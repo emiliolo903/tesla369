@@ -23,12 +23,13 @@
     h1 {
       color: #00e5ff;
     }
-    input, button {
+    textarea, button {
       padding: 10px;
       margin: 8px;
       font-size: 16px;
       border-radius: 5px;
       border: none;
+      width: 80%;
     }
     button {
       background: #00e5ff;
@@ -52,8 +53,8 @@
 
   <h1>Tesla Pro</h1>
 
-  <p>Ingresá un NRO base (vertical o normal)</p>
-  <textarea id="base" placeholder="Ej: 5\n5\n6\n7" rows="4" style="width:80%;"></textarea>
+  <p>Ingresá un NRO base vertical (uno por línea)</p>
+  <textarea id="base" placeholder="Ej:\n5\n5\n6\n7" rows="4"></textarea>
   <br>
   <button onclick="generar()">Generar NRO</button>
 
@@ -83,7 +84,7 @@ function generar() {
   // Separar cada línea como dígito
   const digitos = baseRaw.split(/\r?\n/).map(d => d.trim()).filter(d => d !== "");
 
-  // Mapa Tesla vertical exacto
+  // Mapa Tesla vertical
   const mapTesla = {
     0: [0,0],
     1: [0,0],
@@ -97,41 +98,34 @@ function generar() {
     9: [3,4]
   };
 
-  // GENERAR TODOS LOS POSIBLES AMBOS
-  let ambos = [];
-  digitos.forEach(d => {
-    if(mapTesla[d]){
-      mapTesla[d].forEach(n => {
-        ambos.push(d + "" + n);
-      });
-    }
-  });
-
-  // GENERAR TERNOS (combinando ambos con cada dígito base)
-  let ternos = [];
-  ambos.forEach(a => {
-    digitos.forEach(d => {
-      ternos.push(a + d);
-    });
-  });
-
-  // GENERAR CUATERNOS (combinando ternos con cada dígito base)
+  // GENERAR LAS 2 JUGADAS EXACTAS (según Tesla)
   let cuaternos = [];
-  ternos.forEach(t => {
-    digitos.forEach(d => {
-      cuaternos.push(t + d);
-    });
+
+  // Primera jugada: tomar la primera opción de cada dígito
+  let jugada1 = "";
+  digitos.forEach(d => {
+    jugada1 += mapTesla[d][0];
   });
+  cuaternos.push(jugada1);
 
-  // MOSTRAR SOLO LOS 2 MEJORES DE CADA UNO (puedes cambiar criterio)
-  document.getElementById("ambos").innerHTML =
-    ambos.slice(0,2).map(n => `<div class="resultado">${n}</div>`).join("");
+  // Segunda jugada: tomar la segunda opción de cada dígito
+  let jugada2 = "";
+  digitos.forEach(d => {
+    jugada2 += mapTesla[d][1];
+  });
+  cuaternos.push(jugada2);
 
-  document.getElementById("ternos").innerHTML =
-    ternos.slice(0,2).map(n => `<div class="resultado">${n}</div>`).join("");
+  // GENERAR ternos y ambos automáticamente
+  let ternos = cuaternos.map(c => c.slice(1)); // últimos 3 dígitos
+  let ambos  = ternos.map(t => t.slice(1));   // últimos 2 dígitos
 
+  // MOSTRAR las 2 jugadas
   document.getElementById("cuaternos").innerHTML =
-    cuaternos.slice(0,2).map(n => `<div class="resultado">${n}</div>`).join("");
+    cuaternos.map(n => `<div class="resultado">${n}</div>`).join("");
+  document.getElementById("ternos").innerHTML =
+    ternos.map(n => `<div class="resultado">${n}</div>`).join("");
+  document.getElementById("ambos").innerHTML =
+    ambos.map(n => `<div class="resultado">${n}</div>`).join("");
 }
 </script>
 

@@ -3,154 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <title>Tesla 369</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
+
+  <!-- PWA básico -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+
+  <!-- ICONO -->
+  <link rel="icon" href="icon-512.png">
+  <link rel="apple-touch-icon" href="icon-512.png">
+
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
+      background: #0f0f0f;
+      color: #ffffff;
+      text-align: center;
       padding: 20px;
     }
     h1 {
-      text-align: center;
-      color: #38bdf8;
+      color: #00e5ff;
     }
     input, button {
-      width: 100%;
       padding: 10px;
-      margin: 8px 0;
+      margin: 8px;
       font-size: 16px;
+      border-radius: 5px;
+      border: none;
     }
     button {
-      background: #38bdf8;
-      border: none;
-      cursor: pointer;
+      background: #00e5ff;
+      color: #000;
       font-weight: bold;
     }
     .box {
-      background: #020617;
-      padding: 10px;
+      background: #1c1c1c;
+      padding: 15px;
       margin-top: 15px;
-      border-radius: 8px;
+      border-radius: 10px;
     }
-    .item {
-      margin: 4px 0;
+    .resultado {
+      margin: 5px 0;
+      font-size: 18px;
     }
   </style>
 </head>
+
 <body>
 
-<h1>Tesla 369</h1>
+  <h1>Tesla 369</h1>
 
-<input type="text" id="numeroBase" placeholder="Ingresar NRO base">
-<button onclick="ejecutarTesla()">Generar</button>
+  <p>Ingresá un NRO base</p>
 
-<div class="box">
-  <h3>Cifras Tesla</h3>
-  <div id="cifras"></div>
-</div>
+  <input type="number" id="base" placeholder="Ej: 1234">
+  <br>
+  <button onclick="generar()">Generar NRO</button>
 
-<div class="box">
-  <h3>Ambos (Top 2)</h3>
-  <div id="ambos"></div>
-</div>
+  <div class="box">
+    <h3>🔹 Ambos</h3>
+    <div id="ambos"></div>
+  </div>
 
-<div class="box">
-  <h3>Ternos (Top 2)</h3>
-  <div id="ternos"></div>
-</div>
+  <div class="box">
+    <h3>🔹 Ternos</h3>
+    <div id="ternos"></div>
+  </div>
 
-<div class="box">
-  <h3>Cuaternos (Top 2)</h3>
-  <div id="cuaternos"></div>
-</div>
-
-<div class="box">
-  <h3>Historial</h3>
-  <div id="historial"></div>
-</div>
+  <div class="box">
+    <h3>🔹 Cuaternos</h3>
+    <div id="cuaternos"></div>
+  </div>
 
 <script>
-/* TABLA TESLA */
-const tablaTesla = {
-  0: [0,0],
-  1: [0,0],
-  2: [5,7],
-  3: [8,0],
-  4: [6,9],
-  5: [2,7],
-  6: [4,9],
-  7: [5,2],
-  8: [3,0],
-  9: [3,4]
-};
+function generar() {
+  const base = document.getElementById("base").value;
+  if (base === "") {
+    alert("Ingresá un número");
+    return;
+  }
 
-let historial = [];
+  const digitos = base.split("");
 
-function ejecutarTesla() {
-  const base = document.getElementById("numeroBase").value.trim();
-  if (base === "") return;
+  const mapTesla = {
+    0: [0],
+    1: [0],
+    2: [5,7],
+    3: [8],
+    4: [6,9],
+    5: [2,7],
+    6: [4,9],
+    7: [5,2],
+    8: [3],
+    9: [3,4]
+  };
 
-  let conteo = {};
+  let ambos = [];
+  let ternos = [];
+  let cuaternos = [];
 
-  for (let d of base) {
-    if (tablaTesla[d]) {
-      tablaTesla[d].forEach(n => {
-        conteo[n] = (conteo[n] || 0) + 1;
+  digitos.forEach(d => {
+    if (mapTesla[d]) {
+      mapTesla[d].forEach(n => {
+        ambos.push(d + "" + n);
       });
     }
-  }
+  });
 
-  // CIFRAS TESLA
-  const cifras = Object.entries(conteo)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 4)
-    .map(e => e[0]);
+  ternos = ambos.slice(0, 2).map(a => a + digitos[0]);
+  cuaternos = ternos.map(t => t + digitos[1]);
 
-  mostrar("cifras", cifras);
+  document.getElementById("ambos").innerHTML =
+    ambos.slice(0,2).map(n => `<div class="resultado">${n}</div>`).join("");
 
-  // RANKING POR PESO
-  const ambosRank = rankingPorPeso(combinaciones(cifras, 2), conteo);
-  const ternosRank = rankingPorPeso(combinaciones(cifras, 3), conteo);
-  const cuaternosRank = rankingPorPeso(combinaciones(cifras, 4), conteo);
+  document.getElementById("ternos").innerHTML =
+    ternos.map(n => `<div class="resultado">${n}</div>`).join("");
 
-  mostrar("ambos", ambosRank.slice(0, 2));
-  mostrar("ternos", ternosRank.slice(0, 2));
-  mostrar("cuaternos", cuaternosRank.slice(0, 2));
-
-  historial.unshift(base);
-  mostrar("historial", historial.slice(0, 10));
-}
-
-function combinaciones(arr, n) {
-  if (n === 1) return arr.map(x => [x]);
-  let res = [];
-  for (let i = 0; i <= arr.length - n; i++) {
-    const rest = combinaciones(arr.slice(i + 1), n - 1);
-    rest.forEach(r => res.push([arr[i], ...r]));
-  }
-  return res.map(c => c.join(""));
-}
-
-function rankingPorPeso(combos, conteo) {
-  return combos
-    .map(c => {
-      let peso = 0;
-      for (let d of c) {
-        peso += conteo[d] || 0;
-      }
-      return { jugada: c, peso };
-    })
-    .sort((a, b) => b.peso - a.peso)
-    .map(x => x.jugada);
-}
-
-function mostrar(id, datos) {
-  document.getElementById(id).innerHTML =
-    datos.map(d => `<div class="item">${d}</div>`).join("");
+  document.getElementById("cuaternos").innerHTML =
+    cuaternos.map(n => `<div class="resultado">${n}</div>`).join("");
 }
 </script>
 
 </body>
- </html>
+</html>

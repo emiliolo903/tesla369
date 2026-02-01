@@ -4,11 +4,10 @@
   <meta charset="UTF-8">
   <title>Tesla Pro</title>
 
-  <!-- PWA básico -->
+  <!-- PWA -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#000000">
-
-  <!-- ICONO -->
+  <meta name="theme-color" content="#00e5ff">
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-512.png">
 
@@ -20,9 +19,7 @@
       text-align: center;
       padding: 20px;
     }
-    h1 {
-      color: #00e5ff;
-    }
+    h1 { color: #00e5ff; }
     textarea, button {
       padding: 10px;
       margin: 8px;
@@ -31,24 +28,16 @@
       border: none;
       width: 80%;
     }
-    button {
-      background: #00e5ff;
-      color: #000;
-      font-weight: bold;
-    }
+    button { background: #00e5ff; color: #000; font-weight: bold; }
     .box {
       background: #1c1c1c;
       padding: 15px;
       margin-top: 15px;
       border-radius: 10px;
     }
-    .resultado {
-      margin: 5px 0;
-      font-size: 18px;
-    }
+    .resultado { margin: 5px 0; font-size: 18px; }
   </style>
 </head>
-
 <body>
 
   <h1>Tesla Pro</h1>
@@ -74,59 +63,61 @@
   </div>
 
 <script>
-function generar() {
-  const baseRaw = document.getElementById("base").value;
-  if (baseRaw.trim() === "") {
-    alert("Ingresá un número");
-    return;
+  // Registro de service worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+    .then(() => console.log('Service Worker registrado'))
+    .catch(err => console.log('Error SW:', err));
   }
 
-  // Separar cada línea como dígito
-  const digitos = baseRaw.split(/\r?\n/).map(d => d.trim()).filter(d => d !== "");
+  // Función principal
+  function generar() {
+    const baseRaw = document.getElementById("base").value;
+    if (baseRaw.trim() === "") {
+      alert("Ingresá un número");
+      return;
+    }
 
-  // Mapa Tesla vertical
-  const mapTesla = {
-    0: [0,0],
-    1: [0,0],
-    2: [5,7],
-    3: [8,0],
-    4: [6,9],
-    5: [2,7],
-    6: [4,9],
-    7: [5,2],
-    8: [3,0],
-    9: [3,4]
-  };
+    const digitos = baseRaw.split(/\r?\n/).map(d => d.trim()).filter(d => d !== "");
 
-  // GENERAR LAS 2 JUGADAS EXACTAS (según Tesla)
-  let cuaternos = [];
+    // Mapa Tesla vertical
+    const mapTesla = {
+      0: [0,0],
+      1: [0,0],
+      2: [5,7],
+      3: [8,0],
+      4: [6,9],
+      5: [2,7],
+      6: [4,9],
+      7: [5,2],
+      8: [3,0],
+      9: [3,4]
+    };
 
-  // Primera jugada: tomar la primera opción de cada dígito
-  let jugada1 = "";
-  digitos.forEach(d => {
-    jugada1 += mapTesla[d][0];
-  });
-  cuaternos.push(jugada1);
+    // Generar las 2 jugadas exactas
+    let cuaternos = [];
+    let jugada1 = "";
+    let jugada2 = "";
 
-  // Segunda jugada: tomar la segunda opción de cada dígito
-  let jugada2 = "";
-  digitos.forEach(d => {
-    jugada2 += mapTesla[d][1];
-  });
-  cuaternos.push(jugada2);
+    digitos.forEach(d => {
+      jugada1 += mapTesla[d][0];
+      jugada2 += mapTesla[d][1];
+    });
 
-  // GENERAR ternos y ambos automáticamente
-  let ternos = cuaternos.map(c => c.slice(1)); // últimos 3 dígitos
-  let ambos  = ternos.map(t => t.slice(1));   // últimos 2 dígitos
+    cuaternos.push(jugada1, jugada2);
 
-  // MOSTRAR las 2 jugadas
-  document.getElementById("cuaternos").innerHTML =
-    cuaternos.map(n => `<div class="resultado">${n}</div>`).join("");
-  document.getElementById("ternos").innerHTML =
-    ternos.map(n => `<div class="resultado">${n}</div>`).join("");
-  document.getElementById("ambos").innerHTML =
-    ambos.map(n => `<div class="resultado">${n}</div>`).join("");
-}
+    // Generar ternos y ambos automáticamente
+    let ternos = cuaternos.map(c => c.slice(1));
+    let ambos  = ternos.map(t => t.slice(1));
+
+    // Mostrar resultados
+    document.getElementById("cuaternos").innerHTML =
+      cuaternos.map(n => `<div class="resultado">${n}</div>`).join("");
+    document.getElementById("ternos").innerHTML =
+      ternos.map(n => `<div class="resultado">${n}</div>`).join("");
+    document.getElementById("ambos").innerHTML =
+      ambos.map(n => `<div class="resultado">${n}</div>`).join("");
+  }
 </script>
 
 </body>

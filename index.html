@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<head><div id="historial"></div>
+<head>
   <meta charset="UTF-8">
   <title>Tesla Digital</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,7 +22,7 @@
       border: none;
       cursor: pointer;
     }
-    #resultado {
+    #resultado, #historial {
       margin-top: 20px;
       background: #222;
       padding: 15px;
@@ -40,11 +40,14 @@
   <br>
 
   <button onclick="ejecutarTesla()">Calcular</button>
+  <button onclick="verHistorial()">📜 Ver historial</button>
+  <button onclick="borrarHistorial()">🗑 Borrar historial</button>
 
   <div id="resultado"></div>
-<button onclick="verHistorial()">📜 Ver historial</button>
-<button onclick="borrarHistorial()">🗑 Borrar historial</button>
+  <div id="historial"></div>
+
   <script>
+    /* ===== METODO TESLA ===== */
     const TESLA_MAP = {
       0: [0, 0],
       1: [0, 0],
@@ -62,9 +65,7 @@
       const cifras = numero.toString().split('').map(Number);
       let pool = [];
       cifras.forEach(c => {
-        if (TESLA_MAP[c]) {
-          pool.push(...TESLA_MAP[c]);
-        }
+        if (TESLA_MAP[c]) pool.push(...TESLA_MAP[c]);
       });
       return pool;
     }
@@ -92,6 +93,46 @@
       return res;
     }
 
+    /* ===== HISTORIAL ===== */
+    function guardarJugada(numero, jugadas) {
+      let historial = JSON.parse(localStorage.getItem("teslaHistorial")) || [];
+
+      historial.unshift({
+        numero,
+        jugadas,
+        fecha: new Date().toLocaleString()
+      });
+
+      if (historial.length > 10) historial = historial.slice(0, 10);
+
+      localStorage.setItem("teslaHistorial", JSON.stringify(historial));
+    }
+
+    function verHistorial() {
+      const historial = JSON.parse(localStorage.getItem("teslaHistorial")) || [];
+      const div = document.getElementById("historial");
+
+      if (historial.length === 0) {
+        div.innerHTML = "<p>No hay historial</p>";
+        return;
+      }
+
+      div.innerHTML = "<h3>📜 Últimas 10 jugadas</h3>" +
+        historial.map(h => `
+          <div style="border-bottom:1px solid #444; padding:5px">
+            <b>Número:</b> ${h.numero}<br>
+            <b>Fecha:</b> ${h.fecha}<br>
+            <b>Jugadas:</b> ${h.jugadas.join(" / ")}
+          </div>
+        `).join("");
+    }
+
+    function borrarHistorial() {
+      localStorage.removeItem("teslaHistorial");
+      document.getElementById("historial").innerHTML = "";
+    }
+
+    /* ===== EJECUCION ===== */
     function ejecutarTesla() {
       const input = document.getElementById("numero").value;
       if (!input) {
@@ -106,10 +147,7 @@
       const ambos = combinaciones(cifras, 2).slice(0, 4);
       const ternos = combinaciones(cifras, 3).slice(0, 4);
       const cuaternos = combinaciones(cifras, 4).slice(0, 2);
-guardarJugada(input, [
-  cuaternos[0]?.join("") || "-",
-  cuaternos[1]?.join("") || "-"
-]);
+
       document.getElementById("resultado").innerHTML = `
         <h3>🔢 Cifras Tesla</h3>
         ${cifras.join(" - ")}
@@ -127,45 +165,12 @@ guardarJugada(input, [
         🥇 ${cuaternos[0] ? cuaternos[0].join("") : "-"}<br>
         🥈 ${cuaternos[1] ? cuaternos[1].join("") : "-"}
       `;
-    }<script>
-function guardarJugada(numero, jugadas) {
-  let historial = JSON.parse(localStorage.getItem("teslaHistorial")) || [];
 
-  historial.unshift({
-    numero,
-    jugadas,
-    fecha: new Date().toLocaleString()
-  });
-
-  if (historial.length > 10) historial = historial.slice(0, 10);
-
-  localStorage.setItem("teslaHistorial", JSON.stringify(historial));
-}
-
-function verHistorial() {
-  const historial = JSON.parse(localStorage.getItem("teslaHistorial")) || [];
-  const div = document.getElementById("historial");
-
-  if (historial.length === 0) {
-    div.innerHTML = "<p>No hay historial</p>";
-    return;
-  }
-
-  div.innerHTML = "<h3>📜 Últimas 10 jugadas</h3>" +
-    historial.map(h => `
-      <div style="border-bottom:1px solid #444; padding:5px">
-        <b>Número:</b> ${h.numero}<br>
-        <b>Fecha:</b> ${h.fecha}<br>
-        <b>Jugadas:</b> ${h.jugadas.join(" / ")}
-      </div>
-    `).join("");
-}
-
-function borrarHistorial() {
-  localStorage.removeItem("teslaHistorial");
-  document.getElementById("historial").innerHTML = "";
-}
-</script>
+      guardarJugada(input, [
+        cuaternos[0] ? cuaternos[0].join("") : "-",
+        cuaternos[1] ? cuaternos[1].join("") : "-"
+      ]);
+    }
   </script>
 
 </body>

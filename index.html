@@ -1,194 +1,136 @@
-<!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Tesla Digital PRO</title>
+  <title>Tesla 369</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- BASE PARA APP INSTALABLE (PASO 4) -->
-  <meta name="theme-color" content="#111">
-
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      text-align: center;
+      background: #0f172a;
+      color: #e5e7eb;
       padding: 20px;
     }
+    h1 {
+      text-align: center;
+      color: #38bdf8;
+    }
     input, button {
+      width: 100%;
       padding: 10px;
-      font-size: 18px;
-      margin: 5px;
+      margin: 8px 0;
+      font-size: 16px;
     }
     button {
-      background: #ffcc00;
+      background: #38bdf8;
       border: none;
       cursor: pointer;
-      border-radius: 5px;
+      font-weight: bold;
     }
-    #resultado, #historial {
-      margin-top: 20px;
-      background: #222;
-      padding: 15px;
+    .box {
+      background: #020617;
+      padding: 10px;
+      margin-top: 15px;
       border-radius: 8px;
     }
-    h3 {
-      margin-bottom: 5px;
-      margin-top: 15px;
+    .item {
+      margin: 4px 0;
     }
   </style>
 </head>
-
 <body>
 
-  <h1>⚡ Tesla Digital PRO</h1>
+<h1>Tesla 369</h1>
 
-  <input type="number" id="numero" placeholder="Ingresá el número base">
+<input type="text" id="numeroBase" placeholder="Ingresar NRO base">
+<button onclick="ejecutarTesla()">Generar</button>
 
-  <br>
+<div class="box">
+  <h3>Cifras Tesla</h3>
+  <div id="cifras"></div>
+</div>
 
-  <button onclick="ejecutarTesla()">Calcular</button>
-  <button onclick="verHistorial()">📜 Historial</button>
-  <button onclick="borrarHistorial()">🗑 Borrar</button>
+<div class="box">
+  <h3>Ambos</h3>
+  <div id="ambos"></div>
+</div>
 
-  <div id="resultado"></div>
+<div class="box">
+  <h3>Ternos</h3>
+  <div id="ternos"></div>
+</div>
+
+<div class="box">
+  <h3>Cuaternos</h3>
+  <div id="cuaternos"></div>
+</div>
+
+<div class="box">
+  <h3>Historial</h3>
   <div id="historial"></div>
+</div>
 
-  <script>
-    /* ================= METODO TESLA ================= */
-    const TESLA_MAP = {
-      0: [0, 0],
-      1: [0, 0],
-      2: [5, 7],
-      3: [8, 0],
-      4: [6, 9],
-      5: [2, 7],
-      6: [4, 9],
-      7: [5, 2],
-      8: [3, 0],
-      9: [3, 4]
-    };
+<script>
+/* TABLA TESLA */
+const tablaTesla = {
+  0: [0,0],
+  1: [0,0],
+  2: [5,7],
+  3: [8,0],
+  4: [6,9],
+  5: [2,7],
+  6: [4,9],
+  7: [5,2],
+  8: [3,0],
+  9: [3,4]
+};
 
-    function generarTesla(numero) {
-      const cifras = numero.toString().split('').map(Number);
-      let pool = [];
-      cifras.forEach(c => {
-        if (TESLA_MAP[c]) pool.push(...TESLA_MAP[c]);
+let historial = [];
+
+function ejecutarTesla() {
+  const base = document.getElementById("numeroBase").value.trim();
+  if (base === "") return;
+
+  let conteo = {};
+
+  for (let d of base) {
+    if (tablaTesla[d]) {
+      tablaTesla[d].forEach(n => {
+        conteo[n] = (conteo[n] || 0) + 1;
       });
-      return pool;
     }
+  }
 
-    function contar(pool) {
-      const conteo = {};
-      pool.forEach(n => conteo[n] = (conteo[n] || 0) + 1);
-      return conteo;
-    }
+  // CIFRAS (sin bloqueo débil)
+  const cifras = Object.entries(conteo)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0,4)
+    .map(e => e[0]);
 
-    const cifras = Object.entries(conteo)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 4)
-  .map(e => e[0]);
+  mostrar("cifras", cifras);
+  mostrar("ambos", combinaciones(cifras,2));
+  mostrar("ternos", combinaciones(cifras,3));
+  mostrar("cuaternos", combinaciones(cifras,4));
 
-const ambos = combinaciones(cifras, 2);
-const ternos = combinaciones(cifras, 3);
-const cuaternos = combinaciones(cifras, 4);
-    }
+  historial.unshift(base);
+  mostrar("historial", historial.slice(0,10));
+}
 
-    function combinaciones(arr, k) {
-      if (k === 1) return arr.map(x => [x]);
-      let res = [];
-      arr.forEach((v, i) => {
-        combinaciones(arr.slice(i + 1), k - 1)
-          .forEach(c => res.push([v, ...c]));
-      });
-      return res;
-    }
+function combinaciones(arr, n) {
+  if (n === 1) return arr.map(x => [x]);
+  let res = [];
+  for (let i = 0; i <= arr.length - n; i++) {
+    const rest = combinaciones(arr.slice(i + 1), n - 1);
+    rest.forEach(r => res.push([arr[i], ...r]));
+  }
+  return res.map(c => c.join(""));
+}
 
-    /* ================= HISTORIAL ================= */
-    function guardarJugada(numero, jugadas) {
-      let historial = JSON.parse(localStorage.getItem("teslaHistorial")) || [];
-
-      historial.unshift({
-        numero,
-        jugadas,
-        fecha: new Date().toLocaleString()
-      });
-
-      if (historial.length > 10) historial = historial.slice(0, 10);
-
-      localStorage.setItem("teslaHistorial", JSON.stringify(historial));
-    }
-
-    function verHistorial() {
-      const historial = JSON.parse(localStorage.getItem("teslaHistorial")) || [];
-      const div = document.getElementById("historial");
-
-      if (historial.length === 0) {
-        div.innerHTML = "<p>No hay historial</p>";
-        return;
-      }
-
-      div.innerHTML = "<h3>📜 Últimas 10 jugadas</h3>" +
-        historial.map(h => `
-          <div style="border-bottom:1px solid #444; padding:6px">
-            <b>Número:</b> ${h.numero}<br>
-            <b>Fecha:</b> ${h.fecha}<br>
-            <b>Jugadas:</b> ${h.jugadas.join(" / ")}
-          </div>
-        `).join("");
-    }
-
-    function borrarHistorial() {
-      localStorage.removeItem("teslaHistorial");
-      document.getElementById("historial").innerHTML = "";
-    }
-
-    /* ================= EJECUCION GENERAL ================= */
-    function ejecutarTesla() {
-      const input = document.getElementById("numero").value;
-      if (!input) {
-        document.getElementById("resultado").innerHTML = "Ingresá un número";
-        return;
-      }
-
-      const pool = generarTesla(input);
-      const conteo = contar(pool);
-      const { fuertes, medias } = topFiltrado(conteo);
-
-      let cifras = [...fuertes];
-      if (cifras.length < 4) {
-        cifras = cifras.concat(medias.slice(0, 4 - cifras.length));
-      }
-
-      const ambos = combinaciones(cifras, 2).slice(0, 4);
-      const ternos = combinaciones(cifras, 3).slice(0, 4);
-      const cuaternos = combinaciones(cifras, 4).slice(0, 2);
-
-      document.getElementById("resultado").innerHTML = `
-        <h3>🔢 Cifras Tesla (solo fuertes / medias)</h3>
-        ${cifras.join(" - ")}
-
-        <h3>🔁 Ambos</h3>
-        ${ambos.map(a => a.join("")).join(" / ")}
-
-        <h3>🔺 Ternos</h3>
-        ${ternos.map(t => t.join("")).join(" / ")}
-
-        <h3>🔷 Cuaternos</h3>
-        ${cuaternos.map(c => c.join("")).join(" / ")}
-
-        <h3>🔥 Jugadas sugeridas</h3>
-        🥇 ${cuaternos[0] ? cuaternos[0].join("") : "-"}<br>
-        🥈 ${cuaternos[1] ? cuaternos[1].join("") : "-"}
-      `;
-
-      guardarJugada(input, [
-        cuaternos[0] ? cuaternos[0].join("") : "-",
-        cuaternos[1] ? cuaternos[1].join("") : "-"
-      ]);
-    }
-  </script>
+function mostrar(id, datos) {
+  document.getElementById(id).innerHTML =
+    datos.map(d => `<div class="item">${d}</div>`).join("");
+}
+</script>
 
 </body>
 </html>

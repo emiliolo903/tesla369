@@ -1,20 +1,15 @@
 {
-  "name": "Tesla 369",
-  "short_name": "Tesla369",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#0f172a",
+  "short_name": "TeslaPro",
+  "name": "Tesla Pro",
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "start_url": "/tesla369/index.html",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#00e5ff"
 }

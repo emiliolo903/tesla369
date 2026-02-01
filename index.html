@@ -75,12 +75,17 @@
       pool.forEach(n => conteo[n] = (conteo[n] || 0) + 1);
       return conteo;
     }
+    function topFiltrado(conteo) {
+  const fuertes = [];
+  const medias = [];
 
-    function topN(conteo, n) {
-      return Object.entries(conteo)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, n)
-        .map(e => e[0]);
+  Object.entries(conteo).forEach(([num, cant]) => {
+    if (cant >= 3) fuertes.push(num);
+    else if (cant === 2) medias.push(num);
+  });
+
+  return { fuertes, medias };
+        }
     }
 
     function combinaciones(arr, k) {
@@ -143,11 +148,17 @@
       const pool = generarTesla(input);
       const conteo = contar(pool);
 
-      const cifras = topN(conteo, 4);
-      const ambos = combinaciones(cifras, 2).slice(0, 4);
-      const ternos = combinaciones(cifras, 3).slice(0, 4);
-      const cuaternos = combinaciones(cifras, 4).slice(0, 2);
+      
+const { fuertes, medias } = topFiltrado(conteo);
 
+let cifras = [...fuertes];
+if (cifras.length < 4) {
+  cifras = cifras.concat(medias.slice(0, 4 - cifras.length));
+}
+
+const ambos = combinaciones(cifras, 2).slice(0, 4);
+const ternos = combinaciones(cifras, 3).slice(0, 4);
+const cuaternos = combinaciones(cifras, 4).slice(0, 2);
       document.getElementById("resultado").innerHTML = `
         <h3>🔢 Cifras Tesla</h3>
         ${cifras.join(" - ")}

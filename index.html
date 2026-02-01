@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -51,17 +51,17 @@
 </div>
 
 <div class="box">
-  <h3>Ambos (2)</h3>
+  <h3>Ambos (Top 2)</h3>
   <div id="ambos"></div>
 </div>
 
 <div class="box">
-  <h3>Ternos (2)</h3>
+  <h3>Ternos (Top 2)</h3>
   <div id="ternos"></div>
 </div>
 
 <div class="box">
-  <h3>Cuaternos (2)</h3>
+  <h3>Cuaternos (Top 2)</h3>
   <div id="cuaternos"></div>
 </div>
 
@@ -101,16 +101,22 @@ function ejecutarTesla() {
     }
   }
 
-  // CIFRAS TESLA (sin bloqueo)
+  // CIFRAS TESLA
   const cifras = Object.entries(conteo)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 4)
     .map(e => e[0]);
 
   mostrar("cifras", cifras);
-  mostrar("ambos", combinaciones(cifras, 2).slice(0, 2));
-  mostrar("ternos", combinaciones(cifras, 3).slice(0, 2));
-  mostrar("cuaternos", combinaciones(cifras, 4).slice(0, 2));
+
+  // RANKING POR PESO
+  const ambosRank = rankingPorPeso(combinaciones(cifras, 2), conteo);
+  const ternosRank = rankingPorPeso(combinaciones(cifras, 3), conteo);
+  const cuaternosRank = rankingPorPeso(combinaciones(cifras, 4), conteo);
+
+  mostrar("ambos", ambosRank.slice(0, 2));
+  mostrar("ternos", ternosRank.slice(0, 2));
+  mostrar("cuaternos", cuaternosRank.slice(0, 2));
 
   historial.unshift(base);
   mostrar("historial", historial.slice(0, 10));
@@ -126,6 +132,19 @@ function combinaciones(arr, n) {
   return res.map(c => c.join(""));
 }
 
+function rankingPorPeso(combos, conteo) {
+  return combos
+    .map(c => {
+      let peso = 0;
+      for (let d of c) {
+        peso += conteo[d] || 0;
+      }
+      return { jugada: c, peso };
+    })
+    .sort((a, b) => b.peso - a.peso)
+    .map(x => x.jugada);
+}
+
 function mostrar(id, datos) {
   document.getElementById(id).innerHTML =
     datos.map(d => `<div class="item">${d}</div>`).join("");
@@ -133,4 +152,4 @@ function mostrar(id, datos) {
 </script>
 
 </body>
-</html> 
+ </html>

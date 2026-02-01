@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Sistema Digital Tesla 3-6-9</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="manifest.json">
+</head>
+
+<body style="font-family: Arial; padding: 15px; background:#f5f5f5;">
+
+<h2>⚡ Sistema Digital Tesla 3-6-9</h2>
+
+<input type="number" id="numero" placeholder="Ingresá número base" style="padding:8px; width:100%; font-size:16px;">
+<br><br>
+
+<button onclick="tesla()">Calcular</button>
+<button onclick="borrarHistorial()">Borrar historial</button>
+
+<hr>
+
+<h3>🔥 Jugada sugerida</h3>
+<div id="sugerida"></div>
+
+<hr>
+
+<h3>📊 Resultado</h3>
+<div id="r"></div>
+
+<hr>
+
+<h3>📜 Historial</h3>
+<div id="historial"></div>
+
+<script>
+function reducirTesla(n){
+  while(n>9){
+    n=n.toString().split("").reduce((a,b)=>a+Number(b),0);
+  }
+  return n;
+}
+
+function pesoTesla(n){
+  let r=reducirTesla(n);
+  if(r===9) return 3;
+  if(r===6) return 2;
+  if(r===3) return 1;
+  return 0;
+}
+
+function tesla(){
+  let num=document.getElementById("numero").value;
+  if(num.length<4){
+    document.getElementById("r").innerHTML="⚠️ Mínimo 4 cifras";
+    return;
+  }
+
+  let d=num.split("");
+
+  let cifras=[...new Set(d)]
+    .map(n=>({n,p:pesoTesla(n)}))
+    .filter(x=>x.p>0)
+    .sort((a,b)=>b.p-a.p);
+
+  let ambos=[];
+  for(let i=0;i<d.length;i++){
+    for(let j=i+1;j<d.length;j++){
+      let a=d[i]+d[j];
+      let p=pesoTesla(a);
+      if(p>0) ambos.push({n:a,p});
+    }
+  }
+  ambos.sort((a,b)=>b.p-a.p);
+
+  let cuaternos=[];
+  for(let i=0;i<d.length;i++){
+    for(let j=i+1;j<d.length;j++){
+      for(let k=j+1;k<d.length;k++){
+        for(let l=k+1;l<d.length;l++){
+          let c=d[i]+d[j]+d[k]+d[l];
+          let p=pesoTesla(c);
+          if(p>0) cuaternos.push({n:c,p});
+        }
+      }
+    }
+  }
+  cuaternos.sort((a,b)=>b.p-a.p);
+
+  document.getElementById("r").innerHTML=
+    "🎯 Cifras: "+cifras.slice(0,2).map(x=>x.n).join(" - ")+"<br>"+
+    "🎯 Ambos: "+ambos.slice(0,2).map(x=>x.n).join(" - ")+"<br>"+
+    "🎯 Cuaternos: "+cuaternos.slice(0,2).map(x=>x.n).join(" - ");
+
+  document.getElementById("sugerida").innerHTML=
+    "🔥 Cuaterno: <b>"+(cuaternos[0]?.n||"-")+"</b><br>"+
+    "🔥 Ambo: <b>"+(ambos[0]?.n||"-")+"</b><br>"+
+    "🔥 Cifra: <b>"+(cifras[0]?.n||"-")+"</b>";
+
+  guardarHistorial(num,cuaternos[0]?.n,ambos[0]?.n,cifras[0]?.n);
+}
+
+function guardarHistorial(num,cu,a,ci){
+  let h=JSON.parse(localStorage.getItem("historialTesla"))||[];
+  h.unshift({fecha:new Date().toLocaleString(),num,cu,a,ci});
+  localStorage.setItem("historialTesla",JSON.stringify(h));
+  mostrarHistorial();
+}
+
+function mostrarHistorial(){
+  let h=JSON.parse(localStorage.getItem("historialTesla"))||[];
+  let html="";
+  h.forEach(x=>{
+    html+=`<div>
+      <b>${x.fecha}</b><br>
+      Base: ${x.num}<br>
+      🔥 ${x.cu} / ${x.a} / ${x.ci}
+    </div><hr>`;
+  });
+  document.getElementById("historial").innerHTML=html;
+}
+
+function borrarHistorial(){
+  if(confirm("¿Borrar todo el historial?")){
+    localStorage.removeItem("historialTesla");
+    mostrarHistorial();
+  }
+}
+
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("service-worker.js");
+}
+
+window.onload=mostrarHistorial;
+</script>
+
+</body>
+  </html>

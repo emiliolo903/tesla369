@@ -34,105 +34,252 @@
 <div id="historial"></div>
 
 <script>
-function reducirTesla(n){
-  while(n>9){
-    n=n.toString().split("").reduce((a,b)=>a+Number(b),0);
-  }
-  return n;
-}
+/* ===== METODO TESLA OFICIAL ===== */
 
-function pesoTesla(n){
-  let r=reducirTesla(n);
-  if(r===9) return 3;
-  if(r===6) return 2;
-  if(r===3) return 1;
-  return 0;
-}
+const TESLA_MAP = {
+  0: [0, 0],
+  1: [0, 0],
+  2: [5, 7],
+  3: [8, 0],
+  4: [6, 9],
+  5: [2, 7],
+  6: [4, 9],
+  7: [5, 2],
+  8: [3, 0],
+  9: [3, 4]
+};
 
-function tesla(){
-  let num=document.getElementById("numero").value;
-  if(num.length<4){
-    document.getElementById("r").innerHTML="⚠️ Mínimo 4 cifras";
-    return;
-  }
+function generarTesla(numero) {
+  const cifras = numero.toString().split('').map(Number);
+  let pool = [];
 
-  let d=num.split("");
-
-  let cifras=[...new Set(d)]
-    .map(n=>({n,p:pesoTesla(n)}))
-    .filter(x=>x.p>0)
-    .sort((a,b)=>b.p-a.p);
-
-  let ambos=[];
-  for(let i=0;i<d.length;i++){
-    for(let j=i+1;j<d.length;j++){
-      let a=d[i]+d[j];
-      let p=pesoTesla(a);
-      if(p>0) ambos.push({n:a,p});
+  cifras.forEach(c => {
+    if (TESLA_MAP[c]) {
+      pool.push(...TESLA_MAP[c]);
     }
-  }
-  ambos.sort((a,b)=>b.p-a.p);
-
-  let cuaternos=[];
-  for(let i=0;i<d.length;i++){
-    for(let j=i+1;j<d.length;j++){
-      for(let k=j+1;k<d.length;k++){
-        for(let l=k+1;l<d.length;l++){
-          let c=d[i]+d[j]+d[k]+d[l];
-          let p=pesoTesla(c);
-          if(p>0) cuaternos.push({n:c,p});
-        }
-      }
-    }
-  }
-  cuaternos.sort((a,b)=>b.p-a.p);
-
-  document.getElementById("r").innerHTML=
-    "🎯 Cifras: "+cifras.slice(0,2).map(x=>x.n).join(" - ")+"<br>"+
-    "🎯 Ambos: "+ambos.slice(0,2).map(x=>x.n).join(" - ")+"<br>"+
-    "🎯 Cuaternos: "+cuaternos.slice(0,2).map(x=>x.n).join(" - ");
-
-  document.getElementById("sugerida").innerHTML=
-    "🔥 Cuaterno: <b>"+(cuaternos[0]?.n||"-")+"</b><br>"+
-    "🔥 Ambo: <b>"+(ambos[0]?.n||"-")+"</b><br>"+
-    "🔥 Cifra: <b>"+(cifras[0]?.n||"-")+"</b>";
-
-  guardarHistorial(num,cuaternos[0]?.n,ambos[0]?.n,cifras[0]?.n);
-}
-
-function guardarHistorial(num,cu,a,ci){
-  let h=JSON.parse(localStorage.getItem("historialTesla"))||[];
-  h.unshift({fecha:new Date().toLocaleString(),num,cu,a,ci});
-  localStorage.setItem("historialTesla",JSON.stringify(h));
-  mostrarHistorial();
-}
-
-function mostrarHistorial(){
-  let h=JSON.parse(localStorage.getItem("historialTesla"))||[];
-  let html="";
-  h.forEach(x=>{
-    html+=`<div>
-      <b>${x.fecha}</b><br>
-      Base: ${x.num}<br>
-      🔥 ${x.cu} / ${x.a} / ${x.ci}
-    </div><hr>`;
   });
-  document.getElementById("historial").innerHTML=html;
+
+  return pool;
 }
 
-function borrarHistorial(){
-  if(confirm("¿Borrar todo el historial?")){
-    localStorage.removeItem("historialTesla");
-    mostrarHistorial();
-  }
+function contar(pool) {
+  const conteo = {};
+  pool.forEach(n => conteo[n] = (conteo[n] || 0) + 1);
+  return conteo;
 }
 
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("service-worker.js");
+function topN(conteo, n) {
+  return Object.entries(conteo)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(e => e[0]);
 }
 
-window.onload=mostrarHistorial;
-</script>
+function combinaciones(arr, k) {
+  if (k === 1) return arr.map(x => [x]);
+  let res = [];
+  arr.forEach((v, i) => {
+    combinaciones(arr.slice(i + 1), k - 1)
+      .forEach(c => res.push([v, ...c]));
+  });
+  return res;
+}
+
+function ejecutarTesla() {
+  const input = document.getElementById("numero").value;
+  if (!input) return;
+
+  const pool = generarTesla(input);
+  const conteo = contar(pool);
+
+  const cifras = topN(conteo, 4);
+  const ambos = combinaciones(cifras, 2).slice(0, 4);
+  const ternos = combinaciones(cifras, 3).slice(0, 4);
+  const cuaternos = combinaciones(cifras, 4).slice(0, 2);
+
+  document.getElementById("resultado").innerHTML = `
+    <h3>⚡ Cifras Tesla</h3>
+    ${cifras.join(" - ")}
+
+    <h3>🔁 Ambos</h3>
+    ${ambos.map(a => a.join("")).join(" / ")}
+
+    <h3>🔺 Ternos</h3>
+    ${ternos.map(t => t.join("")).join(" / ")}
+
+    <h3>🔷 Cuaternos</h3>
+    ${cuaternos.map(c => c.join("")).join(" / ")}
+
+    <h3>🔥 Jugadas Sugeridas</h3>
+    🥇 ${cuaternos[0].join("")}<br>
+    🥈 ${cuaternos[1] ? cuaternos[1].join("") : "—"}
+  `;
+}
+                                      </script><script>
+/* ===== METODO TESLA OFICIAL ===== */
+
+const TESLA_MAP = {
+  0: [0, 0],
+  1: [0, 0],
+  2: [5, 7],
+  3: [8, 0],
+  4: [6, 9],
+  5: [2, 7],
+  6: [4, 9],
+  7: [5, 2],
+  8: [3, 0],
+  9: [3, 4]
+};
+
+function generarTesla(numero) {
+  const cifras = numero.toString().split('').map(Number);
+  let pool = [];
+
+  cifras.forEach(c => {
+    if (TESLA_MAP[c]) {
+      pool.push(...TESLA_MAP[c]);
+    }
+  });
+
+  return pool;
+}
+
+function contar(pool) {
+  const conteo = {};
+  pool.forEach(n => conteo[n] = (conteo[n] || 0) + 1);
+  return conteo;
+}
+
+function topN(conteo, n) {
+  return Object.entries(conteo)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(e => e[0]);
+}
+
+function combinaciones(arr, k) {
+  if (k === 1) return arr.map(x => [x]);
+  let res = [];
+  arr.forEach((v, i) => {
+    combinaciones(arr.slice(i + 1), k - 1)
+      .forEach(c => res.push([v, ...c]));
+  });
+  return res;
+}
+
+function ejecutarTesla() {
+  const input = document.getElementById("numero").value;
+  if (!input) return;
+
+  const pool = generarTesla(input);
+  const conteo = contar(pool);
+
+  const cifras = topN(conteo, 4);
+  const ambos = combinaciones(cifras, 2).slice(0, 4);
+  const ternos = combinaciones(cifras, 3).slice(0, 4);
+  const cuaternos = combinaciones(cifras, 4).slice(0, 2);
+
+  document.getElementById("resultado").innerHTML = `
+    <h3>⚡ Cifras Tesla</h3>
+    ${cifras.join(" - ")}
+
+    <h3>🔁 Ambos</h3>
+    ${ambos.map(a => a.join("")).join(" / ")}
+
+    <h3>🔺 Ternos</h3>
+    ${ternos.map(t => t.join("")).join(" / ")}
+
+    <h3>🔷 Cuaternos</h3>
+    ${cuaternos.map(c => c.join("")).join(" / ")}
+
+    <h3>🔥 Jugadas Sugeridas</h3>
+    🥇 ${cuaternos[0].join("")}<br>
+    🥈 ${cuaternos[1] ? cuaternos[1].join("") : "—"}
+  `;
+}
+                                      </script><script>
+/* ===== METODO TESLA OFICIAL ===== */
+
+const TESLA_MAP = {
+  0: [0, 0],
+  1: [0, 0],
+  2: [5, 7],
+  3: [8, 0],
+  4: [6, 9],
+  5: [2, 7],
+  6: [4, 9],
+  7: [5, 2],
+  8: [3, 0],
+  9: [3, 4]
+};
+
+function generarTesla(numero) {
+  const cifras = numero.toString().split('').map(Number);
+  let pool = [];
+
+  cifras.forEach(c => {
+    if (TESLA_MAP[c]) {
+      pool.push(...TESLA_MAP[c]);
+    }
+  });
+
+  return pool;
+}
+
+function contar(pool) {
+  const conteo = {};
+  pool.forEach(n => conteo[n] = (conteo[n] || 0) + 1);
+  return conteo;
+}
+
+function topN(conteo, n) {
+  return Object.entries(conteo)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, n)
+    .map(e => e[0]);
+}
+
+function combinaciones(arr, k) {
+  if (k === 1) return arr.map(x => [x]);
+  let res = [];
+  arr.forEach((v, i) => {
+    combinaciones(arr.slice(i + 1), k - 1)
+      .forEach(c => res.push([v, ...c]));
+  });
+  return res;
+}
+
+function ejecutarTesla() {
+  const input = document.getElementById("numero").value;
+  if (!input) return;
+
+  const pool = generarTesla(input);
+  const conteo = contar(pool);
+
+  const cifras = topN(conteo, 4);
+  const ambos = combinaciones(cifras, 2).slice(0, 4);
+  const ternos = combinaciones(cifras, 3).slice(0, 4);
+  const cuaternos = combinaciones(cifras, 4).slice(0, 2);
+
+  document.getElementById("resultado").innerHTML = `
+    <h3>⚡ Cifras Tesla</h3>
+    ${cifras.join(" - ")}
+
+    <h3>🔁 Ambos</h3>
+    ${ambos.map(a => a.join("")).join(" / ")}
+
+    <h3>🔺 Ternos</h3>
+    ${ternos.map(t => t.join("")).join(" / ")}
+
+    <h3>🔷 Cuaternos</h3>
+    ${cuaternos.map(c => c.join("")).join(" / ")}
+
+    <h3>🔥 Jugadas Sugeridas</h3>
+    🥇 ${cuaternos[0].join("")}<br>
+    🥈 ${cuaternos[1] ? cuaternos[1].join("") : "—"}
+  `;
+}
+                                      </script>
 
 </body>
   </html>

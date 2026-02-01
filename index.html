@@ -85,17 +85,14 @@
       return conteo;
     }
 
-    /* ================= BLOQUEO DE DEBILES ================= */
-    function topFiltrado(conteo) {
-      const fuertes = [];
-      const medias = [];
+    const cifras = Object.entries(conteo)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 4)
+  .map(e => e[0]);
 
-      Object.entries(conteo).forEach(([num, cant]) => {
-        if (cant >= 3) fuertes.push(num);
-        else if (cant === 2) medias.push(num);
-      });
-
-      return { fuertes, medias };
+const ambos = combinaciones(cifras, 2);
+const ternos = combinaciones(cifras, 3);
+const cuaternos = combinaciones(cifras, 4);
     }
 
     function combinaciones(arr, k) {

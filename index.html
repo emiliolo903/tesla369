@@ -52,9 +52,8 @@
 
   <h1>Tesla Pro</h1>
 
-  <p>Ingresá un NRO base</p>
-
-  <input type="number" id="base" placeholder="Ej: 1234">
+  <p>Ingresá un NRO base (vertical o normal)</p>
+  <textarea id="base" placeholder="Ej: 5\n5\n6\n7" rows="4" style="width:80%;"></textarea>
   <br>
   <button onclick="generar()">Generar NRO</button>
 
@@ -75,15 +74,16 @@
 
 <script>
 function generar() {
-  const base = document.getElementById("base").value;
-  if (base === "") {
+  const baseRaw = document.getElementById("base").value;
+  if (baseRaw.trim() === "") {
     alert("Ingresá un número");
     return;
   }
 
-  const digitos = base.split("");
+  // Separar cada línea como dígito
+  const digitos = baseRaw.split(/\r?\n/).map(d => d.trim()).filter(d => d !== "");
 
-  // Mapa Tesla completo
+  // Mapa Tesla vertical exacto
   const mapTesla = {
     0: [0,0],
     1: [0,0],
@@ -97,36 +97,33 @@ function generar() {
     9: [3,4]
   };
 
-  let ambos = [];
-  let ternos = [];
-  let cuaternos = [];
-
   // GENERAR TODOS LOS POSIBLES AMBOS
+  let ambos = [];
   digitos.forEach(d => {
-    if (mapTesla[d]) {
+    if(mapTesla[d]){
       mapTesla[d].forEach(n => {
-        if (n !== 0 || d !== "0") ambos.push(d + "" + n);
+        ambos.push(d + "" + n);
       });
     }
   });
 
-  // GENERAR TERNOS y CUATERNOS con todas las combinaciones posibles
-  ternos = [];
-  cuaternos = [];
-
+  // GENERAR TERNOS (combinando ambos con cada dígito base)
+  let ternos = [];
   ambos.forEach(a => {
-    digitos.forEach(d2 => {
-      ternos.push(a + d2);
+    digitos.forEach(d => {
+      ternos.push(a + d);
     });
   });
 
+  // GENERAR CUATERNOS (combinando ternos con cada dígito base)
+  let cuaternos = [];
   ternos.forEach(t => {
-    digitos.forEach(d3 => {
-      cuaternos.push(t + d3);
+    digitos.forEach(d => {
+      cuaternos.push(t + d);
     });
   });
 
-  // MOSTRAR SOLO 2 MEJORES DE CADA UNO
+  // MOSTRAR SOLO LOS 2 MEJORES DE CADA UNO (puedes cambiar criterio)
   document.getElementById("ambos").innerHTML =
     ambos.slice(0,2).map(n => `<div class="resultado">${n}</div>`).join("");
 
@@ -139,4 +136,4 @@ function generar() {
 </script>
 
 </body>
-    </html>
+</html>

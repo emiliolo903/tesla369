@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#000000">
 
-  <!-- ICONO NUEVO -->
+  <!-- ICONO -->
   <link rel="icon" href="icon-512.png">
   <link rel="apple-touch-icon" href="icon-512.png">
 
@@ -83,16 +83,17 @@ function generar() {
 
   const digitos = base.split("");
 
+  // Mapa Tesla completo
   const mapTesla = {
-    0: [0],
-    1: [0],
+    0: [0,0],
+    1: [0,0],
     2: [5,7],
-    3: [8],
+    3: [8,0],
     4: [6,9],
     5: [2,7],
     6: [4,9],
     7: [5,2],
-    8: [3],
+    8: [3,0],
     9: [3,4]
   };
 
@@ -100,27 +101,42 @@ function generar() {
   let ternos = [];
   let cuaternos = [];
 
+  // GENERAR TODOS LOS POSIBLES AMBOS
   digitos.forEach(d => {
     if (mapTesla[d]) {
       mapTesla[d].forEach(n => {
-        ambos.push(d + "" + n);
+        if (n !== 0 || d !== "0") ambos.push(d + "" + n);
       });
     }
   });
 
-  ternos = ambos.slice(0, 2).map(a => a + digitos[0]);
-  cuaternos = ternos.map(t => t + digitos[1]);
+  // GENERAR TERNOS y CUATERNOS con todas las combinaciones posibles
+  ternos = [];
+  cuaternos = [];
 
+  ambos.forEach(a => {
+    digitos.forEach(d2 => {
+      ternos.push(a + d2);
+    });
+  });
+
+  ternos.forEach(t => {
+    digitos.forEach(d3 => {
+      cuaternos.push(t + d3);
+    });
+  });
+
+  // MOSTRAR SOLO 2 MEJORES DE CADA UNO
   document.getElementById("ambos").innerHTML =
     ambos.slice(0,2).map(n => `<div class="resultado">${n}</div>`).join("");
 
   document.getElementById("ternos").innerHTML =
-    ternos.map(n => `<div class="resultado">${n}</div>`).join("");
+    ternos.slice(0,2).map(n => `<div class="resultado">${n}</div>`).join("");
 
   document.getElementById("cuaternos").innerHTML =
-    cuaternos.map(n => `<div class="resultado">${n}</div>`).join("");
+    cuaternos.slice(0,2).map(n => `<div class="resultado">${n}</div>`).join("");
 }
 </script>
 
 </body>
-</html>
+    </html>

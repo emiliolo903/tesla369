@@ -1,4 +1,4 @@
-      <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -51,17 +51,17 @@
 </div>
 
 <div class="box">
-  <h3>Ambos</h3>
+  <h3>Ambos (2)</h3>
   <div id="ambos"></div>
 </div>
 
 <div class="box">
-  <h3>Ternos</h3>
+  <h3>Ternos (2)</h3>
   <div id="ternos"></div>
 </div>
 
 <div class="box">
-  <h3>Cuaternos</h3>
+  <h3>Cuaternos (2)</h3>
   <div id="cuaternos"></div>
 </div>
 
@@ -101,19 +101,19 @@ function ejecutarTesla() {
     }
   }
 
-  // CIFRAS (sin bloqueo débil)
+  // CIFRAS TESLA (sin bloqueo)
   const cifras = Object.entries(conteo)
-    .sort((a,b) => b[1] - a[1])
-    .slice(0,4)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
     .map(e => e[0]);
 
   mostrar("cifras", cifras);
-  mostrar("ambos", combinaciones(cifras,2));
-  mostrar("ternos", combinaciones(cifras,3));
-  mostrar("cuaternos", combinaciones(cifras,4));
+  mostrar("ambos", combinaciones(cifras, 2).slice(0, 2));
+  mostrar("ternos", combinaciones(cifras, 3).slice(0, 2));
+  mostrar("cuaternos", combinaciones(cifras, 4).slice(0, 2));
 
   historial.unshift(base);
-  mostrar("historial", historial.slice(0,10));
+  mostrar("historial", historial.slice(0, 10));
 }
 
 function combinaciones(arr, n) {
@@ -133,4 +133,4 @@ function mostrar(id, datos) {
 </script>
 
 </body>
-</html>
+</html> 

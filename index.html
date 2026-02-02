@@ -1,169 +1,112 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Tesla Pro</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#111111" />
+
+  <link rel="manifest" href="manifest.json" />
 
   <style>
     body {
-      font-family: Arial, sans-serif;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
       background: #111;
       color: #fff;
+      text-align: center;
       padding: 15px;
     }
-
-    h1, h2 {
-      color: #00ffcc;
-      text-align: center;
-    }
-
-    textarea, input, button {
+    h1 { color: #00ffcc; }
+    h2 { color: #ffd700; margin-top: 30px; }
+    textarea, button {
       width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      border-radius: 6px;
-      border: none;
+      max-width: 420px;
+      margin: 10px auto;
+      display: block;
       font-size: 16px;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
     }
-
+    textarea { height: 80px; }
     button {
       background: #00ffcc;
-      color: #000;
       font-weight: bold;
       cursor: pointer;
     }
-
-    button:hover {
-      background: #00ccaa;
-    }
-
     .resultado {
-      margin-top: 10px;
-      font-size: 20px;
-      text-align: center;
+      margin-top: 15px;
+      font-size: 18px;
+      color: #00ffcc;
     }
-
-    hr {
-      margin: 40px 0;
-      border: 1px solid #333;
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      opacity: 0.7;
     }
   </style>
 </head>
 
 <body>
 
-<h1>⚡ Tesla Pro</h1>
+  <h1>⚡ Tesla Pro</h1>
+  <p>Método Tesla 3-6-9</p>
 
-<!-- ========================= -->
-<!-- GENERADOR TESLA ORIGINAL -->
-<!-- ========================= -->
+  <h2>Generador Tesla Clásico</h2>
+  <textarea id="base" placeholder="Ej: 5 2 7 5 2 7 6 4 9 7"></textarea>
+  <button onclick="generarClasico()">Generar</button>
+  <div class="resultado" id="resClasico"></div>
 
-<h2>Generador Tesla</h2>
+  <h2>🧿 Quiniela Poceada Correntina</h2>
+  <p>Ingresá los 10 números del sorteo anterior</p>
+  <textarea id="poceada" placeholder="Ej: 12 34 56 78 90 11 22 33 44 55"></textarea>
+  <button onclick="generarPoceada()">Generar 5 números</button>
+  <div class="resultado" id="resPoceada"></div>
 
-<input type="number" id="numeroBase" placeholder="Ingresá NRO base">
-
-<button onclick="generarTesla()">Generar</button>
-
-<div class="resultado" id="resultadoTesla"></div>
-
-<hr>
-
-<!-- ========================================= -->
-<!-- QUINIELA POCEADA CORRENTINA - MÉTODO TESLA -->
-<!-- ========================================= -->
-
-<h2>🧿 Quiniela Poceada Correntina – Método Tesla</h2>
-
-<p>Ingresá los 10 números del último sorteo:</p>
-
-<textarea id="poceadaInput" rows="3"
-  placeholder="Ej: 02 05 12 24 29 45 57 69 72 92"></textarea>
-
-<button onclick="generarPoceadaTesla()">Generar 5 NRO (Tesla)</button>
-
-<div class="resultado" id="poceadaResultado"></div>
-
-<!-- ================= -->
-<!-- JAVASCRIPT -->
-<!-- ================= -->
+  <footer>
+    Tesla Pro · Método Tesla 3-6-9
+  </footer>
 
 <script>
-/* =======================
-   TABLA TESLA ORIGINAL
-======================= */
-const tablaTesla = {
-  0: [0,0],
-  1: [0,0],
-  2: [5,7],
-  3: [8,0],
-  4: [6,9],
-  5: [2,7],
-  6: [4,9],
-  7: [5,2],
-  8: [3,0],
-  9: [3,4]
-};
-
-/* =======================
-   GENERADOR TESLA BASE
-======================= */
-function generarTesla() {
-  let base = document.getElementById("numeroBase").value;
-  if (!base) return;
-
-  let llamados = [];
-  base.split("").forEach(d => {
-    llamados.push(...tablaTesla[d]);
-  });
-
-  let cuaterno1 = base;
-  let cuaterno2 = llamados.slice(0,4).join("");
-
-  let terno1 = cuaterno1.slice(1);
-  let terno2 = cuaterno2.slice(1);
-
-  let ambos1 = terno1.slice(1);
-  let ambos2 = terno2.slice(1);
-
-  document.getElementById("resultadoTesla").innerHTML =
-    `Cuaternos: ${cuaterno1} – ${cuaterno2}<br>
-     Ternos: ${terno1} – ${terno2}<br>
-     Ambos: ${ambos1} – ${ambos2}`;
-}
-
-/* ======================================
-   POCEADA CORRENTINA - MÉTODO TESLA
-====================================== */
-function generarPoceadaTesla() {
-
-  let input = document.getElementById("poceadaInput").value;
-  let numeros = input.match(/\d+/g);
-
-  if (!numeros || numeros.length !== 10) {
-    document.getElementById("poceadaResultado").innerHTML =
-      "⚠️ Ingresá EXACTAMENTE 10 números.";
-    return;
+  function limpiar(n) {
+    return n.replace(/\D/g, '').split('');
   }
 
-  let conteo = {};
+  function generarClasico() {
+    const nums = limpiar(document.getElementById("base").value);
+    if (nums.length < 4) {
+      resClasico.innerHTML = "Ingresá más números";
+      return;
+    }
+    const cuaterno = nums.slice(0,4).join('');
+    const terno = cuaterno.slice(1);
+    const ambos = cuaterno.slice(2);
+    resClasico.innerHTML =
+      "Cuaterno: " + cuaterno +
+      "<br>Terno: " + terno +
+      "<br>Ambos: " + ambos;
+  }
 
-  numeros.forEach(num => {
-    num.split("").forEach(d => {
-      tablaTesla[d].forEach(n => {
-        conteo[n] = (conteo[n] || 0) + 1;
-      });
-    });
-  });
+  function generarPoceada() {
+    const nums = limpiar(document.getElementById("poceada").value);
+    if (nums.length < 10) {
+      resPoceada.innerHTML = "Ingresá los 10 números";
+      return;
+    }
+    let resultado = [];
+    for (let i = 0; i < 5; i++) {
+      const a = nums[i];
+      const b = nums[i+5];
+      resultado.push((a + b).slice(-2));
+    }
+    resPoceada.innerHTML = "Números sugeridos: <br>" + resultado.join(" · ");
+  }
 
-  let resultado = Object.entries(conteo)
-    .sort((a,b) => b[1] - a[1])
-    .slice(0,5)
-    .map(n => n[0].padStart(2,"0"));
-
-  document.getElementById("poceadaResultado").innerHTML =
-    "⭐ " + resultado.join(" – ");
-}
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
 </script>
 
 </body>

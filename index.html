@@ -2,122 +2,168 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tesla Pro</title>
-
-  <!-- PWA -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#00e5ff">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icon-512.png">
-  <link rel="apple-touch-icon" href="icon-512.png">
 
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #0f0f0f;
-      color: #ffffff;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 { color: #00e5ff; }
-    textarea, button {
-      padding: 10px;
-      margin: 8px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: none;
-      width: 80%;
-    }
-    button { background: #00e5ff; color: #000; font-weight: bold; }
-    .box {
-      background: #1c1c1c;
+      background: #111;
+      color: #fff;
       padding: 15px;
-      margin-top: 15px;
-      border-radius: 10px;
     }
-    .resultado { margin: 5px 0; font-size: 18px; }
+
+    h1, h2 {
+      color: #00ffcc;
+      text-align: center;
+    }
+
+    textarea, input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      background: #00ffcc;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #00ccaa;
+    }
+
+    .resultado {
+      margin-top: 10px;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    hr {
+      margin: 40px 0;
+      border: 1px solid #333;
+    }
   </style>
 </head>
+
 <body>
 
-  <h1>Tesla Pro</h1>
+<h1>⚡ Tesla Pro</h1>
 
-  <p>Ingresá un NRO base vertical (uno por línea)</p>
-  <textarea id="base" placeholder="Ej:\n5\n5\n6\n7" rows="4"></textarea>
-  <br>
-  <button onclick="generar()">Generar NRO</button>
+<!-- ========================= -->
+<!-- GENERADOR TESLA ORIGINAL -->
+<!-- ========================= -->
 
-  <div class="box">
-    <h3>🔹 Ambos</h3>
-    <div id="ambos"></div>
-  </div>
+<h2>Generador Tesla</h2>
 
-  <div class="box">
-    <h3>🔹 Ternos</h3>
-    <div id="ternos"></div>
-  </div>
+<input type="number" id="numeroBase" placeholder="Ingresá NRO base">
 
-  <div class="box">
-    <h3>🔹 Cuaternos</h3>
-    <div id="cuaternos"></div>
-  </div>
+<button onclick="generarTesla()">Generar</button>
+
+<div class="resultado" id="resultadoTesla"></div>
+
+<hr>
+
+<!-- ========================================= -->
+<!-- QUINIELA POCEADA CORRENTINA - MÉTODO TESLA -->
+<!-- ========================================= -->
+
+<h2>🧿 Quiniela Poceada Correntina – Método Tesla</h2>
+
+<p>Ingresá los 10 números del último sorteo:</p>
+
+<textarea id="poceadaInput" rows="3"
+  placeholder="Ej: 02 05 12 24 29 45 57 69 72 92"></textarea>
+
+<button onclick="generarPoceadaTesla()">Generar 5 NRO (Tesla)</button>
+
+<div class="resultado" id="poceadaResultado"></div>
+
+<!-- ================= -->
+<!-- JAVASCRIPT -->
+<!-- ================= -->
 
 <script>
-  // Registro de service worker
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-    .then(() => console.log('Service Worker registrado'))
-    .catch(err => console.log('Error SW:', err));
+/* =======================
+   TABLA TESLA ORIGINAL
+======================= */
+const tablaTesla = {
+  0: [0,0],
+  1: [0,0],
+  2: [5,7],
+  3: [8,0],
+  4: [6,9],
+  5: [2,7],
+  6: [4,9],
+  7: [5,2],
+  8: [3,0],
+  9: [3,4]
+};
+
+/* =======================
+   GENERADOR TESLA BASE
+======================= */
+function generarTesla() {
+  let base = document.getElementById("numeroBase").value;
+  if (!base) return;
+
+  let llamados = [];
+  base.split("").forEach(d => {
+    llamados.push(...tablaTesla[d]);
+  });
+
+  let cuaterno1 = base;
+  let cuaterno2 = llamados.slice(0,4).join("");
+
+  let terno1 = cuaterno1.slice(1);
+  let terno2 = cuaterno2.slice(1);
+
+  let ambos1 = terno1.slice(1);
+  let ambos2 = terno2.slice(1);
+
+  document.getElementById("resultadoTesla").innerHTML =
+    `Cuaternos: ${cuaterno1} – ${cuaterno2}<br>
+     Ternos: ${terno1} – ${terno2}<br>
+     Ambos: ${ambos1} – ${ambos2}`;
+}
+
+/* ======================================
+   POCEADA CORRENTINA - MÉTODO TESLA
+====================================== */
+function generarPoceadaTesla() {
+
+  let input = document.getElementById("poceadaInput").value;
+  let numeros = input.match(/\d+/g);
+
+  if (!numeros || numeros.length !== 10) {
+    document.getElementById("poceadaResultado").innerHTML =
+      "⚠️ Ingresá EXACTAMENTE 10 números.";
+    return;
   }
 
-  // Función principal
-  function generar() {
-    const baseRaw = document.getElementById("base").value;
-    if (baseRaw.trim() === "") {
-      alert("Ingresá un número");
-      return;
-    }
+  let conteo = {};
 
-    const digitos = baseRaw.split(/\r?\n/).map(d => d.trim()).filter(d => d !== "");
-
-    // Mapa Tesla vertical
-    const mapTesla = {
-      0: [0,0],
-      1: [0,0],
-      2: [5,7],
-      3: [8,0],
-      4: [6,9],
-      5: [2,7],
-      6: [4,9],
-      7: [5,2],
-      8: [3,0],
-      9: [3,4]
-    };
-
-    // Generar las 2 jugadas exactas
-    let cuaternos = [];
-    let jugada1 = "";
-    let jugada2 = "";
-
-    digitos.forEach(d => {
-      jugada1 += mapTesla[d][0];
-      jugada2 += mapTesla[d][1];
+  numeros.forEach(num => {
+    num.split("").forEach(d => {
+      tablaTesla[d].forEach(n => {
+        conteo[n] = (conteo[n] || 0) + 1;
+      });
     });
+  });
 
-    cuaternos.push(jugada1, jugada2);
+  let resultado = Object.entries(conteo)
+    .sort((a,b) => b[1] - a[1])
+    .slice(0,5)
+    .map(n => n[0].padStart(2,"0"));
 
-    // Generar ternos y ambos automáticamente
-    let ternos = cuaternos.map(c => c.slice(1));
-    let ambos  = ternos.map(t => t.slice(1));
-
-    // Mostrar resultados
-    document.getElementById("cuaternos").innerHTML =
-      cuaternos.map(n => `<div class="resultado">${n}</div>`).join("");
-    document.getElementById("ternos").innerHTML =
-      ternos.map(n => `<div class="resultado">${n}</div>`).join("");
-    document.getElementById("ambos").innerHTML =
-      ambos.map(n => `<div class="resultado">${n}</div>`).join("");
-  }
+  document.getElementById("poceadaResultado").innerHTML =
+    "⭐ " + resultado.join(" – ");
+}
 </script>
 
 </body>

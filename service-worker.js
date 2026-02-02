@@ -1,34 +1,40 @@
-const CACHE_NAME = 'tesla-pro-cache-v1';
+const CACHE_NAME = "tesla-pro-v2"; // ⚠️ versión nueva
+
 const urlsToCache = [
-  '/',
-  '/tesla369/index.html',
-  '/tesla369/icon-512.png'
+  "./",
+  "./index.html",
+  "./manifest.json"
 ];
 
-// Instalación: cacheamos archivos
-self.addEventListener('install', event => {
+// INSTALACIÓN
+self.addEventListener("install", event => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(urlsToCache);
+    })
   );
 });
 
-// Activación: limpiar caches antiguas
-self.addEventListener('activate', event => {
+// ACTIVACIÓN (BORRA CACHÉS VIEJOS)
+self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.map(key => {
-        if (key !== CACHE_NAME) {
-          return caches.delete(key);
-        }
-      }))
+      Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      )
     )
   );
+  self.clients.claim();
 });
 
-// Interceptar requests: servir cache o fetch
-self.addEventListener('fetch', event => {
+// FETCH
+self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });

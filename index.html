@@ -1,112 +1,94 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Tesla Pro</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#111111" />
-
-  <link rel="manifest" href="manifest.json" />
-
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #111;
-      color: #fff;
-      text-align: center;
-      padding: 15px;
-    }
-    h1 { color: #00ffcc; }
-    h2 { color: #ffd700; margin-top: 30px; }
-    textarea, button {
-      width: 100%;
-      max-width: 420px;
-      margin: 10px auto;
-      display: block;
-      font-size: 16px;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-    }
-    textarea { height: 80px; }
-    button {
-      background: #00ffcc;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .resultado {
-      margin-top: 15px;
-      font-size: 18px;
-      color: #00ffcc;
-    }
-    footer {
-      margin-top: 40px;
-      font-size: 14px;
-      opacity: 0.7;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Tesla Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#111;
+  color:#fff;
+  text-align:center;
+  padding:15px
+}
+h1{color:#00ffcc}
+h2{color:#ffd700;margin-top:25px}
+textarea,button{
+  width:100%;
+  max-width:420px;
+  margin:10px auto;
+  display:block;
+  padding:10px;
+  font-size:16px;
+  border-radius:8px;
+  border:none
+}
+button{
+  background:#00ffcc;
+  font-weight:bold;
+  cursor:pointer
+}
+.resultado{
+  margin-top:10px;
+  font-size:18px;
+  color:#00ffcc
+}
+</style>
 </head>
 
 <body>
 
-  <h1>⚡ Tesla Pro</h1>
-  <p>Método Tesla 3-6-9</p>
+<h1>⚡ Tesla Pro</h1>
+<p>Método Tesla 3-6-9</p>
 
-  <h2>Generador Tesla Clásico</h2>
-  <textarea id="base" placeholder="Ej: 5 2 7 5 2 7 6 4 9 7"></textarea>
-  <button onclick="generarClasico()">Generar</button>
-  <div class="resultado" id="resClasico"></div>
+<h2>Generador Tesla Clásico</h2>
+<textarea id="base" placeholder="Ej: 5 2 7 5 2 7 6 4 9 7"></textarea>
+<button onclick="clasico()">Generar</button>
+<div class="resultado" id="r1"></div>
 
-  <h2>🧿 Quiniela Poceada Correntina</h2>
-  <p>Ingresá los 10 números del sorteo anterior</p>
-  <textarea id="poceada" placeholder="Ej: 12 34 56 78 90 11 22 33 44 55"></textarea>
-  <button onclick="generarPoceada()">Generar 5 números</button>
-  <div class="resultado" id="resPoceada"></div>
-
-  <footer>
-    Tesla Pro · Método Tesla 3-6-9
-  </footer>
+<h2>🧿 Quiniela Poceada Correntina (Tesla)</h2>
+<p>Ingresá los 10 números del sorteo anterior</p>
+<textarea id="poceada" placeholder="Ej: 12 34 56 78 90 11 22 33 44 55"></textarea>
+<button onclick="poceada()">Generar 2 jugadas</button>
+<div class="resultado" id="r2"></div>
 
 <script>
-  function limpiar(n) {
-    return n.replace(/\D/g, '').split('');
+function nums(t){
+  return t.replace(/\D/g,'').split('')
+}
+
+function clasico(){
+  let n=nums(base.value)
+  if(n.length<4){
+    r1.innerHTML="Ingresá más números"
+    return
+  }
+  let c=n.slice(0,4).join('')
+  r1.innerHTML=
+    "Cuaterno: "+c+
+    "<br>Terno: "+c.slice(1)+
+    "<br>Ambos: "+c.slice(2)
+}
+
+function poceada(){
+  let n=nums(poceada.value)
+  if(n.length<10){
+    r2.innerHTML="Ingresá los 10 números"
+    return
   }
 
-  function generarClasico() {
-    const nums = limpiar(document.getElementById("base").value);
-    if (nums.length < 4) {
-      resClasico.innerHTML = "Ingresá más números";
-      return;
-    }
-    const cuaterno = nums.slice(0,4).join('');
-    const terno = cuaterno.slice(1);
-    const ambos = cuaterno.slice(2);
-    resClasico.innerHTML =
-      "Cuaterno: " + cuaterno +
-      "<br>Terno: " + terno +
-      "<br>Ambos: " + ambos;
+  let j1=[], j2=[]
+  for(let i=0;i<5;i++){
+    j1.push((n[i]+n[i+5]).slice(-2))
+    j2.push((n[i+5]+n[i]).slice(-2))
   }
 
-  function generarPoceada() {
-    const nums = limpiar(document.getElementById("poceada").value);
-    if (nums.length < 10) {
-      resPoceada.innerHTML = "Ingresá los 10 números";
-      return;
-    }
-    let resultado = [];
-    for (let i = 0; i < 5; i++) {
-      const a = nums[i];
-      const b = nums[i+5];
-      resultado.push((a + b).slice(-2));
-    }
-    resPoceada.innerHTML = "Números sugeridos: <br>" + resultado.join(" · ");
-  }
-
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js");
-  }
+  r2.innerHTML=
+    "<b>Jugada 1:</b><br>"+j1.join(" · ")+
+    "<br><br><b>Jugada 2:</b><br>"+j2.join(" · ")
+}
 </script>
 
 </body>

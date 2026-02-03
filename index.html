@@ -95,7 +95,7 @@ function limpiar(txt){
   return txt.replace(/\D/g,'').split('').map(n=>parseInt(n))
 }
 
-// ================= QUINIELA TRADICIONAL =================
+// ================= QUINIELA TRADICIONAL (2 JUGADAS) =================
 function quinielaTradicional(){
   let n = limpiar(tradicional.value)
   if(n.length < 4){
@@ -103,18 +103,27 @@ function quinielaTradicional(){
     return
   }
 
-  // se toman las primeras 4 cifras
   let base = n.slice(0,4)
 
-  // Tesla: se usa la primera lectura de la tabla
-  let cuaterno = base.map(d => tablaTesla[d][0]).join('')
-  let terno = cuaterno.slice(1)
-  let ambos = cuaterno.slice(2)
+  // Jugada 1 (Tesla A)
+  let cuat1 = base.map(d => tablaTesla[d][0]).join('')
+  let tern1 = cuat1.slice(1)
+  let amb1  = cuat1.slice(2)
+
+  // Jugada 2 (Tesla B)
+  let cuat2 = base.map(d => tablaTesla[d][1]).join('')
+  let tern2 = cuat2.slice(1)
+  let amb2  = cuat2.slice(2)
 
   rt.innerHTML =
-    "<b>Cuaterno:</b> " + cuaterno +
-    "<br><b>Terno:</b> " + terno +
-    "<br><b>Ambos:</b> " + ambos
+    "<b>JUGADA 1</b><br>" +
+    "Cuaterno: " + cuat1 +
+    "<br>Terno: " + tern1 +
+    "<br>Ambos: " + amb1 +
+    "<br><br><b>JUGADA 2</b><br>" +
+    "Cuaterno: " + cuat2 +
+    "<br>Terno: " + tern2 +
+    "<br>Ambos: " + amb2
 }
 
 // ================= POCEADA CORRENTINA =================
@@ -125,7 +134,6 @@ function poceadaCorrentina(){
     return
   }
 
-  // Dos lecturas Tesla
   let lecturaA = []
   let lecturaB = []
 
@@ -134,7 +142,6 @@ function poceadaCorrentina(){
     lecturaB.push(tablaTesla[d][1])
   })
 
-  // Se arman 5 números por jugada (pares)
   let jugada1 = []
   let jugada2 = []
 

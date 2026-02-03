@@ -7,7 +7,7 @@
 <style>
 body{
   margin:0;
-  font-family:Arial;
+  font-family:Arial, Helvetica, sans-serif;
   background:#111;
   color:#fff;
   text-align:center;
@@ -35,61 +35,119 @@ button{
   font-size:18px;
   color:#00ffcc
 }
+.box{
+  border:1px solid #00ffcc;
+  padding:15px;
+  border-radius:12px;
+  margin-top:20px
+}
+hr{
+  border:0;
+  border-top:1px solid #333;
+  margin:30px 0
+}
 </style>
 </head>
 
 <body>
 
 <h1>⚡ Tesla Pro</h1>
-<p>Método Tesla 3-6-9</p>
+<p>Método Tesla 3·6·9</p>
 
-<h2>Generador Tesla Clásico</h2>
-<textarea id="base" placeholder="Ej: 5 2 7 5 2 7 6 4 9 7"></textarea>
-<button onclick="clasico()">Generar</button>
-<div class="resultado" id="r1"></div>
+<!-- ================= QUINIELA TRADICIONAL ================= -->
+<div class="box">
+<h2>Quiniela Tradicional (Tesla)</h2>
+<p>Ingresá el número base</p>
 
+<textarea id="tradicional" placeholder="Ej: 7993"></textarea>
+<button onclick="quinielaTradicional()">Generar</button>
+<div class="resultado" id="rt"></div>
+</div>
+
+<hr>
+
+<!-- ================= POCEADA CORRENTINA ================= -->
+<div class="box">
 <h2>🧿 Quiniela Poceada Correntina (Tesla)</h2>
 <p>Ingresá los 10 números del sorteo anterior</p>
+
 <textarea id="poceada" placeholder="Ej: 12 34 56 78 90 11 22 33 44 55"></textarea>
-<button onclick="poceada()">Generar 2 jugadas</button>
-<div class="resultado" id="r2"></div>
+<button onclick="poceadaCorrentina()">Generar 2 jugadas</button>
+<div class="resultado" id="rp"></div>
+</div>
 
 <script>
-function nums(t){
-  return t.replace(/\D/g,'').split('')
+// ================= TABLA TESLA (FIJA) =================
+const tablaTesla = {
+  0:[0,0],
+  1:[0,0],
+  2:[5,7],
+  3:[8,0],
+  4:[6,9],
+  5:[2,7],
+  6:[4,9],
+  7:[5,2],
+  8:[3,0],
+  9:[3,4]
 }
 
-function clasico(){
-  let n=nums(base.value)
-  if(n.length<4){
-    r1.innerHTML="Ingresá más números"
-    return
-  }
-  let c=n.slice(0,4).join('')
-  r1.innerHTML=
-    "Cuaterno: "+c+
-    "<br>Terno: "+c.slice(1)+
-    "<br>Ambos: "+c.slice(2)
+function limpiar(txt){
+  return txt.replace(/\D/g,'').split('').map(n=>parseInt(n))
 }
 
-function poceada(){
-  let n=nums(poceada.value)
-  if(n.length<10){
-    r2.innerHTML="Ingresá los 10 números"
+// ================= QUINIELA TRADICIONAL =================
+function quinielaTradicional(){
+  let n = limpiar(tradicional.value)
+  if(n.length < 4){
+    rt.innerHTML = "Ingresá al menos 4 cifras"
     return
   }
 
-  let j1=[], j2=[]
+  // se toman las primeras 4 cifras
+  let base = n.slice(0,4)
+
+  // Tesla: se usa la primera lectura de la tabla
+  let cuaterno = base.map(d => tablaTesla[d][0]).join('')
+  let terno = cuaterno.slice(1)
+  let ambos = cuaterno.slice(2)
+
+  rt.innerHTML =
+    "<b>Cuaterno:</b> " + cuaterno +
+    "<br><b>Terno:</b> " + terno +
+    "<br><b>Ambos:</b> " + ambos
+}
+
+// ================= POCEADA CORRENTINA =================
+function poceadaCorrentina(){
+  let n = limpiar(poceada.value)
+  if(n.length < 10){
+    rp.innerHTML = "Ingresá los 10 números"
+    return
+  }
+
+  // Dos lecturas Tesla
+  let lecturaA = []
+  let lecturaB = []
+
+  n.forEach(d=>{
+    lecturaA.push(tablaTesla[d][0])
+    lecturaB.push(tablaTesla[d][1])
+  })
+
+  // Se arman 5 números por jugada (pares)
+  let jugada1 = []
+  let jugada2 = []
+
   for(let i=0;i<5;i++){
-    j1.push((n[i]+n[i+5]).slice(-2))
-    j2.push((n[i+5]+n[i]).slice(-2))
+    jugada1.push("" + lecturaA[i] + lecturaA[i+5])
+    jugada2.push("" + lecturaB[i] + lecturaB[i+5])
   }
 
-  r2.innerHTML=
-    "<b>Jugada 1:</b><br>"+j1.join(" · ")+
-    "<br><br><b>Jugada 2:</b><br>"+j2.join(" · ")
+  rp.innerHTML =
+    "<b>JUGADA 1</b><br>" + jugada1.join(" · ") +
+    "<br><br><b>JUGADA 2</b><br>" + jugada2.join(" · ")
 }
 </script>
 
 </body>
-</html>
+  </html>

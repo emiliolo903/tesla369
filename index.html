@@ -2,70 +2,74 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Tesla Pro – Quiniela Tradicional</title>
+<title>Tesla Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body {
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
   background:#0b0b0b;
-  color:#eaeaea;
-  font-family: Arial, sans-serif;
+  color:#fff;
   text-align:center;
-  padding:20px;
+  padding:15px
 }
-h1 { color:#00ffd0; }
-input, button {
+h1{color:#00ffd0}
+h2{color:#ffd700;margin-top:30px}
+input, textarea, button{
   width:100%;
-  max-width:320px;
-  padding:12px;
+  max-width:420px;
   margin:10px auto;
-  font-size:18px;
+  display:block;
+  padding:12px;
+  font-size:16px;
   border-radius:8px;
-  border:none;
+  border:none
 }
-button {
+button{
   background:#00ffd0;
   font-weight:bold;
+  cursor:pointer
 }
-.card {
+.card{
   background:#141414;
   padding:15px;
-  border-radius:10px;
+  border-radius:12px;
   margin:15px auto;
-  max-width:360px;
-  box-shadow:0 0 10px rgba(0,255,200,0.3);
+  max-width:420px;
+  box-shadow:0 0 10px rgba(0,255,200,0.3)
 }
-.jugada-title {
-  color:#ffd700;
-  font-weight:bold;
-  margin-bottom:8px;
-}
-.horario {
-  color:#00ffd0;
-}
-.footer {
-  font-size:13px;
-  opacity:0.7;
-  margin-top:20px;
-}
+.horario{color:#00ffd0}
+.footer{font-size:13px;opacity:.7;margin-top:20px}
 </style>
 </head>
 
 <body>
 
 <h1>⚡ Tesla Pro</h1>
-<h3>Quiniela Tradicional – Método Tesla</h3>
 
-<input id="base" type="number" placeholder="Ingresá número base (4 cifras)">
-<button onclick="generar()">Generar jugadas</button>
+<!-- ================= TRADICIONAL ================= -->
+<h2>Quiniela Tradicional (Método Tesla)</h2>
 
-<div id="resultado"></div>
+<input id="baseTrad" placeholder="Número base (4 cifras)">
+<button onclick="generarTradicional()">Generar Tradicional</button>
+
+<div id="resTrad"></div>
+
+<!-- ================= POCEADA ================= -->
+<h2>🧿 Quiniela Poceada Correntina</h2>
+<p>Ingresá los 10 números del sorteo anterior</p>
+
+<textarea id="basePoc" placeholder="Ej: 12 34 56 78 90 11 22 33 44 55"></textarea>
+<button onclick="generarPoceada()">Generar 2 jugadas Tesla</button>
+
+<div id="resPoc"></div>
 
 <div class="footer">
-Horario sugerido según energía Tesla (mañana / tarde / noche)
+Método Tesla original + energía Mañana / Tarde / Noche
 </div>
 
 <script>
-// Tabla Tesla (la de tu foto)
+// ===== TABLA TESLA (TU MÉTODO) =====
 const tesla = {
   0:[0,0], 1:[0,0], 2:[5,7], 3:[8,0], 4:[6,9],
   5:[2,7], 6:[4,9], 7:[5,2], 8:[3,0], 9:[3,4]
@@ -74,44 +78,71 @@ const tesla = {
 const horarios = ["🌅 Mañana","🌇 Tarde","🌙 Noche"];
 
 function energia(num){
-  let suma = num.split('').reduce((a,b)=>a+parseInt(b),0);
-  return horarios[suma % 3];
+  let s = num.split('').reduce((a,b)=>a+parseInt(b),0);
+  return horarios[s % 3];
 }
 
 function transformar(numero, variante){
-  let res = "";
-  for(let d of numero){
-    res += tesla[d][variante];
-  }
-  return res;
+  let r="";
+  for(let d of numero) r+=tesla[d][variante];
+  return r;
 }
 
-function generar(){
-  const base = document.getElementById("base").value;
-  if(base.length < 2){
-    alert("Ingresá al menos 2 cifras");
+// ===== TRADICIONAL =====
+function generarTradicional(){
+  const base = document.getElementById("baseTrad").value.padStart(4,"0");
+  if(base.length<4) return;
+
+  let html="";
+  for(let i=0;i<2;i++){
+    const cuat = transformar(base,i);
+    const tern = cuat.slice(-3);
+    const amb = cuat.slice(-2);
+
+    html+=`
+    <div class="card">
+      <b>Jugada ${i+1}</b><br>
+      Cuaterno: ${cuat} <span class="horario">(${energia(cuat)})</span><br>
+      Terno: ${tern} <span class="horario">(${energia(tern)})</span><br>
+      Ambos: ${amb} <span class="horario">(${energia(amb)})</span>
+    </div>`;
+  }
+  document.getElementById("resTrad").innerHTML=html;
+}
+
+// ===== POCEADA CORRENTINA =====
+function generarPoceada(){
+  const nums = document.getElementById("basePoc").value.replace(/\D/g,'');
+  if(nums.length<20){
+    alert("Ingresá los 10 números completos");
     return;
   }
 
-  let html = "";
-
-  for(let i=0;i<2;i++){
-    const cuaterno = transformar(base.padStart(4,"0"), i);
-    const terno = cuaterno.slice(-3);
-    const ambos = cuaterno.slice(-2);
-
-    html += `
-    <div class="card">
-      <div class="jugada-title">🔢 Jugada ${i+1}</div>
-      Cuaterno: <b>${cuaterno}</b> <span class="horario">(${energia(cuaterno)})</span><br>
-      Terno: <b>${terno}</b> <span class="horario">(${energia(terno)})</span><br>
-      Ambos: <b>${ambos}</b> <span class="horario">(${energia(ambos)})</span>
-    </div>`;
+  let base1="", base2="";
+  for(let i=0;i<10;i++){
+    base1+=tesla[nums[i]][0];
+    base2+=tesla[nums[i]][1];
   }
 
-  document.getElementById("resultado").innerHTML = html;
+  let jug1=[], jug2=[];
+  for(let i=0;i<5;i++){
+    jug1.push(base1.slice(i*2,i*2+2));
+    jug2.push(base2.slice(i*2,i*2+2));
+  }
+
+  document.getElementById("resPoc").innerHTML=`
+  <div class="card">
+    <b>Jugada 1</b><br>
+    ${jug1.join(" · ")}<br>
+    <span class="horario">${energia(jug1.join(""))}</span>
+  </div>
+  <div class="card">
+    <b>Jugada 2</b><br>
+    ${jug2.join(" · ")}<br>
+    <span class="horario">${energia(jug2.join(""))}</span>
+  </div>`;
 }
 </script>
 
 </body>
-</html>
+  </html>

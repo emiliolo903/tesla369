@@ -2,106 +2,114 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Tesla Pro</title>
+<title>Tesla Pro – Quiniela Tradicional</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body {
-    background:#0b0f14;
-    color:#eaeaea;
-    font-family: Arial, sans-serif;
-    text-align:center;
-    padding:20px;
-  }
-  h1 { color:#00ffd0; }
-  input {
-    font-size:22px;
-    padding:10px;
-    width:200px;
-    text-align:center;
-    border-radius:8px;
-    border:none;
-  }
-  button {
-    margin-top:15px;
-    padding:12px 25px;
-    font-size:18px;
-    border:none;
-    border-radius:10px;
-    background:#00ffd0;
-    cursor:pointer;
-  }
-  .jugada {
-    margin-top:20px;
-    padding:15px;
-    border-radius:12px;
-    background:#111823;
-  }
+body {
+  background:#0b0b0b;
+  color:#eaeaea;
+  font-family: Arial, sans-serif;
+  text-align:center;
+  padding:20px;
+}
+h1 { color:#00ffd0; }
+input, button {
+  width:100%;
+  max-width:320px;
+  padding:12px;
+  margin:10px auto;
+  font-size:18px;
+  border-radius:8px;
+  border:none;
+}
+button {
+  background:#00ffd0;
+  font-weight:bold;
+}
+.card {
+  background:#141414;
+  padding:15px;
+  border-radius:10px;
+  margin:15px auto;
+  max-width:360px;
+  box-shadow:0 0 10px rgba(0,255,200,0.3);
+}
+.jugada-title {
+  color:#ffd700;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+.horario {
+  color:#00ffd0;
+}
+.footer {
+  font-size:13px;
+  opacity:0.7;
+  margin-top:20px;
+}
 </style>
 </head>
 
 <body>
 
 <h1>⚡ Tesla Pro</h1>
-<p>Quiniela Tradicional – Método Tesla</p>
+<h3>Quiniela Tradicional – Método Tesla</h3>
 
-<input id="base" placeholder="Ej: 8171" maxlength="4">
-<br>
+<input id="base" type="number" placeholder="Ingresá número base (4 cifras)">
 <button onclick="generar()">Generar jugadas</button>
 
 <div id="resultado"></div>
 
+<div class="footer">
+Horario sugerido según energía Tesla (mañana / tarde / noche)
+</div>
+
 <script>
-// TABLA TESLA (la de tu imagen, sin tocar)
+// Tabla Tesla (la de tu foto)
 const tesla = {
-  0:[0,0],
-  1:[0,0],
-  2:[5,7],
-  3:[8,0],
-  4:[6,9],
-  5:[2,7],
-  6:[4,9],
-  7:[5,2],
-  8:[3,0],
-  9:[3,4]
+  0:[0,0], 1:[0,0], 2:[5,7], 3:[8,0], 4:[6,9],
+  5:[2,7], 6:[4,9], 7:[5,2], 8:[3,0], 9:[3,4]
 };
 
-function horarioTesla(num){
-  const suma = num.split('').reduce((a,b)=>a+parseInt(b),0) % 3;
-  if(suma === 0) return "🌅 Mañana";
-  if(suma === 1) return "🏙️ Tarde";
-  return "🌙 Noche";
+const horarios = ["🌅 Mañana","🌇 Tarde","🌙 Noche"];
+
+function energia(num){
+  let suma = num.split('').reduce((a,b)=>a+parseInt(b),0);
+  return horarios[suma % 3];
+}
+
+function transformar(numero, variante){
+  let res = "";
+  for(let d of numero){
+    res += tesla[d][variante];
+  }
+  return res;
 }
 
 function generar(){
   const base = document.getElementById("base").value;
-  if(base.length < 3) return;
+  if(base.length < 2){
+    alert("Ingresá al menos 2 cifras");
+    return;
+  }
 
-  const d = base.split('').map(n => tesla[n]);
+  let html = "";
 
-  // Jugada 1
-  const cuaterno1 = base;
-  const terno1 = `${d[1][0]}${d[2][0]}${d[3][0]}`;
-  const ambos1 = `${d[2][0]}${d[3][0]}`;
+  for(let i=0;i<2;i++){
+    const cuaterno = transformar(base.padStart(4,"0"), i);
+    const terno = cuaterno.slice(-3);
+    const ambos = cuaterno.slice(-2);
 
-  // Jugada 2
-  const cuaterno2 = base;
-  const terno2 = `${d[0][0]}${d[1][0]}${d[2][0]}`;
-  const ambos2 = `${d[1][0]}${d[2][0]}`;
+    html += `
+    <div class="card">
+      <div class="jugada-title">🔢 Jugada ${i+1}</div>
+      Cuaterno: <b>${cuaterno}</b> <span class="horario">(${energia(cuaterno)})</span><br>
+      Terno: <b>${terno}</b> <span class="horario">(${energia(terno)})</span><br>
+      Ambos: <b>${ambos}</b> <span class="horario">(${energia(ambos)})</span>
+    </div>`;
+  }
 
-  document.getElementById("resultado").innerHTML = `
-    <div class="jugada">
-      <h3>🔢 Jugada 1</h3>
-      Cuaterno: ${cuaterno1} (${horarioTesla(cuaterno1)})<br>
-      Terno: ${terno1} (${horarioTesla(terno1)})<br>
-      Ambos: ${ambos1} (${horarioTesla(ambos1)})
-    </div>
-
-    <div class="jugada">
-      <h3>🔢 Jugada 2</h3>
-      Cuaterno: ${cuaterno2} (${horarioTesla(cuaterno2)})<br>
-      Terno: ${terno2} (${horarioTesla(terno2)})<br>
-      Ambos: ${ambos2} (${horarioTesla(ambos2)})
-    </div>
-  `;
+  document.getElementById("resultado").innerHTML = html;
 }
 </script>
 

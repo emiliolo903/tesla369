@@ -50,85 +50,80 @@ button{
 <h1>⚡ Tesla Pro</h1>
 <p>Método Tesla 3-6-9</p>
 
-<!-- ================= QUINIELA TRADICIONAL ================= -->
-
+<!-- ================= TRADICIONAL ================= -->
 <div class="bloque">
 <h2>🎯 Quiniela Tradicional</h2>
 <textarea id="base" placeholder="Ej: 7 9 9 3 5 0 7 1 6 9"></textarea>
-<button onclick="generarTradicional()">Generar</button>
+<button onclick="tradicional()">Generar</button>
 <div class="resultado" id="r1"></div>
 </div>
 
-<!-- ================= POCEADA CORRENTINA ================= -->
-
+<!-- ================= POCEADA ================= -->
 <div class="bloque">
 <h2>🧿 Quiniela Poceada Correntina</h2>
 <p>Ingresá los 10 números del sorteo anterior</p>
 <textarea id="poceada" placeholder="Ej: 12 34 56 78 90 11 22 33 44 55"></textarea>
-<button onclick="generarPoceada()">Generar 2 jugadas</button>
+<button onclick="poceadaGen()">Generar 2 jugadas</button>
 <div class="resultado" id="r2"></div>
 </div>
 
 <script>
-// ---------- util ----------
-function soloNumeros(txt){
-  return txt.replace(/\D/g,'').split('').map(Number)
+// ---------- UTIL ----------
+function nums(txt){
+  return txt.replace(/\D/g,'').split('').map(n=>parseInt(n))
 }
 
 function energia(){
-  const h=new Date().getHours()
+  let h=new Date().getHours()
   if(h<12) return "🌅 Mañana"
   if(h<18) return "🌇 Tarde"
   return "🌙 Noche"
 }
 
-// ---------- QUINIELA TRADICIONAL ----------
-function generarTradicional(){
-  let n=soloNumeros(base.value)
-  if(n.length<6){
-    r1.innerHTML="Ingresá más números"
+// ---------- TESLA BASE ----------
+function teslaBase(arr, offset){
+  let a = (arr[0+offset] + arr[3+offset]) % 10
+  let b = (arr[1+offset] + arr[4+offset]) % 10
+  let c = (arr[2+offset] + arr[5+offset]) % 10
+  let d = (a + b + c) % 10
+  return `${a}${b}${c}${d}`
+}
+
+// ---------- TRADICIONAL ----------
+function tradicional(){
+  let n = nums(base.value)
+  if(n.length < 6){
+    r1.innerHTML="Ingresá mínimo 6 dígitos"
     return
   }
 
-  // Tesla 3-6-9
-  let a=(n[0]+n[3]+n[6]||0)%10
-  let b=(n[1]+n[4]+n[7]||0)%10
-  let c=(n[2]+n[5]+n[8]||0)%10
-  let d=(a+b+c)%10
+  let c1 = teslaBase(n,0)
+  let c2 = teslaBase(n.reverse(),0)
 
-  let cuat1=`${a}${b}${c}${d}`
-  let cuat2=`${d}${c}${b}${a}`
-
-  let ter1=cuat1.slice(1)
-  let ter2=cuat2.slice(1)
-
-  let amb1=cuat1.slice(2)
-  let amb2=cuat2.slice(2)
-
-  r1.innerHTML=
+  r1.innerHTML =
     `<b>${energia()}</b><br><br>
-     <b>Cuaternos:</b><br>${cuat1} · ${cuat2}<br><br>
-     <b>Ternos:</b><br>${ter1} · ${ter2}<br><br>
-     <b>Ambos:</b><br>${amb1} · ${amb2}`
+     <b>Cuaternos:</b><br>${c1} · ${c2}<br><br>
+     <b>Ternos:</b><br>${c1.slice(1)} · ${c2.slice(1)}<br><br>
+     <b>Ambos:</b><br>${c1.slice(2)} · ${c2.slice(2)}`
 }
 
-// ---------- POCEADA CORRENTINA ----------
-function generarPoceada(){
-  let n=soloNumeros(poceada.value)
-  if(n.length<10){
+// ---------- POCEADA ----------
+function poceadaGen(){
+  let n = nums(poceada.value)
+  if(n.length < 10){
     r2.innerHTML="Ingresá los 10 números"
     return
   }
 
   let j1=[], j2=[]
   for(let i=0;i<5;i++){
-    let t1=(n[i]+n[i+5])%100
-    let t2=(n[i+5]+n[i])%100
-    j1.push(t1.toString().padStart(2,"0"))
-    j2.push(t2.toString().padStart(2,"0"))
+    let v1=(n[i]+n[i+5])%100
+    let v2=(n[i+5]+n[i])%100
+    j1.push(v1.toString().padStart(2,"0"))
+    j2.push(v2.toString().padStart(2,"0"))
   }
 
-  r2.innerHTML=
+  r2.innerHTML =
     `<b>${energia()}</b><br><br>
      <b>Jugada 1:</b><br>${j1.join(" · ")}<br><br>
      <b>Jugada 2:</b><br>${j2.join(" · ")}`
@@ -136,4 +131,4 @@ function generarPoceada(){
 </script>
 
 </body>
-</html>
+  </html>

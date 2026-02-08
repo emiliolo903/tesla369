@@ -9,16 +9,16 @@ body {margin:0;font-family:Arial,sans-serif;background:#111;color:#fff;display:f
 .container{width:100%;max-width:500px;text-align:center;}
 h1{color:#00F5E0;font-size:28px;margin-bottom:20px;}
 h2{color:#FFD700;font-size:22px;margin-bottom:10px;}
-input{width:80%;padding:12px;font-size:18px;border-radius:8px;border:none;margin-bottom:15px;}
+input, textarea{width:80%;padding:12px;font-size:18px;border-radius:8px;border:none;margin-bottom:15px;}
+textarea{height:120px;}
 button{width:85%;padding:14px;font-size:18px;background:#00F5E0;color:#111;border:none;border-radius:10px;cursor:pointer;margin-bottom:20px;}
 .resultado{background:#222;padding:15px;border-radius:12px;margin-bottom:15px;text-align:left;font-size:18px;}
 .resultado span{color:#00FFAA;font-weight:bold;}
 .fuerte{color:#FFD700;}
-.energia{font-weight:bold;}
 .poseada{margin-top:30px;}
 .nota{font-size:14px;color:#aaa;margin-top:10px;}
 .historial{margin-top:20px;padding:15px;background:#222;border-radius:12px;}
-.historial input{width:70%;margin-bottom:10px;}
+.historial textarea{width:90%;}
 </style>
 </head>
 <body>
@@ -39,10 +39,10 @@ button{width:85%;padding:14px;font-size:18px;background:#00F5E0;color:#111;borde
 </div>
 
 <div class="historial">
-<h2>Histórico Poseada (últimos 20 números)</h2>
-<input type="text" id="inputHistorico" placeholder="Ingresá 20 números separados por coma o espacio">
+<h2>Histórico Poseada (últimas 20 jugadas)</h2>
+<textarea id="inputHistorico" placeholder="Ingresá las 20 jugadas anteriores, cada jugada con 10 números separados por coma, y cada jugada en nueva línea"></textarea>
 <button onclick="guardarHistorico()">Guardar Histórico</button>
-<div class="nota">Estos números se usarán para calcular los 5 más fuertes para Principal y Respaldo automáticamente.</div>
+<div class="nota">Estos números se usarán automáticamente para calcular Principal y Respaldo. Se mantiene histórico persistente y se actualiza con cada nuevo sorteo.</div>
 </div>
 
 <script>
@@ -50,8 +50,8 @@ button{width:85%;padding:14px;font-size:18px;background:#00F5E0;color:#111;borde
 const tablaTesla = {0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']};
 const agencias = ["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
 
-// Histórico interno de 20 números Poseada
-let historicoPoseada = [];
+// Cargar histórico desde localStorage si existe
+let historicoPoseada = JSON.parse(localStorage.getItem('historicoPoseada')) || [];
 
 // Función para calcular energía de cada número según Tesla
 function energiaNumero(num){
@@ -75,14 +75,6 @@ function sugerenciaJugada(cuaterno, terno, ambos){
   if(uniqueC===4) return "🎯 Cuaterno";
   if(uniqueT===3) return "✅ Terno";
   return "⚡ Ambos";
-}
-
-// Resaltar número fuerte según histórico Poseada
-function resaltarFuertePoseada(num){
-  for(let h of historicoPoseada){
-    if(h.includes(num)) return true;
-  }
-  return false;
 }
 
 // Tradicional
@@ -125,14 +117,21 @@ function generarPoseada(){
   let input=inputRaw.split(/[\s,]+/).map(v=>v.trim()).filter(v=>v!=='').map(v=>v.padStart(2,'0'));
   if(input.length!==10){alert('Ingresá 10 números del sorteo anterior'); return;}
 
-  // Usar histórico Poseada si existe
+  // Guardar la nueva jugada en histórico
+  historicoPoseada.push(input);
+  if(historicoPoseada.length>20) historicoPoseada.shift(); // Mantener solo 20 últimas jugadas
+  localStorage.setItem('historicoPoseada', JSON.stringify(historicoPoseada));
+
   let principal=[], respaldo=[];
-  if(historicoPoseada.length===20){
+  if(historicoPoseada.length>0){
+    // Calcular frecuencia de números en Principal y Respaldo de las últimas 20 jugadas
     let frecuencias={};
-    historicoPoseada.forEach(n=>{
-      frecuencias[n]=(frecuencias[n]||0)+1;
+    historicoPoseada.forEach(jugada=>{
+      jugada.forEach(n=>{
+        frecuencias[n]=(frecuencias[n]||0)+1;
+      });
     });
-    // Ordenar por frecuencia y tomar 5 + 5
+    // Ordenar por frecuencia descendente
     let numerosOrdenados = Object.keys(frecuencias).sort((a,b)=>frecuencias[b]-frecuencias[a]);
     principal = numerosOrdenados.slice(0,5);
     respaldo = numerosOrdenados.slice(5,10);
@@ -151,12 +150,19 @@ function generarPoseada(){
   document.getElementById('resultadosPoseada').innerHTML=html;
 }
 
-// Guardar histórico de 20 números Poseada
+// Guardar histórico manualmente (por si quieres cargar 20 jugadas de golpe)
 function guardarHistorico(){
-  let input=document.getElementById('inputHistorico').value.split(/[\s,]+/).map(v=>v.trim()).filter(v=>v!=='').map(v=>v.padStart(2,'0'));
-  if(input.length!==20){alert('Ingresá exactamente 20 números'); return;}
-  historicoPoseada = input;
-  alert('Histórico guardado correctamente. Ahora se usará para generar Principal y Respaldo automáticamente.');
+  let input=document.getElementById('inputHistorico').value.split(/\n+/).map(line=>line.trim()).filter(line=>line!=='');
+  if(input.length!==20){alert('Ingresá exactamente 20 jugadas completas'); return;}
+  let jugadas = [];
+  for(let line of input){
+    let nums=line.split(/[\s,]+/).map(n=>n.trim().padStart(2,'0'));
+    if(nums.length!==10){alert('Cada jugada debe tener exactamente 10 números'); return;}
+    jugadas.push(nums);
+  }
+  historicoPoseada = jugadas;
+  localStorage.setItem('historicoPoseada', JSON.stringify(historicoPoseada));
+  alert('Histórico de 20 jugadas guardado correctamente. Ahora se usará automáticamente para Principal y Respaldo.');
 }
 </script>
 </body>

@@ -14,51 +14,51 @@ body {
   margin: 0;
 }
 .app {
-  max-width: 400px;
-  width: 90%;
+  max-width: 450px;
+  width: 95%;
   text-align: center;
 }
 input {
   width: 100%;
-  padding: 12px;
-  font-size: 18px;
-  border-radius: 10px;
+  padding: 16px;
+  font-size: 22px;
+  border-radius: 12px;
   border: none;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   color: #000;
 }
 button {
   width: 100%;
-  padding: 12px;
-  font-size: 18px;
-  border-radius: 10px;
+  padding: 16px;
+  font-size: 22px;
+  border-radius: 12px;
   border: none;
   background: #00ffd5;
   font-weight: bold;
   cursor: pointer;
   color: #000;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 .card {
   background: #1c1c1c;
-  margin-top: 12px;
-  padding: 15px;
-  border-radius: 10px;
+  margin-top: 14px;
+  padding: 20px;
+  border-radius: 12px;
   color: #fff;
 }
-.card h3 { color: #00ffd5; margin-top:0; }
-.line { margin: 6px 0; font-size: 16px; }
+.card h3 { color: #00ffd5; margin-top:0; font-size: 24px; }
+.line { margin: 8px 0; font-size: 20px; }
 </style>
 </head>
 <body>
 <div class="app">
-  <h2>⚡ Quiniela Tradicional – Método Tesla</h2>
+  <h2 style="font-size:28px;">⚡ Quiniela Tradicional – Método Tesla</h2>
   <input id="numero" type="text" maxlength="4" placeholder="Ingresá 4 cifras o dejá vacío" />
   <button onclick="generarTradicional()">Generar Tradicional</button>
   <div id="energia" class="line"></div>
   <div id="agencia" class="line"></div>
-  <div id="resultado"></div>  <h2>🎯 Quiniela Poseada Correntina</h2>
-  <input id="poseadaInput" placeholder="Ingresá 10 números separados por coma (00-99) o dejá vacío" />
+  <div id="resultado"></div>  <h2 style="font-size:28px;">🎯 Quiniela Poseada Correntina</h2>
+  <input id="poseadaInput" placeholder="Ingresá 10 números (00-99) separados por coma" />
   <button onclick="generarPoseada()">Generar Poseada</button>
   <div id="poseadaResultado" class="card"></div>
 </div><script>
@@ -104,18 +104,27 @@ function generarTradicional(){
 
 // Poseada Correntina
 function generarPoseada(){
-  let valores = document.getElementById('poseadaInput').value.split(',').map(v=>v.trim()).filter(v=>v!=="" && !isNaN(v));
+  let raw = document.getElementById('poseadaInput').value.split(',').map(v=>v.trim());
+  let valores = [];
 
-  // Si está vacío, generar 10 números random
-  if(valores.length !== 10){
-    valores = Array.from({length:10},()=>Math.floor(Math.random()*100).toString().padStart(2,'0'));
+  raw.forEach(v => {
+    if(v!=="" && /^\d{1,2}$/.test(v)){
+      let n = parseInt(v);
+      if(n>=0 && n<=99){
+        valores.push(n.toString().padStart(2,'0'));
+      }
+    }
+  });
+
+  while(valores.length < 10){
+    let r = Math.floor(Math.random()*100).toString().padStart(2,'0');
+    if(!valores.includes(r)) valores.push(r);
   }
+  valores = valores.slice(0,10);
 
-  // Aplicar Tesla al primer dígito de cada número
   let pool = [];
   valores.forEach(n => {
-    let num = n.padStart(2,'0');
-    let d = parseInt(num[0]);
+    let d = parseInt(n[0]);
     pool.push(tesla[d][0]);
     pool.push(tesla[d][1]);
   });

@@ -1,97 +1,45 @@
 <!DOCTYPE html><html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Quiniela Tradicional Tesla</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-    .app {
-      background: #1c1c1c;
-      padding: 20px;
-      border-radius: 12px;
-      width: 340px;
-      text-align: center;
-    }
-    h2 { margin-bottom: 10px; }
-    button {
-      margin-top: 10px;
-      padding: 10px;
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .res {
-      margin-top: 15px;
-      background: #000;
-      padding: 10px;
-      border-radius: 8px;
-    }
-    .big { font-size: 18px; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <h2>Quiniela Tradicional</h2><div id="energia" class="big"></div>
-<div id="agencia" class="big"></div>
-
-<button onclick="generar()">Generar NRO Tesla</button>
-
-<div class="res" id="resultado"></div>
-
-  </div><script>
-  const agencias = ["Corrientes", "Ciudad", "Bonaerense", "Santa Fe", "Córdoba", "Entre Ríos", "Chaco"];
-
-  function energiaActual() {
-    const h = new Date().getHours();
-    if (h < 12) return "Energía: Mañana";
-    if (h < 18) return "Energía: Tarde";
-    return "Energía: Noche";
-  }
-
-  function agenciaPorNumero(num) {
-    const n = parseInt(num[0]);
-    return agencias[n % agencias.length];
-  }
-
-  function generar() {
-    // Método Tesla base
-    const pares = [
-      [3,8,0],
-      [5,2,7],
-      [1,0,0],
-      [8,3,0]
-    ];
-
-    const cuaterno1 = `${pares[0][1]}${pares[1][0]}${pares[2][0]}${pares[3][0]}`; // 8203
-    const cuaterno2 = `0${pares[1][2]}00`; // 0700
-
-    const terno1 = cuaterno1.slice(1);
-    const terno2 = cuaterno2.slice(1);
-
-    const ambos1 = cuaterno1.slice(2);
-    const ambos2 = cuaterno2.slice(2);
-
-    document.getElementById('energia').innerText = energiaActual();
-    document.getElementById('agencia').innerText = "Agencia sugerida: " + agenciaPorNumero(cuaterno1);
-
-    document.getElementById('resultado').innerHTML = `
-      <div><b>Cuaterno 1:</b> ${cuaterno1}</div>
-      <div>Terno: ${terno1}</div>
-      <div>Ambos: ${ambos1}</div>
-      <hr>
-      <div><b>Cuaterno 2:</b> ${cuaterno2}</div>
-      <div>Terno: ${terno2}</div>
-      <div>Ambos: ${ambos2}</div>
-    `;
-  }
-</script></body>
-</html>
+<meta charset="UTF-8">
+<title>Quiniela Tradicional – Tesla Dinámico</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #0b0b0b;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  padding-top: 20px;
+}
+.app {
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+input {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 10px;
+}
+button {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+  background: #00ffd5;
+  font-weight: bold;
+  cursor: pointer;
+}
+.card {
+  background: #121212;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 10px;
+}
+.card h3 {
+  margin-top: 0;
+  color:

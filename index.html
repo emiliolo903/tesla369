@@ -1,96 +1,70 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Quiniela Tradicional - Método Tesla</title>
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #111;
-  color: #eee;
-  padding: 20px;
-}
-input, button {
-  padding: 10px;
-  font-size: 16px;
-  margin: 5px 0;
-}
-button {
-  background: #00c853;
-  border: none;
-  cursor: pointer;
-}
-.resultado {
-  background: #222;
-  padding: 15px;
-  margin-top: 15px;
-  border-radius: 8px;
-}
-h2 { color: #00e676; }
-</style>
+  <meta charset="UTF-8" />
+  <title>Quiniela Tradicional – Método Tesla</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#111; color:#eee; padding:20px; }
+    h1 { color:#00ffcc; }
+    input, button { padding:10px; font-size:16px; margin:5px 0; }
+    button { background:#00ffcc; border:none; cursor:pointer; }
+    .box { background:#1b1b1b; padding:15px; margin-top:15px; border-radius:8px; }
+    .ok { color:#7CFC00; }
+  </style>
 </head>
-
-<body>
-
-<h2>🎯 Quiniela Tradicional – Método Tesla</h2>
-
-<p>Ingresá un número de <b>4 cifras</b>:</p>
-<input type="number" id="numero" placeholder="Ej: 3518" maxlength="4">
+<body><h1>Quiniela Tradicional – Método Tesla</h1><p>Ingresá un número de <b>4 cifras</b>:</p>
+<input type="text" id="numero" maxlength="4" placeholder="Ej: 3518" />
 <br>
-<button onclick="generar()">Generar jugadas</button>
-
-<div class="resultado" id="salida"></div>
-
-<script>
-// TABLA TESLA FIJA (SEGÚN LA FOTO)
+<button onclick="generar()">Generar Jugadas Tesla</button><div id="resultado" class="box"></div><script>
+// TABLA TESLA FIJA (NO SE MODIFICA)
 const tesla = {
-  0: ["0"],
-  1: ["0"],
-  2: ["5","7"],
-  3: ["8","0"],
-  4: ["6","9"],
-  5: ["2","7"],
-  6: ["4","9"],
-  7: ["5","2"],
-  8: ["3","0"],
-  9: ["3","4"]
+  0: ['0','0'],
+  1: ['0','0'],
+  2: ['5','7'],
+  3: ['8','0'],
+  4: ['6','9'],
+  5: ['2','7'],
+  6: ['4','9'],
+  7: ['5','2'],
+  8: ['3','0'],
+  9: ['3','4']
 };
 
-function combinar(arrays) {
-  return arrays.reduce((a, b) =>
-    a.flatMap(d => b.map(e => d + e))
-  );
-}
-
 function generar() {
-  const num = document.getElementById("numero").value;
-  if (num.length !== 4) {
-    alert("Ingresá un número de 4 cifras");
+  const num = document.getElementById('numero').value;
+  const res = document.getElementById('resultado');
+
+  if (!/^\d{4}$/.test(num)) {
+    res.innerHTML = '<span style="color:red">Ingresá exactamente 4 cifras</span>';
     return;
   }
 
-  const digitos = num.split("");
-  const opciones = digitos.map(d => tesla[d]);
+  let j1 = '';
+  let j2 = '';
 
-  const cuaternos = combinar(opciones);
+  for (let d of num) {
+    j1 += tesla[d][0];
+    j2 += tesla[d][1];
+  }
 
-  const ternos = [...new Set(cuaternos.map(n => n.substring(1)))];
-  const ambos = [...new Set(cuaternos.map(n => n.substring(2)))];
+  const terno1 = j1.slice(1);
+  const ambos1 = j1.slice(2);
+  const terno2 = j2.slice(1);
+  const ambos2 = j2.slice(2);
 
-  document.getElementById("salida").innerHTML = `
-    <h3>🔢 Número base: ${num}</h3>
+  res.innerHTML = `
+    <h3 class="ok">JUGADA TESLA 1</h3>
+    Cuaterno: <b>${j1}</b><br>
+    Terno: <b>${terno1}</b><br>
+    Ambos: <b>${ambos1}</b>
 
-    <b>▶ Cuaternos Tesla:</b><br>
-    ${cuaternos.join(" - ")}<br><br>
+    <hr>
 
-    <b>▶ Ternos Tesla:</b><br>
-    ${ternos.join(" - ")}<br><br>
-
-    <b>▶ Ambos:</b><br>
-    ${ambos.join(" - ")}
+    <h3 class="ok">JUGADA TESLA 2</h3>
+    Cuaterno: <b>${j2}</b><br>
+    Terno: <b>${terno2}</b><br>
+    Ambos: <b>${ambos2}</b>
   `;
 }
-</script>
-
-</body>
+</script></body>
 </html>
+  

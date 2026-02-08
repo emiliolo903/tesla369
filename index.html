@@ -1,20 +1,20 @@
-<!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <title>Tesla Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial;
   background:#111;
   color:#fff;
   text-align:center;
-  padding:15px;
+  padding:15px
 }
 h1{color:#00ffcc}
+h2{color:#ffd700;margin-top:25px}
 input,button{
   width:100%;
   max-width:420px;
@@ -22,28 +22,28 @@ input,button{
   display:block;
   padding:12px;
   font-size:18px;
-  border-radius:8px;
-  border:none;
+  border-radius:10px;
+  border:none
 }
 button{
   background:#00ffcc;
   font-weight:bold;
-  cursor:pointer;
+  cursor:pointer
 }
-.caja{
-  border:1px solid #00ffcc;
-  border-radius:10px;
-  padding:10px;
-  margin-top:12px;
+.box{
+  margin-top:15px;
+  padding:15px;
+  border-radius:12px;
+  background:#1b1b1b
 }
-.info{
-  color:#ffd700;
-  margin-top:10px;
+.res{
+  color:#00ffcc;
+  font-size:17px;
+  line-height:1.6
 }
-.acierto{
-  background:#28a745;
-  color:#fff;
-  margin-top:8px;
+.small{
+  font-size:13px;
+  color:#aaa
 }
 </style>
 </head>
@@ -53,65 +53,96 @@ button{
 <h1>⚡ Tesla Pro</h1>
 <p>Quiniela Tradicional – Método Tesla</p>
 
-<input id="base" placeholder="Ingresá cuaterno (ej: 3518)">
+<h2>Ingresá número base</h2>
+<input id="base" placeholder="Ej: 3518">
 <button onclick="generar()">Generar jugadas</button>
 
 <div id="salida"></div>
 
 <script>
-// 🔒 TABLA TESLA (TU FOTO)
-const tesla = {
-  "0":["0","0"], "1":["0","0"], "2":["5","7"], "3":["8","0"],
-  "4":["6","9"], "5":["2","7"], "6":["4","9"], "7":["5","2"],
-  "8":["3","0"], "9":["3","4"]
+// TABLA TESLA (FIJA)
+const tablaTesla = {
+  0:[0,0], 1:[0,0],
+  2:[5,7], 3:[8,0],
+  4:[6,9], 5:[2,7],
+  6:[4,9], 7:[5,2],
+  8:[3,0], 9:[3,4]
 };
 
-function energiaYAgencia(num){
-  let suma = [...num].reduce((a,b)=>a+Number(b),0);
-  if(suma <= 12) return {e:"🌅 Mañana", a:"Correntina / Ciudad"};
-  if(suma <= 24) return {e:"🌆 Tarde", a:"Bonaerense / Santa Fe"};
-  return {e:"🌙 Noche", a:"Córdoba / Entre Ríos / Chaco"};
+// raíz digital
+function energia(num){
+  let s = num.toString().split('').reduce((a,b)=>a+parseInt(b),0);
+  while(s>9) s = s.toString().split('').reduce((a,b)=>a+parseInt(b),0);
+  return s;
 }
 
-function marcar(id){
-  localStorage.setItem(id,"✔ ACIERTO");
-  document.getElementById(id).innerText = "✔ ACIERTO GUARDADO";
+// energía → franja
+function franja(e){
+  if(e<=3) return "🌅 Mañana";
+  if(e<=6) return "🌆 Tarde";
+  return "🌙 Noche";
+}
+
+// franja → agencias
+function agencias(f){
+  if(f.includes("Mañana")) return "Correntina / Ciudad";
+  if(f.includes("Tarde")) return "Bonaerense / Santa Fe";
+  return "Córdoba / Entre Ríos / Chaco";
+}
+
+// aplica tabla tesla a un número
+function aplicarTesla(num){
+  return num.toString().split('').map(d=>tablaTesla[d][0]).join('');
+}
+
+// arma bloque cuaterno/terno/ambo
+function bloque(titulo,num){
+  let e = energia(num);
+  let f = franja(e);
+  return `
+    <div class="res">
+      <b>${titulo}</b><br>
+      Número: ${num}<br>
+      Energía: ${e} ${f}<br>
+      Agencia sugerida: ${agencias(f)}
+    </div>
+    <hr style="opacity:.2">
+  `;
 }
 
 function generar(){
-  let n = base.value.replace(/\D/g,'');
-  if(n.length !== 4){
-    salida.innerHTML = "⚠️ Ingresá un cuaterno válido";
+  let b = base.value.replace(/\D/g,'');
+  if(b.length<4){
+    salida.innerHTML = "<p>Ingresá mínimo 4 dígitos</p>";
     return;
   }
 
-  let j1="", j2="";
-  for(let d of n){
-    j1 += tesla[d][0];
-    j2 += tesla[d][1];
-  }
+  // Jugada 1
+  let j1 = b.slice(0,4);
+  let t1 = aplicarTesla(j1).slice(0,3);
+  let a1 = aplicarTesla(j1).slice(0,2);
 
-  let e1 = energiaYAgencia(j1);
-  let e2 = energiaYAgencia(j2);
+  // Jugada 2 (invertida)
+  let j2 = b.split('').reverse().join('');
+  let t2 = aplicarTesla(j2).slice(0,3);
+  let a2 = aplicarTesla(j2).slice(0,2);
 
   salida.innerHTML = `
-    <div class="caja">
-      <b>🔹 Jugada Tesla 1</b><br>
-      Cuaterno: ${j1}<br>
-      Terno: ${j1.slice(0,3)}<br>
-      Ambos: ${j1.slice(-2)}<br>
-      <div class="info">${e1.e} – ${e1.a}</div>
-      <button class="acierto" id="a1" onclick="marcar('a1')">Marcar acierto</button>
+    <div class="box">
+      <h2>🔢 Jugada Tesla 1</h2>
+      ${bloque("Cuaterno",j1)}
+      ${bloque("Terno",t1)}
+      ${bloque("Ambos",a1)}
     </div>
 
-    <div class="caja">
-      <b>🔹 Jugada Tesla 2</b><br>
-      Cuaterno: ${j2}<br>
-      Terno: ${j2.slice(0,3)}<br>
-      Ambos: ${j2.slice(-2)}<br>
-      <div class="info">${e2.e} – ${e2.a}</div>
-      <button class="acierto" id="a2" onclick="marcar('a2')">Marcar acierto</button>
+    <div class="box">
+      <h2>🔢 Jugada Tesla 2</h2>
+      ${bloque("Cuaterno",j2)}
+      ${bloque("Terno",t2)}
+      ${bloque("Ambos",a2)}
     </div>
+
+    <p class="small">Energía y agencia calculadas automáticamente según método Tesla</p>
   `;
 }
 </script>

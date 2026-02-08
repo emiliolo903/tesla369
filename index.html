@@ -9,11 +9,14 @@ body {
   color: #fff;
   display: flex;
   justify-content: center;
-  padding-top: 20px;
+  align-items: flex-start;
+  padding: 20px 0;
+  min-height: 100vh;
+  margin: 0;
 }
 .app {
   max-width: 400px;
-  width: 100%;
+  width: 90%;
   text-align: center;
 }
 input {
@@ -23,6 +26,7 @@ input {
   border-radius: 10px;
   border: none;
   margin-bottom: 10px;
+  color: #000;
 }
 button {
   width: 100%;
@@ -33,13 +37,60 @@ button {
   background: #00ffd5;
   font-weight: bold;
   cursor: pointer;
+  color: #000;
 }
 .card {
-  background: #121212;
+  background: #1c1c1c;
   margin-top: 12px;
-  padding: 12px;
+  padding: 15px;
   border-radius: 10px;
+  color: #fff;
 }
 .card h3 {
   margin-top: 0;
-  color:
+  color: #00ffd5;
+}
+.line { margin: 6px 0; font-size: 16px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h2>⚡ Quiniela Tradicional – Método Tesla</h2>
+  <input id="numero" type="text" maxlength="4" placeholder="Ingresá 4 cifras o dejá vacío" />
+  <button onclick="generar()">Generar Jugadas</button>
+  <div id="resultado"></div>
+</div><script>
+const tesla = {
+  0:[0,0],1:[0,0],2:[5,7],3:[8,0],4:[6,9],5:[2,7],6:[4,9],7:[5,2],8:[3,0],9:[3,4]
+};
+
+function generar(){
+  let n = document.getElementById('numero').value;
+  if(!n){
+    n = Math.floor(Math.random()*9000+1000).toString();
+  }
+  if(n.length!==4 || isNaN(n)){
+    alert('Ingresá un número válido de 4 cifras');
+    return;
+  }
+
+  const dig = [...n].map(Number);
+  const jugadas = [dig.map(d=>tesla[d][0]), dig.map(d=>tesla[d][1])];
+
+  let html = '';
+  jugadas.forEach((j, i)=>{
+    const cuaterno = j.join('');
+    const terno = j.slice(1).join('');
+    const ambos = j.slice(2).join('');
+    html += `<div class="card">
+      <h3>Jugada Tesla ${i+1}</h3>
+      <div class="line">Cuaterno: ${cuaterno}</div>
+      <div class="line">Terno: ${terno}</div>
+      <div class="line">Ambos: ${ambos}</div>
+    </div>`;
+  });
+
+  document.getElementById('resultado').innerHTML = html;
+}
+</script></body>
+</html>

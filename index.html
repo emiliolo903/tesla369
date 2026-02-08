@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Quiniela Tradicional – Método Tesla</title>
+<title>App Quiniela – Método Tesla</title>
 
 <style>
 body {
@@ -34,82 +34,15 @@ button {
 
 <body>
 
-<h2>📊 QUINIELA TRADICIONAL – MÉTODO TESLA</h2>
+<h2>📊 APP QUINIELA – MÉTODO TESLA</h2>
 
 <div class="box">
   <h3>🔢 Ingresar número base</h3>
   <input id="base" placeholder="Ej: 3518">
   <br>
-  <button onclick="generar()">Generar jugadas</button>
+  <button onclick="generar()">Generar</button>
 </div>
 
 <div class="box" id="energiaBox"></div>
 
-<div class="box">
-  <h3>🎯 Jugadas generadas</h3>
-  <div id="tradicional"></div>
-</div>
-
-<script>
-// ENERGÍA
-function energiaPorNumero(n){
-  let suma = n.split('').reduce((a,b)=>a+parseInt(b),0);
-  if(suma % 3 === 0) return "MAÑANA";
-  if(suma % 3 === 1) return "TARDE";
-  return "NOCHE";
-}
-
-// AGENCIA SUGERIDA (solo informativa)
-function agenciaPorEnergia(e){
-  if(e === "MAÑANA") return "CORRIENTES / CHACO";
-  if(e === "TARDE") return "SANTA FE / ENTRE RÍOS";
-  return "BUENOS AIRES / CÓRDOBA";
-}
-
-// MÉTODO TESLA (FIJO)
-function metodoTesla(n){
-  let a = n.split('').map(Number);
-  return [
-    (a[0] + a[1]) % 10,
-    (a[2] + a[3]) % 10,
-    Math.abs(a[0] - a[3]),
-    Math.abs(a[1] - a[2])
-  ];
-}
-
-// GENERAR TERNO / CUATERNO
-function generarJugadas(t){
-  let terno1 = `${t[1]}${t[0]}${t[2]}`;
-  let terno2 = `${t[3]}${t[0]}${t[0]}`;
-  let cuaterno = `${t[0]}${t[1]}${t[2]}${t[3]}`;
-  return { terno1, terno2, cuaterno };
-}
-
-// FUNCIÓN PRINCIPAL
-function generar(){
-  let base = document.getElementById("base").value;
-  if(base.length < 3) return;
-
-  let energia = energiaPorNumero(base);
-  let agencia = agenciaPorEnergia(energia);
-  let tesla = metodoTesla(base);
-  let jugadas = generarJugadas(tesla);
-
-  document.getElementById("energiaBox").innerHTML = `
-    <h3>⚡ Energía del número</h3>
-    Energía: <b>${energia}</b><br>
-    Agencia sugerida: <b>${agencia}</b>
-  `;
-
-  document.getElementById("tradicional").innerHTML = `
-    <div class="result">
-      Terno 1: <b>${jugadas.terno1}</b><br>
-      Terno 2: <b>${jugadas.terno2}</b><br>
-      Cuaterno: <b>${jugadas.cuaterno}</b>
-    </div>
-  `;
-}
-</script>
-
-</body>
-</html>
+<div class="box"

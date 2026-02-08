@@ -1,141 +1,161 @@
-<!DOCTYPE html><html lang="es">
+<!DOCTYPE html>
+<html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Quiniela Tesla Tradicional + Poseada Correntina</title>
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #0b0b0b;
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  padding-top: 20px;
-  min-height: 100vh;
-  margin: 0;
-}
-.app {
-  max-width: 450px;
-  width: 95%;
-  text-align: center;
-}
-input {
-  width: 100%;
-  padding: 16px;
-  font-size: 22px;
-  border-radius: 12px;
-  border: none;
-  margin-bottom: 12px;
-  color: #000;
-}
-button {
-  width: 100%;
-  padding: 16px;
-  font-size: 22px;
-  border-radius: 12px;
-  border: none;
-  background: #00ffd5;
-  font-weight: bold;
-  cursor: pointer;
-  color: #000;
-  margin-top: 10px;
-}
-.card {
-  background: #1c1c1c;
-  margin-top: 14px;
-  padding: 20px;
-  border-radius: 12px;
-  color: #fff;
-}
-.card h3 { color: #00ffd5; margin-top:0; font-size: 24px; }
-.line { margin: 8px 0; font-size: 20px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tesla Pro</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+    h1 {
+      color: #00F5E0;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    h2 {
+      color: #FFD700;
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    input {
+      width: 80%;
+      padding: 12px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: none;
+      margin-bottom: 15px;
+    }
+    button {
+      width: 85%;
+      padding: 14px;
+      font-size: 18px;
+      background-color: #00F5E0;
+      color: #111;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    .resultado {
+      background-color: #222;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      text-align: left;
+      font-size: 20px;
+    }
+    .resultado span {
+      color: #00FFAA;
+      font-weight: bold;
+    }
+    .energia {
+      font-weight: bold;
+    }
+    .poseada {
+      margin-top: 30px;
+    }
+    .nota {
+      font-size: 14px;
+      color: #aaa;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-<div class="app">
-  <h2 style="font-size:28px;">⚡ Quiniela Tradicional – Método Tesla</h2>
-  <input id="numero" type="text" maxlength="4" placeholder="Ingresá 4 cifras o dejá vacío" />
-  <button onclick="generarTradicional()">Generar Tradicional</button>
-  <div id="energia" class="line"></div>
-  <div id="agencia" class="line"></div>
-  <div id="resultado"></div>  <h2 style="font-size:28px;">🎯 Quiniela Poseada Correntina</h2>
-  <input id="poseadaInput" placeholder="Ingresá 10 números (00-99) separados por coma" />
-  <button onclick="generarPoseada()">Generar Poseada</button>
-  <div id="poseadaResultado" class="card"></div>
-</div><script>
-const tesla = {0:[0,0],1:[0,0],2:[5,7],3:[8,0],4:[6,9],5:[2,7],6:[4,9],7:[5,2],8:[3,0],9:[3,4]};
-const agencias = ["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
+  <div class="container">
+    <h1>⚡ Tesla Pro</h1>
 
-function energiaActual(){
-  const h = new Date().getHours();
-  if(h<12) return "🌅 Mañana";
-  if(h<18) return "🌇 Tarde";
-  return "🌙 Noche";
-}
+    <h2>Quiniela Tradicional (Método Tesla)</h2>
+    <input type="text" id="inputTradicional" placeholder="Ingresá un número de 4 cifras">
+    <button onclick="generarTradicional()">Generar Tradicional</button>
 
-function agenciaPorNumero(num){
-  const n = parseInt(num[0]);
-  return agencias[n % agencias.length];
-}
+    <div id="resultadosTradicional"></div>
 
-// Tradicional
-function generarTradicional(){
-  let n = document.getElementById('numero').value;
-  if(!n){ n = Math.floor(Math.random()*9000+1000).toString(); }
-  if(n.length!==4 || isNaN(n)){ alert('Ingresá un número válido de 4 cifras'); return; }
+    <div class="poseada">
+      <h2>Quiniela Poseada Correntina</h2>
+      <input type="text" id="inputPoseada" placeholder="Ingresá los 10 números del sorteo anterior">
+      <button onclick="generarPoseada()">Generar 2 jugadas Tesla</button>
+    </div>
+    <div class="nota">Método Tesla original + energía ☀️ / 🌆 / 🌙</div>
+    <div id="resultadosPoseada"></div>
+  </div>
 
-  const dig = [...n].map(Number);
-  const jugadas = [dig.map(d=>tesla[d][0]), dig.map(d=>tesla[d][1])];
+  <script>
+    const tablaTesla = {
+      0: ['0','0'], 1:['0','0'], 2:['5','7'], 3:['8','0'], 4:['6','9'], 
+      5:['2','7'], 6:['4','9'], 7:['5','2'], 8:['3','0'], 9:['3','4']
+    };
 
-  document.getElementById('energia').innerText = "Energía: " + energiaActual();
-  document.getElementById('agencia').innerText = "Agencia sugerida: " + agenciaPorNumero(n);
+    function generarTradicional() {
+      const nro = document.getElementById('inputTradicional').value;
+      if(nro.length !== 4) { alert('Ingresá un número válido de 4 cifras'); return; }
 
-  let html = '';
-  jugadas.forEach((j,i)=>{
-    const cuaterno = j.join('');
-    const terno = j.slice(1).join('');
-    const ambos = j.slice(2).join('');
-    html += `<div class='card'><h3>Jugada Tesla ${i+1}</h3>`+
-            `<div class='line'>Cuaterno: ${cuaterno}</div>`+
-            `<div class='line'>Terno: ${terno}</div>`+
-            `<div class='line'>Ambos: ${ambos}</div></div>`;
-  });
-  document.getElementById('resultado').innerHTML = html;
-}
-
-// Poseada Correntina
-function generarPoseada(){
-  let raw = document.getElementById('poseadaInput').value.split(',').map(v=>v.trim());
-  let valores = [];
-
-  raw.forEach(v => {
-    if(v!=="" && /^\d{1,2}$/.test(v)){
-      let n = parseInt(v);
-      if(n>=0 && n<=99){
-        valores.push(n.toString().padStart(2,'0'));
+      let jugadas = [];
+      for(let i=0; i<2; i++) {
+        let cuaterno = '';
+        let terno = '';
+        let ambos = '';
+        for(let j=0; j<4; j++) {
+          let nums = tablaTesla[parseInt(nro[j])];
+          cuaterno += nums[i%2];
+          if(j>0) terno += nums[i%2];
+          if(j>2) ambos += nums[i%2];
+        }
+        let energia = ['☀️ Mañana', '🌆 Tarde', '🌙 Noche'][i%3];
+        jugadas.push({cuaterno, terno, ambos, energia});
       }
+
+      let html = '';
+      jugadas.forEach((j, idx)=>{
+        html += `<div class="resultado">
+          <strong>Jugada ${idx+1}</strong><br>
+          Cuaterno: <span>${j.cuaterno}</span> (${j.energia})<br>
+          Terno: <span>${j.terno}</span> (${j.energia})<br>
+          Ambos: <span>${j.ambos}</span> (${j.energia})
+        </div>`;
+      });
+      document.getElementById('resultadosTradicional').innerHTML = html;
     }
-  });
 
-  while(valores.length < 10){
-    let r = Math.floor(Math.random()*100).toString().padStart(2,'0');
-    if(!valores.includes(r)) valores.push(r);
-  }
-  valores = valores.slice(0,10);
+    function generarPoseada() {
+      const input = document.getElementById('inputPoseada').value.replace(/\D/g,'');
+      if(input.length !== 20) { alert('Ingresá 10 números de 2 cifras cada uno (20 dígitos)'); return; }
 
-  let pool = [];
-  valores.forEach(n => {
-    let d = parseInt(n[0]);
-    pool.push(tesla[d][0]);
-    pool.push(tesla[d][1]);
-  });
+      let nums = [];
+      for(let i=0;i<10;i++) nums.push(input.substr(i*2,2));
 
-  let unicos = [...new Set(pool.map(n=>n.toString().padStart(2,'0')))]
-  let principal = unicos.slice(0,5);
-  let respaldo = unicos.slice(5,10);
+      let jugadas = [];
+      for(let i=0;i<2;i++) {
+        let cuaterno = nums[i]+nums[i+1];
+        let terno = nums[i+1];
+        let ambos = nums[i+1].substr(1);
+        jugadas.push({cuaterno, terno, ambos});
+      }
 
-  document.getElementById('poseadaResultado').innerHTML = `<h3>Poseada Correntina</h3>`+
-    `<div class='line'>Principal: ${principal.join(' - ')}</div>`+
-    `<div class='line'>Respaldo: ${respaldo.join(' - ')}</div>`;
-}
-</script></body>
+      let html = '';
+      jugadas.forEach((j, idx)=>{
+        html += `<div class="resultado">
+          <strong>Jugada ${idx+1}</strong><br>
+          Cuaterno: <span>${j.cuaterno}</span><br>
+          Terno: <span>${j.terno}</span><br>
+          Ambos: <span>${j.ambos}</span>
+        </div>`;
+      });
+
+      document.getElementById('resultadosPoseada').innerHTML = html;
+    }
+  </script>
+</body>
 </html>

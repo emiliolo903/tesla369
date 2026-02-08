@@ -1,72 +1,127 @@
-<!DOCTYPE html><html lang="es">
+<!DOCTYPE html>
+<html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Quiniela Tesla</title>
-  <style>
-    body { font-family: Arial, sans-serif; background:#111; color:#eee; padding:20px; }
-    h1 { color:#00ffcc; }
-    .box { border:1px solid #444; padding:15px; margin-bottom:15px; border-radius:8px; }
-    button { padding:10px 15px; font-size:16px; cursor:pointer; }
-    .result { font-size:18px; margin-top:10px; }
-  </style>
+<meta charset="UTF-8">
+<title>Tesla Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#111;
+  color:#fff;
+  text-align:center;
+  padding:15px;
+}
+h1{color:#00ffcc}
+textarea,button{
+  width:100%;
+  max-width:420px;
+  margin:10px auto;
+  display:block;
+  padding:10px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+}
+button{
+  background:#00ffcc;
+  font-weight:bold;
+  cursor:pointer;
+}
+.resultado{
+  margin-top:15px;
+  font-size:18px;
+  color:#00ffcc;
+}
+.extra{
+  font-size:14px;
+  color:#aaa;
+  margin-top:5px;
+}
+</style>
 </head>
-<body><h1>Quiniela – Método Tesla</h1><div class="box">
-  <label>Ingresá número base:</label><br>
-  <input type="number" id="base" />
-  <button onclick="generar()">Generar jugadas</button>
-</div><div class="box">
-  <strong>Energía actual:</strong> <span id="energia"></span><br>
-  <strong>Horario sugerido:</strong> <span id="horario"></span><br>
-  <strong>Agencia sugerida:</strong> <span id="agencia"></span>
-</div><div class="box">
-  <h3>Resultados</h3>
-  <div id="salida" class="result"></div>
-</div><script>
-// Tabla Tesla FIJA
-const tablaTesla = [
-  [3,8,0],
-  [5,2,7],
-  [1,0,0],
-  [8,3,0]
-];
 
-function calcularEnergia(num) {
-  const suma = num.split('').reduce((a,b)=>a+parseInt(b),0);
-  if (suma <= 9) return 'MAÑANA';
-  if (suma <= 18) return 'TARDE';
-  return 'NOCHE';
+<body>
+
+<h1>⚡ Tesla Pro</h1>
+<p>Método Tesla – Quiniela Tradicional</p>
+
+<h2>Generador Tesla</h2>
+<textarea id="base" placeholder="Ej: 3518"></textarea>
+<button onclick="generar()">Generar</button>
+
+<div class="resultado" id="r1"></div>
+<div class="resultado" id="r2"></div>
+
+<script>
+// 🔒 TABLA TESLA (TU MÉTODO REAL)
+const tesla = {
+  0:["0","0"],
+  1:["0","0"],
+  2:["5","7"],
+  3:["8","0"],
+  4:["6","9"],
+  5:["2","7"],
+  6:["4","9"],
+  7:["5","2"],
+  8:["3","0"],
+  9:["3","4"]
+};
+
+// 🔋 energía → mañana / tarde / noche
+function energiaHorario(num){
+  let s = num.split('').reduce((a,b)=>a+parseInt(b),0);
+  while(s>9){
+    s = s.toString().split('').reduce((a,b)=>a+parseInt(b),0);
+  }
+  if(s<=3) return "🌅 Mañana";
+  if(s<=6) return "🌆 Tarde";
+  return "🌙 Noche";
 }
 
-function sugerirAgencia(energia) {
-  if (energia === 'MAÑANA') return 'Centro';
-  if (energia === 'TARDE') return 'Zona Comercial';
-  return 'Terminal / Nocturna';
+// 🏦 agencia según horario
+function agenciaSegun(h){
+  if(h.includes("Mañana")) return "Correntina / Ciudad";
+  if(h.includes("Tarde")) return "Bonaerense / Santa Fe";
+  return "Córdoba / Entre Ríos / Chaco";
 }
 
-function generar() {
-  const base = document.getElementById('base').value;
-  if (!base) return;
+function generar(){
+  let n = base.value.replace(/\D/g,'');
+  if(n.length < 4){
+    r1.innerHTML = "Ingresá mínimo 4 dígitos";
+    r2.innerHTML = "";
+    return;
+  }
 
-  const energia = calcularEnergia(base);
-  document.getElementById('energia').innerText = energia;
+  let j1="", j2="";
+  for(let d of n){
+    j1 += tesla[d][0];
+    j2 += tesla[d][1];
+  }
 
-  document.getElementById('horario').innerText = energia;
-  document.getElementById('agencia').innerText = sugerirAgencia(energia);
+  let h1 = energiaHorario(j1);
+  let h2 = energiaHorario(j2);
 
-  // Jugadas Tesla
-  let ternos = [];
-  let cuaternos = [];
+  r1.innerHTML =
+    "<b>Jugada Tesla 1</b><br>"+
+    "Cuaterno: "+j1+
+    "<br>Terno: "+j1.slice(1,4)+
+    "<br>Ambos: "+j1.slice(-2)+
+    "<div class='extra'>Energía: "+h1+
+    " · Agencia: "+agenciaSegun(h1)+"</div>";
 
-  tablaTesla.forEach(fila => {
-    const terno = `${fila[0]}${fila[1]}${fila[2]}`;
-    ternos.push(terno);
-    cuaternos.push(terno + fila[0]); // extensión Tesla
-  });
-
-  document.getElementById('salida').innerHTML = `
-    <strong>Ternos:</strong> ${ternos.join(' - ')}<br>
-    <strong>Cuaternos:</strong> ${cuaternos.join(' - ')}
-  `;
+  r2.innerHTML =
+    "<b>Jugada Tesla 2</b><br>"+
+    "Cuaterno: "+j2+
+    "<br>Terno: "+j2.slice(1,4)+
+    "<br>Ambos: "+j2.slice(-2)+
+    "<div class='extra'>Energía: "+h2+
+    " · Agencia: "+agenciaSegun(h2)+"</div>";
 }
-</script></body>
+</script>
+
+</body>
 </html>

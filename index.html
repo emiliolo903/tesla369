@@ -2,182 +2,140 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Tesla Pro – Quiniela Tradicional</title>
+<title>Tesla Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body{
   margin:0;
-  font-family:Arial;
+  font-family:Arial, sans-serif;
   background:#111;
   color:#fff;
   text-align:center;
-  padding:15px
+  padding:15px;
 }
 h1{color:#00ffcc}
-h2{color:#ffd700;margin-top:25px}
-textarea, select, input, button{
+textarea,button{
   width:100%;
   max-width:420px;
-  margin:8px auto;
+  margin:10px auto;
   display:block;
   padding:10px;
   font-size:16px;
   border-radius:8px;
-  border:none
+  border:none;
 }
 button{
   background:#00ffcc;
   font-weight:bold;
-  cursor:pointer
+  cursor:pointer;
 }
 .resultado{
   margin-top:10px;
   font-size:18px;
-  color:#00ffcc
+  color:#00ffcc;
 }
-.historial{
-  margin-top:20px;
-  font-size:14px;
-  text-align:left;
-  max-width:420px;
-  margin-left:auto;
-  margin-right:auto;
-  background:#000;
-  padding:10px;
-  border-radius:8px
+#energiaBox{
+  background:#222;
+  border:2px solid #00ffcc;
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:15px;
 }
-hr{border:0;border-top:1px solid #333;margin:10px 0}
 </style>
 </head>
 
 <body>
 
+<!-- ENERGÍA + AGENCIAS ARRIBA -->
+<div id="energiaBox">
+  <div id="energiaTexto"></div>
+  <div id="agenciasTexto"></div>
+</div>
+
 <h1>⚡ Tesla Pro</h1>
 <p>Quiniela Tradicional – Método Tesla</p>
 
-<!-- GENERADOR TESLA -->
-<h2>Generador Tesla</h2>
-<textarea id="base" placeholder="Ej: 5 2 7 5 2 7 6 4 9 7"></textarea>
-<button onclick="generarTesla()">Generar</button>
+<textarea id="base" placeholder="Ingresá 4 cifras (ej: 3518)"></textarea>
+<button onclick="generar()">Generar jugadas</button>
 
-<div class="resultado" id="salida"></div>
-
-<!-- REGISTRO -->
-<h2>📊 Registrar resultado oficial</h2>
-
-<select id="agencia">
-  <option>Corrientes</option>
-  <option>Nacional</option>
-  <option>Provincia</option>
-  <option>Santa Fe</option>
-  <option>Córdoba</option>
-  <option>Entre Ríos</option>
-  <option>Chaco</option>
-</select>
-
-<select id="horario">
-  <option>Mañana</option>
-  <option>Tarde</option>
-  <option>Noche</option>
-</select>
-
-<input id="numeroOficial" placeholder="Número que salió">
-
-<select id="tipo">
-  <option>Ambos</option>
-  <option>Terno</option>
-  <option>Cuaterno</option>
-</select>
-
-<button onclick="guardarResultado()">Guardar resultado</button>
-
-<!-- HISTORIAL -->
-<h2>📈 Historial</h2>
-<div class="historial" id="historial"></div>
+<div class="resultado" id="r1"></div>
+<div class="resultado" id="r2"></div>
 
 <script>
-// ===== UTILIDADES =====
-function soloNumeros(t){
-  return t.replace(/\D/g,'').split('')
+// 🔢 TABLA TESLA FIJA (NO SE TOCA)
+const tablaTesla = {
+  0:["0","9"],
+  1:["1","8"],
+  2:["2","7"],
+  3:["3","6"],
+  4:["4","5"],
+  5:["5","4"],
+  6:["6","3"],
+  7:["7","2"],
+  8:["8","1"],
+  9:["9","0"]
+};
+
+// ⏰ ENERGÍA AUTOMÁTICA
+function energiaActual(){
+  const h = new Date().getHours();
+  if(h>=6 && h<12) return "🌅 Mañana";
+  if(h>=12 && h<18) return "🌇 Tarde";
+  return "🌙 Noche";
 }
 
-// ===== MÉTODO TESLA (igual que antes) =====
-let ultimo = {}
+// 🎯 AGENCIAS SEGÚN ENERGÍA
+function agenciasPorEnergia(e){
+  if(e.includes("Mañana")) return ["Correntina","Entre Ríos"];
+  if(e.includes("Tarde")) return ["Ciudad","Santa Fe"];
+  return ["Bonaerense","Córdoba","Chaco"];
+}
 
-function generarTesla(){
-  let n = soloNumeros(base.value)
-  if(n.length < 4){
-    salida.innerHTML = "Ingresá más números"
-    return
+// MOSTRAR ARRIBA
+function mostrarEnergia(){
+  const e = energiaActual();
+  const a = agenciasPorEnergia(e);
+  energiaTexto.innerHTML = "⏰ <b>Energía actual:</b> "+e;
+  agenciasTexto.innerHTML = "🎯 <b>Agencias sugeridas:</b><br>"+a.join(" · ");
+}
+
+// ⚡ GENERADOR TESLA TRADICIONAL (2 JUGADAS)
+function generar(){
+  let v = base.value.replace(/\D/g,'');
+  if(v.length<4){
+    r1.innerHTML="Ingresá 4 cifras";
+    r2.innerHTML="";
+    return;
   }
 
-  let cuaterno = n.slice(0,4).join('')
-  let terno = cuaterno.slice(1)
-  let ambos = cuaterno.slice(2)
-
-  // horario sugerido simple por vibración
-  let suma = cuaterno.split('').reduce((a,b)=>a+Number(b),0)
-  let horario = suma % 3 === 0 ? "Mañana" : suma % 3 === 1 ? "Tarde" : "Noche"
-
-  ultimo = {cuaterno, terno, ambos}
-
-  salida.innerHTML =
-    "Cuaterno: "+cuaterno+
-    "<br>Terno: "+terno+
-    "<br>Ambos: "+ambos+
-    "<br>🕒 Energía: "+horario
-}
-
-// ===== REGISTRO Y MEMORIA =====
-function guardarResultado(){
-  if(!ultimo.cuaterno){
-    alert("Primero generá con Tesla")
-    return
+  let j1="", j2="";
+  for(let d of v){
+    j1 += tablaTesla[d][0];
+    j2 += tablaTesla[d][1];
   }
 
-  let data = {
-    fecha: new Date().toLocaleString(),
-    agencia: agencia.value,
-    horario: horario.value,
-    numero: numeroOficial.value,
-    tipo: tipo.value,
-    acierto: calcularAcierto(numeroOficial.value)
-  }
+  const energia = energiaActual();
 
-  let hist = JSON.parse(localStorage.getItem("teslaHistorial") || "[]")
-  hist.push(data)
-  localStorage.setItem("teslaHistorial", JSON.stringify(hist))
-  mostrarHistorial()
+  r1.innerHTML = `
+  <b>Jugada Tesla 1</b><br>
+  Cuaterno: ${j1}<br>
+  Terno: ${j1.slice(0,3)}<br>
+  Ambos: ${j1.slice(-2)}<br>
+  Energía: ${energia}
+  `;
+
+  r2.innerHTML = `
+  <b>Jugada Tesla 2</b><br>
+  Cuaterno: ${j2}<br>
+  Terno: ${j2.slice(0,3)}<br>
+  Ambos: ${j2.slice(-2)}<br>
+  Energía: ${energia}
+  `;
 }
 
-// ===== COMPARACIÓN =====
-function calcularAcierto(num){
-  if(num === ultimo.cuaterno) return "✅ Cuaterno"
-  if(num === ultimo.terno) return "✅ Terno"
-  if(num === ultimo.ambos) return "✅ Ambos"
-  return "❌"
-}
-
-// ===== MOSTRAR HISTORIAL =====
-function mostrarHistorial(){
-  let hist = JSON.parse(localStorage.getItem("teslaHistorial") || "[]")
-  if(hist.length === 0){
-    historial.innerHTML = "Sin registros todavía"
-    return
-  }
-
-  historial.innerHTML = hist.map(h=>`
-    <b>${h.agencia}</b> – ${h.horario}<br>
-    Número: ${h.numero}<br>
-    Tipo: ${h.tipo}<br>
-    Resultado: ${h.acierto}<br>
-    <small>${h.fecha}</small>
-    <hr>
-  `).join('')
-}
-
-mostrarHistorial()
+// ejecutar al abrir
+mostrarEnergia();
 </script>
 
 </body>

@@ -2,47 +2,103 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>App Quiniela – Método Tesla</title>
+<title>Quiniela Tradicional – Método Tesla Original</title>
 
 <style>
-body {
+body{
   font-family: Arial, sans-serif;
-  background: #111;
-  color: #eee;
-  padding: 15px;
+  background:#111;
+  color:#eee;
+  padding:15px;
 }
-h2, h3 {
-  color: #00ffcc;
+h2,h3{ color:#00ffcc; }
+.box{
+  border:1px solid #444;
+  padding:12px;
+  margin-bottom:12px;
 }
-.box {
-  border: 1px solid #444;
-  padding: 12px;
-  margin-bottom: 12px;
+button{
+  padding:8px 12px;
+  cursor:pointer;
 }
-button {
-  padding: 8px 12px;
-  margin-top: 6px;
-  cursor: pointer;
-}
-.result {
-  background: #222;
-  padding: 10px;
-  margin-top: 8px;
+.result{
+  background:#222;
+  padding:10px;
+  margin-top:8px;
 }
 </style>
 </head>
 
 <body>
 
-<h2>📊 APP QUINIELA – MÉTODO TESLA</h2>
+<h2>📊 QUINIELA TRADICIONAL – MÉTODO TESLA (ORIGINAL)</h2>
 
 <div class="box">
-  <h3>🔢 Ingresar número base</h3>
-  <input id="base" placeholder="Ej: 3518">
+  <h3>🔢 Ingresar número (4 cifras)</h3>
+  <input id="base" maxlength="4" placeholder="Ej: 3518">
   <br>
   <button onclick="generar()">Generar</button>
 </div>
 
-<div class="box" id="energiaBox"></div>
+<div class="box" id="resultado"></div>
 
-<div class="box"
+<script>
+// Validar 4 cifras exactas
+function validar(n){
+  return /^\d{4}$/.test(n);
+}
+
+// MÉTODO TESLA SEGÚN TU TABLA
+function metodoTeslaOriginal(n){
+  let a = n.split("").map(Number);
+
+  // pares como en tu ejemplo
+  let fila1 = [a[0], a[3], (a[0]+a[3])%10];
+  let fila2 = [a[1], a[2], Math.abs(a[1]-a[2])];
+  let fila3 = [a[2], a[1], (a[2]+a[1])%10];
+  let fila4 = [a[3], a[0], Math.abs(a[3]-a[0])];
+
+  // ternos EXACTOS como vos los usás
+  let terno1 = `${fila1[2]}${fila2[2]}${fila3[2]}`;
+  let terno2 = `${fila2[2]}${fila3[2]}${fila4[2]}`;
+
+  // ambos
+  let ambos1 = `${fila1[2]}${fila2[2]}`;
+  let ambos2 = `${fila3[2]}${fila4[2]}`;
+
+  // cuaterno
+  let cuaterno = `${fila1[2]}${fila2[2]}${fila3[2]}${fila4[2]}`;
+
+  return { fila1, fila2, fila3, fila4, terno1, terno2, ambos1, ambos2, cuaterno };
+}
+
+function generar(){
+  let base = document.getElementById("base").value;
+
+  if(!validar(base)){
+    document.getElementById("resultado").innerHTML =
+      "❌ Ingresá exactamente 4 cifras";
+    return;
+  }
+
+  let t = metodoTeslaOriginal(base);
+
+  document.getElementById("resultado").innerHTML = `
+    <h3>📐 Tabla Tesla</h3>
+    ${t.fila1[0]} &nbsp; ${t.fila1[1]} / ${t.fila1[2]}<br>
+    ${t.fila2[0]} &nbsp; ${t.fila2[1]} / ${t.fila2[2]}<br>
+    ${t.fila3[0]} &nbsp; ${t.fila3[1]} / ${t.fila3[2]}<br>
+    ${t.fila4[0]} &nbsp; ${t.fila4[1]} / ${t.fila4[2]}<br>
+
+    <div class="result">
+      🎯 Terno 1: <b>${t.terno1}</b><br>
+      🎯 Terno 2: <b>${t.terno2}</b><br>
+      🔢 Ambos: <b>${t.ambos1}</b> – <b>${t.ambos2}</b><br>
+      🔥 Cuaterno: <b>${t.cuaterno}</b>
+    </div>
+  `;
+}
+</script>
+
+</body>
+</html>

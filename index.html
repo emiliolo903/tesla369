@@ -2,74 +2,90 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>App Quiniela – Método Tesla</title>
+<title>Quiniela Tradicional – Método Tesla</title>
+
 <style>
-body { font-family: Arial; background:#111; color:#eee; padding:15px }
-h2,h3 { color:#00ffcc }
-.box { border:1px solid #444; padding:10px; margin:10px 0 }
-button { padding:8px; margin-top:5px }
-.result { background:#222; padding:8px; margin-top:5px }
+body {
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: #eee;
+  padding: 15px;
+}
+h2, h3 {
+  color: #00ffcc;
+}
+.box {
+  border: 1px solid #444;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+button {
+  padding: 8px 12px;
+  margin-top: 6px;
+  cursor: pointer;
+}
+.result {
+  background: #222;
+  padding: 10px;
+  margin-top: 8px;
+}
 </style>
 </head>
 
 <body>
 
-<h2>📊 APP QUINIELA – MÉTODO TESLA</h2>
+<h2>📊 QUINIELA TRADICIONAL – MÉTODO TESLA</h2>
 
 <div class="box">
-<h3>🔢 Ingresar número base</h3>
-<input id="base" placeholder="Ej: 3518">
-<br>
-<button onclick="generar()">Generar</button>
+  <h3>🔢 Ingresar número base</h3>
+  <input id="base" placeholder="Ej: 3518">
+  <br>
+  <button onclick="generar()">Generar jugadas</button>
 </div>
 
 <div class="box" id="energiaBox"></div>
 
 <div class="box">
-<h3>🎯 Quiniela Tradicional</h3>
-<div id="tradicional"></div>
-</div>
-
-<div class="box">
-<h3>🌙 Quiniela Poseada Correntina</h3>
-<div id="poseada"></div>
+  <h3>🎯 Jugadas generadas</h3>
+  <div id="tradicional"></div>
 </div>
 
 <script>
+// ENERGÍA
 function energiaPorNumero(n){
-  let s = n.split('').reduce((a,b)=>a+parseInt(b),0);
-  if(s%3===0) return "MAÑANA";
-  if(s%3===1) return "TARDE";
+  let suma = n.split('').reduce((a,b)=>a+parseInt(b),0);
+  if(suma % 3 === 0) return "MAÑANA";
+  if(suma % 3 === 1) return "TARDE";
   return "NOCHE";
 }
 
+// AGENCIA SUGERIDA (solo informativa)
 function agenciaPorEnergia(e){
-  if(e==="MAÑANA") return "CORRIENTES / CHACO";
-  if(e==="TARDE") return "SANTA FE / ENTRE RÍOS";
+  if(e === "MAÑANA") return "CORRIENTES / CHACO";
+  if(e === "TARDE") return "SANTA FE / ENTRE RÍOS";
   return "BUENOS AIRES / CÓRDOBA";
 }
 
+// MÉTODO TESLA (FIJO)
 function metodoTesla(n){
   let a = n.split('').map(Number);
   return [
-    (a[0]+a[1])%10,
-    (a[2]+a[3])%10,
-    Math.abs(a[0]-a[3]),
-    Math.abs(a[1]-a[2])
+    (a[0] + a[1]) % 10,
+    (a[2] + a[3]) % 10,
+    Math.abs(a[0] - a[3]),
+    Math.abs(a[1] - a[2])
   ];
 }
 
-function generarTernoCuaterno(t){
+// GENERAR TERNO / CUATERNO
+function generarJugadas(t){
   let terno1 = `${t[1]}${t[0]}${t[2]}`;
   let terno2 = `${t[3]}${t[0]}${t[0]}`;
   let cuaterno = `${t[0]}${t[1]}${t[2]}${t[3]}`;
   return { terno1, terno2, cuaterno };
 }
 
-function diaHoy(){
-  return new Date().getDay(); // 2 martes, 4 jueves, 5 viernes
-}
-
+// FUNCIÓN PRINCIPAL
 function generar(){
   let base = document.getElementById("base").value;
   if(base.length < 3) return;
@@ -77,44 +93,19 @@ function generar(){
   let energia = energiaPorNumero(base);
   let agencia = agenciaPorEnergia(energia);
   let tesla = metodoTesla(base);
-  let jugadas = generarTernoCuaterno(tesla);
+  let jugadas = generarJugadas(tesla);
 
   document.getElementById("energiaBox").innerHTML = `
-    <h3>⚡ Energía detectada</h3>
+    <h3>⚡ Energía del número</h3>
     Energía: <b>${energia}</b><br>
     Agencia sugerida: <b>${agencia}</b>
   `;
 
-  // QUINIELA TRADICIONAL (LIMPIA, SIN PEGÓ)
   document.getElementById("tradicional").innerHTML = `
     <div class="result">
-      Terno 1: ${jugadas.terno1}<br>
-      Terno 2: ${jugadas.terno2}<br>
-      Cuaterno: ${jugadas.cuaterno}
-    </div>
-  `;
-
-  // POSEADA CORRENTINA
-  let d = diaHoy();
-  let habilitado = (d===2 || d===4 || d===5);
-
-  if(!habilitado){
-    document.getElementById("poseada").innerHTML =
-      "❌ Hoy no hay sorteo de Quiniela Poseada Correntina";
-    return;
-  }
-
-  let jugarDos = (d===5 || (d===4 && energia==="NOCHE"));
-
-  let principal = tesla.map(n => ("0"+n).slice(-2));
-  let respaldo = principal.map(n => ("0"+((parseInt(n)+3)%100)).slice(-2));
-
-  document.getElementById("poseada").innerHTML = `
-    <div class="result">
-      Sorteo: NOCTURNA<br>
-      Recomendación: ${jugarDos ? "PRINCIPAL + RESPALDO" : "PRINCIPAL"}<br><br>
-      Principal: ${principal.join(" - ")}<br>
-      ${jugarDos ? `Respaldo: ${respaldo.join(" - ")}` : ""}
+      Terno 1: <b>${jugadas.terno1}</b><br>
+      Terno 2: <b>${jugadas.terno2}</b><br>
+      Cuaterno: <b>${jugadas.cuaterno}</b>
     </div>
   `;
 }

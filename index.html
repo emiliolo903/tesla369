@@ -60,7 +60,7 @@ button{
 <div id="salida"></div>
 
 <script>
-// TABLA TESLA (FIJA)
+// 🔒 TABLA TESLA (TU MÉTODO REAL)
 const tablaTesla = {
   0:[0,0], 1:[0,0],
   2:[5,7], 3:[8,0],
@@ -69,33 +69,35 @@ const tablaTesla = {
   8:[3,0], 9:[3,4]
 };
 
-// raíz digital
+// 🔋 raíz digital
 function energia(num){
   let s = num.toString().split('').reduce((a,b)=>a+parseInt(b),0);
-  while(s>9) s = s.toString().split('').reduce((a,b)=>a+parseInt(b),0);
+  while(s>9){
+    s = s.toString().split('').reduce((a,b)=>a+parseInt(b),0);
+  }
   return s;
 }
 
-// energía → franja
+// ⏰ energía → franja
 function franja(e){
   if(e<=3) return "🌅 Mañana";
   if(e<=6) return "🌆 Tarde";
   return "🌙 Noche";
 }
 
-// franja → agencias
+// 🏦 franja → agencias
 function agencias(f){
   if(f.includes("Mañana")) return "Correntina / Ciudad";
   if(f.includes("Tarde")) return "Bonaerense / Santa Fe";
   return "Córdoba / Entre Ríos / Chaco";
 }
 
-// aplica tabla tesla a un número
+// ⚡ aplicar Tesla (PRIMERA columna)
 function aplicarTesla(num){
   return num.toString().split('').map(d=>tablaTesla[d][0]).join('');
 }
 
-// arma bloque cuaterno/terno/ambo
+// 📦 bloque de salida
 function bloque(titulo,num){
   let e = energia(num);
   let f = franja(e);
@@ -112,37 +114,38 @@ function bloque(titulo,num){
 
 function generar(){
   let b = base.value.replace(/\D/g,'');
-  if(b.length<4){
+  if(b.length < 4){
     salida.innerHTML = "<p>Ingresá mínimo 4 dígitos</p>";
     return;
   }
 
-  // Jugada 1
-  let j1 = b.slice(0,4);
-  let t1 = aplicarTesla(j1).slice(0,3);
-  let a1 = aplicarTesla(j1).slice(0,2);
+  // ===== JUGADA TESLA 1 =====
+  let cuat1 = aplicarTesla(b.slice(0,4));
+  let tern1 = cuat1.slice(0,3);
+  let amb1  = cuat1.slice(-2);
 
-  // Jugada 2 (invertida)
-  let j2 = b.split('').reverse().join('');
-  let t2 = aplicarTesla(j2).slice(0,3);
-  let a2 = aplicarTesla(j2).slice(0,2);
+  // ===== JUGADA TESLA 2 (INVERTIDA) =====
+  let inv = b.split('').reverse().join('');
+  let cuat2 = aplicarTesla(inv);
+  let tern2 = cuat2.slice(0,3);
+  let amb2  = cuat2.slice(-2);
 
   salida.innerHTML = `
     <div class="box">
       <h2>🔢 Jugada Tesla 1</h2>
-      ${bloque("Cuaterno",j1)}
-      ${bloque("Terno",t1)}
-      ${bloque("Ambos",a1)}
+      ${bloque("Cuaterno",cuat1)}
+      ${bloque("Terno",tern1)}
+      ${bloque("Ambos",amb1)}
     </div>
 
     <div class="box">
       <h2>🔢 Jugada Tesla 2</h2>
-      ${bloque("Cuaterno",j2)}
-      ${bloque("Terno",t2)}
-      ${bloque("Ambos",a2)}
+      ${bloque("Cuaterno",cuat2)}
+      ${bloque("Terno",tern2)}
+      ${bloque("Ambos",amb2)}
     </div>
 
-    <p class="small">Energía y agencia calculadas automáticamente según método Tesla</p>
+    <p class="small">Método Tesla aplicado correctamente a todas las jugadas</p>
   `;
 }
 </script>

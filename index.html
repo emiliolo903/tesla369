@@ -9,13 +9,14 @@
     button { background:#00ffcc; border:none; cursor:pointer; }
     .box { background:#1b1b1b; padding:15px; margin-top:15px; border-radius:8px; }
     .ok { color:#7CFC00; }
+    .info { color:#ffd54f; }
   </style>
 </head>
 <body><h1>Quiniela Tradicional – Método Tesla</h1><p>Ingresá un número de <b>4 cifras</b>:</p>
 <input type="text" id="numero" maxlength="4" placeholder="Ej: 3518" />
 <br>
 <button onclick="generar()">Generar Jugadas Tesla</button><div id="resultado" class="box"></div><script>
-// TABLA TESLA FIJA (NO SE MODIFICA)
+// TABLA TESLA FIJA (SEGÚN TU FOTO)
 const tesla = {
   0: ['0','0'],
   1: ['0','0'],
@@ -28,6 +29,21 @@ const tesla = {
   8: ['3','0'],
   9: ['3','4']
 };
+
+// ENERGÍA SEGÚN SUMA DEL CUATERNO
+function calcularEnergia(cuaterno) {
+  const suma = cuaterno.split('').reduce((a,b)=>a+parseInt(b),0);
+  if (suma <= 12) return 'MAÑANA';
+  if (suma <= 22) return 'TARDE';
+  return 'NOCHE';
+}
+
+// AGENCIA SUGERIDA SEGÚN ENERGÍA
+function agenciaPorEnergia(e) {
+  if (e === 'MAÑANA') return 'Agencias céntricas / barrios tranquilos';
+  if (e === 'TARDE') return 'Agencias de alto movimiento';
+  return 'Agencias nocturnas / avenidas principales';
+}
 
 function generar() {
   const num = document.getElementById('numero').value;
@@ -51,20 +67,26 @@ function generar() {
   const terno2 = j2.slice(1);
   const ambos2 = j2.slice(2);
 
+  const energia1 = calcularEnergia(j1);
+  const energia2 = calcularEnergia(j2);
+
   res.innerHTML = `
     <h3 class="ok">JUGADA TESLA 1</h3>
     Cuaterno: <b>${j1}</b><br>
     Terno: <b>${terno1}</b><br>
-    Ambos: <b>${ambos1}</b>
+    Ambos: <b>${ambos1}</b><br>
+    <span class="info">Energía: ${energia1}</span><br>
+    <span class="info">Agencia sugerida: ${agenciaPorEnergia(energia1)}</span>
 
     <hr>
 
     <h3 class="ok">JUGADA TESLA 2</h3>
     Cuaterno: <b>${j2}</b><br>
     Terno: <b>${terno2}</b><br>
-    Ambos: <b>${ambos2}</b>
+    Ambos: <b>${ambos2}</b><br>
+    <span class="info">Energía: ${energia2}</span><br>
+    <span class="info">Agencia sugerida: ${agenciaPorEnergia(energia2)}</span>
   `;
 }
 </script></body>
 </html>
-  

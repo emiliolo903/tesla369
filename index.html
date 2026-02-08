@@ -1,63 +1,72 @@
 <!DOCTYPE html><html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Tesla Pro Energía</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-body{margin:0;font-family:Arial;background:#0f0f0f;color:#fff;text-align:center;padding:15px}
-h1{color:#00ffcc}
-textarea,button{width:100%;max-width:420px;margin:10px auto;display:block;padding:10px;font-size:16px;border-radius:8px;border:none}
-button{background:#00ffcc;font-weight:bold;cursor:pointer}
-.box{border:1px solid #00ffcc;border-radius:10px;padding:10px;margin:10px auto;max-width:420px}
-.titulo{color:#00ffcc;font-weight:bold}
-</style>
+  <meta charset="UTF-8" />
+  <title>Quiniela Tesla</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#111; color:#eee; padding:20px; }
+    h1 { color:#00ffcc; }
+    .box { border:1px solid #444; padding:15px; margin-bottom:15px; border-radius:8px; }
+    button { padding:10px 15px; font-size:16px; cursor:pointer; }
+    .result { font-size:18px; margin-top:10px; }
+  </style>
 </head>
-<body><h1>⚡ Tesla Pro+</h1>
-<p>Método Tesla · Energía · Agencia</p><textarea id="base" placeholder="Ej: 3518"></textarea><button onclick="generar()">Generar</button>
-
-<div class="box" id="energiaBox">
-<div class="titulo">Energía Actual</div>
-<div id="energia"></div>
-<div class="titulo">Agencia Sugerida</div>
-<div id="agencia"></div>
-</div><div class="box" id="j1"></div>
-<div class="box" id="j2"></div><div class="box" id="stats">
-<div class="titulo">Estadísticas</div>
-<div id="contador">Jugadas: 0</div>
+<body><h1>Quiniela – Método Tesla</h1><div class="box">
+  <label>Ingresá número base:</label><br>
+  <input type="number" id="base" />
+  <button onclick="generar()">Generar jugadas</button>
+</div><div class="box">
+  <strong>Energía actual:</strong> <span id="energia"></span><br>
+  <strong>Horario sugerido:</strong> <span id="horario"></span><br>
+  <strong>Agencia sugerida:</strong> <span id="agencia"></span>
+</div><div class="box">
+  <h3>Resultados</h3>
+  <div id="salida" class="result"></div>
 </div><script>
-const tesla={
-0:["0","0"],1:["0","0"],2:["5","7"],3:["8","0"],4:["6","9"],5:["2","7"],6:["4","9"],7:["5","2"],8:["3","0"],9:["3","4"]};
+// Tabla Tesla FIJA
+const tablaTesla = [
+  [3,8,0],
+  [5,2,7],
+  [1,0,0],
+  [8,3,0]
+];
 
-const energias=["Caliente","Neutra","Fría"];
-const agencias=["Centro","Barrio","Terminal","Zona Norte","Zona Sur"];
-let total=0;
-
-function generar(){
- let n=base.value.replace(/\D/g,'');
- if(n.length<4) return;
-
- let j1="",j2="";
- for(let d of n){j1+=tesla[d][0];j2+=tesla[d][1];}
-
- let energia=energias[n%3];
- let agencia=agencias[n%agencias.length];
-
- document.getElementById('energia').innerHTML=energia;
- document.getElementById('agencia').innerHTML=agencia;
-
- j1Box(j1,1);
- j1Box(j2,2);
-
- total++;
- document.getElementById('contador').innerHTML="Jugadas: "+total;
+function calcularEnergia(num) {
+  const suma = num.split('').reduce((a,b)=>a+parseInt(b),0);
+  if (suma <= 9) return 'MAÑANA';
+  if (suma <= 18) return 'TARDE';
+  return 'NOCHE';
 }
 
-function j1Box(num,id){
- let box=document.getElementById(id==1?'j1':'j2');
- box.innerHTML="<div class='titulo'>Jugada Tesla "+id+"</div>"+
- "Cuaterno: "+num+
- "<br>Terno: "+num.slice(1,4)+
- "<br>Ambos: "+num.slice(-2);
+function sugerirAgencia(energia) {
+  if (energia === 'MAÑANA') return 'Centro';
+  if (energia === 'TARDE') return 'Zona Comercial';
+  return 'Terminal / Nocturna';
+}
+
+function generar() {
+  const base = document.getElementById('base').value;
+  if (!base) return;
+
+  const energia = calcularEnergia(base);
+  document.getElementById('energia').innerText = energia;
+
+  document.getElementById('horario').innerText = energia;
+  document.getElementById('agencia').innerText = sugerirAgencia(energia);
+
+  // Jugadas Tesla
+  let ternos = [];
+  let cuaternos = [];
+
+  tablaTesla.forEach(fila => {
+    const terno = `${fila[0]}${fila[1]}${fila[2]}`;
+    ternos.push(terno);
+    cuaternos.push(terno + fila[0]); // extensión Tesla
+  });
+
+  document.getElementById('salida').innerHTML = `
+    <strong>Ternos:</strong> ${ternos.join(' - ')}<br>
+    <strong>Cuaternos:</strong> ${cuaternos.join(' - ')}
+  `;
 }
 </script></body>
 </html>

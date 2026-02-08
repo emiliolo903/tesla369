@@ -58,9 +58,9 @@ button {
   <div id="energia" class="line"></div>
   <div id="agencia" class="line"></div>
   <div id="resultado"></div>  <h2>🎯 Quiniela Poseada Correntina</h2>
-  <input id="poseadaInput" placeholder="Ingresá 10 números separados por coma (00-99)" />
+  <input id="poseadaInput" placeholder="Ingresá 10 números separados por coma (00-99) o dejá vacío" />
   <button onclick="generarPoseada()">Generar Poseada</button>
-  <div id="poseadaResultado"></div>
+  <div id="poseadaResultado" class="card"></div>
 </div><script>
 const tesla = {0:[0,0],1:[0,0],2:[5,7],3:[8,0],4:[6,9],5:[2,7],6:[4,9],7:[5,2],8:[3,0],9:[3,4]};
 const agencias = ["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
@@ -105,12 +105,13 @@ function generarTradicional(){
 // Poseada Correntina
 function generarPoseada(){
   let valores = document.getElementById('poseadaInput').value.split(',').map(v=>v.trim()).filter(v=>v!=="" && !isNaN(v));
+
+  // Si está vacío, generar 10 números random
   if(valores.length !== 10){
-    alert('Ingresá exactamente 10 números válidos (00-99)');
-    return;
+    valores = Array.from({length:10},()=>Math.floor(Math.random()*100).toString().padStart(2,'0'));
   }
 
-  // Aplicar Tesla a cada número (solo primer dígito)
+  // Aplicar Tesla al primer dígito de cada número
   let pool = [];
   valores.forEach(n => {
     let num = n.padStart(2,'0');
@@ -119,16 +120,13 @@ function generarPoseada(){
     pool.push(tesla[d][1]);
   });
 
-  // Unicos y convertir a 2 cifras
   let unicos = [...new Set(pool.map(n=>n.toString().padStart(2,'0')))]
   let principal = unicos.slice(0,5);
   let respaldo = unicos.slice(5,10);
 
-  document.getElementById('poseadaResultado').innerHTML = `
-    <div class='card'><h3>Poseada Correntina</h3>
-    <div class='line'>Principal: ${principal.join(' - ')}</div>
-    <div class='line'>Respaldo: ${respaldo.join(' - ')}</div>
-    </div>`;
+  document.getElementById('poseadaResultado').innerHTML = `<h3>Poseada Correntina</h3>`+
+    `<div class='line'>Principal: ${principal.join(' - ')}</div>`+
+    `<div class='line'>Respaldo: ${respaldo.join(' - ')}</div>`;
 }
 </script></body>
 </html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Quiniela Tradicional – Tesla Dinámico con Energía y Agencia</title>
+<title>Quiniela Tesla Tradicional + Poseada Correntina</title>
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -37,6 +37,7 @@ button {
   font-weight: bold;
   cursor: pointer;
   color: #000;
+  margin-top: 8px;
 }
 .card {
   background: #1c1c1c;
@@ -45,10 +46,7 @@ button {
   border-radius: 10px;
   color: #fff;
 }
-.card h3 {
-  margin-top: 0;
-  color: #00ffd5;
-}
+.card h3 { color: #00ffd5; margin-top:0; }
 .line { margin: 6px 0; font-size: 16px; }
 </style>
 </head>
@@ -56,10 +54,13 @@ button {
 <div class="app">
   <h2>⚡ Quiniela Tradicional – Método Tesla</h2>
   <input id="numero" type="text" maxlength="4" placeholder="Ingresá 4 cifras o dejá vacío" />
-  <button onclick="generar()">Generar Jugadas</button>
-  <div id="energia" class="line" style="margin-top:10px;"></div>
-  <div id="agencia" class="line" style="margin-bottom:10px;"></div>
-  <div id="resultado"></div>
+  <button onclick="generarTradicional()">Generar Tradicional</button>
+  <div id="energia" class="line"></div>
+  <div id="agencia" class="line"></div>
+  <div id="resultado"></div>  <h2>🎯 Quiniela Poseada Correntina</h2>
+  <input id="poseadaInput" placeholder="Ingresá 10 números separados por coma (00-99)" />
+  <button onclick="generarPoseada()">Generar Poseada</button>
+  <div id="poseadaResultado"></div>
 </div><script>
 const tesla = {0:[0,0],1:[0,0],2:[5,7],3:[8,0],4:[6,9],5:[2,7],6:[4,9],7:[5,2],8:[3,0],9:[3,4]};
 const agencias = ["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
@@ -76,7 +77,8 @@ function agenciaPorNumero(num){
   return agencias[n % agencias.length];
 }
 
-function generar(){
+// Tradicional
+function generarTradicional(){
   let n = document.getElementById('numero').value;
   if(!n){ n = Math.floor(Math.random()*9000+1000).toString(); }
   if(n.length!==4 || isNaN(n)){ alert('Ingresá un número válido de 4 cifras'); return; }
@@ -98,6 +100,35 @@ function generar(){
             `<div class='line'>Ambos: ${ambos}</div></div>`;
   });
   document.getElementById('resultado').innerHTML = html;
+}
+
+// Poseada Correntina
+function generarPoseada(){
+  let valores = document.getElementById('poseadaInput').value.split(',').map(v=>v.trim()).filter(v=>v!=="" && !isNaN(v));
+  if(valores.length !== 10){
+    alert('Ingresá exactamente 10 números válidos (00-99)');
+    return;
+  }
+
+  // Aplicar Tesla a cada número (solo primer dígito)
+  let pool = [];
+  valores.forEach(n => {
+    let num = n.padStart(2,'0');
+    let d = parseInt(num[0]);
+    pool.push(tesla[d][0]);
+    pool.push(tesla[d][1]);
+  });
+
+  // Unicos y convertir a 2 cifras
+  let unicos = [...new Set(pool.map(n=>n.toString().padStart(2,'0')))]
+  let principal = unicos.slice(0,5);
+  let respaldo = unicos.slice(5,10);
+
+  document.getElementById('poseadaResultado').innerHTML = `
+    <div class='card'><h3>Poseada Correntina</h3>
+    <div class='line'>Principal: ${principal.join(' - ')}</div>
+    <div class='line'>Respaldo: ${respaldo.join(' - ')}</div>
+    </div>`;
 }
 </script></body>
 </html>

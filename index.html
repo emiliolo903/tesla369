@@ -1,147 +1,153 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Quiniela Tradicional – Método Tesla</title>
-<style>
-body{
-  background:#0f0f0f;
-  color:#eaeaea;
-  font-family:Arial, sans-serif;
-  display:flex;
-  justify-content:center;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tesla Pro – Quiniela Tradicional</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0b0b0b;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+    }.app {
+  width: 100%;
+  max-width: 420px;
+  padding: 16px;
 }
-.container{
-  width:95%;
-  max-width:420px;
-  text-align:center;
+
+h1 {
+  text-align: center;
+  color: #00ffd5;
+  margin-bottom: 4px;
 }
-h1{
-  color:#00ffcc;
+
+h2 {
+  text-align: center;
+  color: #f5c400;
+  margin-top: 0;
 }
-input, button{
-  width:100%;
-  padding:12px;
-  font-size:18px;
-  margin:8px 0;
+
+input {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+  margin-top: 12px;
 }
-button{
-  background:#00ffcc;
-  border:none;
-  font-weight:bold;
+
+button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 12px;
+  border: none;
+  background: #00ffd5;
+  font-weight: bold;
+  cursor: pointer;
 }
-.card{
-  background:#1c1c1c;
-  padding:15px;
-  margin-top:15px;
-  border-radius:10px;
-  text-align:left;
-  font-size:17px;
+
+.card {
+  background: #121212;
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 14px;
+  box-shadow: 0 0 10px rgba(0,255,213,0.25);
 }
-.titulo{
-  color:#7CFF00;
-  font-weight:bold;
-  margin-bottom:8px;
+
+.card h3 {
+  text-align: center;
+  margin-top: 0;
+  color: #00ffd5;
 }
-.resaltado{
-  color:#ffd700;
+
+.line {
+  margin: 6px 0;
+  font-size: 17px;
 }
-</style>
+
+.energy {
+  font-weight: bold;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 14px;
+  color: #888;
+}
+
+  </style>
 </head>
-
 <body>
-<div class="container">
-
-<h1>Quiniela Tradicional<br>Método Tesla</h1>
-
-<input type="number" id="numero" placeholder="Ingresá un número de 4 cifras">
-<button onclick="generar()">Generar Jugadas Tesla</button>
+  <div class="app">
+    <h1>⚡ Tesla Pro</h1>
+    <h2>Quiniela Tradicional (Método Tesla)</h2><input id="numero" type="text" maxlength="4" placeholder="Ingresá un número de 4 cifras" />
+<button onclick="generar()">Generar Tradicional</button>
 
 <div id="resultado"></div>
 
-</div>
+<div class="footer">Método Tesla original + energía Mañana / Tarde / Noche</div>
 
-<script>
-// TABLA TESLA (foto)
-const tablaTesla = {
-  0:[0,0],
-  1:[0,0],
-  2:[5,7],
-  3:[8,0],
-  4:[6,9],
-  5:[2,7],
-  6:[4,9],
-  7:[5,2],
-  8:[3,0],
-  9:[3,4]
-};
+  </div>  <script>
+    // TABLA TESLA FIJA (SEGÚN FOTO)
+    const tesla = {
+      0: [0, 0],
+      1: [0, 0],
+      2: [5, 7],
+      3: [8, 0],
+      4: [6, 9],
+      5: [2, 7],
+      6: [4, 9],
+      7: [5, 2],
+      8: [3, 0],
+      9: [3, 4]
+    };
 
-// FUERZA POR PROVINCIA
-const fuerzas = {
-  "Corrientes":[0,3,6],
-  "Entre Ríos":[1,4,7],
-  "Buenos Aires":[2,5,8],
-  "Santa Fe":[3,6,9],
-  "Córdoba":[4,7,9],
-  "Chaco":[0,5,8]
-};
+    const agencias = ["Corrientes", "Buenos Aires", "Santa Fe", "Córdoba", "Entre Ríos", "Chaco"];
+    const energias = ["☀️ Mañana", "🌆 Tarde", "🌙 Noche"];
 
-function energia(cuaterno){
-  let suma = cuaterno.split('').reduce((a,b)=>a+parseInt(b),0);
-  if(suma<=12) return "MAÑANA";
-  if(suma<=20) return "TARDE";
-  return "NOCHE";
-}
-
-function agencia(cuaterno){
-  let puntos={};
-  for(let p in fuerzas) puntos[p]=0;
-  cuaterno.split('').forEach(d=>{
-    d=parseInt(d);
-    for(let p in fuerzas){
-      if(fuerzas[p].includes(d)) puntos[p]++;
+    function energiaPorNumero(n) {
+      return energias[n % 3];
     }
-  });
-  return Object.keys(puntos).reduce((a,b)=>puntos[a]>puntos[b]?a:b);
-}
 
-function generar(){
-  let n = document.getElementById("numero").value;
-  if(n.length!=4) return alert("Ingresá 4 cifras");
+    function agenciaPorNumero(n) {
+      return agencias[n % agencias.length];
+    }
 
-  let pares=[];
-  for(let d of n){
-    pares.push(tablaTesla[d]);
-  }
+    function generar() {
+      const input = document.getElementById("numero").value;
+      if (input.length !== 4 || isNaN(input)) return;
 
-  let j1 = pares.map(p=>p[0]).join('');
-  let j2 = pares.map(p=>p[1]).join('');
+      const d = input.split("").map(Number);
 
-  mostrar(j1,1);
-  mostrar(j2,2);
-}
+      const j1 = d.map(x => tesla[x][0]);
+      const j2 = d.map(x => tesla[x][1]);
 
-function mostrar(cuaterno,idx){
-  let terno = cuaterno.slice(1);
-  let ambos = cuaterno.slice(2);
+      const jugadas = [j1, j2];
 
-  let e = energia(cuaterno);
-  let a = agencia(cuaterno);
+      let html = "";
 
-  let html = `
-  <div class="card">
-    <div class="titulo">JUGADA TESLA ${idx}</div>
-    Cuaterno: <b>${cuaterno}</b><br>
-    Terno: <b>${terno}</b><br>
-    Ambos: <b>${ambos}</b><br><br>
-    <span class="resaltado">Energía:</span> ${e}<br>
-    <span class="resaltado">Agencia sugerida:</span> ${a}
-  </div>
-  `;
+      jugadas.forEach((j, i) => {
+        const cuaterno = j.join("");
+        const terno = j.slice(1).join("");
+        const ambos = j.slice(2).join("");
 
-  document.getElementById("resultado").innerHTML += html;
-}
-</script>
+        html += `
+          <div class="card">
+            <h3>Jugada ${i + 1}</h3>
+            <div class="line">Cuaterno: ${cuaterno} <span class="energy">(${energiaPorNumero(parseInt(cuaterno))})</span></div>
+            <div class="line">Terno: ${terno} <span class="energy">(${energiaPorNumero(parseInt(terno))})</span></div>
+            <div class="line">Ambos: ${ambos} <span class="energy">(${energiaPorNumero(parseInt(ambos))})</span></div>
+            <div class="line">Agencia sugerida: <b>${agenciaPorNumero(parseInt(cuaterno))}</b></div>
+          </div>
+        `;
+      });
 
-</body>
+      document.getElementById("resultado").innerHTML = html;
+    }
+  </script></body>
 </html>

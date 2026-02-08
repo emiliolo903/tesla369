@@ -66,14 +66,15 @@ function generarTradicional(){
       if(j>2)ambos+=nums[i%2];
     }
     let energia= ['☀️ Mañana','🌆 Tarde','🌙 Noche'][i%3];
-    jugadas.push({cuaterno,terno,ambos,energia});
+    let agencia=agenciaPorNumero(cuaterno); // asigna agencia según primer dígito del cuaterno
+    jugadas.push({cuaterno,terno,ambos,energia,agencia});
   }
   let html='';
   jugadas.forEach((j,idx)=>{
     html+=`<div class="resultado"><strong>Jugada ${idx+1}</strong><br>
-      Cuaterno: <span>${j.cuaterno}</span> (${j.energia})<br>
-      Terno: <span>${j.terno}</span> (${j.energia})<br>
-      Ambos: <span>${j.ambos}</span> (${j.energia})
+      Cuaterno: <span>${j.cuaterno}</span> (${j.energia}) - Agencia: <span>${j.agencia}</span><br>
+      Terno: <span>${j.terno}</span> (${j.energia}) - Agencia: <span>${j.agencia}</span><br>
+      Ambos: <span>${j.ambos}</span> (${j.energia}) - Agencia: <span>${j.agencia}</span>
     </div>`;
   });
   document.getElementById('resultadosTradicional').innerHTML=html;
@@ -82,17 +83,14 @@ function generarTradicional(){
 // Poseada Correntina
 function generarPoseada(){
   let inputRaw=document.getElementById('inputPoseada').value;
-  // separar por coma o espacio
   let input=inputRaw.split(/[\s,]+/).map(v=>v.trim()).filter(v=>v!=='').map(v=>v.padStart(2,'0'));
   if(input.length!==10){alert('Ingresá 10 números del sorteo anterior'); return;}
 
-  // Aplicar Tesla puro a cada número
   let transformados = input.map(n=>{
     let d1=parseInt(n[0]), d2=parseInt(n[1]);
     return tablaTesla[d1][0]+tablaTesla[d2][0];
   });
 
-  // Elegir 5 para Principal y 5 para Respaldo
   let principal=transformados.slice(0,5);
   let respaldo=transformados.slice(5,10);
 

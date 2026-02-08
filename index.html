@@ -47,6 +47,7 @@ button{
 
 <body>
 
+<!-- ENERGÍA + AGENCIAS -->
 <div id="energiaBox">
   <div id="energiaTexto"></div>
   <div id="agenciasTexto"></div>
@@ -62,6 +63,20 @@ button{
 <div class="resultado" id="r2"></div>
 
 <script>
+// 🔒 TABLA TESLA REAL (LA TUYA)
+const tesla = {
+  0:["0","0"],
+  1:["0","0"],
+  2:["7","2"],
+  3:["8","0"],
+  4:["9","5"],
+  5:["2","7"],
+  6:["1","8"],
+  7:["6","2"],
+  8:["3","0"],
+  9:["4","5"]
+};
+
 // ⏰ ENERGÍA
 function energiaActual(){
   const h=new Date().getHours();
@@ -83,11 +98,7 @@ function mostrarEnergia(){
   agenciasTexto.innerHTML="🎯 <b>Agencias sugeridas:</b><br>"+agenciasPorEnergia(e).join(" · ");
 }
 
-// ⚡ TESLA REAL
-function rotar(num,valor){
-  return num.split("").map(d=>(+d+valor)%10).join("");
-}
-
+// ⚡ GENERADOR TESLA REAL
 function generarTesla(){
   let v=base.value.replace(/\D/g,'');
   if(v.length!==4){
@@ -96,8 +107,11 @@ function generarTesla(){
     return;
   }
 
-  let j1 = rotar(v,3);                // Tesla +3
-  let j2 = rotar(v.split("").reverse().join(""),6); // invertido +6
+  let j1="", j2="";
+  for(let d of v){
+    j1 += tesla[d][0];
+    j2 += tesla[d][1];
+  }
 
   const e=energiaActual();
 

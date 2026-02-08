@@ -4,46 +4,36 @@
 <meta charset="UTF-8">
 <title>Tesla Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
 body{
   margin:0;
-  font-family:Arial;
+  font-family:Arial, sans-serif;
   background:#111;
   color:#fff;
   text-align:center;
-  padding:15px
+  padding:15px;
 }
 h1{color:#00ffcc}
-h2{color:#ffd700;margin-top:25px}
-input,button{
+textarea,button{
   width:100%;
   max-width:420px;
   margin:10px auto;
   display:block;
-  padding:12px;
-  font-size:18px;
-  border-radius:10px;
-  border:none
+  padding:10px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
 }
 button{
   background:#00ffcc;
   font-weight:bold;
-  cursor:pointer
+  cursor:pointer;
 }
-.box{
+.resultado{
   margin-top:15px;
-  padding:15px;
-  border-radius:12px;
-  background:#1b1b1b
-}
-.res{
+  font-size:18px;
   color:#00ffcc;
-  font-size:17px;
-  line-height:1.6
-}
-.small{
-  font-size:13px;
-  color:#aaa
 }
 </style>
 </head>
@@ -51,101 +41,55 @@ button{
 <body>
 
 <h1>⚡ Tesla Pro</h1>
-<p>Quiniela Tradicional – Método Tesla</p>
+<p>Método Tesla 3-6-9</p>
 
-<h2>Ingresá número base</h2>
-<input id="base" placeholder="Ej: 3518">
-<button onclick="generar()">Generar jugadas</button>
+<h2>Generador Tesla Clásico</h2>
+<textarea id="base" placeholder="Ej: 3518"></textarea>
+<button onclick="generar()">Generar</button>
 
-<div id="salida"></div>
+<div class="resultado" id="r1"></div>
+<div class="resultado" id="r2"></div>
 
 <script>
-// 🔒 TABLA TESLA (TU MÉTODO REAL)
-const tablaTesla = {
-  0:[0,0], 1:[0,0],
-  2:[5,7], 3:[8,0],
-  4:[6,9], 5:[2,7],
-  6:[4,9], 7:[5,2],
-  8:[3,0], 9:[3,4]
+// TABLA TESLA (LA QUE USÁS)
+const tesla = {
+  0:["0","0"],
+  1:["0","0"],
+  2:["5","7"],
+  3:["8","0"],
+  4:["6","9"],
+  5:["2","7"],
+  6:["4","9"],
+  7:["5","2"],
+  8:["3","0"],
+  9:["3","4"]
 };
 
-// 🔋 raíz digital
-function energia(num){
-  let s = num.toString().split('').reduce((a,b)=>a+parseInt(b),0);
-  while(s>9){
-    s = s.toString().split('').reduce((a,b)=>a+parseInt(b),0);
-  }
-  return s;
-}
-
-// ⏰ energía → franja
-function franja(e){
-  if(e<=3) return "🌅 Mañana";
-  if(e<=6) return "🌆 Tarde";
-  return "🌙 Noche";
-}
-
-// 🏦 franja → agencias
-function agencias(f){
-  if(f.includes("Mañana")) return "Correntina / Ciudad";
-  if(f.includes("Tarde")) return "Bonaerense / Santa Fe";
-  return "Córdoba / Entre Ríos / Chaco";
-}
-
-// ⚡ aplicar Tesla (columna elegida)
-function aplicarTesla(num, col){
-  return num.toString().split('').map(d=>tablaTesla[d][col]).join('');
-}
-
-// 📦 bloque de salida
-function bloque(titulo,num){
-  let e = energia(num);
-  let f = franja(e);
-  return `
-    <div class="res">
-      <b>${titulo}</b><br>
-      Número: ${num}<br>
-      Energía: ${e} ${f}<br>
-      Agencia sugerida: ${agencias(f)}
-    </div>
-    <hr style="opacity:.2">
-  `;
-}
-
 function generar(){
-  let b = base.value.replace(/\D/g,'');
-  if(b.length < 4){
-    salida.innerHTML = "<p>Ingresá mínimo 4 dígitos</p>";
+  let n = base.value.replace(/\D/g,'');
+  if(n.length < 4){
+    r1.innerHTML = "Ingresá mínimo 4 dígitos";
+    r2.innerHTML = "";
     return;
   }
 
-  // ===== JUGADA TESLA 1 (COLUMNA 1) =====
-  let cuat1 = aplicarTesla(b,0);
-  let tern1 = cuat1.slice(0,3);
-  let amb1  = cuat1.slice(-2);
+  let j1="", j2="";
+  for(let d of n){
+    j1 += tesla[d][0];
+    j2 += tesla[d][1];
+  }
 
-  // ===== JUGADA TESLA 2 (COLUMNA 2) =====
-  let cuat2 = aplicarTesla(b,1);
-  let tern2 = cuat2.slice(0,3);
-  let amb2  = cuat2.slice(-2);
+  r1.innerHTML =
+    "<b>Jugada Tesla 1</b><br>"+
+    "Cuaterno: "+j1+
+    "<br>Terno: "+j1.slice(0,3)+
+    "<br>Ambos: "+j1.slice(-2);
 
-  salida.innerHTML = `
-    <div class="box">
-      <h2>🔢 Jugada Tesla 1</h2>
-      ${bloque("Cuaterno",cuat1)}
-      ${bloque("Terno",tern1)}
-      ${bloque("Ambos",amb1)}
-    </div>
-
-    <div class="box">
-      <h2>🔢 Jugada Tesla 2</h2>
-      ${bloque("Cuaterno",cuat2)}
-      ${bloque("Terno",tern2)}
-      ${bloque("Ambos",amb2)}
-    </div>
-
-    <p class="small">Método Tesla aplicado correctamente (2 columnas)</p>
-  `;
+  r2.innerHTML =
+    "<b>Jugada Tesla 2</b><br>"+
+    "Cuaterno: "+j2+
+    "<br>Terno: "+j2.slice(0,3)+
+    "<br>Ambos: "+j2.slice(-2);
 }
 </script>
 

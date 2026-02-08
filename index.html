@@ -2,100 +2,92 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Quiniela Tradicional – Método Tesla Original</title>
-
+<title>Quiniela Tradicional - Método Tesla</title>
 <style>
-body{
+body {
   font-family: Arial, sans-serif;
-  background:#111;
-  color:#eee;
-  padding:15px;
+  background: #111;
+  color: #eee;
+  padding: 20px;
 }
-h2,h3{ color:#00ffcc; }
-.box{
-  border:1px solid #444;
-  padding:12px;
-  margin-bottom:12px;
+input, button {
+  padding: 10px;
+  font-size: 16px;
+  margin: 5px 0;
 }
-button{
-  padding:8px 12px;
-  cursor:pointer;
+button {
+  background: #00c853;
+  border: none;
+  cursor: pointer;
 }
-.result{
-  background:#222;
-  padding:10px;
-  margin-top:8px;
+.resultado {
+  background: #222;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 8px;
 }
+h2 { color: #00e676; }
 </style>
 </head>
 
 <body>
 
-<h2>📊 QUINIELA TRADICIONAL – MÉTODO TESLA (ORIGINAL)</h2>
+<h2>🎯 Quiniela Tradicional – Método Tesla</h2>
 
-<div class="box">
-  <h3>🔢 Ingresar número (4 cifras)</h3>
-  <input id="base" maxlength="4" placeholder="Ej: 3518">
-  <br>
-  <button onclick="generar()">Generar</button>
-</div>
+<p>Ingresá un número de <b>4 cifras</b>:</p>
+<input type="number" id="numero" placeholder="Ej: 3518" maxlength="4">
+<br>
+<button onclick="generar()">Generar jugadas</button>
 
-<div class="box" id="resultado"></div>
+<div class="resultado" id="salida"></div>
 
 <script>
-// Validar 4 cifras exactas
-function validar(n){
-  return /^\d{4}$/.test(n);
+// TABLA TESLA FIJA (SEGÚN LA FOTO)
+const tesla = {
+  0: ["0"],
+  1: ["0"],
+  2: ["5","7"],
+  3: ["8","0"],
+  4: ["6","9"],
+  5: ["2","7"],
+  6: ["4","9"],
+  7: ["5","2"],
+  8: ["3","0"],
+  9: ["3","4"]
+};
+
+function combinar(arrays) {
+  return arrays.reduce((a, b) =>
+    a.flatMap(d => b.map(e => d + e))
+  );
 }
 
-// MÉTODO TESLA SEGÚN TU TABLA
-function metodoTeslaOriginal(n){
-  let a = n.split("").map(Number);
-
-  // pares como en tu ejemplo
-  let fila1 = [a[0], a[3], (a[0]+a[3])%10];
-  let fila2 = [a[1], a[2], Math.abs(a[1]-a[2])];
-  let fila3 = [a[2], a[1], (a[2]+a[1])%10];
-  let fila4 = [a[3], a[0], Math.abs(a[3]-a[0])];
-
-  // ternos EXACTOS como vos los usás
-  let terno1 = `${fila1[2]}${fila2[2]}${fila3[2]}`;
-  let terno2 = `${fila2[2]}${fila3[2]}${fila4[2]}`;
-
-  // ambos
-  let ambos1 = `${fila1[2]}${fila2[2]}`;
-  let ambos2 = `${fila3[2]}${fila4[2]}`;
-
-  // cuaterno
-  let cuaterno = `${fila1[2]}${fila2[2]}${fila3[2]}${fila4[2]}`;
-
-  return { fila1, fila2, fila3, fila4, terno1, terno2, ambos1, ambos2, cuaterno };
-}
-
-function generar(){
-  let base = document.getElementById("base").value;
-
-  if(!validar(base)){
-    document.getElementById("resultado").innerHTML =
-      "❌ Ingresá exactamente 4 cifras";
+function generar() {
+  const num = document.getElementById("numero").value;
+  if (num.length !== 4) {
+    alert("Ingresá un número de 4 cifras");
     return;
   }
 
-  let t = metodoTeslaOriginal(base);
+  const digitos = num.split("");
+  const opciones = digitos.map(d => tesla[d]);
 
-  document.getElementById("resultado").innerHTML = `
-    <h3>📐 Tabla Tesla</h3>
-    ${t.fila1[0]} &nbsp; ${t.fila1[1]} / ${t.fila1[2]}<br>
-    ${t.fila2[0]} &nbsp; ${t.fila2[1]} / ${t.fila2[2]}<br>
-    ${t.fila3[0]} &nbsp; ${t.fila3[1]} / ${t.fila3[2]}<br>
-    ${t.fila4[0]} &nbsp; ${t.fila4[1]} / ${t.fila4[2]}<br>
+  const cuaternos = combinar(opciones);
 
-    <div class="result">
-      🎯 Terno 1: <b>${t.terno1}</b><br>
-      🎯 Terno 2: <b>${t.terno2}</b><br>
-      🔢 Ambos: <b>${t.ambos1}</b> – <b>${t.ambos2}</b><br>
-      🔥 Cuaterno: <b>${t.cuaterno}</b>
-    </div>
+  const ternos = [...new Set(cuaternos.map(n => n.substring(1)))];
+  const ambos = [...new Set(cuaternos.map(n => n.substring(2)))];
+
+  document.getElementById("salida").innerHTML = `
+    <h3>🔢 Número base: ${num}</h3>
+
+    <b>▶ Cuaternos Tesla:</b><br>
+    ${cuaternos.join(" - ")}<br><br>
+
+    <b>▶ Ternos Tesla:</b><br>
+    ${ternos.join(" - ")}<br><br>
+
+    <b>▶ Ambos:</b><br>
+    ${ambos.join(" - ")}
   `;
 }
 </script>

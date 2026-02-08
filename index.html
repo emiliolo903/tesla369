@@ -42,7 +42,7 @@ const agencias = ["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entr
 
 // Función para calcular energía de cada número según Tesla
 function energiaNumero(num){
-  let suma=parseInt(num[0])+parseInt(num[1]);
+  let suma=num.split('').reduce((acc,d)=>acc+parseInt(d),0);
   if(suma % 3 ===0) return "☀️ Mañana";
   if(suma % 3 ===1) return "🌆 Tarde";
   return "🌙 Noche";
@@ -56,9 +56,6 @@ function agenciaPorNumero(num){
 
 // Función para sugerencia cuaterno/terno/ambos
 function sugerenciaJugada(cuaterno, terno, ambos){
-  // regla simple: si todos los dígitos distintos → cuaterno
-  // si 3 dígitos distintos → terno
-  // si 2 dígitos iguales → ambos
   let uniqueC = new Set(cuaterno.split('')).size;
   let uniqueT = new Set(terno.split('')).size;
   let uniqueA = new Set(ambos.split('')).size;
@@ -82,17 +79,15 @@ function generarTradicional(){
       if(j>2)ambos+=nums[i%2];
     }
 
-    // Energía individual por número
-    let energiaC = energiaNumero(cuaterno.slice(0,2));
-    let energiaT = energiaNumero(terno.slice(0,2));
-    let energiaA = energiaNumero(ambos.slice(0,2));
+    // Energía y agencia individual usando los números completos
+    let energiaC = energiaNumero(cuaterno);
+    let energiaT = energiaNumero(terno);
+    let energiaA = energiaNumero(ambos);
 
-    // Agencia individual por número
     let agenciaC = agenciaPorNumero(cuaterno);
     let agenciaT = agenciaPorNumero(terno);
     let agenciaA = agenciaPorNumero(ambos);
 
-    // Sugerencia de juego
     let sugerencia = sugerenciaJugada(cuaterno, terno, ambos);
 
     jugadas.push({cuaterno,terno,ambos,energiaC,energiaT,energiaA,agenciaC,agenciaT,agenciaA,sugerencia});

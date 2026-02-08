@@ -11,7 +11,7 @@ h1{color:#00F5E0;font-size:28px;margin-bottom:20px;}
 h2{color:#FFD700;font-size:22px;margin-bottom:10px;}
 input{width:80%;padding:12px;font-size:18px;border-radius:8px;border:none;margin-bottom:15px;}
 button{width:85%;padding:14px;font-size:18px;background:#00F5E0;color:#111;border:none;border-radius:10px;cursor:pointer;margin-bottom:20px;}
-.resultado{background:#222;padding:15px;border-radius:12px;margin-bottom:15px;text-align:left;font-size:20px;}
+.resultado{background:#222;padding:15px;border-radius:12px;margin-bottom:15px;text-align:left;font-size:18px;}
 .resultado span{color:#00FFAA;font-weight:bold;}
 .energia{font-weight:bold;}
 .poseada{margin-top:30px;}
@@ -40,19 +40,32 @@ button{width:85%;padding:14px;font-size:18px;background:#00F5E0;color:#111;borde
 const tablaTesla = {0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']};
 const agencias = ["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
 
-// Función para calcular energía dominante según Tesla
-function energiaTesla(num){
-  // Ejemplo simple de método Tesla para energía: sumamos dígitos del número
-  let suma = num.split('').reduce((acc,d)=>acc+parseInt(d),0);
-  // Asignamos energía según el valor de la suma
-  if(suma % 3 === 0) return "☀️ Mañana";
-  if(suma % 3 === 1) return "🌆 Tarde";
+// Función para calcular energía de cada número según Tesla
+function energiaNumero(num){
+  let suma=parseInt(num[0])+parseInt(num[1]);
+  if(suma % 3 ===0) return "☀️ Mañana";
+  if(suma % 3 ===1) return "🌆 Tarde";
   return "🌙 Noche";
 }
 
+// Función para asignar agencia por número
 function agenciaPorNumero(num){
   const n=parseInt(num[0]);
   return agencias[n % agencias.length];
+}
+
+// Función para sugerencia cuaterno/terno/ambos
+function sugerenciaJugada(cuaterno, terno, ambos){
+  // regla simple: si todos los dígitos distintos → cuaterno
+  // si 3 dígitos distintos → terno
+  // si 2 dígitos iguales → ambos
+  let uniqueC = new Set(cuaterno.split('')).size;
+  let uniqueT = new Set(terno.split('')).size;
+  let uniqueA = new Set(ambos.split('')).size;
+
+  if(uniqueC===4) return "🎯 Cuaterno";
+  if(uniqueT===3) return "✅ Terno";
+  return "⚡ Ambos";
 }
 
 // Tradicional
@@ -68,16 +81,30 @@ function generarTradicional(){
       if(j>0)terno+=nums[i%2];
       if(j>2)ambos+=nums[i%2];
     }
-    let energia=energiaTesla(cuaterno); // ahora energía automática según Tesla
-    let agencia=agenciaPorNumero(cuaterno);
-    jugadas.push({cuaterno,terno,ambos,energia,agencia});
+
+    // Energía individual por número
+    let energiaC = energiaNumero(cuaterno.slice(0,2));
+    let energiaT = energiaNumero(terno.slice(0,2));
+    let energiaA = energiaNumero(ambos.slice(0,2));
+
+    // Agencia individual por número
+    let agenciaC = agenciaPorNumero(cuaterno);
+    let agenciaT = agenciaPorNumero(terno);
+    let agenciaA = agenciaPorNumero(ambos);
+
+    // Sugerencia de juego
+    let sugerencia = sugerenciaJugada(cuaterno, terno, ambos);
+
+    jugadas.push({cuaterno,terno,ambos,energiaC,energiaT,energiaA,agenciaC,agenciaT,agenciaA,sugerencia});
   }
+
   let html='';
   jugadas.forEach((j,idx)=>{
     html+=`<div class="resultado"><strong>Jugada ${idx+1}</strong><br>
-      Cuaterno: <span>${j.cuaterno}</span> (${j.energia}) - Agencia: <span>${j.agencia}</span><br>
-      Terno: <span>${j.terno}</span> (${j.energia}) - Agencia: <span>${j.agencia}</span><br>
-      Ambos: <span>${j.ambos}</span> (${j.energia}) - Agencia: <span>${j.agencia}</span>
+      Cuaterno: <span>${j.cuaterno}</span> (${j.energiaC}) - Agencia: <span>${j.agenciaC}</span><br>
+      Terno: <span>${j.terno}</span> (${j.energiaT}) - Agencia: <span>${j.agenciaT}</span><br>
+      Ambos: <span>${j.ambos}</span> (${j.energiaA}) - Agencia: <span>${j.agenciaA}</span><br>
+      Sugerencia: <span>${j.sugerencia}</span>
     </div>`;
   });
   document.getElementById('resultadosTradicional').innerHTML=html;

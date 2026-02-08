@@ -47,7 +47,7 @@ button{
 
 <body>
 
-<!-- ENERGÍA + AGENCIAS -->
+<!-- ENERGÍA Y AGENCIAS (DINÁMICAS) -->
 <div id="energiaBox">
   <div id="energiaTexto"></div>
   <div id="agenciasTexto"></div>
@@ -77,7 +77,7 @@ const tesla = {
   9:["4","5"]
 };
 
-// ⏰ ENERGÍA GENERAL
+// ⏰ ENERGÍA ACTUAL
 function energiaActual(){
   const h = new Date().getHours();
   if(h>=6 && h<12) return "🌅 Mañana";
@@ -112,7 +112,7 @@ function energiaPorTipo(tipo){
   return "🌇 Tarde";
 }
 
-// MOSTRAR ENERGÍA + AGENCIAS ARRIBA
+// MOSTRAR ENERGÍA + AGENCIAS (SE ACTUALIZA)
 function mostrarEnergia(){
   const e = energiaActual();
   energiaTexto.innerHTML = "⏰ <b>Energía actual:</b> " + e;
@@ -121,8 +121,12 @@ function mostrarEnergia(){
     agenciasPorEnergia(e).join(" · ");
 }
 
-// ⚡ GENERADOR TESLA REAL
+// ⚡ GENERADOR TESLA REAL (2 JUGADAS)
 function generarTesla(){
+
+  // 🔄 ACTUALIZA ENERGÍA Y AGENCIAS CADA VEZ
+  mostrarEnergia();
+
   let v = base.value.replace(/\D/g,'');
   if(v.length!==4){
     r1.innerHTML = "Ingresá un cuaterno válido";
@@ -151,7 +155,7 @@ function generarTesla(){
   `;
 }
 
-// ejecutar al abrir
+// AL ABRIR LA APP
 mostrarEnergia();
 </script>
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Quiniela Tradicional – Tesla Dinámico</title>
+<title>Quiniela Tradicional – Tesla Dinámico con Energía y Agencia</title>
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -9,8 +9,7 @@ body {
   color: #fff;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 20px 0;
+  padding-top: 20px;
   min-height: 100vh;
   margin: 0;
 }
@@ -58,38 +57,46 @@ button {
   <h2>⚡ Quiniela Tradicional – Método Tesla</h2>
   <input id="numero" type="text" maxlength="4" placeholder="Ingresá 4 cifras o dejá vacío" />
   <button onclick="generar()">Generar Jugadas</button>
+  <div id="energia" class="line" style="margin-top:10px;"></div>
+  <div id="agencia" class="line" style="margin-bottom:10px;"></div>
   <div id="resultado"></div>
 </div><script>
-const tesla = {
-  0:[0,0],1:[0,0],2:[5,7],3:[8,0],4:[6,9],5:[2,7],6:[4,9],7:[5,2],8:[3,0],9:[3,4]
-};
+const tesla = {0:[0,0],1:[0,0],2:[5,7],3:[8,0],4:[6,9],5:[2,7],6:[4,9],7:[5,2],8:[3,0],9:[3,4]};
+const agencias = ["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
+
+function energiaActual(){
+  const h = new Date().getHours();
+  if(h<12) return "🌅 Mañana";
+  if(h<18) return "🌇 Tarde";
+  return "🌙 Noche";
+}
+
+function agenciaPorNumero(num){
+  const n = parseInt(num[0]);
+  return agencias[n % agencias.length];
+}
 
 function generar(){
   let n = document.getElementById('numero').value;
-  if(!n){
-    n = Math.floor(Math.random()*9000+1000).toString();
-  }
-  if(n.length!==4 || isNaN(n)){
-    alert('Ingresá un número válido de 4 cifras');
-    return;
-  }
+  if(!n){ n = Math.floor(Math.random()*9000+1000).toString(); }
+  if(n.length!==4 || isNaN(n)){ alert('Ingresá un número válido de 4 cifras'); return; }
 
   const dig = [...n].map(Number);
   const jugadas = [dig.map(d=>tesla[d][0]), dig.map(d=>tesla[d][1])];
 
+  document.getElementById('energia').innerText = "Energía: " + energiaActual();
+  document.getElementById('agencia').innerText = "Agencia sugerida: " + agenciaPorNumero(n);
+
   let html = '';
-  jugadas.forEach((j, i)=>{
+  jugadas.forEach((j,i)=>{
     const cuaterno = j.join('');
     const terno = j.slice(1).join('');
     const ambos = j.slice(2).join('');
-    html += `<div class="card">
-      <h3>Jugada Tesla ${i+1}</h3>
-      <div class="line">Cuaterno: ${cuaterno}</div>
-      <div class="line">Terno: ${terno}</div>
-      <div class="line">Ambos: ${ambos}</div>
-    </div>`;
+    html += `<div class='card'><h3>Jugada Tesla ${i+1}</h3>`+
+            `<div class='line'>Cuaterno: ${cuaterno}</div>`+
+            `<div class='line'>Terno: ${terno}</div>`+
+            `<div class='line'>Ambos: ${ambos}</div></div>`;
   });
-
   document.getElementById('resultado').innerHTML = html;
 }
 </script></body>

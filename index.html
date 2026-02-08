@@ -71,15 +71,17 @@ function generarTradicional(){
   if(nro.length!==4 || isNaN(nro)){alert('Ingresá un número válido de 4 cifras');return;}
   let jugadas=[];
   for(let i=0;i<2;i++){
-    let cuaterno='',terno='',ambos='';
+    let cuaterno='',terno='';
     for(let j=0;j<4;j++){
       let nums=tablaTesla[parseInt(nro[j])];
       cuaterno+=nums[i%2];
       if(j>0)terno+=nums[i%2];
-      if(j>2)ambos+=nums[i%2];
     }
 
-    // Energía y agencia individual usando los números completos
+    // Para ambos, tomamos los 2 últimos dígitos del cuaterno
+    let ambos = cuaterno.slice(2,4);
+
+    // Energía y agencia
     let energiaC = energiaNumero(cuaterno);
     let energiaT = energiaNumero(terno);
     let energiaA = energiaNumero(ambos);

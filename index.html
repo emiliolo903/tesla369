@@ -30,16 +30,20 @@ button{
   font-weight:bold;
   cursor:pointer;
 }
-.resultado{
-  margin-top:15px;
-  font-size:18px;
-  color:#00ffcc;
-}
 .caja{
   border:1px solid #00ffcc;
   border-radius:10px;
   padding:10px;
+  margin-top:12px;
+}
+.info{
+  color:#ffd700;
   margin-top:10px;
+}
+.acierto{
+  background:#28a745;
+  color:#fff;
+  margin-top:8px;
 }
 </style>
 </head>
@@ -55,19 +59,24 @@ button{
 <div id="salida"></div>
 
 <script>
-// 🔒 TABLA TESLA (SEGÚN TU FOTO)
+// 🔒 TABLA TESLA (TU FOTO)
 const tesla = {
-  "0":["0","0"],
-  "1":["0","0"],
-  "2":["5","7"],
-  "3":["8","0"],
-  "4":["6","9"],
-  "5":["2","7"],
-  "6":["4","9"],
-  "7":["5","2"],
-  "8":["3","0"],
-  "9":["3","4"]
+  "0":["0","0"], "1":["0","0"], "2":["5","7"], "3":["8","0"],
+  "4":["6","9"], "5":["2","7"], "6":["4","9"], "7":["5","2"],
+  "8":["3","0"], "9":["3","4"]
 };
+
+function energiaYAgencia(num){
+  let suma = [...num].reduce((a,b)=>a+Number(b),0);
+  if(suma <= 12) return {e:"🌅 Mañana", a:"Correntina / Ciudad"};
+  if(suma <= 24) return {e:"🌆 Tarde", a:"Bonaerense / Santa Fe"};
+  return {e:"🌙 Noche", a:"Córdoba / Entre Ríos / Chaco"};
+}
+
+function marcar(id){
+  localStorage.setItem(id,"✔ ACIERTO");
+  document.getElementById(id).innerText = "✔ ACIERTO GUARDADO";
+}
 
 function generar(){
   let n = base.value.replace(/\D/g,'');
@@ -82,23 +91,19 @@ function generar(){
     j2 += tesla[d][1];
   }
 
+  let e1 = energiaYAgencia(j1);
+  let e2 = energiaYAgencia(j2);
+
   salida.innerHTML = `
     <div class="caja">
       <b>🔹 Jugada Tesla 1</b><br>
       Cuaterno: ${j1}<br>
       Terno: ${j1.slice(0,3)}<br>
-      Ambos: ${j1.slice(-2)}
+      Ambos: ${j1.slice(-2)}<br>
+      <div class="info">${e1.e} – ${e1.a}</div>
+      <button class="acierto" id="a1" onclick="marcar('a1')">Marcar acierto</button>
     </div>
 
     <div class="caja">
       <b>🔹 Jugada Tesla 2</b><br>
-      Cuaterno: ${j2}<br>
-      Terno: ${j2.slice(0,3)}<br>
-      Ambos: ${j2.slice(-2)}
-    </div>
-  `;
-}
-</script>
-
-</body>
-</html>
+      Cuaterno: ${j2}<

@@ -29,7 +29,7 @@ button{width:85%;padding:14px;font-size:18px;background:#00F5E0;color:#111;borde
 
 <div class="poseada">
 <h2>Quiniela Poseada Correntina</h2>
-<input type="text" id="inputPoseada" placeholder="Ingresá los 10 números del sorteo anterior (00-99) separados por coma">
+<input type="text" id="inputPoseada" placeholder="Ingresá los 10 números del sorteo anterior (00-99), separados por coma o espacio">
 <button onclick="generarPoseada()">Generar 2 jugadas Tesla</button>
 </div>
 <div class="nota">Poseada Correntina usando método Tesla puro. Solo 5 Números Principal y 5 Respaldo.</div>
@@ -81,7 +81,9 @@ function generarTradicional(){
 
 // Poseada Correntina
 function generarPoseada(){
-  const input=document.getElementById('inputPoseada').value.split(',').map(v=>v.trim().padStart(2,'0'));
+  let inputRaw=document.getElementById('inputPoseada').value;
+  // separar por coma o espacio
+  let input=inputRaw.split(/[\s,]+/).map(v=>v.trim()).filter(v=>v!=='').map(v=>v.padStart(2,'0'));
   if(input.length!==10){alert('Ingresá 10 números del sorteo anterior'); return;}
 
   // Aplicar Tesla puro a cada número

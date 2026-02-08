@@ -40,10 +40,13 @@ button{width:85%;padding:14px;font-size:18px;background:#00F5E0;color:#111;borde
 const tablaTesla = {0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']};
 const agencias = ["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
 
-function energiaActual(){
-  const h=new Date().getHours();
-  if(h<12)return "☀️ Mañana";
-  if(h<18)return "🌆 Tarde";
+// Función para calcular energía dominante según Tesla
+function energiaTesla(num){
+  // Ejemplo simple de método Tesla para energía: sumamos dígitos del número
+  let suma = num.split('').reduce((acc,d)=>acc+parseInt(d),0);
+  // Asignamos energía según el valor de la suma
+  if(suma % 3 === 0) return "☀️ Mañana";
+  if(suma % 3 === 1) return "🌆 Tarde";
   return "🌙 Noche";
 }
 
@@ -65,8 +68,8 @@ function generarTradicional(){
       if(j>0)terno+=nums[i%2];
       if(j>2)ambos+=nums[i%2];
     }
-    let energia= ['☀️ Mañana','🌆 Tarde','🌙 Noche'][i%3];
-    let agencia=agenciaPorNumero(cuaterno); // asigna agencia según primer dígito del cuaterno
+    let energia=energiaTesla(cuaterno); // ahora energía automática según Tesla
+    let agencia=agenciaPorNumero(cuaterno);
     jugadas.push({cuaterno,terno,ambos,energia,agencia});
   }
   let html='';

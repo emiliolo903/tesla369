@@ -2,173 +2,122 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Tesla Pro</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<title>App Quiniela – Método Tesla</title>
 <style>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#111;
-  color:#fff;
-  text-align:center;
-  padding:15px;
-}
-h1{color:#00ffcc}
-textarea,button{
-  width:100%;
-  max-width:420px;
-  margin:10px auto;
-  display:block;
-  padding:10px;
-  font-size:16px;
-  border-radius:8px;
-  border:none;
-}
-button{
-  background:#00ffcc;
-  font-weight:bold;
-  cursor:pointer;
-}
-.resultado{
-  margin-top:15px;
-  font-size:18px;
-  color:#00ffcc;
-}
-.extra{
-  font-size:14px;
-  color:#aaa;
-  margin-top:5px;
-}
-.stats{
-  font-size:13px;
-  color:#ccc;
-  margin-top:10px;
-}
-.btns button{
-  margin:5px;
-  background:#444;
-  color:#fff;
-}
+body { font-family: Arial; background:#111; color:#eee; padding:15px }
+h2,h3 { color:#00ffcc }
+.box { border:1px solid #444; padding:10px; margin:10px 0 }
+button { padding:8px; margin-top:5px }
+.result { background:#222; padding:8px; margin-top:5px }
 </style>
 </head>
 
 <body>
 
-<h1>⚡ Tesla Pro</h1>
-<p>Método Tesla – Quiniela Tradicional</p>
+<h2>📊 APP QUINIELA – MÉTODO TESLA</h2>
 
-<textarea id="base" placeholder="Ej: 3518"></textarea>
+<div class="box">
+<h3>🔢 Ingresar número base</h3>
+<input id="base" placeholder="Ej: 3518">
+<br>
 <button onclick="generar()">Generar</button>
+</div>
 
-<div class="resultado" id="r1"></div>
-<div class="resultado" id="r2"></div>
-<div class="stats" id="stats"></div>
+<div class="box" id="energiaBox"></div>
+
+<div class="box">
+<h3>🎯 Quiniela Tradicional</h3>
+<div id="tradicional"></div>
+</div>
+
+<div class="box">
+<h3>🌙 Quiniela Poseada Correntina</h3>
+<div id="poseada"></div>
+</div>
 
 <script>
-// ================== TESLA ==================
-const tesla = {
-  0:["0","0"],1:["0","0"],2:["5","7"],3:["8","0"],
-  4:["6","9"],5:["2","7"],6:["4","9"],7:["5","2"],
-  8:["3","0"],9:["3","4"]
-};
-
-// ================== STORAGE ==================
-let data = JSON.parse(localStorage.getItem("teslaStats")) || {
-  ambos:0, terno:0, cuaterno:0,
-  manana:0, tarde:0, noche:0
-};
-
-function guardar(){ localStorage.setItem("teslaStats", JSON.stringify(data)); }
-
-// ================== ENERGÍA ==================
-function energia(num){
-  let s = num.split('').reduce((a,b)=>a+parseInt(b),0);
-  while(s>9) s = s.toString().split('').reduce((a,b)=>a+parseInt(b),0);
-  if(s<=3) return {t:"🌅 Mañana",k:"manana"};
-  if(s<=6) return {t:"🌆 Tarde",k:"tarde"};
-  return {t:"🌙 Noche",k:"noche"};
+function energiaPorNumero(n){
+  let s = n.split('').reduce((a,b)=>a+parseInt(b),0);
+  if(s%3===0) return "MAÑANA";
+  if(s%3===1) return "TARDE";
+  return "NOCHE";
 }
 
-function agencia(h){
-  if(h=="manana") return "Correntina / Ciudad";
-  if(h=="tarde") return "Bonaerense / Santa Fe";
-  return "Córdoba / Entre Ríos / Chaco";
+function agenciaPorEnergia(e){
+  if(e==="MAÑANA") return "CORRIENTES / CHACO";
+  if(e==="TARDE") return "SANTA FE / ENTRE RÍOS";
+  return "BUENOS AIRES / CÓRDOBA";
 }
 
-// ================== SUGERENCIA ==================
-function sugerencia(){
-  let max = Math.max(data.ambos,data.terno,data.cuaterno);
-  if(max===data.cuaterno) return "👉 Según tus datos: jugar Cuaterno";
-  if(max===data.terno) return "👉 Según tus datos: jugar Terno";
-  return "👉 Según tus datos: jugar Ambos";
+function metodoTesla(n){
+  let a = n.split('').map(Number);
+  return [
+    (a[0]+a[1])%10,
+    (a[2]+a[3])%10,
+    Math.abs(a[0]-a[3]),
+    Math.abs(a[1]-a[2])
+  ];
 }
 
-// ================== MARCAR RESULTADO ==================
-function marcar(tipo,energiaKey){
-  data[tipo]++;
-  data[energiaKey]++;
-  guardar();
-  mostrarStats();
+function generarTernoCuaterno(t){
+  let terno1 = `${t[1]}${t[0]}${t[2]}`;
+  let terno2 = `${t[3]}${t[0]}${t[0]}`;
+  let cuaterno = `${t[0]}${t[1]}${t[2]}${t[3]}`;
+  return { terno1, terno2, cuaterno };
 }
 
-// ================== MOSTRAR ==================
-function mostrarStats(){
-  stats.innerHTML =
-    "Aciertos → Ambos: "+data.ambos+
-    " | Terno: "+data.terno+
-    " | Cuaterno: "+data.cuaterno+
-    "<br>Energía → Mañana: "+data.manana+
-    " | Tarde: "+data.tarde+
-    " | Noche: "+data.noche;
+function diaHoy(){
+  return new Date().getDay(); // 2 martes, 4 jueves, 5 viernes
 }
 
 function generar(){
-  let n = base.value.replace(/\D/g,'');
-  if(n.length<4) return;
+  let base = document.getElementById("base").value;
+  if(base.length < 3) return;
 
-  let j1="", j2="";
-  for(let d of n){ j1+=tesla[d][0]; j2+=tesla[d][1]; }
+  let energia = energiaPorNumero(base);
+  let agencia = agenciaPorEnergia(energia);
+  let tesla = metodoTesla(base);
+  let jugadas = generarTernoCuaterno(tesla);
 
-  let e1 = energia(j1);
-  let e2 = energia(j2);
+  document.getElementById("energiaBox").innerHTML = `
+    <h3>⚡ Energía detectada</h3>
+    Energía: <b>${energia}</b><br>
+    Agencia sugerida: <b>${agencia}</b>
+  `;
 
-  r1.innerHTML = `
-<b>Jugada Tesla 1</b><br>
-Cuaterno: ${j1}<br>
-Terno: ${j1.slice(1,4)}<br>
-Ambos: ${j1.slice(-2)}
-<div class='extra'>
-Energía: ${e1.t} · Agencia: ${agencia(e1.k)}<br>
-${sugerencia()}
-</div>
-<div class='btns'>
-<button onclick="marcar('ambos','${e1.k}')">Pegó Ambos</button>
-<button onclick="marcar('terno','${e1.k}')">Pegó Terno</button>
-<button onclick="marcar('cuaterno','${e1.k}')">Pegó Cuaterno</button>
-</div>
-`;
+  // QUINIELA TRADICIONAL (LIMPIA, SIN PEGÓ)
+  document.getElementById("tradicional").innerHTML = `
+    <div class="result">
+      Terno 1: ${jugadas.terno1}<br>
+      Terno 2: ${jugadas.terno2}<br>
+      Cuaterno: ${jugadas.cuaterno}
+    </div>
+  `;
 
-  r2.innerHTML = `
-<b>Jugada Tesla 2</b><br>
-Cuaterno: ${j2}<br>
-Terno: ${j2.slice(1,4)}<br>
-Ambos: ${j2.slice(-2)}
-<div class='extra'>
-Energía: ${e2.t} · Agencia: ${agencia(e2.k)}<br>
-${sugerencia()}
-</div>
-<div class='btns'>
-<button onclick="marcar('ambos','${e2.k}')">Pegó Ambos</button>
-<button onclick="marcar('terno','${e2.k}')">Pegó Terno</button>
-<button onclick="marcar('cuaterno','${e2.k}')">Pegó Cuaterno</button>
-</div>
-`;
+  // POSEADA CORRENTINA
+  let d = diaHoy();
+  let habilitado = (d===2 || d===4 || d===5);
 
-  mostrarStats();
+  if(!habilitado){
+    document.getElementById("poseada").innerHTML =
+      "❌ Hoy no hay sorteo de Quiniela Poseada Correntina";
+    return;
+  }
+
+  let jugarDos = (d===5 || (d===4 && energia==="NOCHE"));
+
+  let principal = tesla.map(n => ("0"+n).slice(-2));
+  let respaldo = principal.map(n => ("0"+((parseInt(n)+3)%100)).slice(-2));
+
+  document.getElementById("poseada").innerHTML = `
+    <div class="result">
+      Sorteo: NOCTURNA<br>
+      Recomendación: ${jugarDos ? "PRINCIPAL + RESPALDO" : "PRINCIPAL"}<br><br>
+      Principal: ${principal.join(" - ")}<br>
+      ${jugarDos ? `Respaldo: ${respaldo.join(" - ")}` : ""}
+    </div>
+  `;
 }
-
-mostrarStats();
 </script>
 
 </body>

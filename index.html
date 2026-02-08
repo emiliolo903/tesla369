@@ -1,102 +1,97 @@
 <!DOCTYPE html><html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Quiniela Tradicional – Método Tesla</title>
-<style>
-body{
-  margin:0;
-  font-family:Arial, Helvetica, sans-serif;
-  background:#0b0b0b;
-  color:#ffffff;
-  display:flex;
-  justify-content:center;
-}
-.app{
-  width:100%;
-  max-width:420px;
-  padding:16px;
-}
-h1{
-  text-align:center;
-  color:#00ffd5;
-}
-input{
-  width:100%;
-  padding:14px;
-  font-size:18px;
-  border-radius:10px;
-  border:none;
-  margin-top:12px;
-}
-button{
-  width:100%;
-  margin-top:12px;
-  padding:14px;
-  font-size:18px;
-  border-radius:12px;
-  border:none;
-  background:#00ffd5;
-  font-weight:bold;
-}
-.card{
-  background:#121212;
-  border-radius:14px;
-  padding:14px;
-  margin-top:14px;
-}
-.card h3{
-  text-align:center;
-  margin-top:0;
-  color:#00ffd5;
-}
-.line{
-  margin:6px 0;
-  font-size:17px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <title>Quiniela Tradicional Tesla</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .app {
+      background: #1c1c1c;
+      padding: 20px;
+      border-radius: 12px;
+      width: 340px;
+      text-align: center;
+    }
+    h2 { margin-bottom: 10px; }
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .res {
+      margin-top: 15px;
+      background: #000;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .big { font-size: 18px; font-weight: bold; }
+  </style>
 </head>
 <body>
-<div class="app"><h1>⚡ Método Tesla</h1><input id="base" maxlength="4" placeholder="Ingresá un número de 4 cifras">
-<button onclick="generar()">Generar jugadas</button><div id="salida"></div></div><script>
-// TABLA TESLA EXACTA (según tu método)
-const tesla = {
-  0:[0,0],
-  1:[0,0],
-  2:[5,7],
-  3:[8,0],
-  4:[6,9],
-  5:[2,7],
-  6:[4,9],
-  7:[5,2],
-  8:[3,0],
-  9:[3,4]
-};
+  <div class="app">
+    <h2>Quiniela Tradicional</h2><div id="energia" class="big"></div>
+<div id="agencia" class="big"></div>
 
-function generar(){
-  const n = document.getElementById('base').value;
-  if(n.length!==4 || isNaN(n)) return;
+<button onclick="generar()">Generar NRO Tesla</button>
 
-  const dig = [...n].map(Number);
+<div class="res" id="resultado"></div>
 
-  const jugada1 = dig.map(d=>tesla[d][0]).join('');
-  const jugada2 = dig.map(d=>tesla[d][1]).join('');
+  </div><script>
+  const agencias = ["Corrientes", "Ciudad", "Bonaerense", "Santa Fe", "Córdoba", "Entre Ríos", "Chaco"];
 
-  mostrar(jugada1,1);
-  mostrar(jugada2,2);
-}
+  function energiaActual() {
+    const h = new Date().getHours();
+    if (h < 12) return "Energía: Mañana";
+    if (h < 18) return "Energía: Tarde";
+    return "Energía: Noche";
+  }
 
-function mostrar(cuaterno,idx){
-  const terno = cuaterno.slice(1);
-  const ambos = cuaterno.slice(2);
+  function agenciaPorNumero(num) {
+    const n = parseInt(num[0]);
+    return agencias[n % agencias.length];
+  }
 
-  document.getElementById('salida').innerHTML += `
-    <div class="card">
-      <h3>Jugada Tesla ${idx}</h3>
-      <div class="line">Cuaterno: <b>${cuaterno}</b></div>
-      <div class="line">Terno: <b>${terno}</b></div>
-      <div class="line">Ambos: <b>${ambos}</b></div>
-    </div>
-  `;
-}
+  function generar() {
+    // Método Tesla base
+    const pares = [
+      [3,8,0],
+      [5,2,7],
+      [1,0,0],
+      [8,3,0]
+    ];
+
+    const cuaterno1 = `${pares[0][1]}${pares[1][0]}${pares[2][0]}${pares[3][0]}`; // 8203
+    const cuaterno2 = `0${pares[1][2]}00`; // 0700
+
+    const terno1 = cuaterno1.slice(1);
+    const terno2 = cuaterno2.slice(1);
+
+    const ambos1 = cuaterno1.slice(2);
+    const ambos2 = cuaterno2.slice(2);
+
+    document.getElementById('energia').innerText = energiaActual();
+    document.getElementById('agencia').innerText = "Agencia sugerida: " + agenciaPorNumero(cuaterno1);
+
+    document.getElementById('resultado').innerHTML = `
+      <div><b>Cuaterno 1:</b> ${cuaterno1}</div>
+      <div>Terno: ${terno1}</div>
+      <div>Ambos: ${ambos1}</div>
+      <hr>
+      <div><b>Cuaterno 2:</b> ${cuaterno2}</div>
+      <div>Terno: ${terno2}</div>
+      <div>Ambos: ${ambos2}</div>
+    `;
+  }
 </script></body>
 </html>

@@ -1,97 +1,63 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE html><html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Tesla Pro</title>
+<title>Tesla Pro Energía</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-body{
-  margin:0;
-  font-family:Arial, sans-serif;
-  background:#111;
-  color:#fff;
-  text-align:center;
-  padding:15px;
-}
+body{margin:0;font-family:Arial;background:#0f0f0f;color:#fff;text-align:center;padding:15px}
 h1{color:#00ffcc}
-textarea,button{
-  width:100%;
-  max-width:420px;
-  margin:10px auto;
-  display:block;
-  padding:10px;
-  font-size:16px;
-  border-radius:8px;
-  border:none;
-}
-button{
-  background:#00ffcc;
-  font-weight:bold;
-  cursor:pointer;
-}
-.resultado{
-  margin-top:15px;
-  font-size:18px;
-  color:#00ffcc;
-}
+textarea,button{width:100%;max-width:420px;margin:10px auto;display:block;padding:10px;font-size:16px;border-radius:8px;border:none}
+button{background:#00ffcc;font-weight:bold;cursor:pointer}
+.box{border:1px solid #00ffcc;border-radius:10px;padding:10px;margin:10px auto;max-width:420px}
+.titulo{color:#00ffcc;font-weight:bold}
 </style>
 </head>
+<body><h1>⚡ Tesla Pro+</h1>
+<p>Método Tesla · Energía · Agencia</p><textarea id="base" placeholder="Ej: 3518"></textarea><button onclick="generar()">Generar</button>
 
-<body>
+<div class="box" id="energiaBox">
+<div class="titulo">Energía Actual</div>
+<div id="energia"></div>
+<div class="titulo">Agencia Sugerida</div>
+<div id="agencia"></div>
+</div><div class="box" id="j1"></div>
+<div class="box" id="j2"></div><div class="box" id="stats">
+<div class="titulo">Estadísticas</div>
+<div id="contador">Jugadas: 0</div>
+</div><script>
+const tesla={
+0:["0","0"],1:["0","0"],2:["5","7"],3:["8","0"],4:["6","9"],5:["2","7"],6:["4","9"],7:["5","2"],8:["3","0"],9:["3","4"]};
 
-<h1>⚡ Tesla Pro</h1>
-<p>Método Tesla – Quiniela Tradicional</p>
-
-<h2>Generador Tesla</h2>
-<textarea id="base" placeholder="Ej: 3518"></textarea>
-<button onclick="generar()">Generar</button>
-
-<div class="resultado" id="r1"></div>
-<div class="resultado" id="r2"></div>
-
-<script>
-// 🔒 TABLA TESLA (TU MÉTODO)
-const tesla = {
-  0:["0","0"],
-  1:["0","0"],
-  2:["5","7"],
-  3:["8","0"],
-  4:["6","9"],
-  5:["2","7"],
-  6:["4","9"],
-  7:["5","2"],
-  8:["3","0"],
-  9:["3","4"]
-};
+const energias=["Caliente","Neutra","Fría"];
+const agencias=["Centro","Barrio","Terminal","Zona Norte","Zona Sur"];
+let total=0;
 
 function generar(){
-  let n = base.value.replace(/\D/g,'');
-  if(n.length < 4){
-    r1.innerHTML = "Ingresá mínimo 4 dígitos";
-    r2.innerHTML = "";
-    return;
-  }
+ let n=base.value.replace(/\D/g,'');
+ if(n.length<4) return;
 
-  let j1="", j2="";
-  for(let d of n){
-    j1 += tesla[d][0]; // columna 1
-    j2 += tesla[d][1]; // columna 2
-  }
+ let j1="",j2="";
+ for(let d of n){j1+=tesla[d][0];j2+=tesla[d][1];}
 
-  r1.innerHTML =
-    "<b>Jugada Tesla 1</b><br>"+
-    "Cuaterno: "+j1+
-    "<br>Terno: "+j1.slice(1,4)+
-    "<br>Ambos: "+j1.slice(-2);
+ let energia=energias[n%3];
+ let agencia=agencias[n%agencias.length];
 
-  r2.innerHTML =
-    "<b>Jugada Tesla 2</b><br>"+
-    "Cuaterno: "+j2+
-    "<br>Terno: "+j2.slice(1,4)+
-    "<br>Ambos: "+j2.slice(-2);
+ document.getElementById('energia').innerHTML=energia;
+ document.getElementById('agencia').innerHTML=agencia;
+
+ j1Box(j1,1);
+ j1Box(j2,2);
+
+ total++;
+ document.getElementById('contador').innerHTML="Jugadas: "+total;
 }
-</script>
 
-</body>
+function j1Box(num,id){
+ let box=document.getElementById(id==1?'j1':'j2');
+ box.innerHTML="<div class='titulo'>Jugada Tesla "+id+"</div>"+
+ "Cuaterno: "+num+
+ "<br>Terno: "+num.slice(1,4)+
+ "<br>Ambos: "+num.slice(-2);
+}
+</script></body>
 </html>

@@ -35,23 +35,10 @@ button{
   font-size:18px;
   color:#00ffcc;
 }
-#energiaBox{
-  background:#222;
-  border:2px solid #00ffcc;
-  border-radius:10px;
-  padding:12px;
-  margin-bottom:15px;
-}
 </style>
 </head>
 
 <body>
-
-<!-- ENERGÍA Y AGENCIAS (DINÁMICAS) -->
-<div id="energiaBox">
-  <div id="energiaTexto"></div>
-  <div id="agenciasTexto"></div>
-</div>
 
 <h1>⚡ Tesla Pro</h1>
 <p>Quiniela Tradicional – Método Tesla</p>
@@ -63,7 +50,7 @@ button{
 <div class="resultado" id="r2"></div>
 
 <script>
-// 🔒 TABLA TESLA REAL (LA TUYA)
+// 🔒 TABLA TESLA (LA TUYA)
 const tesla = {
   0:["0","0"],
   1:["0","0"],
@@ -77,86 +64,35 @@ const tesla = {
   9:["4","5"]
 };
 
-// ⏰ ENERGÍA ACTUAL
-function energiaActual(){
-  const h = new Date().getHours();
-  if(h>=6 && h<12) return "🌅 Mañana";
-  if(h>=12 && h<18) return "🌇 Tarde";
-  return "🌙 Noche";
-}
-
-// 🎯 AGENCIAS SEGÚN ENERGÍA
-function agenciasPorEnergia(e){
-  if(e.includes("Mañana")) return ["Correntina","Entre Ríos"];
-  if(e.includes("Tarde")) return ["Ciudad","Santa Fe"];
-  return ["Bonaerense","Córdoba","Chaco"];
-}
-
-// 🔋 ENERGÍA POR TIPO DE JUGADA
-function energiaPorTipo(tipo){
-  const e = energiaActual();
-
-  if(e.includes("Mañana")){
-    if(tipo==="Ambos") return "🌅 Mañana";
-    if(tipo==="Terno") return "🌇 Tarde";
-    return "🌙 Noche";
-  }
-  if(e.includes("Tarde")){
-    if(tipo==="Ambos") return "🌇 Tarde";
-    if(tipo==="Terno") return "🌙 Noche";
-    return "🌅 Mañana";
-  }
-  // Noche
-  if(tipo==="Ambos") return "🌙 Noche";
-  if(tipo==="Terno") return "🌅 Mañana";
-  return "🌇 Tarde";
-}
-
-// MOSTRAR ENERGÍA + AGENCIAS (SE ACTUALIZA)
-function mostrarEnergia(){
-  const e = energiaActual();
-  energiaTexto.innerHTML = "⏰ <b>Energía actual:</b> " + e;
-  agenciasTexto.innerHTML =
-    "🎯 <b>Agencias sugeridas:</b><br>" +
-    agenciasPorEnergia(e).join(" · ");
-}
-
-// ⚡ GENERADOR TESLA REAL (2 JUGADAS)
+// ⚡ GENERADOR TESLA CLÁSICO
 function generarTesla(){
-
-  // 🔄 ACTUALIZA ENERGÍA Y AGENCIAS CADA VEZ
-  mostrarEnergia();
-
   let v = base.value.replace(/\D/g,'');
-  if(v.length!==4){
+  if(v.length !== 4){
     r1.innerHTML = "Ingresá un cuaterno válido";
     r2.innerHTML = "";
     return;
   }
 
-  let j1="", j2="";
+  let j1 = "", j2 = "";
   for(let d of v){
     j1 += tesla[d][0];
     j2 += tesla[d][1];
   }
 
   r1.innerHTML = `
-  <b>Jugada Tesla 1</b><br>
-  Cuaterno: ${j1} → ${energiaPorTipo("Cuaterno")}<br>
-  Terno: ${j1.slice(0,3)} → ${energiaPorTipo("Terno")}<br>
-  Ambos: ${j1.slice(-2)} → ${energiaPorTipo("Ambos")}
+    <b>Jugada Tesla 1</b><br>
+    Cuaterno: ${j1}<br>
+    Terno: ${j1.slice(0,3)}<br>
+    Ambos: ${j1.slice(-2)}
   `;
 
   r2.innerHTML = `
-  <b>Jugada Tesla 2</b><br>
-  Cuaterno: ${j2} → ${energiaPorTipo("Cuaterno")}<br>
-  Terno: ${j2.slice(0,3)} → ${energiaPorTipo("Terno")}<br>
-  Ambos: ${j2.slice(-2)} → ${energiaPorTipo("Ambos")}
+    <b>Jugada Tesla 2</b><br>
+    Cuaterno: ${j2}<br>
+    Terno: ${j2.slice(0,3)}<br>
+    Ambos: ${j2.slice(-2)}
   `;
 }
-
-// AL ABRIR LA APP
-mostrarEnergia();
 </script>
 
 </body>

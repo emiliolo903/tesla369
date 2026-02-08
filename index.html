@@ -92,9 +92,9 @@ function agencias(f){
   return "Córdoba / Entre Ríos / Chaco";
 }
 
-// ⚡ aplicar Tesla (PRIMERA columna)
-function aplicarTesla(num){
-  return num.toString().split('').map(d=>tablaTesla[d][0]).join('');
+// ⚡ aplicar Tesla (columna elegida)
+function aplicarTesla(num, col){
+  return num.toString().split('').map(d=>tablaTesla[d][col]).join('');
 }
 
 // 📦 bloque de salida
@@ -119,14 +119,13 @@ function generar(){
     return;
   }
 
-  // ===== JUGADA TESLA 1 =====
-  let cuat1 = aplicarTesla(b.slice(0,4));
+  // ===== JUGADA TESLA 1 (COLUMNA 1) =====
+  let cuat1 = aplicarTesla(b,0);
   let tern1 = cuat1.slice(0,3);
   let amb1  = cuat1.slice(-2);
 
-  // ===== JUGADA TESLA 2 (INVERTIDA) =====
-  let inv = b.split('').reverse().join('');
-  let cuat2 = aplicarTesla(inv);
+  // ===== JUGADA TESLA 2 (COLUMNA 2) =====
+  let cuat2 = aplicarTesla(b,1);
   let tern2 = cuat2.slice(0,3);
   let amb2  = cuat2.slice(-2);
 
@@ -145,7 +144,7 @@ function generar(){
       ${bloque("Ambos",amb2)}
     </div>
 
-    <p class="small">Método Tesla aplicado correctamente a todas las jugadas</p>
+    <p class="small">Método Tesla aplicado correctamente (2 columnas)</p>
   `;
 }
 </script>

@@ -15,13 +15,13 @@ body{
   padding:15px;
 }
 h1{color:#00ffcc}
-textarea,button{
+input,button{
   width:100%;
   max-width:420px;
   margin:10px auto;
   display:block;
-  padding:10px;
-  font-size:16px;
+  padding:12px;
+  font-size:18px;
   border-radius:8px;
   border:none;
 }
@@ -35,6 +35,12 @@ button{
   font-size:18px;
   color:#00ffcc;
 }
+.caja{
+  border:1px solid #00ffcc;
+  border-radius:10px;
+  padding:10px;
+  margin-top:10px;
+}
 </style>
 </head>
 
@@ -43,54 +49,53 @@ button{
 <h1>⚡ Tesla Pro</h1>
 <p>Quiniela Tradicional – Método Tesla</p>
 
-<textarea id="base" placeholder="Ej: 3518"></textarea>
-<button onclick="generarTesla()">Generar jugadas Tesla</button>
+<input id="base" placeholder="Ingresá cuaterno (ej: 3518)">
+<button onclick="generar()">Generar jugadas</button>
 
-<div class="resultado" id="r1"></div>
-<div class="resultado" id="r2"></div>
+<div id="salida"></div>
 
 <script>
-// 🔒 TABLA TESLA (LA TUYA)
+// 🔒 TABLA TESLA (SEGÚN TU FOTO)
 const tesla = {
-  0:["0","0"],
-  1:["0","0"],
-  2:["7","2"],
-  3:["8","0"],
-  4:["9","5"],
-  5:["2","7"],
-  6:["1","8"],
-  7:["6","2"],
-  8:["3","0"],
-  9:["4","5"]
+  "0":["0","0"],
+  "1":["0","0"],
+  "2":["5","7"],
+  "3":["8","0"],
+  "4":["6","9"],
+  "5":["2","7"],
+  "6":["4","9"],
+  "7":["5","2"],
+  "8":["3","0"],
+  "9":["3","4"]
 };
 
-// ⚡ GENERADOR TESLA CLÁSICO
-function generarTesla(){
-  let v = base.value.replace(/\D/g,'');
-  if(v.length !== 4){
-    r1.innerHTML = "Ingresá un cuaterno válido";
-    r2.innerHTML = "";
+function generar(){
+  let n = base.value.replace(/\D/g,'');
+  if(n.length !== 4){
+    salida.innerHTML = "⚠️ Ingresá un cuaterno válido";
     return;
   }
 
-  let j1 = "", j2 = "";
-  for(let d of v){
+  let j1="", j2="";
+  for(let d of n){
     j1 += tesla[d][0];
     j2 += tesla[d][1];
   }
 
-  r1.innerHTML = `
-    <b>Jugada Tesla 1</b><br>
-    Cuaterno: ${j1}<br>
-    Terno: ${j1.slice(0,3)}<br>
-    Ambos: ${j1.slice(-2)}
-  `;
+  salida.innerHTML = `
+    <div class="caja">
+      <b>🔹 Jugada Tesla 1</b><br>
+      Cuaterno: ${j1}<br>
+      Terno: ${j1.slice(0,3)}<br>
+      Ambos: ${j1.slice(-2)}
+    </div>
 
-  r2.innerHTML = `
-    <b>Jugada Tesla 2</b><br>
-    Cuaterno: ${j2}<br>
-    Terno: ${j2.slice(0,3)}<br>
-    Ambos: ${j2.slice(-2)}
+    <div class="caja">
+      <b>🔹 Jugada Tesla 2</b><br>
+      Cuaterno: ${j2}<br>
+      Terno: ${j2.slice(0,3)}<br>
+      Ambos: ${j2.slice(-2)}
+    </div>
   `;
 }
 </script>

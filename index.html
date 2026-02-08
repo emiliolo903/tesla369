@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tesla Pro</title>
+<title>Tesla Pro + Histórico</title>
 <style>
 body {margin:0;font-family:Arial,sans-serif;background:#111;color:#fff;display:flex;justify-content:center;padding:20px;}
 .container{width:100%;max-width:500px;text-align:center;}
@@ -13,6 +13,7 @@ input{width:80%;padding:12px;font-size:18px;border-radius:8px;border:none;margin
 button{width:85%;padding:14px;font-size:18px;background:#00F5E0;color:#111;border:none;border-radius:10px;cursor:pointer;margin-bottom:20px;}
 .resultado{background:#222;padding:15px;border-radius:12px;margin-bottom:15px;text-align:left;font-size:18px;}
 .resultado span{color:#00FFAA;font-weight:bold;}
+.fuerte{color:#FFD700;}
 .energia{font-weight:bold;}
 .poseada{margin-top:30px;}
 .nota{font-size:14px;color:#aaa;margin-top:10px;}
@@ -20,7 +21,7 @@ button{width:85%;padding:14px;font-size:18px;background:#00F5E0;color:#111;borde
 </head>
 <body>
 <div class="container">
-<h1>⚡ Tesla Pro</h1>
+<h1>⚡ Tesla Pro + Histórico</h1>
 
 <h2>Quiniela Tradicional (Método Tesla)</h2>
 <input type="text" id="inputTradicional" placeholder="Ingresá un número de 4 cifras">
@@ -37,8 +38,17 @@ button{width:85%;padding:14px;font-size:18px;background:#00F5E0;color:#111;borde
 </div>
 
 <script>
+// Tabla Tesla
 const tablaTesla = {0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']};
 const agencias = ["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
+
+// Histórico de números (ejemplo, se puede ampliar con todos los sorteos anteriores)
+const historico = [
+  {"fecha":"2026-02-08","hora":"Noche","agencia":"Corrientes","numero":"2034"},
+  {"fecha":"2026-02-08","hora":"Tarde","agencia":"Santa Fe","numero":"4501"},
+  {"fecha":"2026-02-08","hora":"Mañana","agencia":"Córdoba","numero":"8203"},
+  {"fecha":"2026-02-07","hora":"Noche","agencia":"Chaco","numero":"7003"}
+];
 
 // Función para calcular energía de cada número según Tesla
 function energiaNumero(num){
@@ -65,6 +75,14 @@ function sugerenciaJugada(cuaterno, terno, ambos){
   return "⚡ Ambos";
 }
 
+// Función para resaltar números fuertes según histórico
+function resaltarFuerte(num){
+  for(let h of historico){
+    if(h.numero.includes(num)) return true;
+  }
+  return false;
+}
+
 // Tradicional
 function generarTradicional(){
   const nro=document.getElementById('inputTradicional').value;
@@ -78,10 +96,8 @@ function generarTradicional(){
       if(j>0)terno+=nums[i%2];
     }
 
-    // Para ambos, tomamos los 2 últimos dígitos del cuaterno
     let ambos = cuaterno.slice(2,4);
 
-    // Energía y agencia
     let energiaC = energiaNumero(cuaterno);
     let energiaT = energiaNumero(terno);
     let energiaA = energiaNumero(ambos);
@@ -98,9 +114,9 @@ function generarTradicional(){
   let html='';
   jugadas.forEach((j,idx)=>{
     html+=`<div class="resultado"><strong>Jugada ${idx+1}</strong><br>
-      Cuaterno: <span>${j.cuaterno}</span> (${j.energiaC}) - Agencia: <span>${j.agenciaC}</span><br>
-      Terno: <span>${j.terno}</span> (${j.energiaT}) - Agencia: <span>${j.agenciaT}</span><br>
-      Ambos: <span>${j.ambos}</span> (${j.energiaA}) - Agencia: <span>${j.agenciaA}</span><br>
+      Cuaterno: <span class="${resaltarFuerte(j.cuaterno)?'fuerte':''}">${j.cuaterno}</span> (${j.energiaC}) - Agencia: <span>${j.agenciaC}</span><br>
+      Terno: <span class="${resaltarFuerte(j.terno)?'fuerte':''}">${j.terno}</span> (${j.energiaT}) - Agencia: <span>${j.agenciaT}</span><br>
+      Ambos: <span class="${resaltarFuerte(j.ambos)?'fuerte':''}">${j.ambos}</span> (${j.energiaA}) - Agencia: <span>${j.agenciaA}</span><br>
       Sugerencia: <span>${j.sugerencia}</span>
     </div>`;
   });

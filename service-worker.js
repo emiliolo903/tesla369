@@ -1,22 +1,17 @@
-const CACHE_NAME = "tesla-pro-v2"; // ⚠️ versión nueva
-
+const CACHE_NAME = "tesla-poseada-v2";
 const urlsToCache = [
-  "./",
-  "./index.html",
-  "./manifest.json"
+  "index.html",
+  "manifest.json"
 ];
 
-// INSTALACIÓN
 self.addEventListener("install", event => {
   self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
   );
 });
 
-// ACTIVACIÓN (BORRA CACHÉS VIEJOS)
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -29,12 +24,14 @@ self.addEventListener("activate", event => {
       )
     )
   );
-  self.clients.claim();
 });
 
-// FETCH
+self.clients.claim();
+});
+
 self.addEventListener("fetch", event => {
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
   );
 });

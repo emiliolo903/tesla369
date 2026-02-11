@@ -4,179 +4,194 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tesla Pro + Histórico Poseada</title>
+
 <style>
-body {margin:0;font-family:Arial,sans-serif;background:#111;color:#fff;display:flex;justify-content:center;padding:20px;}
+body{margin:0;font-family:Arial;background:#111;color:#fff;display:flex;justify-content:center;padding:20px;}
 .container{width:100%;max-width:500px;text-align:center;}
-h1{color:#00F5E0;font-size:28px;margin-bottom:20px;}
-h2{color:#FFD700;font-size:22px;margin-bottom:10px;}
-input, textarea{width:80%;padding:12px;font-size:18px;border-radius:8px;border:none;margin-bottom:15px;}
+h1{color:#00F5E0;margin-bottom:20px;}
+h2{color:#FFD700;margin-top:25px;}
+input,textarea{width:85%;padding:12px;font-size:16px;border-radius:8px;border:none;margin-bottom:12px;}
 textarea{height:120px;}
-button{width:85%;padding:14px;font-size:18px;background:#00F5E0;color:#111;border:none;border-radius:10px;cursor:pointer;margin-bottom:20px;}
-.resultado{background:#222;padding:15px;border-radius:12px;margin-bottom:15px;text-align:left;font-size:18px;}
+button{width:90%;padding:14px;font-size:16px;background:#00F5E0;color:#111;border:none;border-radius:10px;margin-bottom:15px;cursor:pointer;}
+.resultado{background:#222;padding:12px;border-radius:10px;margin-bottom:12px;text-align:left;}
 .resultado span{color:#00FFAA;font-weight:bold;}
-.poseada{margin-top:30px;}
-.nota{font-size:14px;color:#aaa;margin-top:10px;}
-.historial{margin-top:20px;padding:15px;background:#222;border-radius:12px;}
-.historial textarea{width:90%;}
+.nota{font-size:13px;color:#aaa;margin-bottom:15px;}
 </style>
 </head>
+
 <body>
 <div class="container">
+
 <h1>⚡ Tesla Pro + Histórico Poseada</h1>
 
-<h2>Quiniela Tradicional (Método Tesla)</h2>
-<input type="text" id="inputTradicional" placeholder="Ingresá un número de 4 cifras">
+<h2>Quiniela Tradicional</h2>
+<input type="text" id="inputTradicional" placeholder="Ingresá 4 cifras">
 <button onclick="generarTradicional()">Generar Tradicional</button>
 <div id="resultadosTradicional"></div>
 
-<div class="poseada">
 <h2>Quiniela Poseada Correntina</h2>
-<input type="text" id="inputPoseada" placeholder="Ingresá los 10 números del sorteo anterior (00-99)">
-<button onclick="generarPoseada()">Generar 2 jugadas Tesla</button>
-<div class="nota">Sistema conservador con peso por recencia.</div>
+<input type="text" id="inputPoseada" placeholder="Ingresá los 10 números del sorteo anterior">
+<button onclick="generarPoseada()">Generar Poseada</button>
 <div id="resultadosPoseada"></div>
-</div>
 
-<div class="historial">
-<h2>Histórico Poseada (últimas 20 jugadas)</h2>
-<textarea id="inputHistorico" placeholder="20 jugadas, cada una con 10 números (una por línea)"></textarea>
+<h2>Histórico (20 jugadas)</h2>
+<textarea id="inputHistorico" placeholder="20 jugadas, una por línea, cada una con 10 números"></textarea>
 <button onclick="guardarHistorico()">Guardar Histórico</button>
-<div class="nota">Se guarda en memoria del navegador.</div>
+<div class="nota">Se guarda automáticamente en el navegador.</div>
+
 </div>
 
 <script>
 
 // ================= TABLA TESLA =================
-const tablaTesla = {
-0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],
-5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']
+const tablaTesla={
+0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],
+4:['6','9'],5:['2','7'],6:['4','9'],7:['5','2'],
+8:['3','0'],9:['3','4']
 };
 
-let historicoPoseada = JSON.parse(localStorage.getItem('historicoPoseada')) || [];
+const agencias=["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
+
+let historicoPoseada=JSON.parse(localStorage.getItem('historicoPoseada'))||[];
+
+// ================= FUNCIONES AUXILIARES =================
+
+function energiaNumero(num){
+let suma=num.split('').reduce((a,b)=>a+parseInt(b),0);
+if(suma%3===0)return "☀️ Mañana";
+if(suma%3===1)return "🌆 Tarde";
+return "🌙 Noche";
+}
+
+function agenciaPorNumero(num){
+let n=parseInt(num[0]);
+return agencias[n%agencias.length];
+}
+
+function sugerenciaJugada(c,t,a){
+if(new Set(c).size===4)return "🎯 Cuaterno";
+if(new Set(t).size===3)return "✅ Terno";
+return "⚡ Ambos";
+}
 
 // ================= TRADICIONAL =================
+
 function generarTradicional(){
-  const nro=document.getElementById('inputTradicional').value;
-  if(nro.length!==4 || isNaN(nro)){alert('Ingresá 4 cifras');return;}
 
-  let html='';
-  for(let i=0;i<2;i++){
-    let cuaterno='',terno='';
-    for(let j=0;j<4;j++){
-      let nums=tablaTesla[parseInt(nro[j])];
-      cuaterno+=nums[i%2];
-      if(j>0)terno+=nums[i%2];
-    }
-    let ambos = cuaterno.slice(2,4);
+let nro=document.getElementById("inputTradicional").value;
+if(nro.length!==4||isNaN(nro)){alert("Ingresá 4 cifras válidas");return;}
 
-    html+=`
-    <div class="resultado">
-      <strong>Jugada ${i+1}</strong><br>
-      Cuaterno: <span>${cuaterno}</span><br>
-      Terno: <span>${terno}</span><br>
-      Ambos: <span>${ambos}</span>
-    </div>`;
-  }
+let html="";
 
-  document.getElementById('resultadosTradicional').innerHTML=html;
+for(let i=0;i<2;i++){
+
+let cuaterno="",terno="";
+
+for(let j=0;j<4;j++){
+let nums=tablaTesla[parseInt(nro[j])];
+cuaterno+=nums[i];
+if(j>0)terno+=nums[i];
 }
 
-// ================= POSEADA CONSERVADORA =================
+let ambos=cuaterno.slice(2,4);
+
+html+=`
+<div class="resultado">
+<strong>Jugada ${i+1}</strong><br>
+Cuaterno: <span>${cuaterno}</span> (${energiaNumero(cuaterno)}) - Agencia: <span>${agenciaPorNumero(cuaterno)}</span><br>
+Terno: <span>${terno}</span> (${energiaNumero(terno)}) - Agencia: <span>${agenciaPorNumero(terno)}</span><br>
+Ambos: <span>${ambos}</span> (${energiaNumero(ambos)}) - Agencia: <span>${agenciaPorNumero(ambos)}</span><br>
+Sugerencia: <span>${sugerenciaJugada(cuaterno,terno,ambos)}</span>
+</div>
+`;
+}
+
+document.getElementById("resultadosTradicional").innerHTML=html;
+}
+
+// ================= POSEADA PONDERADA =================
+
 function generarPoseada(){
 
-  let inputRaw=document.getElementById('inputPoseada').value;
-  let input=inputRaw.split(/[\s,]+/)
-  .map(v=>v.trim())
-  .filter(v=>v!=='')
-  .map(v=>v.padStart(2,'0'));
+let input=document.getElementById("inputPoseada").value
+.split(/[\s,]+/)
+.map(v=>v.trim())
+.filter(v=>v!=="")
+.map(v=>v.padStart(2,'0'));
 
-  if(input.length!==10){
-    alert('Ingresá exactamente 10 números');
-    return;
-  }
+if(input.length!==10){alert("Ingresá exactamente 10 números");return;}
 
-  // Guardar nuevo sorteo
-  historicoPoseada.push(input);
-  if(historicoPoseada.length>20){
-    historicoPoseada.shift();
-  }
-  localStorage.setItem('historicoPoseada', JSON.stringify(historicoPoseada));
+historicoPoseada.push(input);
+if(historicoPoseada.length>20)historicoPoseada.shift();
 
-  // ================= PONDERACIÓN POR RECENCIA =================
-  let frecuencias = {};
-  let total = historicoPoseada.length;
+localStorage.setItem('historicoPoseada',JSON.stringify(historicoPoseada));
 
-  historicoPoseada.forEach((jugada, index) => {
+let frecuencias={};
+let total=historicoPoseada.length;
 
-    let peso = 1;
-    let posicion = total - index;
+historicoPoseada.forEach((jugada,index)=>{
 
-    if (posicion <= 5) {
-      peso = 3;      // últimos 5 sorteos
-    } else if (posicion <= 10) {
-      peso = 2;      // del 6 al 10
-    } else {
-      peso = 1;      // del 11 al 20
-    }
+let peso=1;
+let posicion=total-index;
 
-    jugada.forEach(n => {
-      frecuencias[n] = (frecuencias[n] || 0) + peso;
-    });
-  });
+if(posicion<=5)peso=3;
+else if(posicion<=10)peso=2;
+else peso=1;
 
-  // Ordenar por mayor peso
-  let numerosOrdenados = Object.keys(frecuencias)
-  .sort((a,b)=>frecuencias[b]-frecuencias[a]);
+jugada.forEach(n=>{
+frecuencias[n]=(frecuencias[n]||0)+peso;
+});
 
-  let principal = numerosOrdenados.slice(0,5);
-  let respaldo = numerosOrdenados.slice(5,10);
+});
 
-  let html=`
-  <div class="resultado">
-  <strong>Principal</strong>: <span>${principal.join(' - ')}</span>
-  </div>
+let ordenados=Object.keys(frecuencias)
+.sort((a,b)=>frecuencias[b]-frecuencias[a]);
 
-  <div class="resultado">
-  <strong>Respaldo</strong>: <span>${respaldo.join(' - ')}</span>
-  </div>
-  `;
+let principal=ordenados.slice(0,5);
+let respaldo=ordenados.slice(5,10);
 
-  document.getElementById('resultadosPoseada').innerHTML=html;
+let html=`
+<div class="resultado">
+<strong>Principal:</strong> <span>${principal.join(" - ")}</span>
+</div>
+<div class="resultado">
+<strong>Respaldo:</strong> <span>${respaldo.join(" - ")}</span>
+</div>
+`;
+
+document.getElementById("resultadosPoseada").innerHTML=html;
 }
 
-// ================= GUARDAR HISTÓRICO MANUAL =================
+// ================= GUARDAR HISTORICO =================
+
 function guardarHistorico(){
 
-  let input=document.getElementById('inputHistorico').value
-  .split(/\n+/)
-  .map(line=>line.trim())
-  .filter(line=>line!=='');
+let lineas=document.getElementById("inputHistorico").value
+.split(/\n+/)
+.map(l=>l.trim())
+.filter(l=>l!=="");
 
-  if(input.length!==20){
-    alert('Ingresá exactamente 20 jugadas');
-    return;
-  }
+if(lineas.length!==20){alert("Deben ser exactamente 20 jugadas");return;}
 
-  let jugadas = [];
+let jugadas=[];
 
-  for(let line of input){
-    let nums=line.split(/[\s,]+/)
-    .map(n=>n.trim().padStart(2,'0'));
+for(let linea of lineas){
 
-    if(nums.length!==10){
-      alert('Cada jugada debe tener 10 números');
-      return;
-    }
+let nums=linea.split(/[\s,]+/)
+.map(n=>n.trim().padStart(2,'0'));
 
-    jugadas.push(nums);
-  }
+if(nums.length!==10){alert("Cada jugada debe tener 10 números");return;}
 
-  historicoPoseada = jugadas;
-  localStorage.setItem('historicoPoseada', JSON.stringify(historicoPoseada));
+jugadas.push(nums);
+}
 
-  alert('Histórico guardado correctamente.');
+historicoPoseada=jugadas;
+localStorage.setItem('historicoPoseada',JSON.stringify(historicoPoseada));
+
+alert("Histórico guardado correctamente.");
 }
 
 </script>
+
 </body>
 </html>

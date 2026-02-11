@@ -3,179 +3,219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tesla Pro Oficial</title>
+<title>Tesla PRO V3</title>
 
 <style>
 body{
   margin:0;
   font-family:Arial,sans-serif;
-  background:#111;
+  background:#0f0f0f;
   color:#fff;
   display:flex;
   justify-content:center;
-  padding:20px;
+  padding:15px;
 }
-
 .container{
   width:100%;
-  max-width:500px;
-}
-
-.card{
-  background:#1a1a1a;
-  padding:20px;
-  border-radius:20px;
-  margin-bottom:20px;
-  box-shadow:0 0 15px rgba(0,255,255,0.3);
-}
-
-h1{
+  max-width:380px;
   text-align:center;
-  color:#00ffff;
 }
-
-input{
-  width:100%;
-  padding:12px;
-  margin-top:10px;
-  margin-bottom:15px;
-  border-radius:10px;
+h1{color:#00F5E0;font-size:20px;}
+h2{color:#FFD700;font-size:17px;}
+input, textarea{
+  width:92%;
+  padding:10px;
+  font-size:15px;
+  border-radius:8px;
   border:none;
-  font-size:16px;
+  margin-bottom:12px;
 }
-
+textarea{height:110px;}
 button{
-  width:100%;
-  padding:14px;
+  width:95%;
+  padding:10px;
+  font-size:15px;
+  background:#00F5E0;
+  color:#111;
   border:none;
-  border-radius:12px;
-  background:#00ffff;
-  font-size:16px;
-  font-weight:bold;
+  border-radius:8px;
   cursor:pointer;
+  margin-bottom:15px;
 }
-
-.result{
-  margin-top:15px;
-  background:#222;
-  padding:15px;
-  border-radius:12px;
+.resultado{
+  background:#1b1b1b;
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:12px;
+  text-align:left;
+  font-size:14px;
 }
-
-span{
-  color:#00ffcc;
-  font-weight:bold;
-}
+span{color:#00FFAA;font-weight:bold;}
+hr{border:1px solid #222;margin:25px 0;}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<h1>⚡ Tesla Pro Oficial</h1>
+<h1>⚡ Tesla PRO V3</h1>
 
-<div class="card">
-<h3>Quiniela Tradicional</h3>
-<input id="tradicional" placeholder="Ingresá 4 cifras">
+<h2>Quiniela Tradicional</h2>
+<input type="text" id="inputTradicional" placeholder="Número de 4 cifras">
 <button onclick="generarTradicional()">Generar Tesla</button>
-<div id="resTradicional"></div>
-</div>
+<div id="resultadosTradicional"></div>
+
+<hr>
+
+<h2>Poseada PRO V3</h2>
+<input type="text" id="inputPoseada" placeholder="10 números anteriores (00-99)">
+<button onclick="generarPoseada()">Generar Poseada PRO</button>
+<div id="resultadosPoseada"></div>
+
+<hr>
+
+<h2>Histórico Poseada (20 jugadas)</h2>
+<textarea id="inputHistorico" placeholder="20 líneas - 10 números cada línea"></textarea>
+<button onclick="guardarHistorico()">Guardar Histórico</button>
 
 </div>
 
 <script>
 
-// ===== TABLA TESLA ORIGINAL =====
-const tablaTesla = {
-0:['0','0'],
-1:['0','0'],
-2:['5','7'],
-3:['8','0'],
-4:['6','9'],
-5:['2','7'],
-6:['4','9'],
-7:['5','2'],
-8:['3','0'],
-9:['3','4']
+const tablaTesla={
+0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],
+5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']
 };
 
-const agencias = [
-"Corrientes",
-"Ciudad",
-"Bonaerense",
-"Santa Fe",
-"Córdoba",
-"Entre Ríos",
-"Chaco"
-];
+const agencias=["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
 
-// ===== ENERGÍA =====
+let historicoPoseada = JSON.parse(localStorage.getItem('historicoPoseada')) || [];
+
 function energiaNumero(num){
-  let suma = num.split('').reduce((a,b)=>a+parseInt(b),0);
-  if(suma % 3 === 0) return "☀️ Mañana";
-  if(suma % 3 === 1) return "🌆 Tarde";
+  let suma=num.split('').reduce((a,b)=>a+parseInt(b),0);
+  if(suma%3===0) return "☀️ Mañana";
+  if(suma%3===1) return "🌆 Tarde";
   return "🌙 Noche";
 }
 
-// ===== AGENCIA =====
 function agenciaPorNumero(num){
-  let indice = parseInt(num[0]) % agencias.length;
-  return agencias[indice];
+  return agencias[parseInt(num[0]) % agencias.length];
 }
 
-// ===== GENERADOR TRADICIONAL COMPLETO =====
 function generarTradicional(){
-
-  let nro = document.getElementById("tradicional").value.trim();
-
-  if(nro.length !== 4 || isNaN(nro)){
-    alert("Ingresá un número válido de 4 cifras");
+  const nro=document.getElementById('inputTradicional').value;
+  if(nro.length!==4 || isNaN(nro)){
+    alert("Número inválido");
     return;
   }
 
-  let html = "";
+  let html="";
 
-  // Genera 2 jugadas Tesla
-  for(let variante = 0; variante < 2; variante++){
-
-    let cuaterno = "";
-    let terno = "";
-
-    for(let i = 0; i < 4; i++){
-      let digito = parseInt(nro[i]);
-      let valorTesla = tablaTesla[digito][variante];
-      cuaterno += valorTesla;
-
-      if(i > 0){
-        terno += valorTesla;
-      }
+  for(let i=0;i<2;i++){
+    let cuaterno="",terno="";
+    for(let j=0;j<4;j++){
+      let nums=tablaTesla[parseInt(nro[j])];
+      cuaterno+=nums[i%2];
+      if(j>0) terno+=nums[i%2];
     }
 
-    let ambos = cuaterno.slice(2,4);
+    let ambos=cuaterno.slice(2,4);
 
-    html += `
-    <div class="result">
-      <strong>Jugada ${variante+1}</strong><br><br>
-
-      Cuaterno: <span>${cuaterno}</span><br>
-      Energía: ${energiaNumero(cuaterno)}<br>
-      Agencia: ${agenciaPorNumero(cuaterno)}<br><br>
-
-      Terno: <span>${terno}</span><br>
-      Energía: ${energiaNumero(terno)}<br>
-      Agencia: ${agenciaPorNumero(terno)}<br><br>
-
-      Ambos: <span>${ambos}</span><br>
-      Energía: ${energiaNumero(ambos)}<br>
-      Agencia: ${agenciaPorNumero(ambos)}
-    </div>
-    `;
+    html+=`
+    <div class="resultado">
+    <strong>Jugada ${i+1}</strong><br>
+    Cuaterno: <span>${cuaterno}</span> (${energiaNumero(cuaterno)}) - ${agenciaPorNumero(cuaterno)}<br>
+    Terno: <span>${terno}</span> (${energiaNumero(terno)}) - ${agenciaPorNumero(terno)}<br>
+    Ambos: <span>${ambos}</span> (${energiaNumero(ambos)}) - ${agenciaPorNumero(ambos)}
+    </div>`;
   }
 
-  document.getElementById("resTradicional").innerHTML = html;
+  document.getElementById("resultadosTradicional").innerHTML=html;
+}
+
+function generarPoseada(){
+
+  let input=document.getElementById('inputPoseada').value
+    .split(/[\s,]+/)
+    .map(v=>v.trim())
+    .filter(v=>v!=='')
+    .map(v=>v.padStart(2,'0'));
+
+  if(input.length!==10){
+    alert("Ingresá 10 números");
+    return;
+  }
+
+  historicoPoseada.push(input);
+  if(historicoPoseada.length>20) historicoPoseada.shift();
+  localStorage.setItem('historicoPoseada', JSON.stringify(historicoPoseada));
+
+  let freq={};
+  historicoPoseada.forEach(j=>{
+    j.forEach(n=>{
+      freq[n]=(freq[n]||0)+1;
+    });
+  });
+
+  let tesla=input.map(n=>{
+    return tablaTesla[parseInt(n[0])][0] + tablaTesla[parseInt(n[1])][0];
+  });
+
+  let candidatos=[...new Set([...Object.keys(freq), ...tesla])];
+
+  candidatos=candidatos.filter(n=>!input.includes(n));
+
+  candidatos.sort((a,b)=>(freq[b]||0)-(freq[a]||0));
+
+  let principales=candidatos.slice(0,5);
+  let respaldo=candidatos.slice(5,10);
+
+  while(principales.length<5){
+    let r=Math.floor(Math.random()*100).toString().padStart(2,'0');
+    if(!principales.includes(r)&&!input.includes(r))
+      principales.push(r);
+  }
+
+  while(respaldo.length<5){
+    let r=Math.floor(Math.random()*100).toString().padStart(2,'0');
+    if(!principales.includes(r)&&!respaldo.includes(r)&&!input.includes(r))
+      respaldo.push(r);
+  }
+
+  document.getElementById("resultadosPoseada").innerHTML=`
+  <div class="resultado"><strong>🔥 Principales</strong>: <span>${principales.join(" - ")}</span></div>
+  <div class="resultado"><strong>🛡 Respaldo</strong>: <span>${respaldo.join(" - ")}</span></div>`;
+}
+
+function guardarHistorico(){
+
+  let lineas=document.getElementById("inputHistorico").value
+    .split(/\n+/)
+    .map(l=>l.trim())
+    .filter(l=>l!=='');
+
+  if(lineas.length!==20){
+    alert("Necesitás 20 jugadas");
+    return;
+  }
+
+  let nuevo=[];
+
+  for(let l of lineas){
+    let nums=l.split(/[\s,]+/).map(n=>n.padStart(2,'0'));
+    if(nums.length!==10){
+      alert("Cada línea debe tener 10 números");
+      return;
+    }
+    nuevo.push(nums);
+  }
+
+  historicoPoseada=nuevo;
+  localStorage.setItem('historicoPoseada', JSON.stringify(historicoPoseada));
+
+  alert("Histórico guardado correctamente");
 }
 
 </script>
-
 </body>
 </html>

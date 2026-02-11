@@ -3,15 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tesla Pro App</title>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0ff">
+<title>Tesla Pro Full</title>
 
 <style>
 body{
   margin:0;
-  font-family:Arial, sans-serif;
+  font-family:Arial,sans-serif;
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:white;
   display:flex;
@@ -37,7 +34,7 @@ h1{
   color:#00ffff;
 }
 
-input, textarea{
+input{
   width:100%;
   padding:12px;
   margin-top:10px;
@@ -64,6 +61,10 @@ button{
   padding:15px;
   border-radius:12px;
 }
+span{
+  color:#00ffcc;
+  font-weight:bold;
+}
 </style>
 </head>
 
@@ -73,39 +74,91 @@ button{
 <h1>⚡ Tesla Pro</h1>
 
 <div class="card">
-<h3>Tradicional</h3>
-<input id="tradicional" placeholder="4 cifras">
-<button onclick="tradicional()">Generar</button>
+<h3>Quiniela Tradicional</h3>
+<input id="tradicional" placeholder="Ingresá 4 cifras">
+<button onclick="generarTradicional()">Generar Tesla</button>
 <div id="resTradicional"></div>
 </div>
 
 <div class="card">
-<h3>Poseada</h3>
-<input id="poseada" placeholder="10 números 00-99">
-<button onclick="poseada()">Generar</button>
+<h3>Quiniela Poseada</h3>
+<input id="poseada" placeholder="Ingresá 10 números (00-99)">
+<button onclick="generarPoseada()">Generar Poseada</button>
 <div id="resPoseada"></div>
 </div>
 
 </div>
 
 <script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
+
+// ===== TABLA TESLA REAL =====
+const tablaTesla = {
+0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],
+5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']
+};
+
+const agencias = [
+"Corrientes","Ciudad","Bonaerense",
+"Santa Fe","Córdoba","Entre Ríos","Chaco"
+];
+
+// ===== FUNCIONES =====
+
+function energiaNumero(num){
+  let suma=num.split('').reduce((a,b)=>a+parseInt(b),0);
+  if(suma%3===0) return "☀️ Mañana";
+  if(suma%3===1) return "🌆 Tarde";
+  return "🌙 Noche";
 }
 
-function tradicional(){
-  let n=document.getElementById("tradicional").value;
-  if(n.length!==4) return alert("4 cifras");
-  document.getElementById("resTradicional").innerHTML=
-  `<div class="result">Número generado desde ${n}</div>`;
+function agenciaPorNumero(num){
+  return agencias[parseInt(num[0]) % agencias.length];
 }
 
-function poseada(){
-  let n=document.getElementById("poseada").value;
-  localStorage.setItem("historial", n);
+// ===== TRADICIONAL COMPLETA =====
+
+function generarTradicional(){
+  let nro=document.getElementById("tradicional").value;
+  if(nro.length!==4 || isNaN(nro)) return alert("Número inválido");
+
+  let html="";
+
+  for(let i=0;i<2;i++){
+
+    let cuaterno="", terno="";
+
+    for(let j=0;j<4;j++){
+      let nums=tablaTesla[parseInt(nro[j])];
+      cuaterno+=nums[i%2];
+      if(j>0) terno+=nums[i%2];
+    }
+
+    let ambos=cuaterno.slice(2,4);
+
+    html+=`
+    <div class="result">
+    <strong>Jugada ${i+1}</strong><br>
+    Cuaterno: <span>${cuaterno}</span> - ${energiaNumero(cuaterno)} - ${agenciaPorNumero(cuaterno)}<br>
+    Terno: <span>${terno}</span> - ${energiaNumero(terno)} - ${agenciaPorNumero(terno)}<br>
+    Ambos: <span>${ambos}</span> - ${energiaNumero(ambos)} - ${agenciaPorNumero(ambos)}
+    </div>`;
+  }
+
+  document.getElementById("resTradicional").innerHTML=html;
+}
+
+// ===== POSEADA SIMPLE =====
+
+function generarPoseada(){
+  let input=document.getElementById("poseada").value;
+  if(input.trim()=="") return alert("Ingresá números");
+
+  localStorage.setItem("poseadaUltima", input);
+
   document.getElementById("resPoseada").innerHTML=
-  `<div class="result">Guardado ✔</div>`;
+  `<div class="result">Generado desde:<br><span>${input}</span></div>`;
 }
+
 </script>
 
 </body>

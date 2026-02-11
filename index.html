@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tesla Pro Full</title>
+<title>Tesla Pro Oficial</title>
 
 <style>
 body{
   margin:0;
   font-family:Arial,sans-serif;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:white;
+  background:#111;
+  color:#fff;
   display:flex;
   justify-content:center;
   padding:20px;
@@ -22,11 +22,11 @@ body{
 }
 
 .card{
-  background:#111;
+  background:#1a1a1a;
   padding:20px;
   border-radius:20px;
   margin-bottom:20px;
-  box-shadow:0 0 20px rgba(0,255,255,0.3);
+  box-shadow:0 0 15px rgba(0,255,255,0.3);
 }
 
 h1{
@@ -61,6 +61,7 @@ button{
   padding:15px;
   border-radius:12px;
 }
+
 span{
   color:#00ffcc;
   font-weight:bold;
@@ -71,7 +72,7 @@ span{
 <body>
 <div class="container">
 
-<h1>⚡ Tesla Pro</h1>
+<h1>⚡ Tesla Pro Oficial</h1>
 
 <div class="card">
 <h3>Quiniela Tradicional</h3>
@@ -80,83 +81,98 @@ span{
 <div id="resTradicional"></div>
 </div>
 
-<div class="card">
-<h3>Quiniela Poseada</h3>
-<input id="poseada" placeholder="Ingresá 10 números (00-99)">
-<button onclick="generarPoseada()">Generar Poseada</button>
-<div id="resPoseada"></div>
-</div>
-
 </div>
 
 <script>
 
-// ===== TABLA TESLA REAL =====
+// ===== TABLA TESLA ORIGINAL =====
 const tablaTesla = {
-0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],
-5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']
+0:['0','0'],
+1:['0','0'],
+2:['5','7'],
+3:['8','0'],
+4:['6','9'],
+5:['2','7'],
+6:['4','9'],
+7:['5','2'],
+8:['3','0'],
+9:['3','4']
 };
 
 const agencias = [
-"Corrientes","Ciudad","Bonaerense",
-"Santa Fe","Córdoba","Entre Ríos","Chaco"
+"Corrientes",
+"Ciudad",
+"Bonaerense",
+"Santa Fe",
+"Córdoba",
+"Entre Ríos",
+"Chaco"
 ];
 
-// ===== FUNCIONES =====
-
+// ===== ENERGÍA =====
 function energiaNumero(num){
-  let suma=num.split('').reduce((a,b)=>a+parseInt(b),0);
-  if(suma%3===0) return "☀️ Mañana";
-  if(suma%3===1) return "🌆 Tarde";
+  let suma = num.split('').reduce((a,b)=>a+parseInt(b),0);
+  if(suma % 3 === 0) return "☀️ Mañana";
+  if(suma % 3 === 1) return "🌆 Tarde";
   return "🌙 Noche";
 }
 
+// ===== AGENCIA =====
 function agenciaPorNumero(num){
-  return agencias[parseInt(num[0]) % agencias.length];
+  let indice = parseInt(num[0]) % agencias.length;
+  return agencias[indice];
 }
 
-// ===== TRADICIONAL COMPLETA =====
-
+// ===== GENERADOR TRADICIONAL COMPLETO =====
 function generarTradicional(){
-  let nro=document.getElementById("tradicional").value;
-  if(nro.length!==4 || isNaN(nro)) return alert("Número inválido");
 
-  let html="";
+  let nro = document.getElementById("tradicional").value.trim();
 
-  for(let i=0;i<2;i++){
-
-    let cuaterno="", terno="";
-
-    for(let j=0;j<4;j++){
-      let nums=tablaTesla[parseInt(nro[j])];
-      cuaterno+=nums[i%2];
-      if(j>0) terno+=nums[i%2];
-    }
-
-    let ambos=cuaterno.slice(2,4);
-
-    html+=`
-    <div class="result">
-    <strong>Jugada ${i+1}</strong><br>
-    Cuaterno: <span>${cuaterno}</span> - ${energiaNumero(cuaterno)} - ${agenciaPorNumero(cuaterno)}<br>
-    Terno: <span>${terno}</span> - ${energiaNumero(terno)} - ${agenciaPorNumero(terno)}<br>
-    Ambos: <span>${ambos}</span> - ${energiaNumero(ambos)} - ${agenciaPorNumero(ambos)}
-    </div>`;
+  if(nro.length !== 4 || isNaN(nro)){
+    alert("Ingresá un número válido de 4 cifras");
+    return;
   }
 
-  document.getElementById("resTradicional").innerHTML=html;
-}
+  let html = "";
 
-// ===== POSEADA SIMPLE =====
+  // Genera 2 jugadas Tesla
+  for(let variante = 0; variante < 2; variante++){
 
-function generarPoseada(){
-  let input=document.getElementById("poseada").value;
-  if(input.trim()=="") return alert("Ingresá números");
+    let cuaterno = "";
+    let terno = "";
 
-  localStorage.setItem("poseadaUltima", input);
+    for(let i = 0; i < 4; i++){
+      let digito = parseInt(nro[i]);
+      let valorTesla = tablaTesla[digito][variante];
+      cuaterno += valorTesla;
 
-  document.getElementById("resPoseada").innerHTML=
-  `<div class="result">Generado desde:<br><span>${input}</span></div>`;
+      if(i > 0){
+        terno += valorTesla;
+      }
+    }
+
+    let ambos = cuaterno.slice(2,4);
+
+    html += `
+    <div class="result">
+      <strong>Jugada ${variante+1}</strong><br><br>
+
+      Cuaterno: <span>${cuaterno}</span><br>
+      Energía: ${energiaNumero(cuaterno)}<br>
+      Agencia: ${agenciaPorNumero(cuaterno)}<br><br>
+
+      Terno: <span>${terno}</span><br>
+      Energía: ${energiaNumero(terno)}<br>
+      Agencia: ${agenciaPorNumero(terno)}<br><br>
+
+      Ambos: <span>${ambos}</span><br>
+      Energía: ${energiaNumero(ambos)}<br>
+      Agencia: ${agenciaPorNumero(ambos)}
+    </div>
+    `;
+  }
+
+  document.getElementById("resTradicional").innerHTML = html;
 }
 
 </script>

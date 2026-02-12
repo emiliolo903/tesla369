@@ -1,7 +1,11 @@
-const CACHE="emi-tesla-v4";
+const CACHE="emi-tesla-pro-v1";
 self.addEventListener("install",e=>{
 e.waitUntil(
-caches.open(CACHE).then(cache=>cache.addAll(["index.html"]))
+caches.open(CACHE).then(c=>c.addAll([
+"./",
+"./index.html",
+"./manifest.json"
+]))
 );
 });
 self.addEventListener("fetch",e=>{

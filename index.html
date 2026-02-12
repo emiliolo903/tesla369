@@ -3,219 +3,142 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tesla PRO V3</title>
+<title>EL EMI Tesla Pro</title>
+
+<link rel="manifest" href="manifest.json">
 
 <style>
 body{
   margin:0;
-  font-family:Arial,sans-serif;
+  font-family:Arial, sans-serif;
   background:#0f0f0f;
   color:#fff;
-  display:flex;
-  justify-content:center;
-  padding:15px;
-}
-.container{
-  width:100%;
-  max-width:380px;
   text-align:center;
 }
-h1{color:#00F5E0;font-size:20px;}
-h2{color:#FFD700;font-size:17px;}
-input, textarea{
-  width:92%;
-  padding:10px;
-  font-size:15px;
-  border-radius:8px;
-  border:none;
-  margin-bottom:12px;
+
+.container{
+  max-width:480px;
+  margin:auto;
+  padding:15px;
 }
-textarea{height:110px;}
-button{
+
+h1{
+  color:#00ffcc;
+  font-size:22px;
+  margin-bottom:20px;
+}
+
+.card{
+  background:#1a1a1a;
+  padding:15px;
+  border-radius:14px;
+  margin-bottom:20px;
+  box-shadow:0 0 15px rgba(0,255,200,0.2);
+}
+
+input, textarea{
   width:95%;
   padding:10px;
-  font-size:15px;
-  background:#00F5E0;
-  color:#111;
-  border:none;
   border-radius:8px;
-  cursor:pointer;
-  margin-bottom:15px;
+  border:none;
+  margin-bottom:10px;
+  font-size:16px;
 }
-.resultado{
-  background:#1b1b1b;
+
+button{
+  width:100%;
   padding:12px;
+  border:none;
   border-radius:10px;
-  margin-bottom:12px;
-  text-align:left;
+  background:#00ffcc;
+  color:#000;
+  font-weight:bold;
+  font-size:16px;
+  margin-top:5px;
+}
+
+.resultado{
+  background:#111;
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
   font-size:14px;
 }
-span{color:#00FFAA;font-weight:bold;}
-hr{border:1px solid #222;margin:25px 0;}
+span{
+  color:#00ff99;
+  font-weight:bold;
+}
 </style>
 </head>
 
 <body>
+
 <div class="container">
 
-<h1>⚡ Tesla PRO V3</h1>
+<h1>⚡ EL EMI Tesla Pro</h1>
 
+<div class="card">
 <h2>Quiniela Tradicional</h2>
-<input type="text" id="inputTradicional" placeholder="Número de 4 cifras">
-<button onclick="generarTradicional()">Generar Tesla</button>
-<div id="resultadosTradicional"></div>
+<input type="text" id="inputTradicional" placeholder="Número 4 cifras">
+<button onclick="generarTradicional()">Generar</button>
+<div id="resultadoTradicional"></div>
+</div>
 
-<hr>
-
-<h2>Poseada PRO V3</h2>
-<input type="text" id="inputPoseada" placeholder="10 números anteriores (00-99)">
-<button onclick="generarPoseada()">Generar Poseada PRO</button>
-<div id="resultadosPoseada"></div>
-
-<hr>
-
-<h2>Histórico Poseada (20 jugadas)</h2>
-<textarea id="inputHistorico" placeholder="20 líneas - 10 números cada línea"></textarea>
-<button onclick="guardarHistorico()">Guardar Histórico</button>
+<div class="card">
+<h2>Poseada PRO</h2>
+<input type="text" id="inputPoseada" placeholder="10 números anteriores">
+<button onclick="generarPoseada()">Generar Poseada</button>
+<div id="resultadoPoseada"></div>
+</div>
 
 </div>
 
 <script>
 
 const tablaTesla={
-0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],
-5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']
+0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],
+4:['6','9'],5:['2','7'],6:['4','9'],
+7:['5','2'],8:['3','0'],9:['3','4']
 };
 
-const agencias=["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
-
-let historicoPoseada = JSON.parse(localStorage.getItem('historicoPoseada')) || [];
-
-function energiaNumero(num){
-  let suma=num.split('').reduce((a,b)=>a+parseInt(b),0);
-  if(suma%3===0) return "☀️ Mañana";
-  if(suma%3===1) return "🌆 Tarde";
-  return "🌙 Noche";
-}
-
-function agenciaPorNumero(num){
-  return agencias[parseInt(num[0]) % agencias.length];
-}
-
 function generarTradicional(){
-  const nro=document.getElementById('inputTradicional').value;
-  if(nro.length!==4 || isNaN(nro)){
-    alert("Número inválido");
-    return;
-  }
+let n=document.getElementById("inputTradicional").value;
+if(n.length!=4||isNaN(n)){alert("Número inválido");return;}
 
-  let html="";
-
-  for(let i=0;i<2;i++){
-    let cuaterno="",terno="";
-    for(let j=0;j<4;j++){
-      let nums=tablaTesla[parseInt(nro[j])];
-      cuaterno+=nums[i%2];
-      if(j>0) terno+=nums[i%2];
-    }
-
-    let ambos=cuaterno.slice(2,4);
-
-    html+=`
-    <div class="resultado">
-    <strong>Jugada ${i+1}</strong><br>
-    Cuaterno: <span>${cuaterno}</span> (${energiaNumero(cuaterno)}) - ${agenciaPorNumero(cuaterno)}<br>
-    Terno: <span>${terno}</span> (${energiaNumero(terno)}) - ${agenciaPorNumero(terno)}<br>
-    Ambos: <span>${ambos}</span> (${energiaNumero(ambos)}) - ${agenciaPorNumero(ambos)}
-    </div>`;
-  }
-
-  document.getElementById("resultadosTradicional").innerHTML=html;
+let r="";
+for(let i=0;i<2;i++){
+let c="";
+for(let j=0;j<4;j++){
+c+=tablaTesla[n[j]][i%2];
+}
+r+=`<div class="resultado">Jugada ${i+1}: <span>${c}</span></div>`;
+}
+document.getElementById("resultadoTradicional").innerHTML=r;
 }
 
 function generarPoseada(){
+let input=document.getElementById("inputPoseada").value
+.split(/[\s,]+/)
+.filter(v=>v!="")
+.map(v=>v.padStart(2,"0"));
 
-  let input=document.getElementById('inputPoseada').value
-    .split(/[\s,]+/)
-    .map(v=>v.trim())
-    .filter(v=>v!=='')
-    .map(v=>v.padStart(2,'0'));
+if(input.length!=10){alert("Ingresá 10 números");return;}
 
-  if(input.length!==10){
-    alert("Ingresá 10 números");
-    return;
-  }
+let resultado=[];
+input.forEach(n=>{
+resultado.push(tablaTesla[n[0]][0]+tablaTesla[n[1]][0]);
+});
 
-  historicoPoseada.push(input);
-  if(historicoPoseada.length>20) historicoPoseada.shift();
-  localStorage.setItem('historicoPoseada', JSON.stringify(historicoPoseada));
-
-  let freq={};
-  historicoPoseada.forEach(j=>{
-    j.forEach(n=>{
-      freq[n]=(freq[n]||0)+1;
-    });
-  });
-
-  let tesla=input.map(n=>{
-    return tablaTesla[parseInt(n[0])][0] + tablaTesla[parseInt(n[1])][0];
-  });
-
-  let candidatos=[...new Set([...Object.keys(freq), ...tesla])];
-
-  candidatos=candidatos.filter(n=>!input.includes(n));
-
-  candidatos.sort((a,b)=>(freq[b]||0)-(freq[a]||0));
-
-  let principales=candidatos.slice(0,5);
-  let respaldo=candidatos.slice(5,10);
-
-  while(principales.length<5){
-    let r=Math.floor(Math.random()*100).toString().padStart(2,'0');
-    if(!principales.includes(r)&&!input.includes(r))
-      principales.push(r);
-  }
-
-  while(respaldo.length<5){
-    let r=Math.floor(Math.random()*100).toString().padStart(2,'0');
-    if(!principales.includes(r)&&!respaldo.includes(r)&&!input.includes(r))
-      respaldo.push(r);
-  }
-
-  document.getElementById("resultadosPoseada").innerHTML=`
-  <div class="resultado"><strong>🔥 Principales</strong>: <span>${principales.join(" - ")}</span></div>
-  <div class="resultado"><strong>🛡 Respaldo</strong>: <span>${respaldo.join(" - ")}</span></div>`;
+document.getElementById("resultadoPoseada").innerHTML=
+`<div class="resultado">Resultado: <span>${resultado.join(" - ")}</span></div>`;
 }
 
-function guardarHistorico(){
-
-  let lineas=document.getElementById("inputHistorico").value
-    .split(/\n+/)
-    .map(l=>l.trim())
-    .filter(l=>l!=='');
-
-  if(lineas.length!==20){
-    alert("Necesitás 20 jugadas");
-    return;
-  }
-
-  let nuevo=[];
-
-  for(let l of lineas){
-    let nums=l.split(/[\s,]+/).map(n=>n.padStart(2,'0'));
-    if(nums.length!==10){
-      alert("Cada línea debe tener 10 números");
-      return;
-    }
-    nuevo.push(nums);
-  }
-
-  historicoPoseada=nuevo;
-  localStorage.setItem('historicoPoseada', JSON.stringify(historicoPoseada));
-
-  alert("Histórico guardado correctamente");
+// SERVICE WORKER
+if("serviceWorker" in navigator){
+navigator.serviceWorker.register("service-worker.js");
 }
 
 </script>
+
 </body>
 </html>

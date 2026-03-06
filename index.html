@@ -2,121 +2,145 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>EMI Tesla Predictor V5</title>
+<title>App Quiniela Tesla</title>
 
 <style>
-
 body{
-background:#0a0a0a;
-color:white;
 font-family:Arial;
+background:#111;
+color:white;
 text-align:center;
 padding:20px;
 }
 
-h1{
-color:#00ffcc;
+textarea{
+width:90%;
+height:120px;
+font-size:18px;
+padding:10px;
+margin:10px;
 }
 
 button{
-padding:12px;
-margin:10px;
+padding:12px 20px;
+margin:8px;
 font-size:18px;
-background:#00ffcc;
 border:none;
 border-radius:8px;
 cursor:pointer;
 }
 
-.resultado{
-font-size:28px;
-margin-top:20px;
-}
+#tradicional{background:#ff9800;color:white;}
+#poceada{background:#4caf50;color:white;}
+#limpiar{background:#f44336;color:white;}
 
+#resultado{
+margin-top:20px;
+font-size:20px;
+background:#222;
+padding:15px;
+border-radius:10px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>EMI Tesla Predictor V5</h1>
+<h2>APP QUINIELA TESLA</h2>
 
-<button onclick="generar()">Generar combinación</button>
+<p>Pegar números del sorteo</p>
 
-<div class="resultado" id="principal"></div>
-<div class="resultado" id="extra"></div>
+<textarea id="numeros"></textarea>
+
+<br>
+
+<button id="tradicional" onclick="tradicional()">Quiniela Tradicional</button>
+<button id="poceada" onclick="poceada()">5 + 3</button>
+<button id="limpiar" onclick="limpiar()">Limpiar</button>
+
+<div id="resultado"></div>
 
 <script>
 
-// HISTORICO (podés actualizarlo)
-let historico = [
-11,12,33,63,71,
-14,20,29,22,18,
-0,12,42,48,54,
-56,66,85,87,99
-]
+const metodoTesla={
+0:[0,0],
+1:[0,0],
+2:[5,7],
+3:[8,0],
+4:[6,9],
+5:[2,7],
+6:[4,9],
+7:[5,2],
+8:[3,0],
+9:[3,4]
+};
 
-// función random
-function random(min,max){
-return Math.floor(Math.random()*(max-min+1))+min
-}
+function obtenerNumeros(){
 
-// refuerzo Tesla 3-6-9
-function teslaBoost(n){
-let r=n
-if(r%3==0) r+=1
-if(r>99) r-=10
-return r
-}
+let texto=document.getElementById("numeros").value;
 
-// balance de décadas
-function generarDecadas(){
+let numeros=texto.match(/\d+/g);
 
-let numeros=[]
-
-numeros.push(random(0,9))
-numeros.push(random(10,19))
-numeros.push(random(40,49))
-numeros.push(random(50,59))
-numeros.push(random(80,99))
-
-return numeros
+return numeros||[];
 
 }
 
-// afinidad histórica
-function afinidad(){
+function tradicional(){
 
-let pick=historico[random(0,historico.length-1)]
+let nums=obtenerNumeros();
 
-return teslaBoost(pick)
+let salida="RESULTADO TRADICIONAL<br><br>";
+
+nums.forEach(n=>{
+
+let ultimo=parseInt(n.slice(-1));
+
+let pares=metodoTesla[ultimo];
+
+salida+=n+" → "+pares[0]+""+pares[1]+"<br>";
+
+});
+
+document.getElementById("resultado").innerHTML=salida;
 
 }
 
-// generar jugada
-function generar(){
+function poceada(){
 
-let base=generarDecadas()
+let nums=obtenerNumeros();
 
-let afin1=afinidad()
-let afin2=afinidad()
-let afin3=afinidad()
+let frecuencia={};
 
-let todos=[...base,afin1,afin2,afin3]
+nums.forEach(n=>{
 
-todos=[...new Set(todos)]
+n.split("").forEach(d=>{
 
-while(todos.length<8){
-todos.push(random(0,99))
+frecuencia[d]=(frecuencia[d]||0)+1;
+
+});
+
+});
+
+let orden=Object.entries(frecuencia).sort((a,b)=>b[1]-a[1]);
+
+let cinco=orden.slice(0,5).map(x=>x[0]);
+
+let tres=orden.slice(5,8).map(x=>x[0]);
+
+let salida="JUGADA POCEADA<br><br>";
+
+salida+="5 FIJOS: "+cinco.join(" - ")+"<br><br>";
+
+salida+="3 APOYO: "+tres.join(" - ");
+
+document.getElementById("resultado").innerHTML=salida;
+
 }
 
-let principal=todos.slice(0,5)
-let extra=todos.slice(5,8)
+function limpiar(){
 
-document.getElementById("principal").innerHTML=
-"🎯 PRINCIPAL: "+principal.join(" - ")
-
-document.getElementById("extra").innerHTML=
-"⭐ EXTRA: "+extra.join(" - ")
+document.getElementById("numeros").value="";
+document.getElementById("resultado").innerHTML="";
 
 }
 

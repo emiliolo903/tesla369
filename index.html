@@ -5,23 +5,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V6</title>
+<title>EMI Tesla Pro V7</title>
 
 <style>
 
 body{
 margin:0;
 font-family:Arial;
-background:#111;
-color:#fff;
+background:#111111;
+color:#ffffff;
 display:flex;
 justify-content:center;
 padding:15px;
 }
 
 .container{
-width:100%;
 max-width:480px;
+width:100%;
 text-align:center;
 }
 
@@ -30,18 +30,15 @@ h1{color:#00F5E0}
 h2{color:#FFD700}
 
 input,textarea{
-
 width:95%;
 padding:10px;
 font-size:16px;
 border-radius:8px;
 border:none;
 margin-bottom:10px;
-
 }
 
 button{
-
 width:100%;
 padding:12px;
 font-size:16px;
@@ -51,17 +48,14 @@ border:none;
 border-radius:8px;
 margin-bottom:15px;
 cursor:pointer;
-
 }
 
 .resultado{
-
 background:#222;
 padding:10px;
 border-radius:10px;
 margin-bottom:10px;
 text-align:left;
-
 }
 
 span{
@@ -77,18 +71,18 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V6</h1>
+<h1>🔥 EMI Tesla Pro V7</h1>
 
 <h2>Quiniela Tradicional</h2>
 
-<input type="text" id="inputTradicional" placeholder="Número de 4 cifras">
+<input type="text" id="inputTradicional" placeholder="Número 4 cifras">
 
 <button onclick="generarTradicional()">Generar</button>
 
 <div id="resultadosTradicional"></div>
 
 
-<h2>Poceada Inteligente</h2>
+<h2>Poceada Inteligente V7</h2>
 
 <input type="text" id="inputPoseada" placeholder="Ingresar 10 números del último sorteo">
 
@@ -99,10 +93,9 @@ font-weight:bold;
 
 <h2>Cargar 20 sorteos históricos</h2>
 
-<textarea id="historico20" placeholder="Pegar aquí 20 sorteos (10 números por línea)"></textarea>
+<textarea id="historico20" placeholder="Pegar 20 sorteos (10 números por línea)"></textarea>
 
 <button onclick="cargarHistorico20()">Cargar histórico</button>
-
 
 </div>
 
@@ -123,17 +116,17 @@ const tablaTesla={
 
 let historico=[];
 
+function espejo(n){
+return n[1]+n[0];
+}
 
 function generarTradicional(){
 
 let n=document.getElementById("inputTradicional").value;
 
 if(n.length!==4||isNaN(n)){
-
 alert("Número inválido");
-
 return;
-
 }
 
 let html="";
@@ -156,7 +149,6 @@ if(j>0) terno+=nums[i%2];
 let ambos=cuaterno.slice(2,4);
 
 html+=`
-
 <div class="resultado">
 
 Cuaterno: <span>${cuaterno}</span><br>
@@ -164,7 +156,6 @@ Terno: <span>${terno}</span><br>
 Ambos: <span>${ambos}</span>
 
 </div>
-
 `;
 
 }
@@ -173,16 +164,6 @@ document.getElementById("resultadosTradicional").innerHTML=html;
 
 }
 
-
-
-function espejo(n){
-
-return n[1]+n[0];
-
-}
-
-
-
 function generarPoseada(){
 
 let input=document.getElementById("inputPoseada").value
@@ -190,23 +171,18 @@ let input=document.getElementById("inputPoseada").value
 .map(v=>v.padStart(2,'0'));
 
 if(input.length!==10){
-
 alert("Ingresá 10 números");
-
 return;
-
 }
 
 historico.push(input);
 
 if(historico.length>20) historico.shift();
 
-
 let freq={};
 let decadas={};
 let finales={};
 let ultima={};
-
 
 historico.forEach((j,i)=>{
 
@@ -226,7 +202,6 @@ ultima[n]=i;
 
 });
 
-
 let decadasTop=Object.keys(decadas)
 .sort((a,b)=>decadas[b]-decadas[a])
 .slice(0,3);
@@ -234,7 +209,6 @@ let decadasTop=Object.keys(decadas)
 let finalesTop=Object.keys(finales)
 .sort((a,b)=>finales[b]-finales[a])
 .slice(0,3);
-
 
 let candidatos=[];
 
@@ -255,7 +229,6 @@ if(decadasTop.includes(d)) score+=3;
 if(finalesTop.includes(num[1])) score+=3;
 
 let tesla=
-
 tablaTesla[parseInt(num[0])][0]+
 tablaTesla[parseInt(num[1])][0];
 
@@ -267,7 +240,11 @@ let esp=espejo(num);
 
 if(input.includes(esp)) score+=3;
 
-if(score>=8) score+=3;
+/* detector de racha */
+if(freq[num] >=2) score+=3;
+
+/* expansión V7 */
+if(score>=7) score+=3;
 
 candidatos.push({num,score});
 
@@ -275,47 +252,41 @@ candidatos.push({num,score});
 
 candidatos.sort((a,b)=>b.score-a.score);
 
-let principal=candidatos.slice(0,6).map(c=>c.num);
+/* expansión 12 candidatos */
 
-let respaldo=candidatos.slice(6,10).map(c=>c.num);
+let expansion=candidatos.slice(0,12);
 
+/* selección final */
+
+let principal=expansion.slice(0,6).map(c=>c.num);
+
+let respaldo=expansion.slice(6,10).map(c=>c.num);
 
 let textoDecadas=decadasTop.map(d=>d+"0").join(" - ");
 
 let textoFinales=finalesTop.join(" - ");
 
+document.getElementById("resultadosPoseada").innerHTML=
 
-document.getElementById("resultadosPoseada").innerHTML=`
-
+`
 <div class="resultado">
-
 Principal: <span>${principal.join(" - ")}</span>
-
 </div>
 
 <div class="resultado">
-
 Respaldo: <span>${respaldo.join(" - ")}</span>
-
 </div>
 
 <div class="resultado">
-
 Décadas activas: <span>${textoDecadas}</span>
-
 </div>
 
 <div class="resultado">
-
 Finales calientes: <span>${textoFinales}</span>
-
 </div>
-
 `;
 
 }
-
-
 
 function cargarHistorico20(){
 
@@ -324,11 +295,8 @@ let texto=document.getElementById("historico20").value.trim();
 let lineas=texto.split(/\n+/);
 
 if(lineas.length<20){
-
 alert("Necesitas 20 sorteos");
-
 return;
-
 }
 
 historico=[];
@@ -338,9 +306,7 @@ lineas.slice(0,20).forEach(l=>{
 let nums=l.split(/[\s,]+/).map(n=>n.padStart(2,'0'));
 
 if(nums.length===10){
-
 historico.push(nums);
-
 }
 
 });

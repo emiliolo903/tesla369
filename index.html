@@ -3,110 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EMI Tesla Pro</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00F5E0">
+<title>EMI Tesla Pro V6</title>
 
 <style>
+
 body{
 margin:0;
-font-family:Arial,sans-serif;
-background:#111111;
+font-family:Arial;
+background:#111;
 color:#fff;
 display:flex;
 justify-content:center;
 padding:15px;
 }
 
-#splash-screen{
-position:fixed;
-width:100%;
-height:100%;
-background:#111111;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:9999;
-flex-direction:column;
-}
-
-.splash-content{
-text-align:center;
-color:#00F5E0;
-}
-
-.logo-main{
-font-size:42px;
-letter-spacing:4px;
-margin:0;
-}
-
-.logo-sub{
-font-size:20px;
-margin:5px 0;
-color:#ffffff;
-}
-
-.logo-tag{
-font-size:13px;
-color:#888888;
-margin-bottom:20px;
-}
-
-.loader{
-width:40px;
-height:40px;
-border:3px solid #00F5E0;
-border-top:3px solid transparent;
-border-radius:50%;
-animation:spin 1s linear infinite;
-margin:0 auto 10px auto;
-}
-
-.loading-text{
-font-size:12px;
-color:#888888;
-}
-
-@keyframes spin{
-0%{transform:rotate(0deg);}
-100%{transform:rotate(360deg);}
-}
-
 .container{
-width:100%;
 max-width:480px;
+width:100%;
 text-align:center;
 }
 
-h1{
-color:#00F5E0;
-font-size:22px;
-}
-
-h2{
-color:#FFD700;
-font-size:18px;
-margin-top:20px;
-}
+h1{color:#00F5E0}
 
 input,textarea{
 width:95%;
 padding:10px;
-font-size:16px;
+margin-bottom:10px;
 border-radius:8px;
 border:none;
-margin-bottom:10px;
+font-size:16px;
 }
 
 button{
 width:100%;
 padding:12px;
-font-size:16px;
 background:#00F5E0;
-color:#111111;
 border:none;
 border-radius:8px;
+font-size:16px;
 margin-bottom:15px;
 cursor:pointer;
 }
@@ -116,7 +50,6 @@ background:#222;
 padding:10px;
 border-radius:10px;
 margin-bottom:10px;
-font-size:15px;
 text-align:left;
 }
 
@@ -125,185 +58,193 @@ color:#00FFAA;
 font-weight:bold;
 }
 
-.legal{
-font-size:11px;
-color:#777;
-margin-top:25px;
-line-height:1.4;
-}
 </style>
 </head>
 
 <body>
 
-<div id="splash-screen">
-<div class="splash-content">
-<h1 class="logo-main">EMI</h1>
-<h2 class="logo-sub">Tesla Pro</h2>
-<p class="logo-tag">Laboratorio de Análisis Numérico</p>
-<div class="loader"></div>
-<p class="loading-text">Iniciando sistema...</p>
-</div>
-</div>
-
 <div class="container">
-<h1>🔥 EMI Tesla Pro</h1>
+
+<h1>🔥 EMI Tesla Pro V6</h1>
 
 <h2>Quiniela Tradicional</h2>
+
 <input type="text" id="inputTradicional" placeholder="Número 4 cifras">
+
 <button onclick="generarTradicional()">Generar</button>
+
 <div id="resultadosTradicional"></div>
 
-<h2>Poseada Pro V4</h2>
-<input type="text" id="inputPoseada" placeholder="10 números anteriores (00-99)">
-<button onclick="generarPoseada()">Generar Poseada</button>
+<h2>Poceada Inteligente</h2>
+
+<input type="text" id="inputPoseada" placeholder="Ingresar 10 números anteriores">
+
+<button onclick="generarPoseada()">Generar</button>
+
 <div id="resultadosPoseada"></div>
-
-<h2>Histórico Poseada</h2>
-<textarea id="inputHistorico" placeholder="20 líneas de 10 números, separadas por coma"></textarea>
-<button onclick="guardarHistorico()">Guardar Histórico</button>
-
-<div class="legal">
-EMI Tesla Pro es un sistema de análisis estadístico aplicado a sorteos numéricos.<br>
-Los resultados generados son estimaciones basadas en patrones y frecuencia histórica.<br>
-No garantiza premios ni resultados específicos.<br>
-El uso de la herramienta es responsabilidad del usuario.
-</div>
 
 </div>
 
 <script>
 
-window.addEventListener("load",function(){
-setTimeout(function(){
-document.getElementById("splash-screen").style.display="none";
-},2000);
-});
+const tablaTesla={
+0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],
+5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']
+};
 
-const tablaTesla={0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']};
-const agencias=["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
-let historico=JSON.parse(localStorage.getItem("historicoEMI"))||[];
-
-function energia(num){
-let s=num.split('').reduce((a,b)=>a+parseInt(b),0);
-if(s%3===0)return "☀️ Mañana";
-if(s%3===1)return "🌆 Tarde";
-return "🌙 Noche";
-}
-
-function agencia(num){
-return agencias[parseInt(num[0])%agencias.length];
-}
+let historico=[];
 
 function generarTradicional(){
+
 let n=document.getElementById("inputTradicional").value;
-if(n.length!==4||isNaN(n))return alert("Número inválido");
+
+if(n.length!==4||isNaN(n)) return alert("Número inválido");
+
 let html="";
+
 for(let i=0;i<2;i++){
+
 let cuaterno="",terno="";
+
 for(let j=0;j<4;j++){
+
 let nums=tablaTesla[parseInt(n[j])];
+
 cuaterno+=nums[i%2];
+
 if(j>0)terno+=nums[i%2];
+
 }
+
 let ambos=cuaterno.slice(2,4);
+
 html+=`
 <div class="resultado">
-<strong>Jugada ${i+1}</strong><br>
-Cuaterno: <span>${cuaterno}</span> (${energia(cuaterno)}) - ${agencia(cuaterno)}<br>
-Terno: <span>${terno}</span> (${energia(terno)}) - ${agencia(terno)}<br>
-Ambos: <span>${ambos}</span> (${energia(ambos)}) - ${agencia(ambos)}
+
+Cuaterno: <span>${cuaterno}</span><br>
+Terno: <span>${terno}</span><br>
+Ambos: <span>${ambos}</span>
+
 </div>`;
+
 }
+
 document.getElementById("resultadosTradicional").innerHTML=html;
+
+}
+
+function espejo(n){
+
+return n[1]+n[0];
+
 }
 
 function generarPoseada(){
 
-let input=document.getElementById("inputPoseada").value.split(/[\s,]+/).map(v=>v.padStart(2,'0'));
-if(input.length!==10)return alert("Ingresá 10 números");
+let input=document.getElementById("inputPoseada").value
+.split(/[\s,]+/)
+.map(v=>v.padStart(2,'0'));
+
+if(input.length!==10) return alert("Ingresá 10 números");
 
 historico.push(input);
-if(historico.length>20)historico.shift();
-localStorage.setItem("historicoEMI",JSON.stringify(historico));
 
-let freq={},decadas={},finales={};
+if(historico.length>20) historico.shift();
 
-historico.forEach(j=>{
+let freq={},decadas={},finales={},ultimaAparicion={};
+
+historico.forEach((j,i)=>{
+
 j.forEach(n=>{
+
 freq[n]=(freq[n]||0)+1;
+
 let d=Math.floor(parseInt(n)/10);
+
 decadas[d]=(decadas[d]||0)+1;
+
 finales[n[1]]=(finales[n[1]]||0)+1;
-});
+
+ultimaAparicion[n]=i;
+
 });
 
-let decadasTop=Object.keys(decadas).sort((a,b)=>decadas[b]-decadas[a]).slice(0,3);
-let finalesTop=Object.keys(finales).sort((a,b)=>finales[b]-finales[a]).slice(0,3);
+});
 
-let textoDecadas=decadasTop.map(d=>d+"0").join(" - ");
-let textoFinales=finalesTop.join(" - ");
+let decadasTop=Object.keys(decadas)
+.sort((a,b)=>decadas[b]-decadas[a])
+.slice(0,3);
+
+let finalesTop=Object.keys(finales)
+.sort((a,b)=>finales[b]-finales[a])
+.slice(0,3);
 
 let candidatos=[];
 
 for(let i=0;i<100;i++){
 
 let num=i.toString().padStart(2,'0');
-if(input.includes(num))continue;
+
+if(input.includes(num)) continue;
 
 let score=0;
 
-if(freq[num])score+=freq[num]*2;
+if(freq[num]) score+=freq[num]*2;
 
 let d=Math.floor(i/10).toString();
-if(decadasTop.includes(d))score+=3;
 
-if(finalesTop.includes(num[1]))score+=3;
+if(decadasTop.includes(d)) score+=3;
 
-let tesla=tablaTesla[parseInt(num[0])][0]+tablaTesla[parseInt(num[1])][0];
-if(freq[tesla])score+=2;
+if(finalesTop.includes(num[1])) score+=3;
+
+let tesla=
+tablaTesla[parseInt(num[0])][0]+
+tablaTesla[parseInt(num[1])][0];
+
+if(freq[tesla]) score+=2;
+
+if(!(num in ultimaAparicion)) score+=4;
+
+let esp=espejo(num);
+
+if(input.includes(esp)) score+=3;
+
+if(score>=8) score+=3;
 
 candidatos.push({num,score});
+
 }
 
 candidatos.sort((a,b)=>b.score-a.score);
 
-let principal=candidatos.slice(0,5).map(c=>c.num);
-let respaldo=candidatos.slice(5,10).map(c=>c.num);
+let principal=candidatos.slice(0,6).map(c=>c.num);
+
+let respaldo=candidatos.slice(6,10).map(c=>c.num);
+
+let textoDecadas=decadasTop.map(d=>d+"0").join(" - ");
+
+let textoFinales=finalesTop.join(" - ");
 
 document.getElementById("resultadosPoseada").innerHTML=
-`<div class="resultado"><strong>Principal</strong>: <span>${principal.join(" - ")}</span></div>
-<div class="resultado"><strong>Respaldo</strong>: <span>${respaldo.join(" - ")}</span></div>
-<div class="resultado"><strong>Décadas activas</strong>: <span>${textoDecadas}</span></div>
-<div class="resultado"><strong>Finales calientes</strong>: <span>${textoFinales}</span></div>`;
-}
 
-function guardarHistorico(){
+`
+<div class="resultado">
+Principal: <span>${principal.join(" - ")}</span>
+</div>
 
-let lineas=document.getElementById("inputHistorico").value.split(/\n+/).map(l=>l.trim()).filter(l=>l!=='');
+<div class="resultado">
+Respaldo: <span>${respaldo.join(" - ")}</span>
+</div>
 
-if(lineas.length!==20)return alert("Necesitas 20 jugadas");
+<div class="resultado">
+Décadas activas: <span>${textoDecadas}</span>
+</div>
 
-let nuevo=[];
+<div class="resultado">
+Finales calientes: <span>${textoFinales}</span>
+</div>
+`;
 
-for(let l of lineas){
-
-let nums=l.split(/[\s,]+/).map(n=>n.padStart(2,'0'));
-
-if(nums.length!==10)return alert("Cada línea debe tener 10 números");
-
-nuevo.push(nums);
-}
-
-historico=nuevo;
-
-localStorage.setItem("historicoEMI",JSON.stringify(historico));
-
-alert("Histórico guardado correctamente");
-}
-
-if('serviceWorker' in navigator){
-navigator.serviceWorker.register('service-worker.js');
 }
 
 </script>

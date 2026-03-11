@@ -18,7 +18,6 @@ justify-content:center;
 padding:15px;
 }
 
-/* SPLASH */
 #splash-screen{
 position:fixed;
 width:100%;
@@ -74,7 +73,6 @@ color:#888888;
 100%{transform:rotate(360deg);}
 }
 
-/* APP */
 .container{
 width:100%;
 max-width:480px;
@@ -138,7 +136,6 @@ line-height:1.4;
 
 <body>
 
-<!-- SPLASH -->
 <div id="splash-screen">
 <div class="splash-content">
 <h1 class="logo-main">EMI</h1>
@@ -176,14 +173,13 @@ El uso de la herramienta es responsabilidad del usuario.
 </div>
 
 <script>
-/* SPLASH OCULTAR */
+
 window.addEventListener("load",function(){
 setTimeout(function(){
 document.getElementById("splash-screen").style.display="none";
 },2000);
 });
 
-/* MOTOR ORIGINAL INTACTO */
 const tablaTesla={0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],4:['6','9'],5:['2','7'],6:['4','9'],7:['5','2'],8:['3','0'],9:['3','4']};
 const agencias=["Corrientes","Ciudad","Bonaerense","Santa Fe","Córdoba","Entre Ríos","Chaco"];
 let historico=JSON.parse(localStorage.getItem("historicoEMI"))||[];
@@ -223,6 +219,7 @@ document.getElementById("resultadosTradicional").innerHTML=html;
 }
 
 function generarPoseada(){
+
 let input=document.getElementById("inputPoseada").value.split(/[\s,]+/).map(v=>v.padStart(2,'0'));
 if(input.length!==10)return alert("Ingresá 10 números");
 
@@ -244,13 +241,18 @@ finales[n[1]]=(finales[n[1]]||0)+1;
 let decadasTop=Object.keys(decadas).sort((a,b)=>decadas[b]-decadas[a]).slice(0,3);
 let finalesTop=Object.keys(finales).sort((a,b)=>finales[b]-finales[a]).slice(0,3);
 
+let textoDecadas=decadasTop.map(d=>d+"0").join(" - ");
+let textoFinales=finalesTop.join(" - ");
+
 let candidatos=[];
 
 for(let i=0;i<100;i++){
+
 let num=i.toString().padStart(2,'0');
 if(input.includes(num))continue;
 
 let score=0;
+
 if(freq[num])score+=freq[num]*2;
 
 let d=Math.floor(i/10).toString();
@@ -271,26 +273,39 @@ let respaldo=candidatos.slice(5,10).map(c=>c.num);
 
 document.getElementById("resultadosPoseada").innerHTML=
 `<div class="resultado"><strong>Principal</strong>: <span>${principal.join(" - ")}</span></div>
-<div class="resultado"><strong>Respaldo</strong>: <span>${respaldo.join(" - ")}</span></div>`;
+<div class="resultado"><strong>Respaldo</strong>: <span>${respaldo.join(" - ")}</span></div>
+<div class="resultado"><strong>Décadas activas</strong>: <span>${textoDecadas}</span></div>
+<div class="resultado"><strong>Finales calientes</strong>: <span>${textoFinales}</span></div>`;
 }
 
 function guardarHistorico(){
+
 let lineas=document.getElementById("inputHistorico").value.split(/\n+/).map(l=>l.trim()).filter(l=>l!=='');
+
 if(lineas.length!==20)return alert("Necesitas 20 jugadas");
+
 let nuevo=[];
+
 for(let l of lineas){
+
 let nums=l.split(/[\s,]+/).map(n=>n.padStart(2,'0'));
+
 if(nums.length!==10)return alert("Cada línea debe tener 10 números");
+
 nuevo.push(nums);
 }
+
 historico=nuevo;
+
 localStorage.setItem("historicoEMI",JSON.stringify(historico));
+
 alert("Histórico guardado correctamente");
 }
 
 if('serviceWorker' in navigator){
 navigator.serviceWorker.register('service-worker.js');
 }
+
 </script>
 
 </body>

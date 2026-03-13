@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V7</title>
+<title>EMI Tesla Pro V8</title>
 
 <style>
 
@@ -26,7 +26,6 @@ text-align:center;
 }
 
 h1{color:#00F5E0}
-
 h2{color:#FFD700}
 
 input,textarea{
@@ -64,14 +63,13 @@ font-weight:bold;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V7</h1>
+<h1>🔥 EMI Tesla Pro V8</h1>
 
 <h2>Quiniela Tradicional</h2>
 
@@ -82,7 +80,7 @@ font-weight:bold;
 <div id="resultadosTradicional"></div>
 
 
-<h2>Poceada Inteligente V7</h2>
+<h2>Poceada Inteligente V8</h2>
 
 <input type="text" id="inputPoseada" placeholder="Ingresar 10 números del último sorteo">
 
@@ -150,11 +148,9 @@ let ambos=cuaterno.slice(2,4);
 
 html+=`
 <div class="resultado">
-
 Cuaterno: <span>${cuaterno}</span><br>
 Terno: <span>${terno}</span><br>
 Ambos: <span>${ambos}</span>
-
 </div>
 `;
 
@@ -234,17 +230,37 @@ tablaTesla[parseInt(num[1])][0];
 
 if(freq[tesla]) score+=2;
 
-if(!(num in ultima)) score+=4;
+if(!(num in ultima)) score+=5;
 
 let esp=espejo(num);
 
 if(input.includes(esp)) score+=3;
 
-/* detector de racha */
-if(freq[num] >=2) score+=3;
+/* vecinos estadísticos */
 
-/* expansión V7 */
-if(score>=7) score+=3;
+input.forEach(n=>{
+
+let base=parseInt(n);
+
+let vecinos=[base-1,base+1,base-10,base+10];
+
+vecinos.forEach(v=>{
+
+if(v>=0 && v<=99){
+
+let vv=v.toString().padStart(2,'0');
+
+if(vv===num) score+=3;
+
+}
+
+});
+
+});
+
+/* racha */
+
+if(freq[num] >=2) score+=3;
 
 candidatos.push({num,score});
 
@@ -252,15 +268,13 @@ candidatos.push({num,score});
 
 candidatos.sort((a,b)=>b.score-a.score);
 
-/* expansión 12 candidatos */
-
-let expansion=candidatos.slice(0,12);
-
-/* selección final */
+let expansion=candidatos.slice(0,14);
 
 let principal=expansion.slice(0,6).map(c=>c.num);
 
 let respaldo=expansion.slice(6,10).map(c=>c.num);
+
+let atrasoRadar=expansion.slice(10,14).map(c=>c.num);
 
 let textoDecadas=decadasTop.map(d=>d+"0").join(" - ");
 
@@ -275,6 +289,10 @@ Principal: <span>${principal.join(" - ")}</span>
 
 <div class="resultado">
 Respaldo: <span>${respaldo.join(" - ")}</span>
+</div>
+
+<div class="resultado">
+Radar atraso: <span>${atrasoRadar.join(" - ")}</span>
 </div>
 
 <div class="resultado">

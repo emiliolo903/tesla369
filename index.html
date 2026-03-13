@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V8</title>
+<title>EMI Tesla Pro V9</title>
 
 <style>
 
@@ -69,18 +69,18 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V8</h1>
+<h1>🔥 EMI Tesla Pro V9</h1>
 
-<h2>Quiniela Tradicional</h2>
+<h2>Quiniela Tradicional PRO</h2>
 
 <input type="text" id="inputTradicional" placeholder="Número 4 cifras">
 
-<button onclick="generarTradicional()">Generar</button>
+<button onclick="generarTradicional()">Analizar Número</button>
 
 <div id="resultadosTradicional"></div>
 
 
-<h2>Poceada Inteligente V8</h2>
+<h2>Poceada Inteligente</h2>
 
 <input type="text" id="inputPoseada" placeholder="Ingresar 10 números del último sorteo">
 
@@ -114,8 +114,8 @@ const tablaTesla={
 
 let historico=[];
 
-function espejo(n){
-return n[1]+n[0];
+function espejo4(n){
+return n.split('').reverse().join('');
 }
 
 function generarTradicional(){
@@ -127,37 +127,65 @@ alert("Número inválido");
 return;
 }
 
-let html="";
+let resultados=[];
 
-for(let i=0;i<2;i++){
+/* original */
+resultados.push(n);
 
-let cuaterno="";
-let terno="";
+/* espejo */
+resultados.push(espejo4(n));
 
-for(let j=0;j<4;j++){
+/* vecinos */
+let base=parseInt(n);
 
-let nums=tablaTesla[parseInt(n[j])];
+let vecinos=[
+base-1,
+base+1,
+base-10,
+base+10
+];
 
-cuaterno+=nums[i%2];
-
-if(j>0) terno+=nums[i%2];
-
+vecinos.forEach(v=>{
+if(v>=0 && v<=9999){
+resultados.push(v.toString().padStart(4,'0'));
 }
+});
 
-let ambos=cuaterno.slice(2,4);
+/* eliminar duplicados */
 
-html+=`
+resultados=[...new Set(resultados)];
+
+let cuaternos=resultados.slice(0,6);
+
+let ternos=cuaternos.map(n=>n.slice(1,4));
+
+let ambos=cuaternos.map(n=>n.slice(2,4));
+
+document.getElementById("resultadosTradicional").innerHTML=
+
+`
 <div class="resultado">
-Cuaterno: <span>${cuaterno}</span><br>
-Terno: <span>${terno}</span><br>
-Ambos: <span>${ambos}</span>
+Cuaternos fuertes:<br>
+<span>${cuaternos.join(" - ")}</span>
+</div>
+
+<div class="resultado">
+Ternos:<br>
+<span>${ternos.join(" - ")}</span>
+</div>
+
+<div class="resultado">
+Ambos:<br>
+<span>${ambos.join(" - ")}</span>
 </div>
 `;
 
 }
 
-document.getElementById("resultadosTradicional").innerHTML=html;
+/* ===== POCEADA ===== */
 
+function espejo(n){
+return n[1]+n[0];
 }
 
 function generarPoseada(){
@@ -224,19 +252,13 @@ if(decadasTop.includes(d)) score+=3;
 
 if(finalesTop.includes(num[1])) score+=3;
 
-let tesla=
-tablaTesla[parseInt(num[0])][0]+
-tablaTesla[parseInt(num[1])][0];
-
-if(freq[tesla]) score+=2;
-
 if(!(num in ultima)) score+=5;
 
 let esp=espejo(num);
 
 if(input.includes(esp)) score+=3;
 
-/* vecinos estadísticos */
+/* vecinos */
 
 input.forEach(n=>{
 
@@ -258,8 +280,6 @@ if(vv===num) score+=3;
 
 });
 
-/* racha */
-
 if(freq[num] >=2) score+=3;
 
 candidatos.push({num,score});
@@ -274,11 +294,7 @@ let principal=expansion.slice(0,6).map(c=>c.num);
 
 let respaldo=expansion.slice(6,10).map(c=>c.num);
 
-let atrasoRadar=expansion.slice(10,14).map(c=>c.num);
-
-let textoDecadas=decadasTop.map(d=>d+"0").join(" - ");
-
-let textoFinales=finalesTop.join(" - ");
+let radar=expansion.slice(10,14).map(c=>c.num);
 
 document.getElementById("resultadosPoseada").innerHTML=
 
@@ -292,15 +308,7 @@ Respaldo: <span>${respaldo.join(" - ")}</span>
 </div>
 
 <div class="resultado">
-Radar atraso: <span>${atrasoRadar.join(" - ")}</span>
-</div>
-
-<div class="resultado">
-Décadas activas: <span>${textoDecadas}</span>
-</div>
-
-<div class="resultado">
-Finales calientes: <span>${textoFinales}</span>
+Radar atraso: <span>${radar.join(" - ")}</span>
 </div>
 `;
 
@@ -311,11 +319,6 @@ function cargarHistorico20(){
 let texto=document.getElementById("historico20").value.trim();
 
 let lineas=texto.split(/\n+/);
-
-if(lineas.length<20){
-alert("Necesitas 20 sorteos");
-return;
-}
 
 historico=[];
 
@@ -329,7 +332,7 @@ historico.push(nums);
 
 });
 
-alert("20 sorteos cargados correctamente");
+alert("Histórico cargado");
 
 }
 

@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro</title>
+<title>EMI Tesla Pro V10</title>
 
 <style>
 
@@ -69,7 +69,7 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro</h1>
+<h1>🔥 EMI Tesla Pro V10</h1>
 
 <h2>Quiniela Tradicional</h2>
 
@@ -88,7 +88,11 @@ font-weight:bold;
 
 <button onclick="autoPoceada()">AUTO Analizar 20 sorteos</button>
 
+<button onclick="detectorProximo()">Detector próximo sorteo</button>
+
 <div id="resultadosPoseada"></div>
+
+<div id="detectorResultado"></div>
 
 
 <h2>Cargar 20 sorteos históricos</h2>
@@ -115,8 +119,6 @@ const tablaTesla={
 };
 
 let historico=[];
-
-/* QUINIELA TESLA */
 
 function generarTradicional(){
 
@@ -170,8 +172,6 @@ Ambos 2: <span>${ambos2}</span>
 `;
 
 }
-
-/* POCEADA */
 
 function espejo(n){
 return n[1]+n[0];
@@ -289,20 +289,93 @@ Radar atraso: <span>${radar.join(" - ")}</span>
 
 }
 
-/* AUTO POCEADA */
+function detectorProximo(){
+
+if(historico.length<10){
+alert("Cargá los sorteos primero");
+return;
+}
+
+let freq={};
+let ultima={};
+
+historico.forEach((j,i)=>{
+
+j.forEach(n=>{
+
+freq[n]=(freq[n]||0)+1;
+
+ultima[n]=i;
+
+});
+
+});
+
+let candidatos=[];
+
+for(let i=0;i<100;i++){
+
+let num=i.toString().padStart(2,'0');
+
+let score=0;
+
+if(freq[num]) score+=freq[num]*2;
+
+if(!(num in ultima)) score+=6;
+
+let esp=num[1]+num[0];
+
+if(freq[esp]) score+=3;
+
+historico[historico.length-1].forEach(n=>{
+
+let base=parseInt(n);
+
+let vecinos=[base-1,base+1];
+
+vecinos.forEach(v=>{
+
+if(v>=0 && v<=99){
+
+let vv=v.toString().padStart(2,'0');
+
+if(vv===num) score+=3;
+
+}
+
+});
+
+});
+
+candidatos.push({num,score});
+
+}
+
+candidatos.sort((a,b)=>b.score-a.score);
+
+let prediccion=candidatos.slice(0,6).map(c=>c.num);
+
+document.getElementById("detectorResultado").innerHTML=
+
+`
+<div class="resultado">
+Detector próximo sorteo:<br>
+<span>${prediccion.join(" - ")}</span>
+</div>
+`;
+
+}
 
 function autoPoceada(){
 
 if(historico.length<10){
-alert("Necesitas cargar los 20 sorteos históricos");
+alert("Necesitas cargar los sorteos históricos");
 return;
 }
 
 analizarHistorico();
 
 }
-
-/* CARGAR HISTORICO */
 
 function cargarHistorico20(){
 

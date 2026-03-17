@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V10</title>
+<title>EMI Tesla Pro V11</title>
 
 <style>
 
@@ -69,16 +69,21 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V10</h1>
+<h1>🔥 EMI Tesla Pro V11</h1>
 
-<h2>Quiniela Tradicional</h2>
+<h2>Quiniela Tradicional PRO</h2>
 
-<input type="text" id="inputTradicional" placeholder="Número 4 cifras">
+<input type="text" id="inputTradicional" placeholder="Número base o últimos resultados (ej: 1234 5678)">
 
-<button onclick="generarTradicional()">Generar</button>
+<button onclick="generarTradicional()">Generar Inteligente</button>
 
 <div id="resultadosTradicional"></div>
 
+<h2>Cargar resultados quiniela (para IA)</h2>
+
+<textarea id="histQuiniela" placeholder="Pegar últimos resultados (uno por línea)"></textarea>
+
+<button onclick="cargarHistQuiniela()">Cargar historial</button>
 
 <h2>Poceada Inteligente</h2>
 
@@ -94,10 +99,9 @@ font-weight:bold;
 
 <div id="detectorResultado"></div>
 
-
 <h2>Cargar 20 sorteos históricos</h2>
 
-<textarea id="historico20" placeholder="Pegar 20 sorteos (10 números por línea)"></textarea>
+<textarea id="historico20"></textarea>
 
 <button onclick="cargarHistorico20()">Cargar histórico</button>
 
@@ -119,59 +123,92 @@ const tablaTesla={
 };
 
 let historico=[];
+let histQuiniela=[];
+
+/* ===== NUEVO TESLA INTELIGENTE ===== */
 
 function generarTradicional(){
 
-let n=document.getElementById("inputTradicional").value.trim();
+let input=document.getElementById("inputTradicional").value.trim();
 
-n=n.replace(/\D/g,'');
+let numeros=input.split(/[\s,]+/).filter(n=>n.length===4);
 
-if(n.length!==4){
-alert("Ingresá un número de 4 cifras");
+if(numeros.length===0){
+alert("Ingresá números válidos");
 return;
 }
 
-let cuaterno1="";
-let cuaterno2="";
+let candidatos=[];
+
+numeros.forEach(n=>{
+
+let c1="", c2="";
 
 for(let i=0;i<4;i++){
-
 let d=parseInt(n[i]);
-
-let nums=tablaTesla[d];
-
-cuaterno1+=nums[0];
-cuaterno2+=nums[1];
-
+c1+=tablaTesla[d][0];
+c2+=tablaTesla[d][1];
 }
 
-let terno1=cuaterno1.substring(1);
-let terno2=cuaterno2.substring(1);
+candidatos.push(c1,c2);
 
-let ambos1=cuaterno1.substring(2);
-let ambos2=cuaterno2.substring(2);
+});
+
+/* ANALISIS REAL */
+
+let freq={};
+
+histQuiniela.forEach(n=>{
+freq[n]=(freq[n]||0)+1;
+});
+
+let evaluados=candidatos.map(n=>{
+
+let score=0;
+
+/* frecuencia */
+if(freq[n]) score+=freq[n]*3;
+
+/* atraso */
+if(!freq[n]) score+=5;
+
+/* repetición dígitos */
+let set=new Set(n.split(''));
+if(set.size<=2) score+=3;
+
+return {n,score};
+
+});
+
+evaluados.sort((a,b)=>b.score-a.score);
+
+/* FILTRO PRO */
+let finales=evaluados.slice(0,3).map(e=>e.n);
 
 document.getElementById("resultadosTradicional").innerHTML=
 
 `
 <div class="resultado">
-
-Cuaterno 1: <span>${cuaterno1}</span><br>
-Terno 1: <span>${terno1}</span><br>
-Ambos 1: <span>${ambos1}</span>
-
-</div>
-
-<div class="resultado">
-
-Cuaterno 2: <span>${cuaterno2}</span><br>
-Terno 2: <span>${terno2}</span><br>
-Ambos 2: <span>${ambos2}</span>
-
+🔥 Números FUERTES:<br>
+<span>${finales.join(" - ")}</span>
 </div>
 `;
 
 }
+
+/* HISTORIAL QUINIELA */
+
+function cargarHistQuiniela(){
+
+let texto=document.getElementById("histQuiniela").value.trim();
+
+histQuiniela=texto.split(/\s+/).filter(n=>n.length===4);
+
+alert("Historial cargado");
+
+}
+
+/* ===== POCEADA ===== */
 
 function espejo(n){
 return n[1]+n[0];
@@ -198,92 +235,43 @@ analizarHistorico(input);
 
 function analizarHistorico(input){
 
-let freq={};
-let decadas={};
-let finales={};
-let ultima={};
+let freq={},decadas={},finales={},ultima={};
 
 historico.forEach((j,i)=>{
-
 j.forEach(n=>{
-
 freq[n]=(freq[n]||0)+1;
-
 let d=Math.floor(parseInt(n)/10);
-
 decadas[d]=(decadas[d]||0)+1;
-
 finales[n[1]]=(finales[n[1]]||0)+1;
-
 ultima[n]=i;
-
 });
-
 });
-
-let decadasTop=Object.keys(decadas)
-.sort((a,b)=>decadas[b]-decadas[a])
-.slice(0,3);
-
-let finalesTop=Object.keys(finales)
-.sort((a,b)=>finales[b]-finales[a])
-.slice(0,3);
 
 let candidatos=[];
 
 for(let i=0;i<100;i++){
 
 let num=i.toString().padStart(2,'0');
-
 if(input && input.includes(num)) continue;
 
 let score=0;
 
 if(freq[num]) score+=freq[num]*2;
-
-let d=Math.floor(i/10).toString();
-
-if(decadasTop.includes(d)) score+=3;
-
-if(finalesTop.includes(num[1])) score+=3;
-
 if(!(num in ultima)) score+=5;
 
-if(input){
-
-let esp=espejo(num);
-
-if(input.includes(esp)) score+=3;
-
-}
-
 candidatos.push({num,score});
-
 }
 
 candidatos.sort((a,b)=>b.score-a.score);
 
-let expansion=candidatos.slice(0,10);
-
-let principal=expansion.slice(0,5).map(c=>c.num);
-
-let respaldo=expansion.slice(5,8).map(c=>c.num);
-
-let radar=expansion.slice(8,10).map(c=>c.num);
+let top=candidatos.slice(0,6).map(c=>c.num);
 
 document.getElementById("resultadosPoseada").innerHTML=
 
 `
 <div class="resultado">
-Principal: <span>${principal.join(" - ")}</span>
-</div>
-
-<div class="resultado">
-Respaldo: <span>${respaldo.join(" - ")}</span>
-</div>
-
-<div class="resultado">
-Radar atraso: <span>${radar.join(" - ")}</span>
+🎯 Mejor jugada:<br>
+<span>${top.join(" - ")}</span>
 </div>
 `;
 
@@ -292,23 +280,17 @@ Radar atraso: <span>${radar.join(" - ")}</span>
 function detectorProximo(){
 
 if(historico.length<10){
-alert("Cargá los sorteos primero");
+alert("Cargá los sorteos");
 return;
 }
 
-let freq={};
-let ultima={};
+let freq={},ultima={};
 
 historico.forEach((j,i)=>{
-
 j.forEach(n=>{
-
 freq[n]=(freq[n]||0)+1;
-
 ultima[n]=i;
-
 });
-
 });
 
 let candidatos=[];
@@ -319,62 +301,29 @@ let num=i.toString().padStart(2,'0');
 
 let score=0;
 
+if(!freq[num]) score+=6;
 if(freq[num]) score+=freq[num]*2;
 
-if(!(num in ultima)) score+=6;
-
-let esp=num[1]+num[0];
-
-if(freq[esp]) score+=3;
-
-historico[historico.length-1].forEach(n=>{
-
-let base=parseInt(n);
-
-let vecinos=[base-1,base+1];
-
-vecinos.forEach(v=>{
-
-if(v>=0 && v<=99){
-
-let vv=v.toString().padStart(2,'0');
-
-if(vv===num) score+=3;
-
-}
-
-});
-
-});
-
 candidatos.push({num,score});
-
 }
 
 candidatos.sort((a,b)=>b.score-a.score);
 
-let prediccion=candidatos.slice(0,6).map(c=>c.num);
+let top=candidatos.slice(0,5).map(c=>c.num);
 
 document.getElementById("detectorResultado").innerHTML=
 
 `
 <div class="resultado">
-Detector próximo sorteo:<br>
-<span>${prediccion.join(" - ")}</span>
+🔥 Próximo sorteo:<br>
+<span>${top.join(" - ")}</span>
 </div>
 `;
 
 }
 
 function autoPoceada(){
-
-if(historico.length<10){
-alert("Necesitas cargar los sorteos históricos");
-return;
-}
-
 analizarHistorico();
-
 }
 
 function cargarHistorico20(){
@@ -386,13 +335,10 @@ let lineas=texto.split(/\n+/);
 historico=[];
 
 lineas.slice(0,20).forEach(l=>{
-
 let nums=l.split(/[\s,]+/).map(n=>n.padStart(2,'0'));
-
 if(nums.length===10){
 historico.push(nums);
 }
-
 });
 
 alert("Histórico cargado");

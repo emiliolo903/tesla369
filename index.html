@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V12 FINAL</title>
+<title>EMI Tesla Pro V12 EXPANSIÓN</title>
 
 <style>
 
@@ -69,7 +69,7 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V12 FINAL</h1>
+<h1>🔥 EMI Tesla Pro V12 EXPANSIÓN</h1>
 
 <h2>Quiniela Tradicional</h2>
 
@@ -81,7 +81,7 @@ font-weight:bold;
 
 <h2>Cargar historial quiniela (IA)</h2>
 
-<textarea id="histQuiniela" placeholder="Pegar números de 4 cifras"></textarea>
+<textarea id="histQuiniela"></textarea>
 
 <button onclick="cargarHistQuiniela()">Cargar historial</button>
 
@@ -125,7 +125,22 @@ const tablaTesla={
 let historico=[];
 let histQuiniela=[];
 
-/* ================= TRADICIONAL PRO ================= */
+/* ===== EXPANSIÓN ===== */
+
+function expandir(num){
+let n=parseInt(num);
+let lista=[num];
+
+[n-1,n+1].forEach(v=>{
+if(v>=0 && v<=99){
+lista.push(v.toString().padStart(2,'0'));
+}
+});
+
+return [...new Set(lista)];
+}
+
+/* ================= TRADICIONAL ================= */
 
 function generarTradicional(){
 
@@ -144,23 +159,8 @@ c1+=tablaTesla[d][0];
 c2+=tablaTesla[d][1];
 }
 
-/* IA FILTRO */
-
-let score1=0;
-let score2=0;
-
-histQuiniela.forEach(h=>{
-if(h===c1) score1+=5;
-if(h===c2) score2+=5;
-});
-
-/* atraso suma */
-if(!histQuiniela.includes(c1)) score1+=3;
-if(!histQuiniela.includes(c2)) score2+=3;
-
-/* elegir orden */
-let primero = score1>=score2 ? c1 : c2;
-let segundo = score1>=score2 ? c2 : c1;
+let primero=c1;
+let segundo=c2;
 
 let t1=primero.slice(1);
 let t2=segundo.slice(1);
@@ -184,12 +184,6 @@ Ambos 2: <span>${a2}</span>
 </div>
 `;
 
-}
-
-function cargarHistQuiniela(){
-let texto=document.getElementById("histQuiniela").value.trim();
-histQuiniela=texto.split(/\s+/).filter(n=>n.length===4);
-alert("Historial cargado");
 }
 
 /* ================= POCEADA ================= */
@@ -244,12 +238,23 @@ let principal=candidatos.slice(0,5).map(c=>c.num);
 let respaldo=candidatos.slice(5,8).map(c=>c.num);
 let radar=candidatos.slice(8,10).map(c=>c.num);
 
+/* 🔥 EXPANSIÓN AUTOMÁTICA */
+
+let expandido=[];
+
+principal.forEach(n=>{
+expandido.push(...expandir(n));
+});
+
+expandido=[...new Set(expandido)];
+
 document.getElementById("resultadosPoseada").innerHTML=
 
 `
 <div class="resultado">🎯 Principal: <span>${principal.join(" - ")}</span></div>
 <div class="resultado">🛟 Respaldo: <span>${respaldo.join(" - ")}</span></div>
 <div class="resultado">📡 Radar: <span>${radar.join(" - ")}</span></div>
+<div class="resultado">🔥 Expansión: <span>${expandido.join(" - ")}</span></div>
 `;
 
 }
@@ -282,12 +287,22 @@ candidatos.sort((a,b)=>b.score-a.score);
 
 let top=candidatos.slice(0,5).map(c=>c.num);
 
+let expandido=[];
+
+top.forEach(n=>{
+expandido.push(...expandir(n));
+});
+
+expandido=[...new Set(expandido)];
+
 document.getElementById("detectorResultado").innerHTML=
 
 `
 <div class="resultado">
 🔥 Próximo sorteo:<br>
-<span>${top.join(" - ")}</span>
+<span>${top.join(" - ")}</span><br><br>
+🔥 Expansión:<br>
+<span>${expandido.join(" - ")}</span>
 </div>
 `;
 

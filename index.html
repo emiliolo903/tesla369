@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V11</title>
+<title>EMI Tesla Pro V12 FINAL</title>
 
 <style>
 
@@ -69,31 +69,31 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V11</h1>
+<h1>🔥 EMI Tesla Pro V12 FINAL</h1>
 
-<h2>Quiniela Tradicional PRO</h2>
+<h2>Quiniela Tradicional</h2>
 
-<input type="text" id="inputTradicional" placeholder="Número base o últimos resultados (ej: 1234 5678)">
+<input type="text" id="inputTradicional" placeholder="Número 4 cifras">
 
-<button onclick="generarTradicional()">Generar Inteligente</button>
+<button onclick="generarTradicional()">Generar</button>
 
 <div id="resultadosTradicional"></div>
 
-<h2>Cargar resultados quiniela (para IA)</h2>
+<h2>Cargar historial quiniela (IA)</h2>
 
-<textarea id="histQuiniela" placeholder="Pegar últimos resultados (uno por línea)"></textarea>
+<textarea id="histQuiniela" placeholder="Pegar números de 4 cifras"></textarea>
 
 <button onclick="cargarHistQuiniela()">Cargar historial</button>
 
 <h2>Poceada Inteligente</h2>
 
-<input type="text" id="inputPoseada" placeholder="Ingresar 10 números del último sorteo">
+<input type="text" id="inputPoseada">
 
 <button onclick="generarPoseada()">Generar Poceada</button>
 
-<button onclick="autoPoceada()">AUTO Analizar 20 sorteos</button>
+<button onclick="autoPoceada()">AUTO Analizar</button>
 
-<button onclick="detectorProximo()">Detector próximo sorteo</button>
+<button onclick="detectorProximo()">Detector próximo</button>
 
 <div id="resultadosPoseada"></div>
 
@@ -125,24 +125,18 @@ const tablaTesla={
 let historico=[];
 let histQuiniela=[];
 
-/* ===== NUEVO TESLA INTELIGENTE ===== */
+/* ================= TRADICIONAL PRO ================= */
 
 function generarTradicional(){
 
-let input=document.getElementById("inputTradicional").value.trim();
+let n=document.getElementById("inputTradicional").value.trim().replace(/\D/g,'');
 
-let numeros=input.split(/[\s,]+/).filter(n=>n.length===4);
-
-if(numeros.length===0){
-alert("Ingresá números válidos");
+if(n.length!==4){
+alert("Ingresá 4 cifras");
 return;
 }
 
-let candidatos=[];
-
-numeros.forEach(n=>{
-
-let c1="", c2="";
+let c1="",c2="";
 
 for(let i=0;i<4;i++){
 let d=parseInt(n[i]);
@@ -150,69 +144,55 @@ c1+=tablaTesla[d][0];
 c2+=tablaTesla[d][1];
 }
 
-candidatos.push(c1,c2);
+/* IA FILTRO */
 
+let score1=0;
+let score2=0;
+
+histQuiniela.forEach(h=>{
+if(h===c1) score1+=5;
+if(h===c2) score2+=5;
 });
 
-/* ANALISIS REAL */
+/* atraso suma */
+if(!histQuiniela.includes(c1)) score1+=3;
+if(!histQuiniela.includes(c2)) score2+=3;
 
-let freq={};
+/* elegir orden */
+let primero = score1>=score2 ? c1 : c2;
+let segundo = score1>=score2 ? c2 : c1;
 
-histQuiniela.forEach(n=>{
-freq[n]=(freq[n]||0)+1;
-});
+let t1=primero.slice(1);
+let t2=segundo.slice(1);
 
-let evaluados=candidatos.map(n=>{
-
-let score=0;
-
-/* frecuencia */
-if(freq[n]) score+=freq[n]*3;
-
-/* atraso */
-if(!freq[n]) score+=5;
-
-/* repetición dígitos */
-let set=new Set(n.split(''));
-if(set.size<=2) score+=3;
-
-return {n,score};
-
-});
-
-evaluados.sort((a,b)=>b.score-a.score);
-
-/* FILTRO PRO */
-let finales=evaluados.slice(0,3).map(e=>e.n);
+let a1=primero.slice(2);
+let a2=segundo.slice(2);
 
 document.getElementById("resultadosTradicional").innerHTML=
 
 `
 <div class="resultado">
-🔥 Números FUERTES:<br>
-<span>${finales.join(" - ")}</span>
+Cuaterno 1: <span>${primero}</span><br>
+Terno 1: <span>${t1}</span><br>
+Ambos 1: <span>${a1}</span>
+</div>
+
+<div class="resultado">
+Cuaterno 2: <span>${segundo}</span><br>
+Terno 2: <span>${t2}</span><br>
+Ambos 2: <span>${a2}</span>
 </div>
 `;
 
 }
 
-/* HISTORIAL QUINIELA */
-
 function cargarHistQuiniela(){
-
 let texto=document.getElementById("histQuiniela").value.trim();
-
 histQuiniela=texto.split(/\s+/).filter(n=>n.length===4);
-
 alert("Historial cargado");
-
 }
 
-/* ===== POCEADA ===== */
-
-function espejo(n){
-return n[1]+n[0];
-}
+/* ================= POCEADA ================= */
 
 function generarPoseada(){
 
@@ -226,23 +206,19 @@ return;
 }
 
 historico.push(input);
-
 if(historico.length>20) historico.shift();
 
-analizarHistorico(input);
+analizar(input);
 
 }
 
-function analizarHistorico(input){
+function analizar(input){
 
-let freq={},decadas={},finales={},ultima={};
+let freq={},ultima={};
 
 historico.forEach((j,i)=>{
 j.forEach(n=>{
 freq[n]=(freq[n]||0)+1;
-let d=Math.floor(parseInt(n)/10);
-decadas[d]=(decadas[d]||0)+1;
-finales[n[1]]=(finales[n[1]]||0)+1;
 ultima[n]=i;
 });
 });
@@ -252,44 +228,39 @@ let candidatos=[];
 for(let i=0;i<100;i++){
 
 let num=i.toString().padStart(2,'0');
-if(input && input.includes(num)) continue;
+if(input.includes(num)) continue;
 
 let score=0;
 
 if(freq[num]) score+=freq[num]*2;
-if(!(num in ultima)) score+=5;
+if(!(num in ultima)) score+=6;
 
 candidatos.push({num,score});
 }
 
 candidatos.sort((a,b)=>b.score-a.score);
 
-let top=candidatos.slice(0,6).map(c=>c.num);
+let principal=candidatos.slice(0,5).map(c=>c.num);
+let respaldo=candidatos.slice(5,8).map(c=>c.num);
+let radar=candidatos.slice(8,10).map(c=>c.num);
 
 document.getElementById("resultadosPoseada").innerHTML=
 
 `
-<div class="resultado">
-🎯 Mejor jugada:<br>
-<span>${top.join(" - ")}</span>
-</div>
+<div class="resultado">🎯 Principal: <span>${principal.join(" - ")}</span></div>
+<div class="resultado">🛟 Respaldo: <span>${respaldo.join(" - ")}</span></div>
+<div class="resultado">📡 Radar: <span>${radar.join(" - ")}</span></div>
 `;
 
 }
 
 function detectorProximo(){
 
-if(historico.length<10){
-alert("Cargá los sorteos");
-return;
-}
+let freq={};
 
-let freq={},ultima={};
-
-historico.forEach((j,i)=>{
+historico.forEach(j=>{
 j.forEach(n=>{
 freq[n]=(freq[n]||0)+1;
-ultima[n]=i;
 });
 });
 
@@ -323,13 +294,12 @@ document.getElementById("detectorResultado").innerHTML=
 }
 
 function autoPoceada(){
-analizarHistorico();
+analizar([]);
 }
 
 function cargarHistorico20(){
 
 let texto=document.getElementById("historico20").value.trim();
-
 let lineas=texto.split(/\n+/);
 
 historico=[];
@@ -348,4 +318,4 @@ alert("Histórico cargado");
 </script>
 
 </body>
-</html>
+  </html>

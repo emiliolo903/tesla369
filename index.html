@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V13 DIOS</title>
+<title>EMI Tesla Pro V13 MIX</title>
 
 <style>
 
@@ -69,7 +69,9 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V13 DIOS</h1>
+<h1>🔥 EMI Tesla Pro V13 MIX</h1>
+
+<!-- ================= TESLA ================= -->
 
 <h2>Quiniela Tradicional (Tesla)</h2>
 
@@ -79,17 +81,17 @@ font-weight:bold;
 
 <div id="resultadosTradicional"></div>
 
-<h2>IA Quiniela PRO</h2>
+<!-- ================= IA ================= -->
 
-<textarea id="base7" placeholder="Ingresar 7 cuaternos del último sorteo"></textarea>
+<h2>IA Quiniela PRO (Base 7)</h2>
 
-<textarea id="histQuiniela" placeholder="Historial de cuaternos"></textarea>
+<textarea id="baseIA" placeholder="Pegá los 7 cuaternos del sorteo anterior"></textarea>
 
-<button onclick="cargarHistQuiniela()">Cargar historial</button>
+<button onclick="generarIA()">Generar IA</button>
 
-<button onclick="generarIA()">Generar IA PRO</button>
+<div id="resultadoIA"></div>
 
-<div id="resultadosIA"></div>
+<!-- ================= POCEADA ================= -->
 
 <h2>Poceada Inteligente</h2>
 
@@ -97,25 +99,13 @@ font-weight:bold;
 
 <button onclick="generarPoseada()">Generar Poceada</button>
 
-<button onclick="autoPoceada()">AUTO Analizar</button>
-
-<button onclick="detectorProximo()">Detector próximo</button>
-
 <div id="resultadosPoseada"></div>
-
-<div id="detectorResultado"></div>
-
-<h2>Cargar 20 sorteos históricos</h2>
-
-<textarea id="historico20"></textarea>
-
-<button onclick="cargarHistorico20()">Cargar histórico</button>
 
 </div>
 
 <script>
 
-/* ===== DATOS ===== */
+/* ===== TESLA (INTACTO) ===== */
 
 const tablaTesla={
 0:['0','0'],
@@ -130,37 +120,9 @@ const tablaTesla={
 9:['3','4']
 };
 
-const agencias=[
-"Corrientes",
-"Ciudad",
-"Bonaerense",
-"Santa Fe",
-"Córdoba",
-"Entre Ríos",
-"Chaco"
-];
-
-let historico=[];
-let histQuiniela=[];
-
-/* ===== FUNCIONES EXTRA ===== */
-
-function energia(num){
-let suma=num.split('').reduce((a,b)=>a+parseInt(b),0);
-if(suma%3===0) return "🌅 Mañana";
-if(suma%3===1) return "🌆 Tarde";
-return "🌙 Noche";
-}
-
-function agencia(num){
-return agencias[parseInt(num[0]) % agencias.length];
-}
-
-/* ===== TESLA ===== */
-
 function generarTradicional(){
 
-let n=document.getElementById("inputTradicional").value.trim().replace(/\D/g,'');
+let n=document.getElementById("inputTradicional").value.trim();
 
 if(n.length!==4){
 alert("Ingresá 4 cifras");
@@ -199,123 +161,75 @@ Ambos 2: <span>${a2}</span>
 
 }
 
-/* ===== IA DIOS ===== */
+/* ===== IA SEPARADA ===== */
 
 function generarIA(){
 
-let base = document.getElementById("base7").value
-.trim()
-.split(/[\s,]+/)
-.filter(n=>n.length===4);
+let texto=document.getElementById("baseIA").value.trim();
+
+let base=texto.split(/[\s,]+/).filter(n=>n.length===4);
 
 if(base.length!==7){
 alert("Ingresá los 7 cuaternos");
 return;
 }
 
-let freqBase={}, posBase=[{},{},{},{}];
+/* separar posiciones */
+let p1=[],p2=[],p3=[],p4=[];
 
 base.forEach(n=>{
-for(let i=0;i<4;i++){
-let d=n[i];
-freqBase[d]=(freqBase[d]||0)+1;
-posBase[i][d]=(posBase[i][d]||0)+1;
-}
+p1.push(n[0]);
+p2.push(n[1]);
+p3.push(n[2]);
+p4.push(n[3]);
 });
 
-let freqHist={};
+/* generar números */
+function generarNumero(){
 
-histQuiniela.forEach(n=>{
-freqHist[n]=(freqHist[n]||0)+1;
-});
+let n=
+p1[Math.floor(Math.random()*p1.length)] +
+p2[Math.floor(Math.random()*p2.length)] +
+p3[Math.floor(Math.random()*p3.length)] +
+p4[Math.floor(Math.random()*p4.length)];
 
-let candidatos=[];
+if(base.includes(n)) return generarNumero();
+if(/^(\d)\1+$/.test(n)) return generarNumero();
 
-for(let i=0;i<10000;i++){
-
-let num=i.toString().padStart(4,'0');
-let score=0;
-
-for(let i=0;i<4;i++){
-let d=num[i];
-if(freqBase[d]) score+=freqBase[d]*3;
-if(posBase[i][d]) score+=posBase[i][d]*4;
+return n;
 }
 
-base.forEach(b=>{
-if(b.slice(0,2)===num.slice(0,2)) score+=3;
-if(b.slice(2)===num.slice(2)) score+=3;
-});
+let jugadas=[];
 
-if(freqHist[num]) score+=freqHist[num]*2;
-
-let set=new Set(num.split(''));
-
-if(set.size===1) score-=10;
-if(set.size===2) score+=1;
-if(set.size>=3) score+=4;
-
-let conteo={};
-num.split('').forEach(d=>conteo[d]=(conteo[d]||0)+1);
-
-Object.values(conteo).forEach(c=>{
-if(c>=3) score-=5;
-});
-
-candidatos.push({num,score});
+while(jugadas.length<3){
+let n=generarNumero();
+if(!jugadas.includes(n)){
+jugadas.push(n);
+}
 }
 
-candidatos.sort((a,b)=>b.score-a.score);
+/* horarios */
+let turnos=["Mañana","Tarde","Noche"];
 
-let finales=[];
+let html=`<div class="resultado">🎯 BASE:<br><span>${base.join(" - ")}</span></div>`;
 
-for(let i=0;i<candidatos.length;i++){
-
-let n=candidatos[i].num;
-
-let repetido=finales.some(f=>{
-return f.slice(2)===n.slice(2);
-});
-
-if(!repetido){
-finales.push(n);
-}
-
-if(finales.length===3) break;
-}
-
-/* RESULTADO */
-
-let html=`<div class="resultado">
-🎯 BASE:<br>
-<span>${base.join(" - ")}</span>
-</div>`;
-
-finales.forEach((n,i)=>{
+jugadas.forEach((n,i)=>{
 
 html+=`
 <div class="resultado">
 🔥 Jugada ${i+1}: <span>${n}</span><br>
-${energia(n)}<br>
-📍 ${agencia(n)}
+⏰ ${turnos[i]}<br>
+📍 Agencia: Variable
 </div>
 `;
 
 });
 
-document.getElementById("resultadosIA").innerHTML=html;
+document.getElementById("resultadoIA").innerHTML=html;
 
 }
 
-/* HISTORIAL */
-
-function cargarHistQuiniela(){
-let texto=document.getElementById("histQuiniela").value.trim();
-histQuiniela=texto.split(/\s+/).filter(n=>n.length===4);
-alert("Historial cargado");
-}
-
-/* ===== POCEADA ===== */
+/* ===== POCEADA (BÁSICA) ===== */
 
 function generarPoseada(){
 
@@ -328,117 +242,29 @@ alert("Ingresá 10 números");
 return;
 }
 
-historico.push(input);
-if(historico.length>20) historico.shift();
-
-analizar(input);
-
-}
-
-function analizar(input){
-
-let freq={},ultima={};
-
-historico.forEach((j,i)=>{
-j.forEach(n=>{
-freq[n]=(freq[n]||0)+1;
-ultima[n]=i;
-});
-});
-
 let candidatos=[];
 
 for(let i=0;i<100;i++){
-
 let num=i.toString().padStart(2,'0');
-if(input.includes(num)) continue;
-
-let score=0;
-
-if(freq[num]) score+=freq[num]*2;
-if(!(num in ultima)) score+=6;
-
-candidatos.push({num,score});
+if(!input.includes(num)){
+candidatos.push(num);
+}
 }
 
-candidatos.sort((a,b)=>b.score-a.score);
-
-let principal=candidatos.slice(0,5).map(c=>c.num);
-let respaldo=candidatos.slice(5,8).map(c=>c.num);
-let radar=candidatos.slice(8,10).map(c=>c.num);
+let resultado=candidatos.sort(()=>0.5-Math.random()).slice(0,6);
 
 document.getElementById("resultadosPoseada").innerHTML=
 
 `
-<div class="resultado">🎯 Principal: <span>${principal.join(" - ")}</span></div>
-<div class="resultado">🛟 Respaldo: <span>${respaldo.join(" - ")}</span></div>
-<div class="resultado">📡 Radar: <span>${radar.join(" - ")}</span></div>
-`;
-
-}
-
-function detectorProximo(){
-
-let freq={};
-
-historico.forEach(j=>{
-j.forEach(n=>{
-freq[n]=(freq[n]||0)+1;
-});
-});
-
-let candidatos=[];
-
-for(let i=0;i<100;i++){
-
-let num=i.toString().padStart(2,'0');
-
-let score=0;
-
-if(!freq[num]) score+=6;
-if(freq[num]) score+=freq[num]*2;
-
-candidatos.push({num,score});
-}
-
-candidatos.sort((a,b)=>b.score-a.score);
-
-let top=candidatos.slice(0,5).map(c=>c.num);
-
-document.getElementById("detectorResultado").innerHTML=
-
-`
 <div class="resultado">
-🔥 Próximo sorteo:<br>
-<span>${top.join(" - ")}</span>
+🎯 Jugada:<br>
+<span>${resultado.join(" - ")}</span>
 </div>
 `;
-
-}
-
-function autoPoceada(){
-analizar([]);
-}
-
-function cargarHistorico20(){
-
-let texto=document.getElementById("historico20").value.trim();
-let lineas=texto.split(/\n+/);
-
-historico=[];
-
-lineas.slice(0,20).forEach(l=>{
-let nums=l.split(/[\s,]+/).map(n=>n.padStart(2,'0'));
-if(nums.length===10){
-historico.push(nums);
-}
-});
-
-alert("Histórico cargado");
 
 }
 
 </script>
 
 </body>
-</html>
+  </html>

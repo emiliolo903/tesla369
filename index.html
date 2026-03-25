@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V12 EXPANSIÓN</title>
+<title>EMI Tesla Pro V12 EXPANSIÓN + IA</title>
 
 <style>
 
@@ -69,19 +69,21 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V12 EXPANSIÓN</h1>
+<h1>🔥 EMI Tesla Pro V12 EXPANSIÓN + IA</h1>
 
 <h2>Quiniela Tradicional</h2>
 
 <input type="text" id="inputTradicional" placeholder="Número 4 cifras">
 
-<button onclick="generarTradicional()">Generar</button>
+<button onclick="generarTradicional()">⚡ Generar Tesla</button>
+
+<button onclick="generarIA()">🧠 Generar IA Pura</button>
 
 <div id="resultadosTradicional"></div>
 
 <h2>Cargar historial quiniela (IA)</h2>
 
-<textarea id="histQuiniela"></textarea>
+<textarea id="histQuiniela" placeholder="Pegá los 7 cuaterno por sorteo"></textarea>
 
 <button onclick="cargarHistQuiniela()">Cargar historial</button>
 
@@ -109,6 +111,13 @@ font-weight:bold;
 
 <script>
 
+/* 🔥 MEMORIA IA */
+let histQuiniela = [];
+
+if(localStorage.getItem("historialIA")){
+histQuiniela = JSON.parse(localStorage.getItem("historialIA"));
+}
+
 const tablaTesla={
 0:['0','0'],
 1:['0','0'],
@@ -123,7 +132,6 @@ const tablaTesla={
 };
 
 let historico=[];
-let histQuiniela=[];
 
 /* ===== EXPANSIÓN ===== */
 
@@ -140,7 +148,7 @@ lista.push(v.toString().padStart(2,'0'));
 return [...new Set(lista)];
 }
 
-/* ================= TRADICIONAL ================= */
+/* ================= TESLA ================= */
 
 function generarTradicional(){
 
@@ -172,6 +180,7 @@ document.getElementById("resultadosTradicional").innerHTML=
 
 `
 <div class="resultado">
+⚡ TESLA<br>
 Cuaterno 1: <span>${primero}</span><br>
 Terno 1: <span>${t1}</span><br>
 Ambos 1: <span>${a1}</span>
@@ -183,6 +192,82 @@ Terno 2: <span>${t2}</span><br>
 Ambos 2: <span>${a2}</span>
 </div>
 `;
+
+}
+
+/* ================= IA PURA ================= */
+
+function generarIA(){
+
+if(histQuiniela.length < 7){
+alert("Cargá al menos un sorteo");
+return;
+}
+
+let freqNum={};
+let freqDig={};
+
+histQuiniela.forEach(n=>{
+freqNum[n]=(freqNum[n]||0)+1;
+
+n.split('').forEach(d=>{
+freqDig[d]=(freqDig[d]||0)+1;
+});
+});
+
+let candidatos=[];
+
+for(let i=0;i<10000;i++){
+
+let num=i.toString().padStart(4,'0');
+
+let score=0;
+
+if(freqNum[num]) score+=freqNum[num]*5;
+if(!freqNum[num]) score+=4;
+
+num.split('').forEach(d=>{
+if(freqDig[d]) score+=freqDig[d];
+});
+
+let set=new Set(num.split(''));
+if(set.size<=2) score+=3;
+
+candidatos.push({num,score});
+}
+
+candidatos.sort((a,b)=>b.score-a.score);
+
+let top3=candidatos.slice(0,3).map(c=>c.num);
+
+document.getElementById("resultadosTradicional").innerHTML=
+
+`
+<div class="resultado">
+🧠 IA PURA (aprendiendo):<br>
+<span>${top3.join(" - ")}</span>
+</div>
+`;
+
+}
+
+/* ================= GUARDAR IA ================= */
+
+function cargarHistQuiniela(){
+
+let texto=document.getElementById("histQuiniela").value.trim();
+
+let nuevos=texto.split(/\s+/).filter(n=>n.length===4);
+
+nuevos.forEach(n=>{
+if(!histQuiniela.includes(n)){
+histQuiniela.push(n);
+}
+});
+
+localStorage.setItem("historialIA", JSON.stringify(histQuiniela));
+
+alert("IA aprendiendo correctamente");
 
 }
 
@@ -237,8 +322,6 @@ candidatos.sort((a,b)=>b.score-a.score);
 let principal=candidatos.slice(0,5).map(c=>c.num);
 let respaldo=candidatos.slice(5,8).map(c=>c.num);
 let radar=candidatos.slice(8,10).map(c=>c.num);
-
-/* 🔥 EXPANSIÓN AUTOMÁTICA */
 
 let expandido=[];
 
@@ -333,4 +416,4 @@ alert("Histórico cargado");
 </script>
 
 </body>
-  </html>
+</html>

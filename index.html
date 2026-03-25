@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V12 DIOS 2</title>
+<title>EMI Tesla Pro V13 DIOS</title>
 
 <style>
 
@@ -69,7 +69,7 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V12 DIOS 2</h1>
+<h1>🔥 EMI Tesla Pro V13 DIOS</h1>
 
 <h2>Quiniela Tradicional (Tesla)</h2>
 
@@ -79,13 +79,15 @@ font-weight:bold;
 
 <div id="resultadosTradicional"></div>
 
-<h2>IA Quiniela (Nivel Dios 2)</h2>
+<h2>IA Quiniela PRO</h2>
 
-<textarea id="histQuiniela" placeholder="Pegar últimos cuaternos (uno por línea)"></textarea>
+<textarea id="base7" placeholder="Ingresar 7 cuaternos del último sorteo"></textarea>
+
+<textarea id="histQuiniela" placeholder="Historial de cuaternos"></textarea>
 
 <button onclick="cargarHistQuiniela()">Cargar historial</button>
 
-<button onclick="generarIA()">Generar IA</button>
+<button onclick="generarIA()">Generar IA PRO</button>
 
 <div id="resultadosIA"></div>
 
@@ -113,6 +115,8 @@ font-weight:bold;
 
 <script>
 
+/* ===== DATOS ===== */
+
 const tablaTesla={
 0:['0','0'],
 1:['0','0'],
@@ -126,8 +130,31 @@ const tablaTesla={
 9:['3','4']
 };
 
+const agencias=[
+"Corrientes",
+"Ciudad",
+"Bonaerense",
+"Santa Fe",
+"Córdoba",
+"Entre Ríos",
+"Chaco"
+];
+
 let historico=[];
 let histQuiniela=[];
+
+/* ===== FUNCIONES EXTRA ===== */
+
+function energia(num){
+let suma=num.split('').reduce((a,b)=>a+parseInt(b),0);
+if(suma%3===0) return "🌅 Mañana";
+if(suma%3===1) return "🌆 Tarde";
+return "🌙 Noche";
+}
+
+function agencia(num){
+return agencias[parseInt(num[0]) % agencias.length];
+}
 
 /* ===== TESLA ===== */
 
@@ -172,24 +199,34 @@ Ambos 2: <span>${a2}</span>
 
 }
 
-/* ===== IA NIVEL DIOS 2 ===== */
+/* ===== IA DIOS ===== */
 
 function generarIA(){
 
-let freq={}, ultima={};
+let base = document.getElementById("base7").value
+.trim()
+.split(/[\s,]+/)
+.filter(n=>n.length===4);
 
-histQuiniela.forEach((n,i)=>{
-freq[n]=(freq[n]||0)+1;
-ultima[n]=i;
-});
+if(base.length!==7){
+alert("Ingresá los 7 cuaternos");
+return;
+}
 
-let pos=[{},{},{},{}];
+let freqBase={}, posBase=[{},{},{},{}];
 
-histQuiniela.forEach(n=>{
+base.forEach(n=>{
 for(let i=0;i<4;i++){
 let d=n[i];
-pos[i][d]=(pos[i][d]||0)+1;
+freqBase[d]=(freqBase[d]||0)+1;
+posBase[i][d]=(posBase[i][d]||0)+1;
 }
+});
+
+let freqHist={};
+
+histQuiniela.forEach(n=>{
+freqHist[n]=(freqHist[n]||0)+1;
 });
 
 let candidatos=[];
@@ -199,58 +236,30 @@ for(let i=0;i<10000;i++){
 let num=i.toString().padStart(4,'0');
 let score=0;
 
-if(freq[num]) score+=freq[num]*4;
-
-if(!(num in ultima)) score+=6;
-else{
-let atraso = histQuiniela.length - ultima[num];
-if(atraso>10) score+=4;
-}
-
 for(let i=0;i<4;i++){
 let d=num[i];
-if(pos[i][d]) score+=pos[i][d]*2;
+if(freqBase[d]) score+=freqBase[d]*3;
+if(posBase[i][d]) score+=posBase[i][d]*4;
 }
+
+base.forEach(b=>{
+if(b.slice(0,2)===num.slice(0,2)) score+=3;
+if(b.slice(2)===num.slice(2)) score+=3;
+});
+
+if(freqHist[num]) score+=freqHist[num]*2;
 
 let set=new Set(num.split(''));
 
-if(set.size===1) score-=8;
+if(set.size===1) score-=10;
 if(set.size===2) score+=1;
 if(set.size>=3) score+=4;
 
 let conteo={};
 num.split('').forEach(d=>conteo[d]=(conteo[d]||0)+1);
+
 Object.values(conteo).forEach(c=>{
-if(c>=3) score-=4;
-});
-
-let finales={};
-histQuiniela.forEach(n=>{
-let f=n.slice(2);
-finales[f]=(finales[f]||0)+1;
-});
-if(finales[num.slice(2)]) score+=3;
-
-let tesla="";
-for(let j=0;j<4;j++){
-tesla+=tablaTesla[parseInt(num[j])][0];
-}
-if(freq[tesla]) score+=2;
-
-histQuiniela.slice(-5).forEach(n=>{
-let base=parseInt(n);
-let vecinos=[base-1,base+1];
-vecinos.forEach(v=>{
-if(v>=0 && v<=9999){
-let vv=v.toString().padStart(4,'0');
-if(vv===num) score+=2;
-}
-});
-});
-
-histQuiniela.slice(-10).forEach(n=>{
-if(n.slice(0,2)===num.slice(0,2)) score+=2;
-if(n.slice(2)===num.slice(2)) score+=2;
+if(c>=3) score-=5;
 });
 
 candidatos.push({num,score});
@@ -275,16 +284,30 @@ finales.push(n);
 if(finales.length===3) break;
 }
 
-document.getElementById("resultadosIA").innerHTML=
+/* RESULTADO */
 
-`
+let html=`<div class="resultado">
+🎯 BASE:<br>
+<span>${base.join(" - ")}</span>
+</div>`;
+
+finales.forEach((n,i)=>{
+
+html+=`
 <div class="resultado">
-🧠 IA NIVEL DIOS 2:<br>
-<span>${finales.join(" - ")}</span>
+🔥 Jugada ${i+1}: <span>${n}</span><br>
+${energia(n)}<br>
+📍 ${agencia(n)}
 </div>
 `;
 
+});
+
+document.getElementById("resultadosIA").innerHTML=html;
+
 }
+
+/* HISTORIAL */
 
 function cargarHistQuiniela(){
 let texto=document.getElementById("histQuiniela").value.trim();
@@ -418,4 +441,4 @@ alert("Histórico cargado");
 </script>
 
 </body>
-  </html>
+</html>

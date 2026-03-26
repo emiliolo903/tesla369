@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V15 REAL</title>
+<title>EMI Tesla Pro V15 COMPLETA</title>
 
 <style>
 body{
@@ -37,17 +37,28 @@ span{color:#00FFAA;font-weight:bold;}
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V15 REAL</h1>
+<h1>🔥 EMI Tesla Pro V15 COMPLETA</h1>
+
+<!-- ===== TESLA ===== -->
 
 <h2>Quiniela Tradicional (Tesla)</h2>
 <input type="text" id="inputTradicional">
 <button onclick="generarTradicional()">Generar Tesla</button>
 <div id="resultadosTradicional"></div>
 
+<!-- ===== IA ===== -->
+
 <h2>IA Quiniela REAL</h2>
 <textarea id="baseIA" placeholder="7 cuaternos anteriores"></textarea>
 <button onclick="generarIA()">Generar IA V15</button>
 <div id="resultadoIA"></div>
+
+<!-- ===== POCEADA ===== -->
+
+<h2>Poceada Inteligente</h2>
+<input type="text" id="inputPoseada" placeholder="10 números del sorteo">
+<button onclick="generarPoseada()">Generar Poceada</button>
+<div id="resultadosPoseada"></div>
 
 </div>
 
@@ -72,10 +83,26 @@ c1+=tablaTesla[d][0];
 c2+=tablaTesla[d][1];
 }
 
+let t1=c1.slice(1);
+let t2=c2.slice(1);
+
+let a1=c1.slice(2);
+let a2=c2.slice(2);
+
 document.getElementById("resultadosTradicional").innerHTML=
-`<div class="resultado">
-<span>${c1}</span> - <span>${c2}</span>
-</div>`;
+`
+<div class="resultado">
+Cuaterno 1: <span>${c1}</span><br>
+Terno: <span>${t1}</span><br>
+Ambos: <span>${a1}</span>
+</div>
+
+<div class="resultado">
+Cuaterno 2: <span>${c2}</span><br>
+Terno: <span>${t2}</span><br>
+Ambos: <span>${a2}</span>
+</div>
+`;
 }
 
 /* ===== IA V15 ===== */
@@ -117,7 +144,6 @@ let baseNum=base[Math.floor(Math.random()*base.length)];
 
 let n="";
 
-/* lógica */
 if(tipo==="fuerte"){
 n=zonaPrincipal + baseNum[1] + baseNum[2] + baseNum[3];
 }
@@ -128,10 +154,8 @@ else{
 n=zonaPrincipal + baseNum[1] + baseNum[2] + base[Math.floor(Math.random()*base.length)][3];
 }
 
-/* filtros */
 if(base.includes(n)) continue;
 if(/^(\d)\1+$/.test(n)) continue;
-
 if(!finalesTop.includes(n.slice(2))) continue;
 
 return n;
@@ -141,14 +165,9 @@ return null;
 }
 
 /* GENERAR */
-let fuerte=generar("fuerte");
-let medio=generar("medio");
-let riesgo=generar("riesgo");
-
-/* fallback */
-if(!fuerte) fuerte="----";
-if(!medio) medio="----";
-if(!riesgo) riesgo="----";
+let fuerte=generar("fuerte")||"----";
+let medio=generar("medio")||"----";
+let riesgo=generar("riesgo")||"----";
 
 /* MOSTRAR */
 
@@ -156,21 +175,80 @@ document.getElementById("resultadoIA").innerHTML=
 
 `
 <div class="resultado">
-📊 Zona principal: <span>${zonaPrincipal}XXX</span><br>
-📊 Zona secundaria: <span>${zonaSecundaria}XXX</span><br>
+📊 Zona: <span>${zonaPrincipal}XXX</span><br>
 🔥 Finales: <span>${finalesTop.join(" - ")}</span>
 </div>
 
-<div class="resultado">
-🥇 MÁS FUERTE: <span>${fuerte}</span>
-</div>
+<div class="resultado">🥇 <span>${fuerte}</span></div>
+<div class="resultado">🥈 <span>${medio}</span></div>
+<div class="resultado">🥉 <span>${riesgo}</span></div>
+`;
 
-<div class="resultado">
-🥈 MEDIO: <span>${medio}</span>
-</div>
+}
 
+/* ===== POCEADA ===== */
+
+function generarPoseada(){
+
+let input=document.getElementById("inputPoseada").value
+.split(/[\s,]+/)
+.map(v=>v.padStart(2,'0'));
+
+if(input.length!==10){
+alert("Ingresá 10 números");
+return;
+}
+
+let freq={};
+
+input.forEach(n=>{
+freq[n]=(freq[n]||0)+1;
+});
+
+let candidatos=[];
+
+for(let i=0;i<100;i++){
+
+let num=i.toString().padStart(2,'0');
+
+if(input.includes(num)) continue;
+
+let score=0;
+
+/* atraso */
+score+=3;
+
+/* repetición inversa */
+let esp=num[1]+num[0];
+if(input.includes(esp)) score+=2;
+
+/* vecinos */
+input.forEach(n=>{
+let base=parseInt(n);
+let vecinos=[base-1,base+1];
+vecinos.forEach(v=>{
+if(v>=0 && v<=99){
+if(v.toString().padStart(2,'0')===num){
+score+=2;
+}
+}
+});
+});
+
+candidatos.push({num,score});
+
+}
+
+candidatos.sort((a,b)=>b.score-a.score);
+
+let resultado=candidatos.slice(0,6).map(c=>c.num);
+
+document.getElementById("resultadosPoseada").innerHTML=
+
+`
 <div class="resultado">
-🥉 RIESGO: <span>${riesgo}</span>
+🎯 Jugada:<br>
+<span>${resultado.join(" - ")}</span>
 </div>
 `;
 

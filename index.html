@@ -5,63 +5,31 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V14 PRO</title>
+<title>EMI Tesla Pro V15 REAL</title>
 
 <style>
-
 body{
 margin:0;
 font-family:Arial;
-background:#111111;
-color:#ffffff;
+background:#111;
+color:#fff;
 display:flex;
 justify-content:center;
 padding:15px;
 }
-
-.container{
-max-width:480px;
-width:100%;
-text-align:center;
-}
-
+.container{max-width:480px;width:100%;text-align:center;}
 h1{color:#00F5E0}
 h2{color:#FFD700}
-
 input,textarea{
-width:95%;
-padding:10px;
-font-size:16px;
-border-radius:8px;
-border:none;
-margin-bottom:10px;
+width:95%;padding:10px;font-size:16px;border-radius:8px;border:none;margin-bottom:10px;
 }
-
 button{
-width:100%;
-padding:12px;
-font-size:16px;
-background:#00F5E0;
-color:#111;
-border:none;
-border-radius:8px;
-margin-bottom:15px;
-cursor:pointer;
+width:100%;padding:12px;font-size:16px;background:#00F5E0;color:#111;border:none;border-radius:8px;margin-bottom:15px;
 }
-
 .resultado{
-background:#222;
-padding:10px;
-border-radius:10px;
-margin-bottom:10px;
-text-align:left;
+background:#222;padding:10px;border-radius:10px;margin-bottom:10px;text-align:left;
 }
-
-span{
-color:#00FFAA;
-font-weight:bold;
-}
-
+span{color:#00FFAA;font-weight:bold;}
 </style>
 </head>
 
@@ -69,37 +37,17 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V14 PRO</h1>
-
-<!-- ===== TESLA ===== -->
+<h1>🔥 EMI Tesla Pro V15 REAL</h1>
 
 <h2>Quiniela Tradicional (Tesla)</h2>
-
-<input type="text" id="inputTradicional" placeholder="Número 4 cifras">
-
+<input type="text" id="inputTradicional">
 <button onclick="generarTradicional()">Generar Tesla</button>
-
 <div id="resultadosTradicional"></div>
 
-<!-- ===== IA ===== -->
-
-<h2>IA Quiniela PRO (7 base)</h2>
-
-<textarea id="baseIA" placeholder="Pegá los 7 cuaternos del sorteo anterior"></textarea>
-
-<button onclick="generarIA()">Generar IA PRO</button>
-
+<h2>IA Quiniela REAL</h2>
+<textarea id="baseIA" placeholder="7 cuaternos anteriores"></textarea>
+<button onclick="generarIA()">Generar IA V15</button>
 <div id="resultadoIA"></div>
-
-<!-- ===== POCEADA ===== -->
-
-<h2>Poceada Inteligente</h2>
-
-<input type="text" id="inputPoseada">
-
-<button onclick="generarPoseada()">Generar Poceada</button>
-
-<div id="resultadosPoseada"></div>
 
 </div>
 
@@ -108,79 +56,46 @@ font-weight:bold;
 /* ===== TESLA ===== */
 
 const tablaTesla={
-0:['0','0'],
-1:['0','0'],
-2:['5','7'],
-3:['8','0'],
-4:['6','9'],
-5:['2','7'],
-6:['4','9'],
-7:['5','2'],
-8:['3','0'],
-9:['3','4']
+0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],
+4:['6','9'],5:['2','7'],6:['4','9'],7:['5','2'],
+8:['3','0'],9:['3','4']
 };
 
 function generarTradicional(){
-
-let n=document.getElementById("inputTradicional").value.trim();
-
-if(n.length!==4){
-alert("Ingresá 4 cifras");
-return;
-}
+let n=document.getElementById("inputTradicional").value;
+if(n.length!==4)return alert("4 cifras");
 
 let c1="",c2="";
-
 for(let i=0;i<4;i++){
 let d=parseInt(n[i]);
 c1+=tablaTesla[d][0];
 c2+=tablaTesla[d][1];
 }
 
-let t1=c1.slice(1);
-let t2=c2.slice(1);
-
-let a1=c1.slice(2);
-let a2=c2.slice(2);
-
 document.getElementById("resultadosTradicional").innerHTML=
-
-`
-<div class="resultado">
-Cuaterno 1: <span>${c1}</span><br>
-Terno 1: <span>${t1}</span><br>
-Ambos 1: <span>${a1}</span>
-</div>
-
-<div class="resultado">
-Cuaterno 2: <span>${c2}</span><br>
-Terno 2: <span>${t2}</span><br>
-Ambos 2: <span>${a2}</span>
-</div>
-`;
-
+`<div class="resultado">
+<span>${c1}</span> - <span>${c2}</span>
+</div>`;
 }
 
-/* ===== IA PRO ===== */
+/* ===== IA V15 ===== */
 
 function generarIA(){
 
-let texto=document.getElementById("baseIA").value.trim();
-let base=texto.split(/[\s,]+/).filter(n=>n.length===4);
+let base=document.getElementById("baseIA").value
+.split(/[\s,]+/)
+.filter(n=>n.length===4);
 
-if(base.length<7){
-alert("Cargá los 7 cuaternos");
-return;
-}
+if(base.length<7)return alert("Cargar 7");
 
 /* ZONA */
 let miles={};
 base.forEach(n=>{
-let m=n[0];
-miles[m]=(miles[m]||0)+1;
+miles[n[0]]=(miles[n[0]]||0)+1;
 });
 
-let zona=Object.keys(miles).sort((a,b)=>miles[b]-miles[a])[0];
+let zonaPrincipal=Object.keys(miles).sort((a,b)=>miles[b]-miles[a])[0];
+let zonaSecundaria=Object.keys(miles).sort((a,b)=>miles[b]-miles[a])[1];
 
 /* FINALES */
 let finales={};
@@ -191,32 +106,31 @@ finales[f]=(finales[f]||0)+1;
 
 let finalesTop=Object.keys(finales)
 .sort((a,b)=>finales[b]-finales[a])
-.slice(0,5);
-
-/* POSICIONES */
-let p2=[],p3=[],p4=[];
-base.forEach(n=>{
-p2.push(n[1]);
-p3.push(n[2]);
-p4.push(n[3]);
-});
+.slice(0,4);
 
 /* GENERADOR */
-function generarNumero(){
+function generar(tipo){
 
-for(let intento=0;intento<50;intento++){
+for(let i=0;i<50;i++){
 
-let n=
-zona +
-p2[Math.floor(Math.random()*p2.length)] +
-p3[Math.floor(Math.random()*p3.length)] +
-p4[Math.floor(Math.random()*p4.length)];
+let baseNum=base[Math.floor(Math.random()*base.length)];
 
+let n="";
+
+/* lógica */
+if(tipo==="fuerte"){
+n=zonaPrincipal + baseNum[1] + baseNum[2] + baseNum[3];
+}
+else if(tipo==="medio"){
+n=zonaSecundaria + baseNum[1] + baseNum[2] + baseNum[3];
+}
+else{
+n=zonaPrincipal + baseNum[1] + baseNum[2] + base[Math.floor(Math.random()*base.length)][3];
+}
+
+/* filtros */
 if(base.includes(n)) continue;
 if(/^(\d)\1+$/.test(n)) continue;
-
-let set=new Set(n.split(''));
-if(set.size<=2) continue;
 
 if(!finalesTop.includes(n.slice(2))) continue;
 
@@ -226,77 +140,37 @@ return n;
 return null;
 }
 
-/* GENERAR 3 */
-let jugadas=[];
+/* GENERAR */
+let fuerte=generar("fuerte");
+let medio=generar("medio");
+let riesgo=generar("riesgo");
 
-while(jugadas.length<3){
-let n=generarNumero();
-if(n && !jugadas.includes(n)){
-jugadas.push(n);
-}
-}
-
-while(jugadas.length<3){
-let r=Math.floor(Math.random()*9000+1000).toString();
-if(!jugadas.includes(r)){
-jugadas.push(r);
-}
-}
+/* fallback */
+if(!fuerte) fuerte="----";
+if(!medio) medio="----";
+if(!riesgo) riesgo="----";
 
 /* MOSTRAR */
 
-let turnos=["Mañana","Tarde","Noche"];
-
-let html=`
-<div class="resultado">
-📊 Zona: <span>${zona}XXX</span><br>
-🔥 Finales: <span>${finalesTop.join(" - ")}</span>
-</div>
-`;
-
-jugadas.forEach((n,i)=>{
-html+=`
-<div class="resultado">
-🎯 ${n}<br>
-⏰ ${turnos[i]}
-</div>
-`;
-});
-
-document.getElementById("resultadoIA").innerHTML=html;
-
-}
-
-/* ===== POCEADA ===== */
-
-function generarPoseada(){
-
-let input=document.getElementById("inputPoseada").value
-.split(/[\s,]+/)
-.map(v=>v.padStart(2,'0'));
-
-if(input.length!==10){
-alert("Ingresá 10 números");
-return;
-}
-
-let candidatos=[];
-
-for(let i=0;i<100;i++){
-let num=i.toString().padStart(2,'0');
-if(!input.includes(num)){
-candidatos.push(num);
-}
-}
-
-let resultado=candidatos.sort(()=>0.5-Math.random()).slice(0,6);
-
-document.getElementById("resultadosPoseada").innerHTML=
+document.getElementById("resultadoIA").innerHTML=
 
 `
 <div class="resultado">
-🎯 Jugada:<br>
-<span>${resultado.join(" - ")}</span>
+📊 Zona principal: <span>${zonaPrincipal}XXX</span><br>
+📊 Zona secundaria: <span>${zonaSecundaria}XXX</span><br>
+🔥 Finales: <span>${finalesTop.join(" - ")}</span>
+</div>
+
+<div class="resultado">
+🥇 MÁS FUERTE: <span>${fuerte}</span>
+</div>
+
+<div class="resultado">
+🥈 MEDIO: <span>${medio}</span>
+</div>
+
+<div class="resultado">
+🥉 RIESGO: <span>${riesgo}</span>
 </div>
 `;
 

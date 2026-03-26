@@ -5,59 +5,101 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V15 COMPLETA</title>
+<title>EMI Tesla Pro V16 FINAL</title>
 
 <style>
 body{
 margin:0;
 font-family:Arial;
-background:#111;
-color:#fff;
+background:#111111;
+color:#ffffff;
 display:flex;
 justify-content:center;
 padding:15px;
 }
-.container{max-width:480px;width:100%;text-align:center;}
+.container{
+max-width:480px;
+width:100%;
+text-align:center;
+}
 h1{color:#00F5E0}
 h2{color:#FFD700}
 input,textarea{
-width:95%;padding:10px;font-size:16px;border-radius:8px;border:none;margin-bottom:10px;
+width:95%;
+padding:10px;
+font-size:16px;
+border-radius:8px;
+border:none;
+margin-bottom:10px;
 }
 button{
-width:100%;padding:12px;font-size:16px;background:#00F5E0;color:#111;border:none;border-radius:8px;margin-bottom:15px;
+width:100%;
+padding:12px;
+font-size:16px;
+background:#00F5E0;
+color:#111;
+border:none;
+border-radius:8px;
+margin-bottom:15px;
+cursor:pointer;
 }
 .resultado{
-background:#222;padding:10px;border-radius:10px;margin-bottom:10px;text-align:left;
+background:#222;
+padding:10px;
+border-radius:10px;
+margin-bottom:10px;
+text-align:left;
 }
-span{color:#00FFAA;font-weight:bold;}
+span{
+color:#00FFAA;
+font-weight:bold;
+}
 </style>
+
 </head>
 
 <body>
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V15 COMPLETA</h1>
+<h1>🔥 EMI Tesla Pro V16 FINAL</h1>
 
 <!-- ===== TESLA ===== -->
 
 <h2>Quiniela Tradicional (Tesla)</h2>
-<input type="text" id="inputTradicional">
+
+<input type="text" id="inputTradicional" placeholder="Número 4 cifras">
+
 <button onclick="generarTradicional()">Generar Tesla</button>
+
 <div id="resultadosTradicional"></div>
 
 <!-- ===== IA ===== -->
 
-<h2>IA Quiniela REAL</h2>
-<textarea id="baseIA" placeholder="7 cuaternos anteriores"></textarea>
-<button onclick="generarIA()">Generar IA V15</button>
+<h2>IA Quiniela</h2>
+
+<textarea id="baseIA" placeholder="Pegar 7 cuaternos anteriores"></textarea>
+
+<button onclick="generarIA()">Generar IA</button>
+
 <div id="resultadoIA"></div>
+
+<!-- ===== DETECTOR ===== -->
+
+<h2>Detector PRO (IA + Tesla)</h2>
+
+<button onclick="detectarCoincidencias()">Buscar coincidencias</button>
+
+<div id="resultadoDetector"></div>
 
 <!-- ===== POCEADA ===== -->
 
 <h2>Poceada Inteligente</h2>
+
 <input type="text" id="inputPoseada" placeholder="10 números del sorteo">
+
 <button onclick="generarPoseada()">Generar Poceada</button>
+
 <div id="resultadosPoseada"></div>
 
 </div>
@@ -73,10 +115,16 @@ const tablaTesla={
 };
 
 function generarTradicional(){
-let n=document.getElementById("inputTradicional").value;
-if(n.length!==4)return alert("4 cifras");
+
+let n=document.getElementById("inputTradicional").value.trim();
+
+if(n.length!==4){
+alert("Ingresá 4 cifras");
+return;
+}
 
 let c1="",c2="";
+
 for(let i=0;i<4;i++){
 let d=parseInt(n[i]);
 c1+=tablaTesla[d][0];
@@ -90,6 +138,7 @@ let a1=c1.slice(2);
 let a2=c2.slice(2);
 
 document.getElementById("resultadosTradicional").innerHTML=
+
 `
 <div class="resultado">
 Cuaterno 1: <span>${c1}</span><br>
@@ -103,9 +152,10 @@ Terno: <span>${t2}</span><br>
 Ambos: <span>${a2}</span>
 </div>
 `;
+
 }
 
-/* ===== IA V15 ===== */
+/* ===== IA ===== */
 
 function generarIA(){
 
@@ -113,75 +163,71 @@ let base=document.getElementById("baseIA").value
 .split(/[\s,]+/)
 .filter(n=>n.length===4);
 
-if(base.length<7)return alert("Cargar 7");
-
-/* ZONA */
-let miles={};
-base.forEach(n=>{
-miles[n[0]]=(miles[n[0]]||0)+1;
-});
-
-let zonaPrincipal=Object.keys(miles).sort((a,b)=>miles[b]-miles[a])[0];
-let zonaSecundaria=Object.keys(miles).sort((a,b)=>miles[b]-miles[a])[1];
-
-/* FINALES */
-let finales={};
-base.forEach(n=>{
-let f=n.slice(2);
-finales[f]=(finales[f]||0)+1;
-});
-
-let finalesTop=Object.keys(finales)
-.sort((a,b)=>finales[b]-finales[a])
-.slice(0,4);
-
-/* GENERADOR */
-function generar(tipo){
-
-for(let i=0;i<50;i++){
-
-let baseNum=base[Math.floor(Math.random()*base.length)];
-
-let n="";
-
-if(tipo==="fuerte"){
-n=zonaPrincipal + baseNum[1] + baseNum[2] + baseNum[3];
-}
-else if(tipo==="medio"){
-n=zonaSecundaria + baseNum[1] + baseNum[2] + baseNum[3];
-}
-else{
-n=zonaPrincipal + baseNum[1] + baseNum[2] + base[Math.floor(Math.random()*base.length)][3];
+if(base.length<7){
+alert("Cargar 7 cuaternos");
+return;
 }
 
-if(base.includes(n)) continue;
-if(/^(\d)\1+$/.test(n)) continue;
-if(!finalesTop.includes(n.slice(2))) continue;
+let resultados=[];
 
-return n;
+for(let i=0;i<3;i++){
+let n=base[Math.floor(Math.random()*base.length)];
+let nuevo=n.slice(0,3)+Math.floor(Math.random()*10);
+resultados.push(nuevo);
 }
-
-return null;
-}
-
-/* GENERAR */
-let fuerte=generar("fuerte")||"----";
-let medio=generar("medio")||"----";
-let riesgo=generar("riesgo")||"----";
-
-/* MOSTRAR */
 
 document.getElementById("resultadoIA").innerHTML=
 
 `
 <div class="resultado">
-📊 Zona: <span>${zonaPrincipal}XXX</span><br>
-🔥 Finales: <span>${finalesTop.join(" - ")}</span>
+<span>${resultados.join(" - ")}</span>
 </div>
+`;
 
-<div class="resultado">🥇 <span>${fuerte}</span></div>
-<div class="resultado">🥈 <span>${medio}</span></div>
-<div class="resultado">🥉 <span>${riesgo}</span></div>
+}
+
+/* ===== DETECTOR ===== */
+
+function detectarCoincidencias(){
+
+let tesla=document.getElementById("resultadosTradicional").innerText.match(/\d{4}/g)||[];
+let ia=document.getElementById("resultadoIA").innerText.match(/\d{4}/g)||[];
+
+if(tesla.length===0 || ia.length===0){
+alert("Generá Tesla e IA primero");
+return;
+}
+
+let bomba="----";
+let terno="";
+let ambo="";
+
+ia.forEach(i=>{
+tesla.forEach(t=>{
+
+if(i===t){
+bomba=i;
+}
+
+if(i.slice(1)===t.slice(1)){
+terno=i.slice(1);
+}
+
+if(i.slice(2)===t.slice(2)){
+ambo=i.slice(2);
+}
+
+});
+});
+
+document.getElementById("resultadoDetector").innerHTML=
+
+`
+<div class="resultado">
+💣 Bomba: <span>${bomba}</span><br>
+🎯 Terno: <span>${terno || "--"}</span><br>
+💰 Ambo: <span>${ambo || "--"}</span>
+</div>
 `;
 
 }
@@ -199,12 +245,6 @@ alert("Ingresá 10 números");
 return;
 }
 
-let freq={};
-
-input.forEach(n=>{
-freq[n]=(freq[n]||0)+1;
-});
-
 let candidatos=[];
 
 for(let i=0;i<100;i++){
@@ -215,18 +255,12 @@ if(input.includes(num)) continue;
 
 let score=0;
 
-/* atraso */
-score+=3;
-
-/* repetición inversa */
 let esp=num[1]+num[0];
-if(input.includes(esp)) score+=2;
+if(input.includes(esp)) score+=3;
 
-/* vecinos */
 input.forEach(n=>{
 let base=parseInt(n);
-let vecinos=[base-1,base+1];
-vecinos.forEach(v=>{
+[base-1,base+1].forEach(v=>{
 if(v>=0 && v<=99){
 if(v.toString().padStart(2,'0')===num){
 score+=2;
@@ -241,14 +275,14 @@ candidatos.push({num,score});
 
 candidatos.sort((a,b)=>b.score-a.score);
 
-let resultado=candidatos.slice(0,6).map(c=>c.num);
+let top=candidatos.slice(0,6).map(c=>c.num);
 
 document.getElementById("resultadosPoseada").innerHTML=
 
 `
 <div class="resultado">
 🎯 Jugada:<br>
-<span>${resultado.join(" - ")}</span>
+<span>${top.join(" - ")}</span>
 </div>
 `;
 

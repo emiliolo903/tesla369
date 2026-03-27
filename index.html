@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V17 FINAL</title>
+<title>EMI Tesla Pro V17 CRUCE</title>
 
 <style>
 body{
@@ -57,20 +57,17 @@ span{color:#00FFAA;font-weight:bold;}
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V17</h1>
+<h1>🔥 EMI Tesla Pro V17 CRUCE</h1>
 
-<!-- ================= TESLA ================= -->
-
+<!-- TESLA -->
 <h2>Quiniela Tradicional (Tesla)</h2>
 
 <input type="text" id="inputTesla" placeholder="Número 4 cifras">
-
 <button onclick="generarTesla()">Generar Tesla</button>
 
 <div id="resultadoTesla"></div>
 
-<!-- ================= IA ================= -->
-
+<!-- IA -->
 <h2>🧠 IA Quiniela PRO</h2>
 
 <textarea id="inputIA" placeholder="Pegar 7 cuaternos"></textarea>
@@ -81,18 +78,16 @@ span{color:#00FFAA;font-weight:bold;}
 <option value="noche">Noche</option>
 </select>
 
-<button onclick="usarTurnoAnterior()">Usar turno anterior automático</button>
-
+<button onclick="usarTurnoAnterior()">Usar turno anterior</button>
 <button onclick="generarIA()">Generar IA</button>
 
 <div id="resultadoIA"></div>
+<div id="cruceFinal"></div>
 
-<!-- ================= POCEADA ================= -->
-
+<!-- POCEADA -->
 <h2>Poceada Inteligente</h2>
 
 <input type="text" id="inputPoceada" placeholder="10 números">
-
 <button onclick="generarPoceada()">Generar</button>
 
 <div id="resultadoPoceada"></div>
@@ -136,24 +131,12 @@ Ambos: <span>${c2.slice(2)}</span>
 </div>`;
 }
 
-/* ================= IA PRO ================= */
+/* ================= IA ================= */
 
 let memoriaIA=[];
 
-function limpiarNumeros(lista){
-return lista.filter(n=>!/(\d)\1\1\1/.test(n)); // evita 1111
-}
-
-function analizarFrecuencia(nums){
-let freq={};
-
-nums.forEach(n=>{
-n.split('').forEach(d=>{
-freq[d]=(freq[d]||0)+1;
-});
-});
-
-return freq;
+function limpiar(lista){
+return lista.filter(n=>!/(\d)\1\1\1/.test(n));
 }
 
 function generarIA(){
@@ -162,15 +145,21 @@ let base=document.getElementById("inputIA").value
 .split(/\s+/)
 .filter(n=>n.length===4);
 
-if(base.length<3) return alert("Mínimo 3 números");
+if(base.length<3)return alert("mínimo 3");
 
 memoriaIA.push(base);
 if(memoriaIA.length>30) memoriaIA.shift();
 
-/* ANALISIS */
+/* frecuencia */
+let freq={};
 
-let freq=analizarFrecuencia(base);
+base.forEach(n=>{
+n.split('').forEach(d=>{
+freq[d]=(freq[d]||0)+1;
+});
+});
 
+/* generar candidatos */
 let candidatos=[];
 
 for(let i=0;i<10000;i++){
@@ -179,31 +168,33 @@ let num=i.toString().padStart(4,'0');
 
 let score=0;
 
-/* frecuencia */
 num.split('').forEach(d=>{
 if(freq[d]) score+=freq[d];
 });
 
-/* evitar repetidos */
+/* evitar basura */
 if(/(\d)\1\1/.test(num)) score-=10;
 
 /* atraso */
-let salió=false;
-memoriaIA.forEach(hist=>{
-if(hist.includes(num)) salió=true;
+let salio=false;
+memoriaIA.forEach(h=>{
+if(h.includes(num)) salio=true;
 });
-if(!salió) score+=5;
+if(!salio) score+=5;
 
 candidatos.push({num,score});
 }
 
 candidatos.sort((a,b)=>b.score-a.score);
 
-let jugadas=limpiarNumeros(
+let jugadas=limpiar(
 candidatos.slice(0,20).map(x=>x.num)
 ).slice(0,3);
 
 mostrarIA(jugadas);
+
+/* CRUCE AUTOMÁTICO */
+cruceAutomatico(jugadas[0]);
 }
 
 function mostrarIA(jugadas){
@@ -214,39 +205,80 @@ let html="";
 
 jugadas.forEach((n,i)=>{
 
-let turnoFinal=turno;
+let t=turno;
 
-if(i===1) turnoFinal="mañana";
-if(i===2) turnoFinal="noche";
+if(i===1) t="mañana";
+if(i===2) t="noche";
 
 html+=`
 <div class="resultado">
-🔥 Jugada ${i+1}: <span>${n}</span><br>
+🔥 ${n}<br>
 🎯 Terno: <span>${n.slice(1)}</span><br>
 💰 Ambos: <span>${n.slice(2)}</span><br>
-⏰ ${turnoFinal}
+⏰ ${t}
 </div>`;
 });
 
 document.getElementById("resultadoIA").innerHTML=html;
 }
 
-/* AUTO TURNO */
+/* ================= CRUCE ================= */
+
+function cruceAutomatico(num){
+
+let c1="",c2="";
+
+for(let i=0;i<4;i++){
+c1+=tablaTesla[num[i]][0];
+c2+=tablaTesla[num[i]][1];
+}
+
+let aIA=num.slice(2);
+let aT1=c1.slice(2);
+let aT2=c2.slice(2);
+let espejo=aIA[1]+aIA[0];
+
+let score={};
+
+function s(n,v){score[n]=(score[n]||0)+v;}
+
+s(aIA,5);
+s(aT1,4);
+s(aT2,4);
+s(espejo,6);
+
+if(aIA===aT1) s(aIA,6);
+if(aIA===aT2) s(aIA,6);
+
+let orden=Object.entries(score).sort((a,b)=>b[1]-a[1]);
+
+let fuerte=orden[0][0];
+let respaldo=orden[1]?orden[1][0]:"-";
+
+document.getElementById("cruceFinal").innerHTML=`
+<div class="resultado">
+💣 CRUCE FINAL<br><br>
+🔥 FUERTE: <span>${fuerte}</span><br>
+🛟 RESPALDO: <span>${respaldo}</span>
+</div>`;
+}
+
+/* ================= TURNO ================= */
 
 function usarTurnoAnterior(){
 
-let turno=document.getElementById("turno");
+let t=document.getElementById("turno");
 
-if(turno.value==="mañana") turno.value="noche";
-else if(turno.value==="tarde") turno.value="mañana";
-else turno.value="tarde";
+if(t.value==="mañana") t.value="noche";
+else if(t.value==="tarde") t.value="mañana";
+else t.value="tarde";
 
-alert("Turno ajustado automáticamente");
+alert("Turno ajustado");
 }
 
 /* ================= POCEADA ================= */
 
-let historialPoceada=[];
+let histP=[];
 
 function generarPoceada(){
 
@@ -256,18 +288,18 @@ let nums=document.getElementById("inputPoceada").value
 
 if(nums.length!==10) return alert("10 números");
 
-historialPoceada.push(nums);
-if(historialPoceada.length>20) historialPoceada.shift();
+histP.push(nums);
+if(histP.length>20) histP.shift();
 
 let freq={};
 
-historialPoceada.forEach(j=>{
+histP.forEach(j=>{
 j.forEach(n=>{
 freq[n]=(freq[n]||0)+1;
 });
 });
 
-let candidatos=[];
+let cand=[];
 
 for(let i=0;i<100;i++){
 
@@ -278,12 +310,12 @@ let score=0;
 if(freq[n]) score+=freq[n]*2;
 else score+=5;
 
-candidatos.push({n,score});
+cand.push({n,score});
 }
 
-candidatos.sort((a,b)=>b.score-a.score);
+cand.sort((a,b)=>b.score-a.score);
 
-let top=candidatos.slice(0,5).map(x=>x.n);
+let top=cand.slice(0,5).map(x=>x.n);
 
 document.getElementById("resultadoPoceada").innerHTML=`
 <div class="resultado">

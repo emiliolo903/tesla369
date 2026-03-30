@@ -5,10 +5,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V17 FINAL</title>
+<title>EMI Tesla Pro V18 IA TOTAL</title>
 
 <style>
-
 body{
 margin:0;
 font-family:Arial;
@@ -18,16 +17,13 @@ display:flex;
 justify-content:center;
 padding:15px;
 }
-
 .container{
 max-width:480px;
 width:100%;
 text-align:center;
 }
-
 h1{color:#00F5E0}
 h2{color:#FFD700}
-
 input,textarea{
 width:95%;
 padding:10px;
@@ -36,7 +32,6 @@ border-radius:8px;
 border:none;
 margin-bottom:10px;
 }
-
 button{
 width:100%;
 padding:12px;
@@ -48,7 +43,6 @@ border-radius:8px;
 margin-bottom:10px;
 cursor:pointer;
 }
-
 .resultado{
 background:#222;
 padding:10px;
@@ -56,12 +50,10 @@ border-radius:10px;
 margin-bottom:10px;
 text-align:left;
 }
-
 span{
 color:#00FFAA;
 font-weight:bold;
 }
-
 </style>
 </head>
 
@@ -69,82 +61,43 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V17 FINAL</h1>
+<h1>🔥 EMI Tesla Pro V18 IA TOTAL</h1>
 
-<h2>Quiniela Tradicional</h2>
-
+<h2>Quiniela Tradicional (Tesla)</h2>
 <input type="text" id="inputTradicional" placeholder="Número 4 cifras">
-
 <button onclick="generarTradicional()">Generar</button>
-
 <div id="resultadosTradicional"></div>
 
-<h2>Cargar historial quiniela (IA)</h2>
-
-<textarea id="histQuiniela"></textarea>
-
-<button onclick="activarVoz('histQuiniela')">🎤 Cargar por voz</button>
+<h2>Cargar historial del día (IA aprende)</h2>
+<textarea id="histQuiniela" placeholder="Pegá todos los sorteos del día"></textarea>
 
 <button onclick="cargarHistQuiniela()">Cargar historial</button>
+<button onclick="analizarAmbosIA()">🔥 Ambos IA</button>
+<button onclick="generarCuaternoIA()">💣 Cuaterno IA Nocturna</button>
+
+<div id="resultadoIA"></div>
+<div id="resultadoCuaternoIA"></div>
 
 <h2>Poceada Inteligente</h2>
-
 <input type="text" id="inputPoseada">
-
-<button onclick="activarVoz('inputPoseada')">🎤 Voz Poceada</button>
-
 <button onclick="generarPoseada()">Generar Poceada</button>
-
 <button onclick="autoPoceada()">AUTO Analizar</button>
-
 <button onclick="detectorProximo()">Detector próximo</button>
 
 <div id="resultadosPoseada"></div>
-
 <div id="detectorResultado"></div>
-
-<h2>Cargar 20 sorteos históricos</h2>
-
-<textarea id="historico20"></textarea>
-
-<button onclick="cargarHistorico20()">Cargar histórico</button>
 
 </div>
 
 <script>
 
+/* ================= TESLA ================= */
+
 const tablaTesla={
-0:['0','0'],
-1:['0','0'],
-2:['5','7'],
-3:['8','0'],
-4:['6','9'],
-5:['2','7'],
-6:['4','9'],
-7:['5','2'],
-8:['3','0'],
-9:['3','4']
+0:['0','0'],1:['0','0'],2:['5','7'],3:['8','0'],
+4:['6','9'],5:['2','7'],6:['4','9'],7:['5','2'],
+8:['3','0'],9:['3','4']
 };
-
-let historico=[];
-let histQuiniela=[];
-
-/* ===== EXPANSIÓN ===== */
-
-function expandir(num){
-let n=parseInt(num);
-let lista=[num];
-
-[n-1,n+1].forEach(v=>{
-if(v>=0 && v<=99){
-lista.push(v.toString().padStart(2,'0'));
-}
-});
-
-return [...new Set(lista)];
-}
-
-/* ================= TRADICIONAL ================= */
 
 function generarTradicional(){
 
@@ -163,66 +116,114 @@ c1+=tablaTesla[d][0];
 c2+=tablaTesla[d][1];
 }
 
-let t1=c1.slice(1);
-let t2=c2.slice(1);
-
-let a1=c1.slice(2);
-let a2=c2.slice(2);
-
 document.getElementById("resultadosTradicional").innerHTML=
-
 `
 <div class="resultado">
 Cuaterno 1: <span>${c1}</span><br>
-Terno 1: <span>${t1}</span><br>
-Ambos 1: <span>${a1}</span>
+Ambos: <span>${c1.slice(2)}</span>
 </div>
 
 <div class="resultado">
 Cuaterno 2: <span>${c2}</span><br>
-Terno 2: <span>${t2}</span><br>
-Ambos 2: <span>${a2}</span>
+Ambos: <span>${c2.slice(2)}</span>
 </div>
 `;
-
 }
 
-/* ================= VOZ ================= */
+/* ================= HISTORIAL ================= */
 
-function activarVoz(destino){
+let histQuiniela=[];
 
-if (!('webkitSpeechRecognition' in window)) {
-    alert("Tu navegador no soporta voz");
-    return;
+function cargarHistQuiniela(){
+let texto=document.getElementById("histQuiniela").value.trim();
+histQuiniela = texto.split(/\s+/).filter(n=>n.length===4);
+alert("Historial cargado");
 }
 
-let reconocimiento = new webkitSpeechRecognition();
+/* ================= IA AMBOS ================= */
 
-reconocimiento.lang = "es-AR";
-reconocimiento.continuous = false;
-reconocimiento.interimResults = false;
+function analizarAmbosIA(){
 
-reconocimiento.start();
+let freq={}, ultima={};
 
-reconocimiento.onresult = function(event){
+histQuiniela.forEach((n,i)=>{
+let ambos=n.slice(2);
+freq[ambos]=(freq[ambos]||0)+1;
+ultima[ambos]=i;
+});
 
-    let texto = event.results[0][0].transcript;
+let candidatos=[];
 
-    let mapa = {
-        "cero":"0","uno":"1","dos":"2","tres":"3","cuatro":"4",
-        "cinco":"5","seis":"6","siete":"7","ocho":"8","nueve":"9"
-    };
+for(let i=0;i<100;i++){
+let num=i.toString().padStart(2,'0');
+let score=0;
 
-    let limpio = texto.toLowerCase().split(" ").map(p => mapa[p] ?? "").join("");
+if(freq[num]) score+=freq[num]*3;
+if(!(num in ultima)) score+=5;
 
-    let resultado = limpio.match(/.{1,4}/g)?.join(" ") || limpio;
+if(ultima[num]!=null){
+score += (histQuiniela.length - ultima[num]);
+}
 
-    document.getElementById(destino).value = resultado;
-};
+candidatos.push({num,score});
+}
 
+candidatos.sort((a,b)=>b.score-a.score);
+
+let top=candidatos.slice(0,3).map(c=>c.num);
+
+document.getElementById("resultadoIA").innerHTML=
+`
+<div class="resultado">
+🔥 Ambos IA:<br>
+<span>${top.join(" - ")}</span>
+</div>
+`;
+}
+
+/* ================= CUATERNO IA ================= */
+
+function generarCuaternoIA(){
+
+if(histQuiniela.length < 5){
+alert("Cargá más sorteos");
+return;
+}
+
+let freqDigitos={};
+
+histQuiniela.forEach(n=>{
+let ambos=n.slice(2);
+ambos.split('').forEach(d=>{
+freqDigitos[d]=(freqDigitos[d]||0)+1;
+});
+});
+
+let ordenados=Object.entries(freqDigitos)
+.sort((a,b)=>b[1]-a[1])
+.map(x=>x[0]);
+
+let d1=ordenados[0]||'0';
+let d2=ordenados[1]||'1';
+let d3=ordenados[2]||'2';
+let d4=ordenados[3]||'3';
+
+let c1=d1+d2+d3+d4;
+let c2=d2+d1+d4+d3;
+
+document.getElementById("resultadoCuaternoIA").innerHTML=
+`
+<div class="resultado">
+💣 Cuaterno IA:<br>
+<span>${c1}</span><br>
+<span>${c2}</span>
+</div>
+`;
 }
 
 /* ================= POCEADA ================= */
+
+let historico=[];
 
 function generarPoseada(){
 
@@ -239,132 +240,8 @@ historico.push(input);
 if(historico.length>20) historico.shift();
 
 analizar(input);
-
 }
 
 function analizar(input){
 
-let freq={},ultima={};
-
-historico.forEach((j,i)=>{
-j.forEach(n=>{
-freq[n]=(freq[n]||0)+1;
-ultima[n]=i;
-});
-});
-
-let candidatos=[];
-
-for(let i=0;i<100;i++){
-
-let num=i.toString().padStart(2,'0');
-if(input.includes(num)) continue;
-
-let score=0;
-
-if(freq[num]) score+=freq[num]*2;
-if(!(num in ultima)) score+=6;
-
-candidatos.push({num,score});
-}
-
-candidatos.sort((a,b)=>b.score-a.score);
-
-let principal=candidatos.slice(0,5).map(c=>c.num);
-let respaldo=candidatos.slice(5,8).map(c=>c.num);
-let radar=candidatos.slice(8,10).map(c=>c.num);
-
-let expandido=[];
-
-principal.forEach(n=>{
-expandido.push(...expandir(n));
-});
-
-expandido=[...new Set(expandido)];
-
-document.getElementById("resultadosPoseada").innerHTML=
-
-`
-<div class="resultado">🎯 Principal: <span>${principal.join(" - ")}</span></div>
-<div class="resultado">🛟 Respaldo: <span>${respaldo.join(" - ")}</span></div>
-<div class="resultado">📡 Radar: <span>${radar.join(" - ")}</span></div>
-<div class="resultado">🔥 Expansión: <span>${expandido.join(" - ")}</span></div>
-`;
-
-}
-
-function detectorProximo(){
-
-let freq={};
-
-historico.forEach(j=>{
-j.forEach(n=>{
-freq[n]=(freq[n]||0)+1;
-});
-});
-
-let candidatos=[];
-
-for(let i=0;i<100;i++){
-
-let num=i.toString().padStart(2,'0');
-
-let score=0;
-
-if(!freq[num]) score+=6;
-if(freq[num]) score+=freq[num]*2;
-
-candidatos.push({num,score});
-}
-
-candidatos.sort((a,b)=>b.score-a.score);
-
-let top=candidatos.slice(0,5).map(c=>c.num);
-
-let expandido=[];
-
-top.forEach(n=>{
-expandido.push(...expandir(n));
-});
-
-expandido=[...new Set(expandido)];
-
-document.getElementById("detectorResultado").innerHTML=
-
-`
-<div class="resultado">
-🔥 Próximo sorteo:<br>
-<span>${top.join(" - ")}</span><br><br>
-🔥 Expansión:<br>
-<span>${expandido.join(" - ")}</span>
-</div>
-`;
-
-}
-
-function autoPoceada(){
-analizar([]);
-}
-
-function cargarHistorico20(){
-
-let texto=document.getElementById("historico20").value.trim();
-let lineas=texto.split(/\n+/);
-
-historico=[];
-
-lineas.slice(0,20).forEach(l=>{
-let nums=l.split(/[\s,]+/).map(n=>n.padStart(2,'0'));
-if(nums.length===10){
-historico.push(nums);
-}
-});
-
-alert("Histórico cargado");
-
-}
-
-</script>
-
-</body>
-</html>
+let freq={}, ultima

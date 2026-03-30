@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V17 MEMORIA</title>
+<title>EMI Tesla PRO V18</title>
 
 <style>
 
@@ -65,32 +65,28 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V17 MEMORIA</h1>
+<h1>🔥 EMI Tesla PRO V18</h1>
 
-<h2>Quiniela Tradicional (Tesla)</h2>
-
+<h2>Tesla</h2>
 <input type="text" id="inputTradicional" placeholder="Ej: 3512">
-
 <button onclick="generarTradicional()">Generar Tesla</button>
-
 <div id="resultadosTradicional"></div>
 
-<h2>Historial (IA aprende)</h2>
-
+<h2>Historial IA</h2>
 <textarea id="historial" placeholder="Pegá números de 4 cifras"></textarea>
-
-<button onclick="guardarSorteo()">💾 Guardar en memoria</button>
-<button onclick="generarIA()">🔥 Generar Ambos IA</button>
-
+<button onclick="guardarMemoria()">💾 Guardar memoria</button>
+<button onclick="generarIA()">🔥 Ambos IA</button>
 <div id="resultadoIA"></div>
 
-<h2>Poceada</h2>
+<h2>Guardar sorteos del día</h2>
+<button onclick="guardarBloque('previa')">Previa</button>
+<button onclick="guardarBloque('primera')">Primera</button>
+<button onclick="guardarBloque('matutina')">Matutina</button>
+<button onclick="guardarBloque('vespertina')">Vespertina</button>
 
-<input type="text" id="inputPoceada" placeholder="10 números separados">
+<button onclick="generarCuaterno()">💣 Cuaterno Nocturna</button>
 
-<button onclick="generarPoceada()">Generar</button>
-
-<div id="resultadoPoceada"></div>
+<div id="resultadoCuaterno"></div>
 
 </div>
 
@@ -98,11 +94,24 @@ font-weight:bold;
 
 /* ================= MEMORIA ================= */
 
-let memoria = JSON.parse(localStorage.getItem("quinielaMemoria")) || [];
+let memoria = JSON.parse(localStorage.getItem("memoria")) || [];
+
+function guardarMemoria(){
+
+let texto = document.getElementById("historial").value.trim();
+
+let nums = texto.split(/\s+/).filter(n=>n.length===4);
+
+memoria.push(...nums);
+
+localStorage.setItem("memoria", JSON.stringify(memoria));
+
+alert("Guardado");
+}
 
 /* ================= TESLA ================= */
 
-const tablaTesla = {
+const tabla = {
 0:['0','0'],
 1:['0','0'],
 2:['5','7'],
@@ -117,166 +126,97 @@ const tablaTesla = {
 
 function generarTradicional(){
 
-let input = document.getElementById("inputTradicional").value;
+let n = document.getElementById("inputTradicional").value;
 
-if(!input){
-alert("Ingresá un número");
-return;
+if(n.length!=4)return alert("4 cifras");
+
+let c1="",c2="";
+
+for(let d of n){
+c1+=tabla[d][0];
+c2+=tabla[d][1];
 }
 
-let n = input.replace(/[^0-9]/g,'');
-
-if(n.length !== 4){
-alert("Ingresá 4 cifras");
-return;
-}
-
-let c1="", c2="";
-
-for(let i=0;i<4;i++){
-let d = parseInt(n[i]);
-
-c1 += tablaTesla[d][0];
-c2 += tablaTesla[d][1];
-}
-
-let t1 = c1.slice(1);
-let t2 = c2.slice(1);
-
-let a1 = c1.slice(2);
-let a2 = c2.slice(2);
-
-document.getElementById("resultadosTradicional").innerHTML =
-
-`
+document.getElementById("resultadosTradicional").innerHTML=`
 <div class="resultado">
-Cuaterno 1: <span>${c1}</span><br>
-Terno: <span>${t1}</span><br>
-Ambos: <span>${a1}</span>
-</div>
-
-<div class="resultado">
-Cuaterno 2: <span>${c2}</span><br>
-Terno: <span>${t2}</span><br>
-Ambos: <span>${a2}</span>
-</div>
-`;
-
-}
-
-/* ================= GUARDAR ================= */
-
-function guardarSorteo(){
-
-let texto = document.getElementById("historial").value.trim();
-
-if(!texto){
-alert("Pegá números");
-return;
-}
-
-let nums = texto.split(/\s+/).filter(n=>n.length===4);
-
-nums.forEach(n=>{
-memoria.push(n);
-});
-
-localStorage.setItem("quinielaMemoria", JSON.stringify(memoria));
-
-alert("Sorteo guardado en memoria");
+${c1} → Ambos ${c1.slice(2)}<br>
+${c2} → Ambos ${c2.slice(2)}
+</div>`;
 }
 
 /* ================= IA ================= */
 
 function generarIA(){
 
-if(memoria.length < 5){
-alert("Cargá más datos");
-return;
-}
+let freq={};
 
-let freq = {};
-let ultima = {};
-
-memoria.forEach((n,i)=>{
-let ambos = n.slice(2);
-freq[ambos] = (freq[ambos] || 0) + 1;
-ultima[ambos] = i;
+memoria.forEach(n=>{
+let a=n.slice(2);
+freq[a]=(freq[a]||0)+1;
 });
 
-let candidatos = [];
+let top=Object.entries(freq)
+.sort((a,b)=>b[1]-a[1])
+.slice(0,3)
+.map(x=>x[0]);
 
-for(let i=0;i<100;i++){
-
-let num = i.toString().padStart(2,'0');
-
-let score = 0;
-
-if(freq[num]) score += freq[num] * 3;
-
-if(!(num in ultima)) score += 5;
-
-if(ultima[num] != null){
-score += (memoria.length - ultima[num]);
-}
-
-candidatos.push({num,score});
-}
-
-candidatos.sort((a,b)=>b.score-a.score);
-
-let top = candidatos.slice(0,3).map(c=>c.num);
-
-document.getElementById("resultadoIA").innerHTML =
-
-`
+document.getElementById("resultadoIA").innerHTML=`
 <div class="resultado">
-🔥 Ambos IA:<br>
-<span>${top.join(" - ")}</span>
-</div>
-`;
-
+🔥 ${top.join(" - ")}
+</div>`;
 }
 
-/* ================= POCEADA ================= */
+/* ================= BLOQUES ================= */
 
-function generarPoceada(){
+let dia={
+previa:[],
+primera:[],
+matutina:[],
+vespertina:[]
+};
 
-let input = document.getElementById("inputPoceada").value
-.split(/[\s,]+/)
-.map(v=>v.padStart(2,'0'));
+function guardarBloque(tipo){
 
-if(input.length !== 10){
-alert("Ingresá 10 números");
-return;
+let texto=document.getElementById("historial").value.trim();
+
+let nums=texto.split(/\s+/).filter(n=>n.length===4);
+
+dia[tipo]=nums;
+
+alert(tipo+" guardado");
 }
 
-let freq = {};
+/* ================= CUATERNO ================= */
 
-input.forEach(n=>{
-freq[n] = (freq[n] || 0) + 1;
+function generarCuaterno(){
+
+let todo=[
+...dia.previa,
+...dia.primera,
+...dia.matutina,
+...dia.vespertina
+];
+
+if(todo.length<5)return alert("Faltan datos");
+
+let conteo={};
+
+todo.forEach(n=>{
+n.split('').forEach(d=>{
+conteo[d]=(conteo[d]||0)+1;
+});
 });
 
-let candidatos = [];
+let orden=Object.entries(conteo)
+.sort((a,b)=>b[1]-a[1])
+.map(x=>x[0]);
 
-for(let i=0;i<100;i++){
-let num = i.toString().padStart(2,'0');
+let cuaterno=orden.slice(0,4).join("");
 
-if(!freq[num]){
-candidatos.push(num);
-}
-}
-
-let resultado = candidatos.slice(0,5);
-
-document.getElementById("resultadoPoceada").innerHTML =
-
-`
+document.getElementById("resultadoCuaterno").innerHTML=`
 <div class="resultado">
-🎯 Sugeridos: <span>${resultado.join(" - ")}</span>
-</div>
-`;
-
+💣 Cuaterno fuerte: <span>${cuaterno}</span>
+</div>`;
 }
 
 </script>

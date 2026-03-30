@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EMI Tesla Pro V17</title>
+<title>EMI Tesla Pro V17 MEMORIA</title>
 
 <style>
 
@@ -65,7 +65,7 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla Pro V17</h1>
+<h1>🔥 EMI Tesla Pro V17 MEMORIA</h1>
 
 <h2>Quiniela Tradicional (Tesla)</h2>
 
@@ -75,11 +75,12 @@ font-weight:bold;
 
 <div id="resultadosTradicional"></div>
 
-<h2>IA Ambos</h2>
+<h2>Historial (IA aprende)</h2>
 
 <textarea id="historial" placeholder="Pegá números de 4 cifras"></textarea>
 
-<button onclick="generarIA()">Generar Ambos IA</button>
+<button onclick="guardarSorteo()">💾 Guardar en memoria</button>
+<button onclick="generarIA()">🔥 Generar Ambos IA</button>
 
 <div id="resultadoIA"></div>
 
@@ -94,6 +95,10 @@ font-weight:bold;
 </div>
 
 <script>
+
+/* ================= MEMORIA ================= */
+
+let memoria = JSON.parse(localStorage.getItem("quinielaMemoria")) || [];
 
 /* ================= TESLA ================= */
 
@@ -159,9 +164,9 @@ Ambos: <span>${a2}</span>
 
 }
 
-/* ================= IA ================= */
+/* ================= GUARDAR ================= */
 
-function generarIA(){
+function guardarSorteo(){
 
 let texto = document.getElementById("historial").value.trim();
 
@@ -172,18 +177,55 @@ return;
 
 let nums = texto.split(/\s+/).filter(n=>n.length===4);
 
-let freq = {};
-
 nums.forEach(n=>{
-let ambos = n.slice(2);
-freq[ambos] = (freq[ambos] || 0) + 1;
+memoria.push(n);
 });
 
-let orden = Object.entries(freq)
-.sort((a,b)=>b[1]-a[1])
-.map(x=>x[0]);
+localStorage.setItem("quinielaMemoria", JSON.stringify(memoria));
 
-let top = orden.slice(0,3);
+alert("Sorteo guardado en memoria");
+}
+
+/* ================= IA ================= */
+
+function generarIA(){
+
+if(memoria.length < 5){
+alert("Cargá más datos");
+return;
+}
+
+let freq = {};
+let ultima = {};
+
+memoria.forEach((n,i)=>{
+let ambos = n.slice(2);
+freq[ambos] = (freq[ambos] || 0) + 1;
+ultima[ambos] = i;
+});
+
+let candidatos = [];
+
+for(let i=0;i<100;i++){
+
+let num = i.toString().padStart(2,'0');
+
+let score = 0;
+
+if(freq[num]) score += freq[num] * 3;
+
+if(!(num in ultima)) score += 5;
+
+if(ultima[num] != null){
+score += (memoria.length - ultima[num]);
+}
+
+candidatos.push({num,score});
+}
+
+candidatos.sort((a,b)=>b.score-a.score);
+
+let top = candidatos.slice(0,3).map(c=>c.num);
 
 document.getElementById("resultadoIA").innerHTML =
 

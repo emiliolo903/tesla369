@@ -74,11 +74,11 @@ font-weight:bold;
 
 <!-- SECCIÓN PROVINCIA NOCTURNA -->
 <h2>Magia Tesla: Afine Cuántico (Terno Prov. Noct.)</h2>
-<input type="text" id="inputAfineCuantico" placeholder="Semilla: Ej: 8349 (Prov. Noct. día anterior)">
+<input type="text" id="inputAfineCuantico" placeholder="Semilla: Ej: 9857 (Prov. Vespertina del mismo día)">
 <button onclick="generarAfineCuantico()">🔥 Generar Afine Cuántico</button>
 <div id="resultadoAfineCuantico"></div>
 
-<!-- NUEVA SECCIÓN: CORRENTINA PREVIA -->
+<!-- SECCIÓN: CORRENTINA PREVIA -->
 <h2>Magia Tesla: Afine Cuántico (Terno Correntina Previa)</h2>
 <input type="text" id="inputAfineCuanticoCorrentinaPrevia" placeholder="Semilla: Ej: 8820 (Correntina Nocturna día anterior)">
 <button onclick="generarAfineCuanticoCorrentinaPrevia()">🔥 Generar Afine Correntina Previa</button>
@@ -93,12 +93,10 @@ font-weight:bold;
 <h2>Guardar sorteos del día</h2>
 <button onclick="guardarBloque('previa')">Previa</button>
 <button onclick="guardarBloque('primera')">Primera</button>
-<button onclick="matutina('matutina')">Matutina</button>
+<button onclick="guardarBloque('matutina')">Matutina</button>
 <button onclick="guardarBloque('vespertina')">Vespertina</button>
 
 <button onclick="generarCuaterno()">💣 Cuaterno Nocturna</button>
-
-<div id="resultadoCuaterno"></div>
 
 </div>
 
@@ -169,7 +167,10 @@ function generarAfineCuantico() {
     let ternoSemilla = numSemilla % 1000;
     let ternoStr = String(ternoSemilla).padStart(3, '0');
     let ternoInvertido = parseInt(ternoStr.split('').reverse().join(''));
-    let factorAjuste = 627; 
+    
+    // NUEVO FACTOR DE AJUSTE PARA PROVINCIA NOCTURNA
+    let factorAjuste = 151; 
+    
     let resultadoCuantico = (ternoInvertido + factorAjuste) % 1000;
     let prediccionTerno = String(resultadoCuantico).padStart(3, '0');
 
@@ -180,34 +181,27 @@ function generarAfineCuantico() {
 }
 
 /* ================= AFINE CUÁNTICO DE LA MAGIA TESLA (Correntina Previa) ================= */
-
+// Este algoritmo sigue pendiente de una base de datos más grande para una afinación robusta.
 function generarAfineCuanticoCorrentinaPrevia() {
     let semilla = document.getElementById("inputAfineCuanticoCorrentinaPrevia").value;
 
     if (semilla.length !== 4 || isNaN(semilla)) {
         return alert("La semilla debe ser un número de 4 cifras.");
     }
-
-    // --- ALGORITMO DEL AFINE CUÁNTICO DE LA MAGIA TESLA para CORRENTINA PREVIA ---
-    // Afinado con los 5 pares de datos proporcionados.
-
+    
+    // Este algoritmo es un placeholder. Necesita más datos para una afinación correcta.
+    // Con los 5 datos que teníamos, ningún patrón era consistentemente fuerte.
+    
     let s1 = parseInt(semilla[0]);
     let s2 = parseInt(semilla[1]);
     let s3 = parseInt(semilla[2]);
     let s4 = parseInt(semilla[3]);
 
-    // Combinación de dígitos internos y externos con una suma y factor de ajuste
-    let valorBase = (s2 * s3) + (s1 + s4); // Multiplicación de los dos centrales, sumado a los dos externos.
-
-    // Factor de ajuste calculado para maximizar las coincidencias con tus datos
-    let factorAjusteCorrentinaPrevia = 153; 
+    let valorBase = (s2 * s3) + (s1 + s4); 
+    let factorAjusteCorrentinaPrevia = 153; // Este factor también es provisional.
 
     let prediccionTernoNumerico = (valorBase + factorAjusteCorrentinaPrevia) % 1000;
-
-    // Formatear a 3 cifras con ceros iniciales si es necesario
     let prediccionTerno = String(prediccionTernoNumerico).padStart(3, '0');
-
-    // --- FIN DEL ALGORITMO ---
 
     document.getElementById("resultadoAfineCuanticoCorrentinaPrevia").innerHTML = `
         <div class="resultado">

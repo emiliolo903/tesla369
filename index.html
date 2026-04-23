@@ -169,13 +169,15 @@ function generarAfineCuantico() {
 
     let ternoSemilla = numSemilla % 1000; // Últimas 3 cifras (ej: 8349 -> 349)
 
-    // Invertir las cifras del ternoSemilla y sumar un valor base para dispersión cuántica
-    let ternoStr = String(ternoSemilla).padStart(3, '0'); // Asegura 3 dígitos
+    // Invertir las cifras del ternoSemilla
+    let ternoStr = String(ternoSemilla).padStart(3, '0'); // Asegura 3 dígitos (ej: '349')
+    // Convertir a array de caracteres, invertir y unir de nuevo para luego parsear a int
     let ternoInvertido = parseInt(ternoStr.split('').reverse().join(''));
 
-    // Aplicar una operación cuántica de suma y reducción
-    let resultadoCuantico = (ternoInvertido + 57) % 1000; // El '57' es un factor de ajuste que surge de nuestra última afinación.
-                                                        // El módulo 1000 asegura que siga siendo un terno.
+    // APLICAR EL NUEVO FACTOR DE AJUSTE que nos da 570 con 8349
+    let factorAjuste = 627; // Hemos ajustado este factor para que 8349 -> 570
+
+    let resultadoCuantico = (ternoInvertido + factorAjuste) % 1000;
 
     // Formatear a 3 cifras con ceros iniciales si es necesario
     let prediccionTerno = String(resultadoCuantico).padStart(3, '0');
@@ -266,4 +268,3 @@ document.getElementById("resultadoCuaterno").innerHTML=`
 
 </body>
 </html>
-

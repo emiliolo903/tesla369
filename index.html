@@ -168,8 +168,8 @@ function generarAfineCuantico() {
     let ternoStr = String(ternoSemilla).padStart(3, '0');
     let ternoInvertido = parseInt(ternoStr.split('').reverse().join(''));
     
-    // NUEVO FACTOR DE AJUSTE PARA PROVINCIA NOCTURNA
-    let factorAjuste = 151; 
+    // NUEVO FACTOR DE AJUSTE PARA PROVINCIA NOCTURNA - Recalibrado con datos verificados
+    let factorAjuste = 446; 
     
     let resultadoCuantico = (ternoInvertido + factorAjuste) % 1000;
     let prediccionTerno = String(resultadoCuantico).padStart(3, '0');

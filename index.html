@@ -343,42 +343,4 @@ function ejecutarAfineCorrentinaPrevia() {
         document.getElementById("resultadoAfineCuanticoCorrentinaPrevia").innerHTML = `
             <div class="resultado">
                 ✨ Predicción Correntina Previa (A la Cabeza): <span>${numeroAfine}</span>
-            </div>`;
-    } else {
-        document.getElementById("resultadoAfineCuanticoCorrentinaPrevia").innerHTML = `
-            <div class="resultado">
-                <span style="color:red;">Error: Ingresa un número de 4 dígitos válido.</span>
-            </div>`;
-    }
-}
-
-
-/* ================= IA ================= */
-
-function generarIA(){
-
-let freq={};
-
-memoria.forEach(n=>{
-let a=n.slice(2);
-freq[a]=(freq[a]||0)+1;
-});
-
-let top=Object.entries(freq)
-.sort((a,b)=>b[1]-a[1])
-.slice(0,3)
-.map(x=>x[0]);
-
-document.getElementById("resultadoIA").innerHTML=`
-<div class="resultado">
-🔥 ${top.join(" - ")}
-</div>`;
-}
-
-/* ================= BLOQUES ================= */
-
-let dia={
-previa:[],
-primera:[],
-mat
     

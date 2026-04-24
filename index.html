@@ -404,4 +404,169 @@ function generarCuaterno() {
     }
 
     if (todosLosNumerosDelDia.
-  
+  /* ================= BLOQUES ================= */
+
+let dia={
+previa:[],
+primera:[],
+matutina:[],
+vespertina:[],
+nocturna:[] // Añadido para el análisis de quiniela
+};
+
+function guardarBloque(tipo){
+
+let texto=document.getElementById("historial").value.trim();
+
+let nums=texto.split(/\s+/).filter(n=>n.length===4);
+
+dia[tipo]=nums;
+
+alert(tipo+" guardado");
+}
+
+/* ================= CUATERNO NOCTURNA ================= */
+
+function generarCuaterno() {
+    let todosLosNumerosDelDia = [];
+    for (let tipo in dia) {
+        todosLosNumerosDelDia = todosLosNumerosDelDia.concat(dia[tipo]);
+    }
+
+    if (todosLosNumerosDelDia.length === 0) {
+        document.getElementById("resultadoCuaterno").innerHTML = `
+            <div class="resultado">
+                <span style="color:red;">No hay números guardados para generar el Cuaterno.</span>
+            </div>`;
+        return;
+    }
+
+    // Convertir todos los números a enteros para facilitar las operaciones
+    let numerosInt = todosLosNumerosDelDia.map(n => parseInt(n, 10));
+
+    // Lógica avanzada para Cuaterno Nocturna (ejemplo basado en tu patrón)
+    // Buscamos un número "raíz" y luego generamos variantes
+    
+    // 1. Número base: Suma de todos los números mod 10000
+    let sumaTotal = numerosInt.reduce((sum, current) => sum + current, 0);
+    let numeroBase = sumaTotal % 10000;
+
+    // 2. Extracción de dígitos clave
+    let s_numeroBase = String(numeroBase).padStart(4, '0');
+    let d1 = parseInt(s_numeroBase[0]);
+    let d2 = parseInt(s_numeroBase[1]);
+    let d3 = parseInt(s_numeroBase[2]);
+    let d4 = parseInt(s_numeroBase[3]);
+
+    // 3. Generación del Cuaterno
+    let cuaterno1 = (d1 * 1000 + d3 * 100 + d2 * 10 + d4) % 10000; // Invertir centrales
+    let cuaterno2 = (d2 * 1000 + d4 * 100 + d1 * 10 + d3) % 10000; // Intercambiar pares
+    let cuaterno3 = (d3 * 1000 + d1 * 100 + d4 * 10 + d2) % 10000; // Otra combinación
+
+    // Asegurarse de que tengan 4 dígitos
+    let c1_str = String(cuaterno1).padStart(4, '0');
+    let c2_str = String(cuaterno2).padStart(4, '0');
+    let c3_str = String(cuaterno3).padStart(4, '0');
+
+    document.getElementById("resultadoCuaterno").innerHTML = `
+        <div class="resultado">
+            💣 Cuaterno Nocturna (Basado en sorteos del día):<br>
+            <span>${c1_str} - ${c2_str} - ${c3_str}</span>
+        </div>`;
+}
+
+/* ================= ANÁLISIS QUINIELA CORRENTINA ================= */
+
+// Función auxiliar para procesar los números de un textarea
+function procesarNumeros(texto) {
+    // Reemplaza comas por espacios, divide por espacios y filtra para asegurar que sean números de 4 dígitos
+    return texto.replace(/,/g, ' ').split(/\s+/).filter(n => /^\d{4}$/.test(n));
+}
+
+// Función auxiliar para obtener frecuencias de "a la cabeza" y primeras 10/20
+function obtenerFrecuencias(data) {
+    const frecuenciasCabeza = {};
+    const frecuenciasPosiciones = {}; // Frecuencias para las primeras posiciones
+
+    data.forEach(numeroCompleto => {
+        const numeroCabeza = numeroCompleto.substring(0, 4); // Asumiendo que el primero de cada línea es "a la cabeza"
+
+        frecuenciasCabeza[numeroCabeza] = (frecuenciasCabeza[numeroCabeza] || 0) + 1;
+
+        // Podríamos considerar solo el primer número de cada entrada o todos los números en un string largo
+        // Para este análisis, asumimos que cada 'numeroCompleto' es un número de 4 dígitos para "a la cabeza"
+        // Si queremos analizar todos los números en una entrada, la lógica debería cambiar.
+        // Por ahora, solo el número "a la cabeza" es el que cuenta para las frecuencias.
+
+        // Para un análisis más detallado de las primeras posiciones (por ejemplo, los primeros 5 o 10 números de cada sorteo)
+        // Necesitaríamos que cada 'data' contuviera una lista de números por sorteo, no solo el 'a la cabeza'.
+        // Para simplificar, si la entrada es "1234 5678 9012", el 1234 es a la cabeza.
+        // Si se quiere analizar los números que salieron del 1 al 5 por ejemplo, la entrada necesitaría ser "1234,5678,9012,XXXX,YYYY"
+        // Y aquí parsear cada uno de ellos y contarlos en frecuenciasPosiciones
+        
+        // Dejamos este como un placeholder para futuras mejoras
+        // const numerosDelSorteo = numeroCompleto.split(' ').map(n => n.trim()).filter(n => n.length === 4);
+        // numerosDelSorteo.slice(0, X).forEach(num => {
+        //     frecuenciasPosiciones[num] = (frecuenciasPosiciones[num] || 0) + 1;
+        // });
+    });
+
+    return { frecuenciasCabeza, frecuenciasPosiciones };
+}
+
+
+function analizarQuiniela() {
+    const previas = procesarNumeros(document.getElementById("previaData").value);
+    const primeras = procesarNumeros(document.getElementById("primeraData").value);
+    const matutinas = procesarNumeros(document.getElementById("matutinaData").value);
+    const vespertinas = procesarNumeros(document.getElementById("vespertinaData").value);
+    const nocturnas = procesarNumeros(document.getElementById("nocturnaData").value);
+
+    let htmlResult = "<h3>Resultados del Análisis Tesla (Correntina)</h3>";
+    let algunDatoIngresado = false;
+
+    // Análisis de frecuencia "a la cabeza"
+    const tiposSorteo = {
+        "Previa": previas,
+        "Primera": primeras,
+        "Matutina": matutinas,
+        "Vespertina": vespertinas,
+        "Nocturna": nocturnas
+    };
+
+    for (const tipo in tiposSorteo) {
+        if (tiposSorteo[tipo].length > 0) {
+            algunDatoIngresado = true;
+            const { frecuenciasCabeza } = obtenerFrecuencias(tiposSorteo[tipo]);
+            
+            // Convertir a array y ordenar por frecuencia (mayor a menor)
+            const sortedFrecuencias = Object.entries(frecuenciasCabeza).sort((a, b) => b[1] - a[1]);
+
+            htmlResult += `<h4>Sorteo ${tipo}:</h4>`;
+            if (sortedFrecuencias.length > 0) {
+                htmlResult += `<ul>`;
+                sortedFrecuencias.slice(0, 5).forEach(([numero, frecuencia]) => { // Mostrar top 5
+                    htmlResult += `<li>Número <strong>${numero}</strong>: Salió ${frecuencia} veces a la cabeza.</li>`;
+                });
+                if (sortedFrecuencias.length > 5) {
+                    htmlResult += `<li>... y otros números menos frecuentes.</li>`;
+                }
+                htmlResult += `</ul>`;
+            } else {
+                htmlResult += `<p>No se encontraron datos para analizar en este sorteo.</p>`;
+            }
+        }
+    }
+
+    if (!algunDatoIngresado) {
+        htmlResult = `<p class="warning">Ingresa al menos un sorteo para activar la Magia Tesla.</p>`;
+    }
+
+    document.getElementById("results").innerHTML = htmlResult;
+}
+
+</script>
+
+</body>
+</html>
+

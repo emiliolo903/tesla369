@@ -1,216 +1,3 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>EMI Tesla PRO V18</title>
-
-<style>
-
-body{
-margin:0;
-font-family:Arial;
-background:#111;
-color:#fff;
-padding:15px;
-}
-
-.container{
-max-width:480px;
-margin:auto;
-}
-
-h1{color:#00F5E0;text-align:center}
-h2{color:#FFD700; margin-top: 25px;} /* Ajuste de margen para h2 */
-
-input,textarea{
-width:100%;
-padding:10px;
-margin-bottom:10px;
-border-radius:8px;
-border:none;
-font-size:16px;
-background:#333; /* Fondo para inputs/textareas */
-color:#fff; /* Color de texto para inputs/textareas */
-}
-
-button{
-width:100%;
-padding:12px;
-background:#00F5E0;
-border:none;
-border-radius:8px;
-font-size:16px;
-margin-bottom:10px;
-cursor:pointer;
-color:#111; /* Color de texto para botones */
-}
-
-.resultado{
-background:#222;
-padding:10px;
-border-radius:10px;
-margin-bottom:10px;
-}
-
-span{
-color:#00FFAA;
-font-weight:bold;
-}
-
-/* Nuevos estilos para la sección de análisis de quiniela */
-.input-section-quiniela, .result-section-quiniela {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #444;
-    border-radius: 8px;
-    background-color: #1a1a1a;
-}
-.input-section-quiniela label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #FFD700; /* Color de etiqueta */
-}
-.input-section-quiniela textarea {
-    min-height: 80px; /* Altura mínima para textareas de quiniela */
-}
-.result-section-quiniela h3 {
-    color: #00F5E0;
-    margin-bottom: 10px;
-    font-size: 1.2em;
-}
-.result-section-quiniela h4 {
-    color: #FFD700;
-    margin-top: 15px;
-    margin-bottom: 8px;
-    font-size: 1.1em;
-}
-.result-section-quiniela p, .result-section-quiniela li {
-    font-size: 0.95em;
-    color: #ccc;
-    margin-bottom: 5px;
-}
-.result-section-quiniela strong {
-    color: #E74C3C; /* Rojo para números importantes */
-}
-.result-section-quiniela ul {
-    list-style-type: none; /* Quitamos los puntos de la lista */
-    padding-left: 10px;
-}
-.result-section-quiniela hr {
-    border: 0;
-    height: 1px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), #444, rgba(0, 0, 0, 0));
-    margin: 20px 0;
-}
-.warning {
-    color: #e74c3c;
-    font-weight: bold;
-    text-align: center;
-    margin-top: 15px;
-    font-size: 0.9em;
-}
-.explanation {
-    font-size: 0.85em;
-    color: #bbb;
-    margin-top: 20px;
-    border-top: 1px dashed #444;
-    padding-top: 15px;
-}
-.explanation ul {
-    list-style-type: disc;
-    margin-left: 20px;
-    padding-left: 0;
-}
-.explanation li {
-    margin-bottom: 5px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-<h1>🔥 EMI Tesla PRO V18</h1>
-
-<h2>Tesla</h2>
-<input type="text" id="inputTradicional" placeholder="Ej: 3512">
-<button onclick="generarTradicional()">Generar Tesla</button>
-<div id="resultadosTradicional" class="resultado"></div>
-
-<!-- SECCIÓN PROVINCIA NOCTURNA -->
-<h2>Magia Tesla: Afine Cuántico (Terno Prov. Noct.)</h2>
-<input type="text" id="inputAfineCuantico" placeholder="Semilla: Ej: 9857 (Prov. Vespertina del mismo día)">
-<button onclick="generarAfineCuantico()">🔥 Generar Afine Cuántico</button>
-<div id="resultadoAfineCuantico" class="resultado"></div>
-
-<!-- SECCIÓN: CORRENTINA PREVIA -->
-<h2>Magia Tesla: Afine Cuántico (Correntina Previa)</h2>
-<input type="text" id="inputAfineCuanticoCorrentinaPrevia" placeholder="Semilla: Ej: 8820 (Correntina Nocturna día anterior)">
-<button onclick="ejecutarAfineCorrentinaPrevia()">🔥 Generar Afine Correntina Previa</button>
-<div id="resultadoAfineCuanticoCorrentinaPrevia" class="resultado"></div>
-
-<!-- NUEVA SECCIÓN DE ANÁLISIS DE QUINIELA CORRENTINA -->
-<div class="input-section-quiniela">
-    <h2>✨ Magia Tesla: Análisis Quiniela Correntina ✨</h2>
-    <p>¡Aquí la "Magia Tesla" analiza tus datos históricos para encontrar patrones! Ingresa los resultados, separados por espacios o comas, una jugada por línea.</p>
-
-    <label for="previaData">Resultados de la PREVIA:</label>
-    <textarea id="previaData" placeholder="Ej: 1234 5678 9012 ..."></textarea>
-
-    <label for="primeraData">Resultados de la PRIMERA:</label>
-    <textarea id="primeraData" placeholder="Ej: 1234 5678 9012 ..."></textarea>
-
-    <label for="matutinaData">Resultados de la MATUTINA:</label>
-    <textarea id="matutinaData" placeholder="Ej: 1234 5678 9012 ..."></textarea>
-
-    <label for="vespertinaData">Resultados de la VESPERTINA:</label>
-    <textarea id="vespertinaData" placeholder="Ej: 1234 5678 9012 ..."></textarea>
-
-    <label for="nocturnaData">Resultados de la NOCTURNA:</label>
-    <textarea id="nocturnaData" placeholder="Ej: 1234 5678 9012 ..."></textarea>
-
-    <button onclick="analizarQuiniela()">Activar Magia Tesla (Correntina)</button>
-</div>
-
-<div class="result-section-quiniela">
-    <div id="results">
-        <p>Aquí aparecerán los números más potentes después de activar la Magia Tesla (Correntina).</p>
-    </div>
-    <p class="warning">Recordatorio: Este análisis se basa en probabilidades y datos históricos. El juego es azaroso y no garantiza resultados futuros.</p>
-    <div class="explanation">
-        <h2>¿Cómo funciona este análisis?</h2>
-        <p>Analiza los números que más se repiten en la "cabeza" (primer puesto) y en las primeras posiciones para cada sorteo, basándose en tus datos históricos.</p>
-    </div>
-</div>
-<!-- FIN NUEVA SECCIÓN DE ANÁLISIS DE QUINIELA CORRENTINA -->
-
-
-<h2>Historial IA</h2>
-<textarea id="historial" placeholder="Pegá números de 4 cifras"></textarea>
-<button onclick="guardarMemoria()">💾 Guardar memoria</button>
-<button onclick="generarIA()">🔥 Ambos IA</button>
-<div id="resultadoIA" class="resultado"></div>
-
-<h2>Guardar sorteos del día</h2>
-<button onclick="guardarBloque('previa')">Previa</button>
-<button onclick="guardarBloque('primera')">Primera</button>
-<button onclick="guardarBloque('matutina')">Matutina</button>
-<button onclick="guardarBloque('vespertina')">Vespertina</button>
-
-<button onclick="generarCuaterno()">💣 Cuaterno Nocturna</button>
-<!-- Div agregado para mostrar el Cuaterno -->
-<div id="resultadoCuaterno" class="resultado"></div> 
-
-
-</div>
-
 <script>
 
 /* ================= MEMORIA ================= */
@@ -343,4 +130,223 @@ function ejecutarAfineCorrentinaPrevia() {
         document.getElementById("resultadoAfineCuanticoCorrentinaPrevia").innerHTML = `
             <div class="resultado">
                 ✨ Predicción Correntina Previa (A la Cabeza): <span>${numeroAfine}</span>
+            </div>`;
+    } else {
+        document.getElementById("resultadoAfineCuanticoCorrentinaPrevia").innerHTML = `
+            <div class="resultado">
+                <span style="color:red;">Error: Ingresa un número de 4 dígitos válido.</span>
+            </div>`;
+    }
+}
+
+
+/* ================= IA ================= */
+
+function generarIA(){
+
+let freq={};
+
+memoria.forEach(n=>{
+let a=n.slice(2);a]=(freq[a]||0)+1;
+});
+
+let top=Object.entries(freq)
+.sort((a,b)=>b[1]-a[1])
+.slice(0,3)
+.map(x=>x[0]);
+
+document.getElementById("resultadoIA").innerHTML=`
+<div class="resultado">
+🔥 ${top.join(" - ")}
+</div>`;
+}
+
+/* ================= BLOQUES ================= */
+
+let dia={
+previa:[],
+primera:[],
+matutina:[],
+vespertina:[]
+};
+
+function guardarBloque(tipo){
+
+let texto=document.getElementById("historial").value.trim();
+
+let nums=texto.split(/\s+/).filter(n=>n.length===4);
+
+dia[tipo]=nums;
+
+alert(tipo+" guardado");
+}
+
+/* ================= CUATERNO NOCTURNA ================= */
+
+function generarCuaterno() {
+    let todosLosNumerosDelDia = [];
+    for (let tipo in dia) {
+        todosLosNumerosDelDia = todosLosNumerosDelDia.concat(dia[tipo]);
+    }
+
+    if (todosLosNumerosDelDia.length === 0) {
+        document.getElementById("resultadoCuaterno").innerHTML = `
+            <div class="resultado">
+                <span style="color:red;">No hay sorteos del día guardados.</span>
+            </div>`;
+        return;
+    }
+
+    let frecuenciaDigitos = {};
+    for (let i = 0; i <= 9; i++) {
+        frecuenciaDigitos[i] = 0;
+    }
+
+    todosLosNumerosDelDia.forEach(num => {
+        if (num && num.length === 4) {
+            num.split('').forEach(d => {
+                frecuenciaDigitos[parseInt(d)]++;
+            });
+        }
+    });
+
+    let digitosOrdenados = Object.entries(frecuenciaDigitos)
+        .sort((a, b) => b[1] - a[1]) // Ordenar por frecuencia descendente
+        .slice(0, 4)                 // Tomar los 4 más frecuentes
+        .map(entry => entry[0]);     // Obtener solo el dígito
+
+    let cuaternoGenerado = digitosOrdenados.join('');
+
+    document.getElementById("resultadoCuaterno").innerHTML = `
+        <div class="resultado">
+            💣 Cuaterno Nocturna (dígitos más frecuentes): <span>${cuaternoGenerado}</span>
+        </div>`;
+}
+
+
+/* ================= ANÁLISIS DE QUINIELA CORRENTINA ================= */
+
+// Función auxiliar para limpiar y normalizar los números (ej. "0123" -> "23" si solo queremos 2 dígitos)
+function limpiarNumero(numStr) {
+    let parsed = parseInt(numStr, 10);
+    if (isNaN(parsed)) return null;
+    return String(parsed).padStart(2, '0'); // Asegura que sean 2 dígitos, ej: "5" se convierte en "05"
+}
+
+// Función principal para analizar un sorteo
+function analizarSorteo(dataText) {
+    let data = dataText.split('\n').filter(line => line.trim() !== ''); // Separa por líneas y elimina vacías
+
+    let topNumbers = {}; // Frecuencia de números en la primera posición
+    let allNumbersFreq = {}; // Frecuencia de todos los números en cualquier posición
+    let positionFreq = {}; // Frecuencia por posición (1-5)
+    for (let i = 1; i <= 5; i++) {
+        positionFreq[i] = {};
+    }
+
+    data.forEach(line => {
+        let numbersInLine = line.split(/[\s,]+/).map(n => limpiarNumero(n)).filter(n => n !== null);
+
+        if (numbersInLine.length > 0) {
+            // Analizar la primera posición
+            let head = numbersInLine[0];
+            topNumbers[head] = (topNumbers[head] || 0) + 1;
+
+            // Analizar todas las posiciones y las primeras 5
+            numbersInLine.forEach((num, index) => {
+                allNumbersFreq[num] = (allNumbersFreq[num] || 0) + 1;
+                if (index < 5) { // Solo las primeras 5 posiciones
+                    positionFreq[index + 1][num] = (positionFreq[index + 1][num] || 0) + 1;
+                }
+            });
+        }
+    });
+
+    // Ordenar y obtener los top 5/3
+    let sortedTopNumbers = Object.entries(topNumbers).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    let sortedAllNumbers = Object.entries(allNumbersFreq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+    let sortedPositionFreq = {};
+    for (let pos = 1; pos <= 5; pos++) {
+        sortedPositionFreq[pos] = Object.entries(positionFreq[pos])
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3); // Top 3 para cada posición
+    }
+
+    return {
+        topNumbers: sortedTopNumbers,
+        allNumbers: sortedAllNumbers,
+        positionFreq: sortedPositionFreq
+    };
+}
+
+
+function analizarQuiniela() {
+    let previaData = document.getElementById('previaData').value;
+    let primeraData = document.getElementById('primeraData').value;
+    let matutinaData = document.getElementById('matutinaData').value;
+    let vespertinaData = document.getElementById('vespertinaData').value;
+    let nocturnaData = document.getElementById('nocturnaData').value;
+
+    let resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = ''; // Limpiar resultados anteriores
+
+    const sorteos = {
+        'PREVIA': previaData,
+        'PRIMERA': primeraData,
+        'MATUTINA': matutinaData,
+        'VESPERTINA': vespertinaData,
+        'NOCTURNA': nocturnaData
+    };
+
+    let hasData = false;
+    for (const key in sorteos) {
+        if (sorteos[key].trim() !== '') {
+            hasData = true;
+            break;
+        }
+    }
+
+    if (!hasData) {
+        resultsDiv.innerHTML = '<p style="color:red;">Ingresa al menos un resultado histórico para analizar.</p>';
+        return;
+    }
+
+
+    for (const sorteoName in sorteos) {
+        const data = sorteos[sorteoName];
+        if (data.trim() === '') {
+            continue; // Saltar si no hay datos para este sorteo
+        }
+
+        const analysis = analizarSorteo(data);
+
+        resultsDiv.innerHTML += `
+            <div style="margin-top: 20px;">
+                <h3>Análisis para ${sorteoName}</h3>
+                <h4>Top 5 Números a la Cabeza:</h4>
+                <ul>
+                    ${analysis.topNumbers.map(item => `<li><strong>${item[0]}</strong> (${item[1]} veces)</li>`).join('')}
+                </ul>
+                <h4>Top 5 Números en Cualquier Posición:</h4>
+                <ul>
+                    ${analysis.allNumbers.map(item => `<li><strong>${item[0]}</strong> (${item[1]} veces)</li>`).join('')}
+                </ul>
+                <h4>Top 3 por Posición (1-5):</h4>
+                <ul>
+                    ${Object.entries(analysis.positionFreq).map(([pos, items]) => `
+                        <li>Posición ${pos}: ${items.map(item => `<strong>${item[0]}</strong> (${item[1]})`).join(', ')}</li>
+                    `).join('')}
+                </ul>
+                <hr>
+            </div>
+        `;
+    }
+       }
+               </script>
+
+</body>
+</html>
+
+freq[
     

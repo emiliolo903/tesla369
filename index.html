@@ -374,7 +374,6 @@ document.getElementById("resultadoIA").innerHTML=`
 🔥 ${top.join(" - ")}
 </div>`;
 }
-
 /* ================= BLOQUES ================= */
 
 let dia={
@@ -498,5 +497,46 @@ function analizarQuiniela() {
 
     // Análisis de frecuencia "a la cabeza"
     const tiposSorteo = {
-        "Previa": prev
-    
+        "Previa": previas,
+        "Primera": primeras,
+        "Matutina": matutinas,
+        "Vespertina": vespertinas,
+        "Nocturna": nocturnas
+    };
+
+    for (const tipo in tiposSorteo) {
+        if (tiposSorteo[tipo].length > 0) {
+            algunDatoIngresado = true;
+            const { frecuenciasCabeza } = obtenerFrecuencias(tiposSorteo[tipo]);
+            
+            // Convertir a array y ordenar por frecuencia (mayor a menor)
+            const sortedFrecuencias = Object.entries(frecuenciasCabeza).sort((a, b) => b[1] - a[1]);
+
+            htmlResult += `<h4>Sorteo ${tipo}:</h4>`;
+            if (sortedFrecuencias.length > 0) {
+                htmlResult += `<ul>`;
+                sortedFrecuencias.slice(0, 5).forEach(([numero, frecuencia]) => { // Mostrar top 5
+                    htmlResult += `<li>Número <strong>${numero}</strong>: Salió ${frecuencia} veces a la cabeza.</li>`;
+                });
+                if (sortedFrecuencias.length > 5) {
+                    htmlResult += `<li>... y otros números menos frecuentes.</li>`;
+                }
+                htmlResult += `</ul>`;
+            } else {
+                htmlResult += `<p>No se encontraron datos para analizar en este sorteo.</p>`;
+            }
+        }
+    }
+
+    if (!algunDatoIngresado) {
+        htmlResult = `<p class="warning">Ingresa al menos un sorteo para activar la Magia Tesla.</p>`;
+    }
+
+    document.getElementById("results").innerHTML = htmlResult;
+}
+
+</script>
+
+</body>
+</html>
+

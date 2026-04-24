@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>EMI Tesla PRO V18</title>
 
 <style>
-
 body{
 margin:0;
 font-family:Arial;
@@ -16,15 +13,12 @@ background:#111;
 color:#fff;
 padding:15px;
 }
-
 .container{
 max-width:480px;
 margin:auto;
 }
-
 h1{color:#00F5E0;text-align:center}
-h2{color:#FFD700; margin-top: 25px;} /* Ajuste de margen para h2 */
-
+h2{color:#FFD700;margin-top:25px;}
 input,textarea{
 width:100%;
 padding:10px;
@@ -32,10 +26,9 @@ margin-bottom:10px;
 border-radius:8px;
 border:none;
 font-size:16px;
-background:#333; /* Fondo para inputs/textareas */
-color:#fff; /* Color de texto para inputs/textareas */
+background:#333;
+color:#fff;
 }
-
 button{
 width:100%;
 padding:12px;
@@ -45,92 +38,19 @@ border-radius:8px;
 font-size:16px;
 margin-bottom:10px;
 cursor:pointer;
-color:#111; /* Color de texto para botones */
+color:#111;
 }
-
 .resultado{
 background:#222;
 padding:10px;
 border-radius:10px;
 margin-bottom:10px;
 }
-
 span{
 color:#00FFAA;
 font-weight:bold;
 }
-
-/* Nuevos estilos para la sección de análisis de quiniela */
-.input-section-quiniela, .result-section-quiniela {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #444;
-    border-radius: 8px;
-    background-color: #1a1a1a;
-}
-.input-section-quiniela label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #FFD700; /* Color de etiqueta */
-}
-.input-section-quiniela textarea {
-    min-height: 80px; /* Altura mínima para textareas de quiniela */
-}
-.result-section-quiniela h3 {
-    color: #00F5E0;
-    margin-bottom: 10px;
-    font-size: 1.2em;
-}
-.result-section-quiniela h4 {
-    color: #FFD700;
-    margin-top: 15px;
-    margin-bottom: 8px;
-    font-size: 1.1em;
-}
-.result-section-quiniela p, .result-section-quiniela li {
-    font-size: 0.95em;
-    color: #ccc;
-    margin-bottom: 5px;
-}
-.result-section-quiniela strong {
-    color: #E74C3C; /* Rojo para números importantes */
-}
-.result-section-quiniela ul {
-    list-style-type: none; /* Quitamos los puntos de la lista */
-    padding-left: 10px;
-}
-.result-section-quiniela hr {
-    border: 0;
-    height: 1px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), #444, rgba(0, 0, 0, 0));
-    margin: 20px 0;
-}
-.warning {
-    color: #e74c3c;
-    font-weight: bold;
-    text-align: center;
-    margin-top: 15px;
-    font-size: 0.9em;
-}
-.explanation {
-    font-size: 0.85em;
-    color: #bbb;
-    margin-top: 20px;
-    border-top: 1px dashed #444;
-    padding-top: 15px;
-}
-.explanation ul {
-    list-style-type: disc;
-    margin-left: 20px;
-    padding-left: 0;
-}
-.explanation li {
-    margin-bottom: 5px;
-}
-
 </style>
-
 </head>
 
 <body>
@@ -139,404 +59,120 @@ font-weight:bold;
 
 <h1>🔥 EMI Tesla PRO V18</h1>
 
-<h2>Tesla</h2>
-<input type="text" id="inputTradicional" placeholder="Ej: 3512">
-<button onclick="generarTradicional()">Generar Tesla</button>
-<div id="resultadosTradicional" class="resultado"></div>
+<h2>Historial del día</h2>
+<textarea id="historial" placeholder="Pegá números (4 cifras)"></textarea>
 
-<!-- SECCIÓN PROVINCIA NOCTURNA -->
-<h2>Magia Tesla: Afine Cuántico (Terno Prov. Noct.)</h2>
-<input type="text" id="inputAfineCuantico" placeholder="Semilla: Ej: 9857 (Prov. Vespertina del mismo día)">
-<button onclick="generarAfineCuantico()">🔥 Generar Afine Cuántico</button>
-<div id="resultadoAfineCuantico" class="resultado"></div>
+<button onclick="guardarBloque('previa')">Guardar Previa</button>
+<button onclick="guardarBloque('primera')">Guardar Primera</button>
+<button onclick="guardarBloque('matutina')">Guardar Matutina</button>
+<button onclick="guardarBloque('vespertina')">Guardar Vespertina</button>
 
-<!-- SECCIÓN: CORRENTINA PREVIA -->
-<h2>Magia Tesla: Afine Cuántico (Correntina Previa)</h2>
-<input type="text" id="inputAfineCuanticoCorrentinaPrevia" placeholder="Semilla: Ej: 8820 (Correntina Nocturna día anterior)">
-<button onclick="ejecutarAfineCorrentinaPrevia()">🔥 Generar Afine Correntina Previa</button>
-<div id="resultadoAfineCuanticoCorrentinaPrevia" class="resultado"></div>
-
-<!-- NUEVA SECCIÓN DE ANÁLISIS DE QUINIELA CORRENTINA -->
-<div class="input-section-quiniela">
-    <h2>✨ Magia Tesla: Análisis Quiniela Correntina ✨</h2>
-    <p>¡Aquí la "Magia Tesla" analiza tus datos históricos para encontrar patrones! Ingresa los resultados, separados por espacios o comas, una jugada por línea.</p>
-
-    <label for="previaData">Resultados de la PREVIA:</label>
-    <textarea id="previaData" placeholder="Ej: 1234 5678 9012 ..."></textarea>
-
-    <label for="primeraData">Resultados de la PRIMERA:</label>
-    <textarea id="primeraData" placeholder="Ej: 1234 5678 9012 ..."></textarea>
-
-    <label for="matutinaData">Resultados de la MATUTINA:</label>
-    <textarea id="matutinaData" placeholder="Ej: 1234 5678 9012 ..."></textarea>
-
-    <label for="vespertinaData">Resultados de la VESPERTINA:</label>
-    <textarea id="vespertinaData" placeholder="Ej: 1234 5678 9012 ..."></textarea>
-
-    <label for="nocturnaData">Resultados de la NOCTURNA:</label>
-    <textarea id="nocturnaData" placeholder="Ej: 1234 5678 9012 ..."></textarea>
-
-    <button onclick="analizarQuiniela()">Activar Magia Tesla (Correntina)</button>
-</div>
-
-<div class="result-section-quiniela">
-    <div id="results">
-        <p>Aquí aparecerán los números más potentes después de activar la Magia Tesla (Correntina).</p>
-    </div>
-    <p class="warning">Recordatorio: Este análisis se basa en probabilidades y datos históricos. El juego es azaroso y no garantiza resultados futuros.</p>
-    <div class="explanation">
-        <h2>¿Cómo funciona este análisis?</h2>
-        <p>Analiza los números que más se repiten en la "cabeza" (primer puesto) y en las primeras posiciones para cada sorteo, basándose en tus datos históricos.</p>
-    </div>
-</div>
-<!-- FIN NUEVA SECCIÓN DE ANÁLISIS DE QUINIELA CORRENTINA -->
-
-
-<h2>Historial IA</h2>
-<textarea id="historial" placeholder="Pegá números de 4 cifras"></textarea>
-<button onclick="guardarMemoria()">💾 Guardar memoria</button>
-<button onclick="generarIA()">🔥 Ambos IA</button>
-<div id="resultadoIA" class="resultado"></div>
-
-<h2>Guardar sorteos del día</h2>
-<button onclick="guardarBloque('previa')">Previa</button>
-<button onclick="guardarBloque('primera')">Primera</button>
-<button onclick="guardarBloque('matutina')">Matutina</button>
-<button onclick="guardarBloque('vespertina')">Vespertina</button>
-
-<button onclick="generarCuaterno()">💣 Cuaterno Nocturna</button>
-<!-- Div agregado para mostrar el Cuaterno -->
+<h2>💣 Cuaterno</h2>
+<button onclick="generarCuaterno()">Generar Cuaterno</button>
 <div id="resultadoCuaterno" class="resultado"></div>
 
+<h2>🔥 Terno Fuerte</h2>
+<button onclick="generarTernoFuerte()">Generar Terno Fuerte</button>
+<div id="resultadoTerno" class="resultado"></div>
 
 </div>
 
 <script>
 
-/* ================= MEMORIA ================= */
-
-let memoria = JSON.parse(localStorage.getItem("memoria")) || [];
-
-function guardarMemoria(){
-
-let texto = document.getElementById("historial").value.trim();
-
-let nums = texto.split(/\s+/).filter(n=>n.length===4);
-
-memoria.push(...nums);
-
-localStorage.setItem("memoria", JSON.stringify(memoria));
-
-alert("Guardado");
-}
-
-/* ================= TESLA ================= */
-
-const tabla = {
-0:['0','0'],
-1:['0','0'],
-2:['5','7'],
-3:['8','0'],
-4:['6','9'],
-5:['2','7'],
-6:['4','9'],
-7:['5','2'],
-8:['3','0'],
-9:['3','4']
-};
-
-function generarTradicional(){
-
-let n = document.getElementById("inputTradicional").value;
-
-if(n.length!=4)return alert("4 cifras");
-
-let c1="",c2="";
-
-for(let d of n){
-c1+=tabla[d][0];
-c2+=tabla[d][1];
-}
-
-document.getElementById("resultadosTradicional").innerHTML=`
-<div class="resultado">
-${c1} → Ambos ${c1.slice(2)}<br>
-${c2} → Ambos ${c2.slice(2)}
-</div>`;
-}
-
-/* ================= AFINE CUÁNTICO DE LA MAGIA TESLA (Provincia Nocturna) ================= */
-
-function generarAfineCuantico() {
-    let semilla = document.getElementById("inputAfineCuantico").value;
-
-    if (semilla.length !== 4 || isNaN(semilla)) {
-        return alert("La semilla debe ser un número de 4 cifras.");
-    }
-
-    // --- NUEVO ALGORITMO PARA PROVINCIA NOCTURNA ---
-    let s1 = parseInt(semilla[0]);
-    let s2 = parseInt(semilla[1]);
-    let s3 = parseInt(semilla[2]);
-    let s4 = parseInt(semilla[3]);
-
-    // Lógica revisada: relación entre dígitos de la semilla y una transformación
-    let valorBase = (s3 * s4) + (s1 + s2); // Multiplicamos los dos últimos y le sumamos los dos primeros
-    
-    // Este factor fue calibrado con los 11 datos verificados
-    let factorAjuste = 123; 
-    
-    let prediccionTernoNumerico = (valorBase + factorAjuste) % 1000;
-    let prediccionTerno = String(prediccionTernoNumerico).padStart(3, '0');
-
-    document.getElementById("resultadoAfineCuantico").innerHTML = `
-        <div class="resultado">
-            ✨ Predicción Terno Prov. Noct. (A la Cabeza): <span>${prediccionTerno}</span>
-        </div>`;
-}
-
-/* ================= AFINE CUÁNTICO DE LA MAGIA TESLA (Correntina Previa) ================= */
-// Este es el algoritmo de la "Magia Tesla" afinado con tus 22 pares de datos.
-function generarAfineCuanticoCorrentinaPrevia(nocturnaAnterior) {
-    if (typeof nocturnaAnterior !== 'string' || nocturnaAnterior.length !== 4 || !/^\d{4}$/.test(nocturnaAnterior)) {
-        console.error("Error en generarAfineCuanticoCorrentinaPrevia: La entrada debe ser un string de 4 dígitos numéricos.");
-        return null;
-    }
-
-    let n = parseInt(nocturnaAnterior, 10); // Convertir a número entero base 10
-
-    // Paso 1: "Despertar" la energía del número sumando sus dígitos inversos.
-    let d1 = parseInt(nocturnaAnterior[0], 10);
-    let d2 = parseInt(nocturnaAnterior[1], 10);
-    let d3 = parseInt(nocturnaAnterior[2], 10);
-    let d4 = parseInt(nocturnaAnterior[3], 10);
-
-    let energiaInversa = (d4 * 1000) + (d3 * 100) + (d2 * 10) + d1;
-    let paso1 = (n + energiaInversa) % 10000; 
-
-    // Paso 2: "Resonancia Lunar" - Ajuste basado en un número clave emergente del análisis.
-    let numeroClave = 2943; 
-    let paso2 = (paso1 + numeroClave - 1111) % 10000;
-    if (paso2 < 0) paso2 += 10000;
-
-    // Paso 3: "Atracción Gravitacional" - Refuerzo por dígitos extremos y centrales.
-    let s_paso2 = String(paso2).padStart(4, '0');
-    let extremos = parseInt(s_paso2[0], 10) + parseInt(s_paso2[3], 10);
-    let centrales = parseInt(s_paso2[1], 10) + parseInt(s_paso2[2], 10);
-
-    let refuerzo = (extremos * 10) + centrales;
-    let paso3 = (paso2 + refuerzo) % 10000;
-
-    // Paso 4: "El Toque Final Tesla" - Pequeño ajuste basado en la frecuencia del primer dígito original.
-    let ajusteFinal = (d1 * 7); 
-    let resultadoFinal = (paso3 + ajusteFinal) % 10000;
-
-    return String(resultadoFinal).padStart(4, '0');
-}
-
-// Función auxiliar para conectar el botón HTML con el algoritmo
-function ejecutarAfineCorrentinaPrevia() {
-    let semilla = document.getElementById("inputAfineCuanticoCorrentinaPrevia").value;
-    const numeroAfine = generarAfineCuanticoCorrentinaPrevia(semilla);
-
-    if (numeroAfine) {
-        document.getElementById("resultadoAfineCuanticoCorrentinaPrevia").innerHTML = `
-            <div class="resultado">
-                ✨ Predicción Correntina Previa (A la Cabeza): <span>${numeroAfine}</span>
-            </div>`;
-    } else {
-        document.getElementById("resultadoAfineCuanticoCorrentinaPrevia").innerHTML = `
-            <div class="resultado">
-                <span style="color:red;">Error: Ingresa un número de 4 dígitos válido.</span>
-            </div>`;
-    }
-}
-
-
-/* ================= IA ================= */
-
-function generarIA(){
-
-let freq={};
-
-memoria.forEach(n=>{
-let a=n.slice(2);
-freq[a]=(freq[a]||0)+1;
-});
-
-let top=Object.entries(freq)
-.sort((a,b)=>b[1]-a[1])
-.slice(0,3)
-.map(x=>x[0]);
-
-document.getElementById("resultadoIA").innerHTML=`
-<div class="resultado">
-🔥 ${top.join(" - ")}
-</div>`;
-}
 /* ================= BLOQUES ================= */
 
 let dia={
 previa:[],
 primera:[],
 matutina:[],
-vespertina:[],
-nocturna:[] // Añadido para el análisis de quiniela
+vespertina:[]
 };
 
 function guardarBloque(tipo){
-
 let texto=document.getElementById("historial").value.trim();
-
 let nums=texto.split(/\s+/).filter(n=>n.length===4);
-
 dia[tipo]=nums;
-
 alert(tipo+" guardado");
 }
 
-/* ================= CUATERNO NOCTURNA ================= */
+/* ================= CUATERNO ================= */
 
-function generarCuaterno() {
-    let todosLosNumerosDelDia = [];
-    for (let tipo in dia) {
-        todosLosNumerosDelDia = todosLosNumerosDelDia.concat(dia[tipo]);
-    }
+function generarCuaterno(){
 
-    if (todosLosNumerosDelDia.length === 0) {
-        document.getElementById("resultadoCuaterno").innerHTML = `
-            <div class="resultado">
-                <span style="color:red;">No hay números guardados para generar el Cuaterno.</span>
-            </div>`;
-        return;
-    }
-
-    // Convertir todos los números a enteros para facilitar las operaciones
-    let numerosInt = todosLosNumerosDelDia.map(n => parseInt(n, 10));
-
-    // Lógica avanzada para Cuaterno Nocturna (ejemplo basado en tu patrón)
-    // Buscamos un número "raíz" y luego generamos variantes
-    
-    // 1. Número base: Suma de todos los números mod 10000
-    let sumaTotal = numerosInt.reduce((sum, current) => sum + current, 0);
-    let numeroBase = sumaTotal % 10000;
-
-    // 2. Extracción de dígitos clave
-    let s_numeroBase = String(numeroBase).padStart(4, '0');
-    let d1 = parseInt(s_numeroBase[0]);
-    let d2 = parseInt(s_numeroBase[1]);
-    let d3 = parseInt(s_numeroBase[2]);
-    let d4 = parseInt(s_numeroBase[3]);
-
-    // 3. Generación del Cuaterno
-    let cuaterno1 = (d1 * 1000 + d3 * 100 + d2 * 10 + d4) % 10000; // Invertir centrales
-    let cuaterno2 = (d2 * 1000 + d4 * 100 + d1 * 10 + d3) % 10000; // Intercambiar pares
-    let cuaterno3 = (d3 * 1000 + d1 * 100 + d4 * 10 + d2) % 10000; // Otra combinación
-
-    // Asegurarse de que tengan 4 dígitos
-    let c1_str = String(cuaterno1).padStart(4, '0');
-    let c2_str = String(cuaterno2).padStart(4, '0');
-    let c3_str = String(cuaterno3).padStart(4, '0');
-
-    document.getElementById("resultadoCuaterno").innerHTML = `
-        <div class="resultado">
-            💣 Cuaterno Nocturna (Basado en sorteos del día):<br>
-            <span>${c1_str} - ${c2_str} - ${c3_str}</span>
-        </div>`;
+let todos=[];
+for(let t in dia){
+todos=todos.concat(dia[t]);
 }
 
-/* ================= ANÁLISIS QUINIELA CORRENTINA ================= */
-
-// Función auxiliar para procesar los números de un textarea
-function procesarNumeros(texto) {
-    // Reemplaza comas por espacios, divide por espacios y filtra para asegurar que sean números de 4 dígitos
-    return texto.replace(/,/g, ' ').split(/\s+/).filter(n => /^\d{4}$/.test(n));
+if(todos.length==0){
+document.getElementById("resultadoCuaterno").innerHTML="Sin datos";
+return;
 }
 
-// Función auxiliar para obtener frecuencias de "a la cabeza" y primeras 10/20
-function obtenerFrecuencias(data) {
-    const frecuenciasCabeza = {};
-    const frecuenciasPosiciones = {}; // Frecuencias para las primeras posiciones
+let freq={};
 
-    data.forEach(numeroCompleto => {
-        const numeroCabeza = numeroCompleto.substring(0, 4); // Asumiendo que el primero de cada línea es "a la cabeza"
+todos.forEach(n=>{
+n.split('').forEach(d=>{
+freq[d]=(freq[d]||0)+1;
+});
+});
 
-        frecuenciasCabeza[numeroCabeza] = (frecuenciasCabeza[numeroCabeza] || 0) + 1;
+let top=Object.entries(freq)
+.sort((a,b)=>b[1]-a[1])
+.slice(0,4)
+.map(x=>x[0]);
 
-        // Podríamos considerar solo el primer número de cada entrada o todos los números en un string largo
-        // Para este análisis, asumimos que cada 'numeroCompleto' es un número de 4 dígitos para "a la cabeza"
-        // Si queremos analizar todos los números en una entrada, la lógica debería cambiar.
-        // Por ahora, solo el número "a la cabeza" es el que cuenta para las frecuencias.
+let cuaterno=top.join('');
 
-        // Para un análisis más detallado de las primeras posiciones (por ejemplo, los primeros 5 o 10 números de cada sorteo)
-        // Necesitaríamos que cada 'data' contuviera una lista de números por sorteo, no solo el 'a la cabeza'.
-        // Para simplificar, si la entrada es "1234 5678 9012", el 1234 es a la cabeza.
-        // Si se quiere analizar los números que salieron del 1 al 5 por ejemplo, la entrada necesitaría ser "1234,5678,9012,XXXX,YYYY"
-        // Y aquí parsear cada uno de ellos y contarlos en frecuenciasPosiciones
-        
-        // Dejamos este como un placeholder para futuras mejoras
-        // const numerosDelSorteo = numeroCompleto.split(' ').map(n => n.trim()).filter(n => n.length === 4);
-        // numerosDelSorteo.slice(0, X).forEach(num => {
-        //     frecuenciasPosiciones[num] = (frecuenciasPosiciones[num] || 0) + 1;
-        // });
-    });
-
-    return { frecuenciasCabeza, frecuenciasPosiciones };
+document.getElementById("resultadoCuaterno").innerHTML=`
+<div class="resultado">
+💣 ${cuaterno}
+</div>`;
 }
 
+/* ================= TERNO FUERTE ================= */
 
-function analizarQuiniela() {
-    const previas = procesarNumeros(document.getElementById("previaData").value);
-    const primeras = procesarNumeros(document.getElementById("primeraData").value);
-    const matutinas = procesarNumeros(document.getElementById("matutinaData").value);
-    const vespertinas = procesarNumeros(document.getElementById("vespertinaData").value);
-    const nocturnas = procesarNumeros(document.getElementById("nocturnaData").value);
+function generarTernoFuerte(){
 
-    let htmlResult = "<h3>Resultados del Análisis Tesla (Correntina)</h3>";
-    let algunDatoIngresado = false;
+let todos=[];
+for(let t in dia){
+todos=todos.concat(dia[t]);
+}
 
-    // Análisis de frecuencia "a la cabeza"
-    const tiposSorteo = {
-        "Previa": previas,
-        "Primera": primeras,
-        "Matutina": matutinas,
-        "Vespertina": vespertinas,
-        "Nocturna": nocturnas
-    };
+if(todos.length==0){
+document.getElementById("resultadoTerno").innerHTML="Sin datos";
+return;
+}
 
-    for (const tipo in tiposSorteo) {
-        if (tiposSorteo[tipo].length > 0) {
-            algunDatoIngresado = true;
-            const { frecuenciasCabeza } = obtenerFrecuencias(tiposSorteo[tipo]);
-            
-            // Convertir a array y ordenar por frecuencia (mayor a menor)
-            const sortedFrecuencias = Object.entries(frecuenciasCabeza).sort((a, b) => b[1] - a[1]);
+// contar frecuencia de dígitos
+let freq={};
 
-            htmlResult += `<h4>Sorteo ${tipo}:</h4>`;
-            if (sortedFrecuencias.length > 0) {
-                htmlResult += `<ul>`;
-                sortedFrecuencias.slice(0, 5).forEach(([numero, frecuencia]) => { // Mostrar top 5
-                    htmlResult += `<li>Número <strong>${numero}</strong>: Salió ${frecuencia} veces a la cabeza.</li>`;
-                });
-                if (sortedFrecuencias.length > 5) {
-                    htmlResult += `<li>... y otros números menos frecuentes.</li>`;
-                }
-                htmlResult += `</ul>`;
-            } else {
-                htmlResult += `<p>No se encontraron datos para analizar en este sorteo.</p>`;
-            }
-        }
-    }
+todos.forEach(n=>{
+n.split('').forEach(d=>{
+freq[d]=(freq[d]||0)+1;
+});
+});
 
-    if (!algunDatoIngresado) {
-        htmlResult = `<p class="warning">Ingresa al menos un sorteo para activar la Magia Tesla.</p>`;
-    }
+// ordenar por frecuencia
+let orden=Object.entries(freq).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
 
-    document.getElementById("results").innerHTML = htmlResult;
+// núcleo fuerte
+let base1=orden[0];
+let base2=orden[1];
+let variable=orden[2] || orden[0];
+
+// generar 2 ternos
+let t1 = base1+base2+base1;
+let t2 = base1+base2+variable;
+
+document.getElementById("resultadoTerno").innerHTML=`
+<div class="resultado">
+🔥 Ternos fuertes:<br>
+<span>${t1} - ${t2}</span>
+</div>`;
 }
 
 </script>
 
 </body>
 </html>
-

@@ -6,50 +6,23 @@
 <title>EMI Tesla PRO V18</title>
 
 <style>
-body{
-margin:0;
-font-family:Arial;
-background:#111;
-color:#fff;
-padding:15px;
-}
-.container{
-max-width:480px;
-margin:auto;
-}
+body{margin:0;font-family:Arial;background:#111;color:#fff;padding:15px;}
+.container{max-width:480px;margin:auto;}
 h1{color:#00F5E0;text-align:center}
 h2{color:#FFD700;margin-top:25px;}
 input,textarea{
-width:100%;
-padding:10px;
-margin-bottom:10px;
-border-radius:8px;
-border:none;
-font-size:16px;
-background:#333;
-color:#fff;
+width:100%;padding:10px;margin-bottom:10px;border-radius:8px;
+border:none;font-size:16px;background:#333;color:#fff;
 }
 button{
-width:100%;
-padding:12px;
-background:#00F5E0;
-border:none;
-border-radius:8px;
-font-size:16px;
-margin-bottom:10px;
-cursor:pointer;
-color:#111;
+width:100%;padding:12px;background:#00F5E0;border:none;
+border-radius:8px;font-size:16px;margin-bottom:10px;
+cursor:pointer;color:#111;
 }
 .resultado{
-background:#222;
-padding:10px;
-border-radius:10px;
-margin-bottom:10px;
+background:#222;padding:10px;border-radius:10px;margin-bottom:10px;
 }
-span{
-color:#00FFAA;
-font-weight:bold;
-}
+span{color:#00FFAA;font-weight:bold;}
 </style>
 </head>
 
@@ -67,12 +40,8 @@ font-weight:bold;
 <button onclick="guardarBloque('matutina')">Guardar Matutina</button>
 <button onclick="guardarBloque('vespertina')">Guardar Vespertina</button>
 
-<h2>💣 Cuaterno</h2>
-<button onclick="generarCuaterno()">Generar Cuaterno</button>
-<div id="resultadoCuaterno" class="resultado"></div>
-
-<h2>🔥 Terno Fuerte</h2>
-<button onclick="generarTernoFuerte()">Generar Terno Fuerte</button>
+<h2>🎯 Terno Tesla Correntina</h2>
+<button onclick="generarTernoCorrentina()">Generar Terno</button>
 <div id="resultadoTerno" class="resultado"></div>
 
 </div>
@@ -95,44 +64,9 @@ dia[tipo]=nums;
 alert(tipo+" guardado");
 }
 
-/* ================= CUATERNO ================= */
+/* ================= TERNO TESLA ================= */
 
-function generarCuaterno(){
-
-let todos=[];
-for(let t in dia){
-todos=todos.concat(dia[t]);
-}
-
-if(todos.length==0){
-document.getElementById("resultadoCuaterno").innerHTML="Sin datos";
-return;
-}
-
-let freq={};
-
-todos.forEach(n=>{
-n.split('').forEach(d=>{
-freq[d]=(freq[d]||0)+1;
-});
-});
-
-let top=Object.entries(freq)
-.sort((a,b)=>b[1]-a[1])
-.slice(0,4)
-.map(x=>x[0]);
-
-let cuaterno=top.join('');
-
-document.getElementById("resultadoCuaterno").innerHTML=`
-<div class="resultado">
-💣 ${cuaterno}
-</div>`;
-}
-
-/* ================= TERNO FUERTE ================= */
-
-function generarTernoFuerte(){
+function generarTernoCorrentina(){
 
 let todos=[];
 for(let t in dia){
@@ -144,7 +78,41 @@ document.getElementById("resultadoTerno").innerHTML="Sin datos";
 return;
 }
 
-// contar frecuencia de dígitos
+/* PASO 1: ternos */
+let ternos = todos.map(n=>n.slice(1,4));
+
+/* PASO 2: frecuencia de ternos */
+let freqTernos={};
+ternos.forEach(t=>{
+freqTernos[t]=(freqTernos[t]||0)+1;
+});
+
+/* SI HAY REPETIDO */
+let repetido = Object.entries(freqTernos)
+.sort((a,b)=>b[1]-a[1])[0];
+
+if(repetido && repetido[1]>=2){
+
+let base = repetido[0];
+
+let d1=parseInt(base[0]);
+let d2=parseInt(base[1]);
+let d3=parseInt(base[2]);
+
+let variante = ((d1+d2)%10).toString()+
+               ((d2+d3)%10).toString()+
+               ((d3+d1)%10).toString();
+
+document.getElementById("resultadoTerno").innerHTML=`
+<div class="resultado">
+🔥 REPETIDO DETECTADO<br><br>
+<span>${base}</span><br>
+<span>${variante}</span>
+</div>`;
+return;
+}
+
+/* PASO 3: frecuencia de dígitos */
 let freq={};
 
 todos.forEach(n=>{
@@ -153,22 +121,37 @@ freq[d]=(freq[d]||0)+1;
 });
 });
 
-// ordenar por frecuencia
-let orden=Object.entries(freq).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+let orden=Object.entries(freq)
+.sort((a,b)=>b[1]-a[1])
+.map(x=>x[0]);
 
-// núcleo fuerte
-let base1=orden[0];
-let base2=orden[1];
-let variable=orden[2] || orden[0];
+let fuerte=orden[0];
+let segundo=orden[1];
 
-// generar 2 ternos
-let t1 = base1+base2+base1;
-let t2 = base1+base2+variable;
+/* PASO 4: dobles */
+let dobles={};
+
+ternos.forEach(t=>{
+if(t[0]===t[1] || t[1]===t[2]){
+let d=t[1];
+dobles[d]=(dobles[d]||0)+1;
+}
+});
+
+let dobleFuerte = Object.entries(dobles)
+.sort((a,b)=>b[1]-a[1])[0];
+
+let d = dobleFuerte ? dobleFuerte[0] : fuerte;
+
+/* PASO 5: resultado final */
+let t1 = segundo + d + d;
+let t2 = d + d + segundo;
 
 document.getElementById("resultadoTerno").innerHTML=`
 <div class="resultado">
-🔥 Ternos fuertes:<br>
-<span>${t1} - ${t2}</span>
+🎯 TERNOS FUERTES<br><br>
+🔥 ${t1}<br>
+🔥 ${t2}
 </div>`;
 }
 

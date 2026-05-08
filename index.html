@@ -6,23 +6,65 @@
 <title>EMI Tesla PRO V18</title>
 
 <style>
-body{margin:0;font-family:Arial;background:#111;color:#fff;padding:15px;}
-.container{max-width:480px;margin:auto;}
-h1{color:#00F5E0;text-align:center}
-h2{color:#FFD700;margin-top:25px;}
+body{
+margin:0;
+font-family:Arial;
+background:#111;
+color:#fff;
+padding:15px;
+}
+
+.container{
+max-width:480px;
+margin:auto;
+}
+
+h1{
+color:#00F5E0;
+text-align:center;
+}
+
+h2{
+color:#FFD700;
+margin-top:25px;
+}
+
 input,textarea{
-width:100%;padding:10px;margin-bottom:10px;border-radius:8px;
-border:none;font-size:16px;background:#333;color:#fff;
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border-radius:8px;
+border:none;
+font-size:16px;
+background:#333;
+color:#fff;
 }
+
 button{
-width:100%;padding:12px;background:#00F5E0;border:none;
-border-radius:8px;font-size:16px;margin-bottom:10px;
-cursor:pointer;color:#111;
+width:100%;
+padding:12px;
+background:#00F5E0;
+border:none;
+border-radius:8px;
+font-size:16px;
+margin-bottom:10px;
+cursor:pointer;
+color:#111;
+font-weight:bold;
 }
+
 .resultado{
-background:#222;padding:10px;border-radius:10px;margin-bottom:10px;
+background:#222;
+padding:10px;
+border-radius:10px;
+margin-bottom:10px;
 }
-span{color:#00FFAA;font-weight:bold;}
+
+span{
+color:#00FFAA;
+font-weight:bold;
+font-size:20px;
+}
 </style>
 </head>
 
@@ -33,7 +75,8 @@ span{color:#00FFAA;font-weight:bold;}
 <h1>🔥 EMI Tesla PRO V18</h1>
 
 <h2>Historial del día</h2>
-<textarea id="historial" placeholder="Pegá números (4 cifras)"></textarea>
+
+<textarea id="historial" placeholder="Pegá números de 4 cifras"></textarea>
 
 <button onclick="guardarBloque('previa')">Guardar Previa</button>
 <button onclick="guardarBloque('primera')">Guardar Primera</button>
@@ -41,8 +84,16 @@ span{color:#00FFAA;font-weight:bold;}
 <button onclick="guardarBloque('vespertina')">Guardar Vespertina</button>
 
 <h2>🎯 Terno Tesla Correntina</h2>
+
 <button onclick="generarTernoCorrentina()">Generar Terno</button>
+
 <div id="resultadoTerno" class="resultado"></div>
+
+<h2>🔥 Método EMI</h2>
+
+<button onclick="probarEMI()">Probar Método EMI</button>
+
+<div id="resultadoEMI" class="resultado"></div>
 
 </div>
 
@@ -58,10 +109,89 @@ vespertina:[]
 };
 
 function guardarBloque(tipo){
+
 let texto=document.getElementById("historial").value.trim();
+
 let nums=texto.split(/\s+/).filter(n=>n.length===4);
+
 dia[tipo]=nums;
+
 alert(tipo+" guardado");
+}
+
+/* ================= MÉTODO EMI ================= */
+
+const emiMetodo={
+
+0:[0,0],
+1:[0,0],
+2:[5,7],
+3:[8,0],
+4:[6,9],
+5:[2,7],
+6:[4,9],
+7:[5,2],
+8:[3,0],
+9:[3,4]
+
+};
+
+function aplicarEMI(numero){
+
+let resultado=[];
+
+numero.split('').forEach(d=>{
+
+if(emiMetodo[d]){
+
+resultado.push(
+d+" → "+emiMetodo[d][0]+"-"+emiMetodo[d][1]
+);
+
+}
+
+});
+
+return resultado.join("<br>");
+}
+
+/* ================= PROBAR EMI ================= */
+
+function probarEMI(){
+
+let todos=[];
+
+for(let t in dia){
+
+todos=todos.concat(dia[t]);
+
+}
+
+if(todos.length===0){
+
+document.getElementById("resultadoEMI").innerHTML="Sin datos";
+
+return;
+}
+
+let ultimo=todos[todos.length-1];
+
+let emi=aplicarEMI(ultimo);
+
+document.getElementById("resultadoEMI").innerHTML=`
+
+<div class="resultado">
+
+🔥 EMI DEL ÚLTIMO NÚMERO<br><br>
+
+<span>${ultimo}</span><br><br>
+
+${emi}
+
+</div>
+
+`;
+
 }
 
 /* ================= TERNO TESLA ================= */
@@ -69,90 +199,137 @@ alert(tipo+" guardado");
 function generarTernoCorrentina(){
 
 let todos=[];
+
 for(let t in dia){
+
 todos=todos.concat(dia[t]);
+
 }
 
 if(todos.length==0){
+
 document.getElementById("resultadoTerno").innerHTML="Sin datos";
+
 return;
 }
 
 /* PASO 1: ternos */
-let ternos = todos.map(n=>n.slice(1,4));
+
+let ternos=todos.map(n=>n.slice(1,4));
 
 /* PASO 2: frecuencia de ternos */
+
 let freqTernos={};
+
 ternos.forEach(t=>{
+
 freqTernos[t]=(freqTernos[t]||0)+1;
+
 });
 
 /* SI HAY REPETIDO */
-let repetido = Object.entries(freqTernos)
+
+let repetido=Object.entries(freqTernos)
+
 .sort((a,b)=>b[1]-a[1])[0];
 
 if(repetido && repetido[1]>=2){
 
-let base = repetido[0];
+let base=repetido[0];
 
 let d1=parseInt(base[0]);
 let d2=parseInt(base[1]);
 let d3=parseInt(base[2]);
 
-let variante = ((d1+d2)%10).toString()+
-               ((d2+d3)%10).toString()+
-               ((d3+d1)%10).toString();
+let variante=
+
+((d1+d2)%10).toString()+
+((d2+d3)%10).toString()+
+((d3+d1)%10).toString();
 
 document.getElementById("resultadoTerno").innerHTML=`
+
 <div class="resultado">
+
 🔥 REPETIDO DETECTADO<br><br>
+
 <span>${base}</span><br>
+
 <span>${variante}</span>
-</div>`;
+
+</div>
+
+`;
+
 return;
 }
 
 /* PASO 3: frecuencia de dígitos */
+
 let freq={};
 
 todos.forEach(n=>{
+
 n.split('').forEach(d=>{
+
 freq[d]=(freq[d]||0)+1;
+
 });
+
 });
 
 let orden=Object.entries(freq)
+
 .sort((a,b)=>b[1]-a[1])
+
 .map(x=>x[0]);
 
 let fuerte=orden[0];
+
 let segundo=orden[1];
 
 /* PASO 4: dobles */
+
 let dobles={};
 
 ternos.forEach(t=>{
+
 if(t[0]===t[1] || t[1]===t[2]){
+
 let d=t[1];
+
 dobles[d]=(dobles[d]||0)+1;
+
 }
+
 });
 
-let dobleFuerte = Object.entries(dobles)
+let dobleFuerte=Object.entries(dobles)
+
 .sort((a,b)=>b[1]-a[1])[0];
 
-let d = dobleFuerte ? dobleFuerte[0] : fuerte;
+let d=dobleFuerte ? dobleFuerte[0] : fuerte;
 
 /* PASO 5: resultado final */
-let t1 = segundo + d + d;
-let t2 = d + d + segundo;
+
+let t1=segundo+d+d;
+
+let t2=d+d+segundo;
 
 document.getElementById("resultadoTerno").innerHTML=`
+
 <div class="resultado">
+
 🎯 TERNOS FUERTES<br><br>
+
 🔥 ${t1}<br>
+
 🔥 ${t2}
-</div>`;
+
+</div>
+
+`;
+
 }
 
 </script>

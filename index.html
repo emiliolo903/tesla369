@@ -380,11 +380,65 @@ freqDigitos[d]=
 
 /* ================= DOMINANTE ================= */
 
+/* ================= LECTURA CONTEXTUAL ================= */
+
+let pares={};
+
+ambos.forEach(a=>{
+
+pares[a]=(pares[a]||0)+1;
+
+let invertido=a[1]+a[0];
+
+pares[invertido]=(pares[invertido]||0)+0.5;
+
+});
+
+/* ================= DETECTAR NÚCLEOS FUERTES ================= */
+
+let nucleos={};
+
+ambos.forEach(a=>{
+
+let d1=a[0];
+let d2=a[1];
+
+nucleos[d1]=(nucleos[d1]||0)+1;
+nucleos[d2]=(nucleos[d2]||0)+1;
+
+/* continuidad invertida */
+
+if(d1!==d2){
+
+nucleos[d1]+=0.3;
+nucleos[d2]+=0.3;
+
+}
+
+/* priorizar 8 y 2 si aparecen conectados */
+
+if(
+(a.includes('8') && a.includes('2'))
+||
+(a==='28')
+||
+(a==='82')
+){
+
+nucleos['8']=(nucleos['8']||0)+2;
+nucleos['2']=(nucleos['2']||0)+2;
+
+}
+
+});
+
+/* ================= DOMINANTE ================= */
+
 let dominante=Object
-.entries(freqDigitos)
+.entries(nucleos)
 .sort((a,b)=>b[1]-a[1])[0][0];
 
-/* ================= ACOMPAÑANTE ================= */
+/* ================= ACOMPAÑANTE CONTEXTUAL ================= */
 
 let acompanantes={};
 
@@ -399,6 +453,26 @@ let otro=
 
 acompanantes[otro]=
 (acompanantes[otro]||0)+1;
+
+/* continuidad invertida */
+
+let invertido=otro+dominante;
+
+if(pares[invertido]){
+acompanantes[otro]+=pares[invertido];
+}
+
+/* priorizar continuidad viva */
+
+if(
+(a===dominante+otro)
+||
+(a===otro+dominante)
+){
+
+acompanantes[otro]+=1.5;
+
+}
 
 }
 

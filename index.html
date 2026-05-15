@@ -3,26 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EMI Tesla PRO V19</title>
+<title>EMI Tesla PRO V20</title>
 
 <style>
 
 body{
 margin:0;
-font-family:Arial;
-background:#111;
-color:#fff;
 padding:15px;
+background:#111;
+font-family:Arial;
+color:#fff;
 }
 
 .container{
-max-width:480px;
+max-width:500px;
 margin:auto;
 }
 
 h1{
-color:#00F5E0;
 text-align:center;
+color:#00F5E0;
 }
 
 h2{
@@ -30,48 +30,49 @@ color:#FFD700;
 margin-top:25px;
 }
 
-input,textarea{
+textarea,input{
 width:100%;
-padding:10px;
+padding:12px;
 margin-bottom:10px;
-border-radius:8px;
 border:none;
-font-size:16px;
-background:#333;
+border-radius:8px;
+background:#222;
 color:#fff;
+font-size:16px;
 box-sizing:border-box;
 }
 
 button{
 width:100%;
 padding:12px;
-background:#00F5E0;
+margin-bottom:10px;
 border:none;
 border-radius:8px;
-font-size:16px;
-margin-bottom:10px;
-cursor:pointer;
+background:#00F5E0;
 color:#111;
+font-size:16px;
 font-weight:bold;
+cursor:pointer;
 }
 
 .resultado{
-background:#222;
-padding:12px;
+background:#1E1E1E;
+padding:15px;
 border-radius:10px;
-margin-bottom:10px;
 line-height:1.6;
+margin-top:10px;
 }
 
 span{
-color:#00FFAA;
+color:#00FF99;
+font-size:24px;
 font-weight:bold;
-font-size:22px;
 }
 
 .alerta{
 color:#FFD700;
 font-weight:bold;
+margin-top:10px;
 }
 
 </style>
@@ -81,11 +82,14 @@ font-weight:bold;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla PRO V19</h1>
+<h1>🔥 EMI Tesla PRO V20</h1>
 
-<h2>Historial del día</h2>
+<h2>Historial del Sorteo</h2>
 
-<textarea id="historial" placeholder="Pegá números de 4 cifras"></textarea>
+<textarea
+id="historial"
+placeholder="Pegá números de 4 cifras">
+</textarea>
 
 <button onclick="guardarBloque('previa')">
 Guardar Previa
@@ -113,33 +117,15 @@ Guardar Nocturna
 Generar Ambos
 </button>
 
-<div id="resultadoAmbos" class="resultado"></div>
-
-<h2>🔥 Método EMI</h2>
-
-<input
-type="text"
-id="numeroEMI"
-placeholder="Ingresá número"
-/>
-
-<button onclick="convertirEMIManual()">
-Convertir Número EMI
-</button>
-
-<button onclick="probarEMI()">
-EMI Último Resultado
-</button>
-
-<div id="resultadoEMI" class="resultado"></div>
+<div id="resultado" class="resultado"></div>
 
 </div>
 
 <script>
 
-/* ================= BLOQUES ================= */
+/* ================= BASE ================= */
 
-let dia={
+let bloques={
 
 previa:[],
 primera:[],
@@ -149,6 +135,8 @@ nocturna:[]
 
 };
 
+/* ================= GUARDAR ================= */
+
 function guardarBloque(tipo){
 
 let texto=document
@@ -156,409 +144,241 @@ let texto=document
 .value
 .trim();
 
-let nums=texto
+let numeros=texto
 .split(/\s+/)
 .filter(n=>n.length===4);
 
-dia[tipo]=nums;
+bloques[tipo]=numeros;
 
 alert(tipo+" guardado");
 
 }
 
-/* ================= MÉTODO EMI ================= */
+/* ================= OBTENER ÚLTIMO ================= */
 
-const emiMetodo={
+function obtenerUltimo(){
 
-0:[0,0],
-1:[0,0],
-2:[5,7],
-3:[8,0],
-4:[6,9],
-5:[2,7],
-6:[4,9],
-7:[5,2],
-8:[3,0],
-9:[3,4]
-
+if(bloques.vespertina.length>0){
+return {
+nombre:"NOCTURNA",
+datos:bloques.vespertina
 };
+}
 
-function aplicarEMI(numero){
+if(bloques.matutina.length>0){
+return {
+nombre:"VESPERTINA",
+datos:bloques.matutina
+};
+}
 
-let resultado=[];
+if(bloques.primera.length>0){
+return {
+nombre:"MATUTINA",
+datos:bloques.primera
+};
+}
 
-numero.split('').forEach(d=>{
+if(bloques.previa.length>0){
+return {
+nombre:"PRIMERA",
+datos:bloques.previa
+};
+}
 
-if(emiMetodo[d]){
-
-resultado.push(
-
-d+" → "+
-emiMetodo[d][0]+
-"-"+
-emiMetodo[d][1]
-
-);
+return null;
 
 }
 
-});
-
-return resultado.join("<br>");
-
-}
-
-/* ================= EMI MANUAL ================= */
-
-function convertirEMIManual(){
-
-let numero=document
-.getElementById("numeroEMI")
-.value
-.trim();
-
-if(numero.length===0){
-
-document.getElementById(
-"resultadoEMI"
-).innerHTML="Ingresá número";
-
-return;
-
-}
-
-let emi=aplicarEMI(numero);
-
-document.getElementById(
-"resultadoEMI"
-).innerHTML=`
-
-<div class="resultado">
-
-🔥 CONVERSIÓN EMI<br><br>
-
-<span>${numero}</span><br><br>
-
-${emi}
-
-</div>
-
-`;
-
-}
-
-/* ================= EMI ÚLTIMO ================= */
-
-function probarEMI(){
-
-let todos=[];
-
-for(let t in dia){
-
-todos=todos.concat(dia[t]);
-
-}
-
-if(todos.length===0){
-
-document.getElementById(
-"resultadoEMI"
-).innerHTML="Sin datos";
-
-return;
-
-}
-
-let ultimo=todos[todos.length-1];
-
-let emi=aplicarEMI(ultimo);
-
-document.getElementById(
-"resultadoEMI"
-).innerHTML=`
-
-<div class="resultado">
-
-🔥 EMI DEL ÚLTIMO NÚMERO<br><br>
-
-<span>${ultimo}</span><br><br>
-
-${emi}
-
-</div>
-
-`;
-
-}
-
-/* ================= AMBOS INTELIGENTES ================= */
-
-function obtenerUltimoBloque(){
-
-if(dia.vespertina.length>0){
-return dia.vespertina;
-}
-
-if(dia.matutina.length>0){
-return dia.matutina;
-}
-
-if(dia.primera.length>0){
-return dia.primera;
-}
-
-if(dia.previa.length>0){
-return dia.previa;
-}
-
-return [];
-
-}
-
-function nombreProximoSorteo(){
-
-if(dia.vespertina.length>0){
-return "NOCTURNA";
-}
-
-if(dia.matutina.length>0){
-return "VESPERTINA";
-}
-
-if(dia.primera.length>0){
-return "MATUTINA";
-}
-
-if(dia.previa.length>0){
-return "PRIMERA";
-}
-
-return "SIGUIENTE";
-
-}
+/* ================= GENERADOR ================= */
 
 function generarAmbos(){
 
-let bloque=obtenerUltimoBloque();
+let actual=obtenerUltimo();
 
-if(bloque.length===0){
+if(!actual){
 
 document.getElementById(
-"resultadoAmbos"
+"resultado"
 ).innerHTML="Sin datos";
 
 return;
 
 }
 
-let proximo=nombreProximoSorteo();
+let sorteo=actual.nombre;
+
+let datos=actual.datos;
 
 /* ================= EXTRAER AMBOS ================= */
 
 let ambos=[];
 
-bloque.forEach(n=>{
+datos.forEach(n=>{
 
-ambos.push(n.slice(2,4));
-
-});
-
-/* ================= FRECUENCIA ================= */
-
-let freqDigitos={};
-
-ambos.forEach(a=>{
-
-a.split('').forEach(d=>{
-
-freqDigitos[d]=
-(freqDigitos[d]||0)+1;
+ambos.push(
+n.slice(2,4)
+);
 
 });
 
-});
+/* ================= MOTOR CONTEXTUAL ================= */
 
-/* ================= DOMINANTE ================= */
+let pesos={};
 
-/* ================= LECTURA CONTEXTUAL ================= */
+function sumar(numero,peso){
 
-let pares={};
+pesos[numero]=
+(pesos[numero]||0)+peso;
 
-ambos.forEach(a=>{
+}
 
-pares[a]=(pares[a]||0)+1;
-
-let invertido=a[1]+a[0];
-
-pares[invertido]=(pares[invertido]||0)+0.5;
-
-});
-
-/* ================= DETECTAR NÚCLEOS FUERTES ================= */
-
-let nucleos={};
+/* ================= ANALIZAR ================= */
 
 ambos.forEach(a=>{
 
 let d1=a[0];
 let d2=a[1];
 
-nucleos[d1]=(nucleos[d1]||0)+1;
-nucleos[d2]=(nucleos[d2]||0)+1;
+/* peso directo */
 
-/* continuidad invertida */
+sumar(a,2);
+
+/* espejo */
+
+sumar(d2+d1,1.5);
+
+/* núcleo doble */
+
+sumar(d1+d2,1);
+
+/* continuidad */
 
 if(d1!==d2){
 
-nucleos[d1]+=0.3;
-nucleos[d2]+=0.3;
+sumar(d1+d2,1.2);
+sumar(d2+d1,1.2);
 
 }
 
-/* priorizar 8 y 2 si aparecen conectados */
+/* detectar 8-2 */
 
 if(
-(a.includes('8') && a.includes('2'))
+(a==="28")
 ||
-(a==='28')
-||
-(a==='82')
+(a==="82")
 ){
 
-nucleos['8']=(nucleos['8']||0)+2;
-nucleos['2']=(nucleos['2']||0)+2;
+sumar("28",10);
+sumar("82",10);
+
+}
+
+/* detectar continuidad 8 */
+
+if(a.includes("8")){
+
+sumar("82",3);
+sumar("28",3);
+sumar("85",2);
+sumar("58",1.5);
+
+}
+
+/* detectar continuidad 2 */
+
+if(a.includes("2")){
+
+sumar("82",2);
+sumar("28",2);
+
+}
+
+/* detectar mutación 5 */
+
+if(a.includes("5")){
+
+sumar("85",4);
+sumar("58",3);
+sumar("65",2);
+
+}
+
+/* detectar crecimiento 6 */
+
+if(a.includes("6")){
+
+sumar("68",4);
+sumar("86",3);
+sumar("65",2);
 
 }
 
 });
+
+/* ================= ORDENAR ================= */
+
+let orden=Object
+.entries(pesos)
+.sort((a,b)=>b[1]-a[1]);
+
+let principal=orden[0][0];
+let apoyo=orden[1][0];
+let refuerzo=orden[2][0];
 
 /* ================= DOMINANTE ================= */
 
-let dominante=Object
-.entries(nucleos)
-.sort((a,b)=>b[1]-a[1])[0][0];
-
-/* ================= ACOMPAÑANTE CONTEXTUAL ================= */
-
-let acompanantes={};
-
-ambos.forEach(a=>{
-
-if(a.includes(dominante)){
-
-let otro=
-(a[0]===dominante)
-? a[1]
-: a[0];
-
-acompanantes[otro]=
-(acompanantes[otro]||0)+1;
-
-/* continuidad invertida */
-
-let invertido=otro+dominante;
-
-if(pares[invertido]){
-acompanantes[otro]+=pares[invertido];
-}
-
-/* priorizar continuidad viva */
-
-if(
-(a===dominante+otro)
-||
-(a===otro+dominante)
-){
-
-acompanantes[otro]+=1.5;
-
-}
-
-}
-
-});
-
-let acomp=Object
-.entries(acompanantes)
-.sort((a,b)=>b[1]-a[1])[0];
-
-let acompReal=acomp
-? acomp[0]
-: dominante;
-
-/* ================= CONTINUIDAD ================= */
-
-let principal=
-dominante+acompReal;
-
-let apoyo=
-acompReal+dominante;
-
-/* ================= MUTACIÓN ================= */
-
-let mutaciones={};
-
-ambos.forEach(a=>{
-
-if(!a.includes(dominante)){
-
-a.split('').forEach(d=>{
-
-mutaciones[d]=
-(mutaciones[d]||0)+1;
-
-});
-
-}
-
-});
-
-let mutacion=Object
-.entries(mutaciones)
-.sort((a,b)=>b[1]-a[1])[0];
-
-let refuerzo="-";
-
-if(mutacion){
-
-refuerzo=
-mutacion[0]+acompReal;
-
-}
+let dominante=principal[0];
 
 /* ================= ALERTAS ================= */
 
-let alerta="🟢 Núcleo activo";
+let alerta=
+"🟢 Núcleo estable";
 
-let cantidadDominante=0;
+if(
+principal==="28"
+||
+principal==="82"
+){
 
-ambos.forEach(a=>{
+alerta=
+"⚠️ Continuidad fuerte 8-2";
 
-if(a.includes(dominante)){
-cantidadDominante++;
 }
 
-});
+if(
+principal==="85"
+||
+principal==="58"
+){
 
-if(cantidadDominante>=3){
-alerta="⚠️ Continuidad dominante fuerte";
+alerta=
+"💣 Mutación hacia 5";
+
 }
 
-if(cantidadDominante>=5){
-alerta="💣 Posible agotamiento de núcleo";
+if(
+principal==="68"
+||
+principal==="65"
+){
+
+alerta=
+"💣 Transferencia hacia 6";
+
 }
 
 /* ================= RESULTADO ================= */
 
 document.getElementById(
-"resultadoAmbos"
+"resultado"
 ).innerHTML=`
 
 <div class="resultado">
 
-🎯 PROYECCIÓN PARA ${proximo}<br><br>
+🎯 PROYECCIÓN PARA ${sorteo}<br><br>
 
-💣 DOMINANTE DETECTADO<br>
+💣 NÚCLEO DOMINANTE<br>
 <span>${dominante}</span><br><br>
 
 🎯 AMBOS PRINCIPAL<br>
@@ -567,7 +387,7 @@ document.getElementById(
 ✔ APOYO ESTRATÉGICO<br>
 <span>${apoyo}</span><br><br>
 
-⚠️ POSIBLE MUTACIÓN<br>
+⚠️ REFUERZO<br>
 <span>${refuerzo}</span><br><br>
 
 <div class="alerta">

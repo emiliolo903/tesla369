@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EMI Tesla PRO V18</title>
+<title>EMI Tesla PRO V19</title>
 
 <style>
 
@@ -57,15 +57,21 @@ font-weight:bold;
 
 .resultado{
 background:#222;
-padding:10px;
+padding:12px;
 border-radius:10px;
 margin-bottom:10px;
+line-height:1.6;
 }
 
 span{
 color:#00FFAA;
 font-weight:bold;
-font-size:20px;
+font-size:22px;
+}
+
+.alerta{
+color:#FFD700;
+font-weight:bold;
 }
 
 </style>
@@ -75,7 +81,7 @@ font-size:20px;
 
 <div class="container">
 
-<h1>🔥 EMI Tesla PRO V18</h1>
+<h1>🔥 EMI Tesla PRO V19</h1>
 
 <h2>Historial del día</h2>
 
@@ -97,13 +103,17 @@ Guardar Matutina
 Guardar Vespertina
 </button>
 
-<h2>🎯 Terno Tesla Correntina</h2>
-
-<button onclick="generarTernoCorrentina()">
-Generar Terno
+<button onclick="guardarBloque('nocturna')">
+Guardar Nocturna
 </button>
 
-<div id="resultadoTerno" class="resultado"></div>
+<h2>💣 Ambos Inteligentes</h2>
+
+<button onclick="generarAmbos()">
+Generar Ambos
+</button>
+
+<div id="resultadoAmbos" class="resultado"></div>
 
 <h2>🔥 Método EMI</h2>
 
@@ -134,7 +144,8 @@ let dia={
 previa:[],
 primera:[],
 matutina:[],
-vespertina:[]
+vespertina:[],
+nocturna:[]
 
 };
 
@@ -181,10 +192,12 @@ numero.split('').forEach(d=>{
 if(emiMetodo[d]){
 
 resultado.push(
+
 d+" → "+
 emiMetodo[d][0]+
 "-"+
 emiMetodo[d][1]
+
 );
 
 }
@@ -278,9 +291,9 @@ ${emi}
 
 }
 
-/* ================= TERNO TESLA ================= */
+/* ================= AMBOS INTELIGENTES ================= */
 
-function generarTernoCorrentina(){
+function generarAmbos(){
 
 let todos=[];
 
@@ -290,142 +303,150 @@ todos=todos.concat(dia[t]);
 
 }
 
-if(todos.length==0){
+if(todos.length===0){
 
 document.getElementById(
-"resultadoTerno"
+"resultadoAmbos"
 ).innerHTML="Sin datos";
 
 return;
 
 }
 
-/* PASO 1 */
+/* ================= EXTRAER AMBOS ================= */
 
-let ternos=todos.map(
-n=>n.slice(1,4)
-);
+let ambos=[];
 
-/* PASO 2 */
+todos.forEach(n=>{
 
-let freqTernos={};
-
-ternos.forEach(t=>{
-
-freqTernos[t]=
-(freqTernos[t]||0)+1;
+ambos.push(n.slice(2,4));
 
 });
 
-/* REPETIDO */
-
-let repetido=Object
-.entries(freqTernos)
-.sort((a,b)=>b[1]-a[1])[0];
-
-if(repetido && repetido[1]>=2){
-
-let base=repetido[0];
-
-let d1=parseInt(base[0]);
-let d2=parseInt(base[1]);
-let d3=parseInt(base[2]);
-
-let variante=
-
-((d1+d2)%10).toString()+
-((d2+d3)%10).toString()+
-((d3+d1)%10).toString();
-
-document.getElementById(
-"resultadoTerno"
-).innerHTML=`
-
-<div class="resultado">
-
-🔥 REPETIDO DETECTADO<br><br>
-
-<span>${base}</span><br>
-
-<span>${variante}</span>
-
-</div>
-
-`;
-
-return;
-
-}
-
-/* PASO 3 */
+/* ================= FRECUENCIA GENERAL ================= */
 
 let freq={};
+
+let continuidad={};
+
+ambos.forEach(a=>{
+
+freq[a]=(freq[a]||0)+1;
+
+let invertido=a[1]+a[0];
+
+continuidad[invertido]=
+(continuidad[invertido]||0)+1;
+
+});
+
+/* ================= DOMINANTE ================= */
+
+let digitos={};
 
 todos.forEach(n=>{
 
 n.split('').forEach(d=>{
 
-freq[d]=(freq[d]||0)+1;
+digitos[d]=(digitos[d]||0)+1;
 
 });
 
 });
 
-let orden=Object
-.entries(freq)
-.sort((a,b)=>b[1]-a[1])
-.map(x=>x[0]);
+let dominante=Object
+.entries(digitos)
+.sort((a,b)=>b[1]-a[1])[0][0];
 
-let fuerte=orden[0];
+/* ================= ACOMPAÑANTE ================= */
 
-let segundo=orden[1];
+let acompanantes={};
 
-/* PASO 4 */
+ambos.forEach(a=>{
 
-let dobles={};
+if(a.includes(dominante)){
 
-ternos.forEach(t=>{
+let otro=
+(a[0]===dominante)
+? a[1]
+: a[0];
 
-if(
-t[0]===t[1]
-||
-t[1]===t[2]
-){
-
-let d=t[1];
-
-dobles[d]=
-(dobles[d]||0)+1;
+acompanantes[otro]=
+(acompanantes[otro]||0)+1;
 
 }
 
 });
 
-let dobleFuerte=Object
-.entries(dobles)
+let acomp=Object
+.entries(acompanantes)
 .sort((a,b)=>b[1]-a[1])[0];
 
-let d=dobleFuerte
-? dobleFuerte[0]
-: fuerte;
+let acompReal=acomp ? acomp[0] : dominante;
 
-/* PASO 5 */
+/* ================= PRINCIPAL ================= */
 
-let t1=segundo+d+d;
+let principal=
+dominante+acompReal;
 
-let t2=d+d+segundo;
+/* ================= APOYO ================= */
+
+let apoyo=
+acompReal+dominante;
+
+/* ================= REFUERZO ================= */
+
+let refuerzo="-";
+
+let ref=Object
+.entries(continuidad)
+.sort((a,b)=>b[1]-a[1])[0];
+
+if(ref && ref[1]>=2){
+
+refuerzo=ref[0];
+
+}
+
+/* ================= ALERTA MUTACIÓN ================= */
+
+let alerta="🟢 Núcleo estable";
+
+if(freq[principal]>=2 || freq[apoyo]>=2){
+
+alerta="⚠️ Continuidad dominante fuerte";
+
+}
+
+if(freq[principal]>=3 || freq[apoyo]>=3){
+
+alerta="💣 Posible agotamiento de núcleo";
+
+}
+
+/* ================= RESULTADO ================= */
 
 document.getElementById(
-"resultadoTerno"
+"resultadoAmbos"
 ).innerHTML=`
 
 <div class="resultado">
 
-🎯 TERNOS FUERTES<br><br>
+💣 DOMINANTE DETECTADO<br>
+<span>${dominante}</span><br><br>
 
-🔥 ${t1}<br>
+🎯 AMBOS PRINCIPAL<br>
+<span>${principal}</span><br><br>
 
-🔥 ${t2}
+✔ APOYO ESTRATÉGICO<br>
+<span>${apoyo}</span><br><br>
+
+⚠️ REFUERZO CONTINUIDAD<br>
+<span>${refuerzo}</span><br><br>
+
+<div class="alerta">
+${alerta}
+</div>
 
 </div>
 

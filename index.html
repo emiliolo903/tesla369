@@ -293,17 +293,55 @@ ${emi}
 
 /* ================= AMBOS INTELIGENTES ================= */
 
-function generarAmbos(){
+function obtenerUltimoBloque(){
 
-let todos=[];
+if(dia.vespertina.length>0){
+return dia.vespertina;
+}
 
-for(let t in dia){
+if(dia.matutina.length>0){
+return dia.matutina;
+}
 
-todos=todos.concat(dia[t]);
+if(dia.primera.length>0){
+return dia.primera;
+}
+
+if(dia.previa.length>0){
+return dia.previa;
+}
+
+return [];
 
 }
 
-if(todos.length===0){
+function nombreProximoSorteo(){
+
+if(dia.vespertina.length>0){
+return "NOCTURNA";
+}
+
+if(dia.matutina.length>0){
+return "VESPERTINA";
+}
+
+if(dia.primera.length>0){
+return "MATUTINA";
+}
+
+if(dia.previa.length>0){
+return "PRIMERA";
+}
+
+return "SIGUIENTE";
+
+}
+
+function generarAmbos(){
+
+let bloque=obtenerUltimoBloque();
+
+if(bloque.length===0){
 
 document.getElementById(
 "resultadoAmbos"
@@ -313,49 +351,37 @@ return;
 
 }
 
+let proximo=nombreProximoSorteo();
+
 /* ================= EXTRAER AMBOS ================= */
 
 let ambos=[];
 
-todos.forEach(n=>{
+bloque.forEach(n=>{
 
 ambos.push(n.slice(2,4));
 
 });
 
-/* ================= FRECUENCIA GENERAL ================= */
+/* ================= FRECUENCIA ================= */
 
-let freq={};
-
-let continuidad={};
+let freqDigitos={};
 
 ambos.forEach(a=>{
 
-freq[a]=(freq[a]||0)+1;
+a.split('').forEach(d=>{
 
-let invertido=a[1]+a[0];
+freqDigitos[d]=
+(freqDigitos[d]||0)+1;
 
-continuidad[invertido]=
-(continuidad[invertido]||0)+1;
+});
 
 });
 
 /* ================= DOMINANTE ================= */
 
-let digitos={};
-
-todos.forEach(n=>{
-
-n.split('').forEach(d=>{
-
-digitos[d]=(digitos[d]||0)+1;
-
-});
-
-});
-
 let dominante=Object
-.entries(digitos)
+.entries(freqDigitos)
 .sort((a,b)=>b[1]-a[1])[0][0];
 
 /* ================= ACOMPAÑANTE ================= */
@@ -382,46 +408,70 @@ let acomp=Object
 .entries(acompanantes)
 .sort((a,b)=>b[1]-a[1])[0];
 
-let acompReal=acomp ? acomp[0] : dominante;
+let acompReal=acomp
+? acomp[0]
+: dominante;
 
-/* ================= PRINCIPAL ================= */
+/* ================= CONTINUIDAD ================= */
 
 let principal=
 dominante+acompReal;
 
-/* ================= APOYO ================= */
-
 let apoyo=
 acompReal+dominante;
 
-/* ================= REFUERZO ================= */
+/* ================= MUTACIÓN ================= */
+
+let mutaciones={};
+
+ambos.forEach(a=>{
+
+if(!a.includes(dominante)){
+
+a.split('').forEach(d=>{
+
+mutaciones[d]=
+(mutaciones[d]||0)+1;
+
+});
+
+}
+
+});
+
+let mutacion=Object
+.entries(mutaciones)
+.sort((a,b)=>b[1]-a[1])[0];
 
 let refuerzo="-";
 
-let ref=Object
-.entries(continuidad)
-.sort((a,b)=>b[1]-a[1])[0];
+if(mutacion){
 
-if(ref && ref[1]>=2){
-
-refuerzo=ref[0];
+refuerzo=
+mutacion[0]+acompReal;
 
 }
 
-/* ================= ALERTA MUTACIÓN ================= */
+/* ================= ALERTAS ================= */
 
-let alerta="🟢 Núcleo estable";
+let alerta="🟢 Núcleo activo";
 
-if(freq[principal]>=2 || freq[apoyo]>=2){
+let cantidadDominante=0;
 
+ambos.forEach(a=>{
+
+if(a.includes(dominante)){
+cantidadDominante++;
+}
+
+});
+
+if(cantidadDominante>=3){
 alerta="⚠️ Continuidad dominante fuerte";
-
 }
 
-if(freq[principal]>=3 || freq[apoyo]>=3){
-
+if(cantidadDominante>=5){
 alerta="💣 Posible agotamiento de núcleo";
-
 }
 
 /* ================= RESULTADO ================= */
@@ -432,6 +482,8 @@ document.getElementById(
 
 <div class="resultado">
 
+🎯 PROYECCIÓN PARA ${proximo}<br><br>
+
 💣 DOMINANTE DETECTADO<br>
 <span>${dominante}</span><br><br>
 
@@ -441,7 +493,7 @@ document.getElementById(
 ✔ APOYO ESTRATÉGICO<br>
 <span>${apoyo}</span><br><br>
 
-⚠️ REFUERZO CONTINUIDAD<br>
+⚠️ POSIBLE MUTACIÓN<br>
 <span>${refuerzo}</span><br><br>
 
 <div class="alerta">

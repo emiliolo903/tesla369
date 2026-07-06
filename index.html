@@ -2,8 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>EMI Tesla PRO V27 STABLE</title>
+<title>EMI Tesla PRO V28 ADVANCED</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <style>
@@ -23,171 +24,144 @@ button{
     border:1px solid #444;
     padding:10px;
     margin-top:10px;
-    white-space:pre-wrap;
     max-height:300px;
     overflow:auto;
+    white-space:pre-wrap;
 }
 </style>
 </head>
 
 <body>
 
-<h2>🚀 EMI Tesla PRO V27 - STABLE OCR</h2>
+<h2>🚀 EMI Tesla PRO V28 ADVANCED</h2>
 
 <input type="file" id="fileInput">
 
 <br>
 
-<button onclick="startOCR()">📄 OCR SEGURO</button>
-<button onclick="buildDB()">🧠 Crear Base</button>
-<button onclick="predict()">🔮 Predicción</button>
-<button onclick="clearAll()">🧹 Limpiar</button>
+<button onclick="processPDF()">📄 Procesar PDF</button>
+<button onclick="showDB()">💾 Ver Base</button>
+<button onclick="predict()">🔮 Predicción AVANZADA</button>
+<button onclick="clearDB()">🧹 Limpiar</button>
 
-<div class="box" id="status">Estado: listo</div>
+<div class="box" id="progress">Esperando...</div>
 <div class="box" id="log"></div>
 <div class="box" id="out"></div>
 
 <script>
 
-//////////////////////////////
-// 📦 DB
-//////////////////////////////
-
-let db = [];
-let fullText = "";
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 //////////////////////////////
-// ⚡ OCR SEGURO CON TIMEOUT
+// 💾 BASE PERSISTENTE
 //////////////////////////////
 
-async function startOCR(){
+let db = JSON.parse(localStorage.getItem("emi_db_v28") || "[]");
+
+//////////////////////////////
+// 📄 PDF → IMÁGENES → OCR
+//////////////////////////////
+
+async function processPDF(){
 
     const file = document.getElementById("fileInput").files[0];
+    if(!file) return log("⚠️ Subí PDF");
 
-    if(!file){
-        log("⚠️ Subí una imagen");
-        return;
+    log("📄 Cargando PDF...");
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+
+    log("📄 Páginas: " + pdf.numPages);
+
+    for(let i=1;i<=pdf.numPages;i++){
+
+        document.getElementById("progress").innerText =
+            `Procesando página ${i}/${pdf.numPages}`;
+
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({scale:2});
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render({canvasContext:ctx, viewport}).promise;
+
+        const img = canvas.toDataURL("image/png");
+
+        await runOCR(img, i);
     }
 
-    document.getElementById("status").innerText = "🔄 Iniciando OCR...";
+    localStorage.setItem("emi_db_v28", JSON.stringify(db));
 
-    let finished = false;
+    document.getElementById("progress").innerText =
+        "✅ PDF procesado completo";
 
-    // 🔥 TIMEOUT DE SEGURIDAD (evita cuelgue infinito)
-    const timeout = setTimeout(()=>{
-        if(!finished){
-            document.getElementById("status").innerText =
-                "⚠️ OCR lento → usando modo fallback";
-
-            fallbackOCR(file);
-        }
-    }, 15000); // 15 segundos máximo inicio
-
-    try {
-
-        log("📄 Creando worker...");
-
-        const worker = await Tesseract.createWorker("eng");
-
-        await worker.loadLanguage("eng+spa");
-        await worker.initialize("eng+spa");
-
-        log("📄 Procesando imagen...");
-
-        const result = await worker.recognize(file, {
-            logger: m => {
-                if(m.status === "recognizing text"){
-                    document.getElementById("status").innerText =
-                        "🔄 OCR: " + Math.round(m.progress*100) + "%";
-                }
-            }
-        });
-
-        finished = true;
-        clearTimeout(timeout);
-
-        fullText = result.data.text || "";
-
-        await worker.terminate();
-
-        document.getElementById("status").innerText = "✅ OCR COMPLETO";
-
-        log("📄 Texto extraído: " + fullText.length + " chars");
-
-    } catch (e) {
-
-        finished = true;
-        clearTimeout(timeout);
-
-        log("❌ Error OCR → fallback activado");
-        fallbackOCR(file);
-    }
+    log("💾 Base actual: " + db.length);
 }
 
 //////////////////////////////
-// ⚡ FALLBACK OCR (SIMPLIFICADO)
+// 👁️ OCR POR PÁGINA
 //////////////////////////////
 
-function fallbackOCR(file){
+async function runOCR(img, page){
 
-    const reader = new FileReader();
+    const worker = await Tesseract.createWorker("eng");
 
-    reader.onload = e => {
+    await worker.loadLanguage("eng+spa");
+    await worker.initialize("eng+spa");
 
-        fullText = e.target.result;
+    const result = await worker.recognize(img);
 
-        document.getElementById("status").innerText =
-            "⚠️ Modo texto directo (fallback)";
+    await worker.terminate();
 
-        log("📄 Fallback cargado");
-    };
+    const text = result.data.text;
 
-    reader.readAsText(file);
+    parseText(text, page);
 }
 
 //////////////////////////////
-// 🧠 PARSER SIMPLE
+// 🧠 PARSER INTELIGENTE
 //////////////////////////////
 
-function buildDB(){
+function parseText(text, page){
 
-    if(!fullText){
-        log("⚠️ Primero OCR");
-        return;
-    }
-
-    const lines = fullText.split("\n");
-
-    db = [];
+    const lines = text.split("\n");
 
     lines.forEach(l => {
 
         const nums = l.match(/\d{4}/g);
-        const date = l.match(/\d{2}\/\d{2}\/\d{4}/)?.[0];
 
         if(nums){
+
+            let type = "DESCONOCIDO";
+
+            if(l.toLowerCase().includes("previa")) type="PREVIA";
+            if(l.toLowerCase().includes("matutina")) type="MATUTINA";
+            if(l.toLowerCase().includes("vespertina")) type="VESPERTINA";
+            if(l.toLowerCase().includes("nocturna")) type="NOCTURNA";
+
             db.push({
-                fecha: date || "sin fecha",
+                pagina: page,
+                tipo: type,
                 numeros: nums
             });
         }
     });
-
-    log("🧠 DB creada: " + db.length);
 }
 
 //////////////////////////////
-// 🔮 PREDICCIÓN SIMPLE
+// 🔮 IA AVANZADA
 //////////////////////////////
 
 function predict(){
 
-    if(db.length === 0){
-        log("⚠️ Primero crear base");
-        return;
-    }
-
     let freq = {};
+    let rec = db.slice(-30);
 
     db.forEach(d=>{
         d.numeros.forEach(n=>{
@@ -195,30 +169,57 @@ function predict(){
         });
     });
 
-    let ranked = Object.entries(freq)
-        .map(([num,score])=>({num,score}))
-        .sort((a,b)=>b.score-a.score)
-        .slice(0,10);
+    let ranked = Object.entries(freq).map(([num,score])=>{
 
-    let out = "🔮 AMBOS PRO V27\n\n";
+        let recencia = rec.filter(r=>r.numeros.includes(num)).length;
 
-    ranked.forEach(r=>{
-        out += `${r.num} → ${r.score}\n`;
+        return {
+            num,
+            score: score*5 + recencia*8
+        };
     });
 
-    document.getElementById("out").innerText = out;
+    ranked.sort((a,b)=>b.score-a.score);
+
+    let top = ranked.slice(0,15);
+
+    let cuaterno = top.slice(0,4).map(x=>x.num);
+    let terno = top.slice(0,3).map(x=>x.num);
+    let ambos = top.slice(0,6).map(x=>x.num);
+
+    document.getElementById("out").innerText =
+`
+🔮 PREDICCIÓN AVANZADA V28
+
+🔥 CUATERNO:
+${cuaterno.join(" - ")}
+
+⚡ TERNO:
+${terno.join(" - ")}
+
+💥 AMBOS:
+${ambos.join(" - ")}
+`;
+}
+
+//////////////////////////////
+// 💾 MOSTRAR DB
+//////////////////////////////
+
+function showDB(){
+    document.getElementById("out").innerText =
+        JSON.stringify(db.slice(-10),null,2);
 }
 
 //////////////////////////////
 // 🧹 LIMPIAR
 //////////////////////////////
 
-function clearAll(){
+function clearDB(){
     db = [];
-    fullText = "";
+    localStorage.removeItem("emi_db_v28");
     document.getElementById("out").innerText="";
-    document.getElementById("status").innerText="Estado: listo";
-    log("🧹 limpio");
+    log("🧹 base limpia");
 }
 
 //////////////////////////////
@@ -226,7 +227,7 @@ function clearAll(){
 //////////////////////////////
 
 function log(m){
-    document.getElementById("log").innerText += "\n" + m;
+    document.getElementById("log").innerText += "\n"+m;
 }
 
 </script>

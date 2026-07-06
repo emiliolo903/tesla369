@@ -2,194 +2,235 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>EMI Tesla PRO V28 ADVANCED</title>
+<title>EMI Tesla PRO V31 - IA MEMORY</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <style>
-body{
-    font-family: Arial;
-    background:#111;
-    color:#fff;
-    padding:15px;
-}
-
-button{
-    padding:10px;
-    margin:5px;
-}
-
-.box{
-    border:1px solid #444;
-    padding:10px;
-    margin-top:10px;
-    max-height:300px;
-    overflow:auto;
-    white-space:pre-wrap;
-}
+body{font-family:Arial;background:#111;color:#fff;padding:15px}
+button,select,input{padding:8px;margin:4px}
+.box{border:1px solid #444;padding:10px;margin-top:10px;max-height:300px;overflow:auto;white-space:pre-wrap}
 </style>
 </head>
 
 <body>
 
-<h2>🚀 EMI Tesla PRO V28 ADVANCED</h2>
+<h2>🚀 EMI Tesla PRO V31 - IA MEMORIA DINÁMICA</h2>
 
+<h3>🧠 Carga Manual</h3>
+
+<select id="turnoManual">
+<option>PREVIA</option>
+<option>PRIMERA</option>
+<option>MATUTINA</option>
+<option>VESPERTINA</option>
+<option>NOCTURNA</option>
+</select>
+
+<input id="numsManual" placeholder="Ej: 1234 5678 9012">
+<button onclick="addManual()">➕ Guardar</button>
+
+<hr>
+
+<h3>📄 OCR PDF</h3>
 <input type="file" id="fileInput">
+<button onclick="processPDF()">📥 Cargar PDF</button>
 
-<br>
+<hr>
 
-<button onclick="processPDF()">📄 Procesar PDF</button>
-<button onclick="showDB()">💾 Ver Base</button>
-<button onclick="predict()">🔮 Predicción AVANZADA</button>
+<h3>🔮 Predicción IA</h3>
+
+<select id="turnoPredict">
+<option>PREVIA</option>
+<option>PRIMERA</option>
+<option>MATUTINA</option>
+<option>VESPERTINA</option>
+<option>NOCTURNA</option>
+</select>
+
+<button onclick="predict()">🔮 Analizar IA</button>
 <button onclick="clearDB()">🧹 Limpiar</button>
 
-<div class="box" id="progress">Esperando...</div>
-<div class="box" id="log"></div>
 <div class="box" id="out"></div>
 
 <script>
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-
 //////////////////////////////
-// 💾 BASE PERSISTENTE
+// 💾 BASE GLOBAL
 //////////////////////////////
 
-let db = JSON.parse(localStorage.getItem("emi_db_v28") || "[]");
+let db = JSON.parse(localStorage.getItem("v31_db") || "[]");
+
+function save(){
+localStorage.setItem("v31_db", JSON.stringify(db));
+}
 
 //////////////////////////////
-// 📄 PDF → IMÁGENES → OCR
+// ➕ MANUAL INPUT
+//////////////////////////////
+
+function addManual(){
+
+const turno = document.getElementById("turnoManual").value;
+const nums = document.getElementById("numsManual").value.match(/\d{4}/g);
+
+if(!nums) return alert("Sin números válidos");
+
+db.push({
+fecha:new Date().toISOString().split("T")[0],
+turno,
+numeros:nums,
+origen:"manual"
+});
+
+save();
+alert("Guardado en base");
+}
+
+//////////////////////////////
+// 📄 OCR PDF
 //////////////////////////////
 
 async function processPDF(){
 
-    const file = document.getElementById("fileInput").files[0];
-    if(!file) return log("⚠️ Subí PDF");
+const file=document.getElementById("fileInput").files[0];
+if(!file) return alert("Subí PDF");
 
-    log("📄 Cargando PDF...");
+const reader=new FileReader();
 
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+reader.onload=async function(e){
 
-    log("📄 Páginas: " + pdf.numPages);
+const pdfData=new Uint8Array(e.target.result);
+const pdf=await pdfjsLib.getDocument({data:pdfData}).promise;
 
-    for(let i=1;i<=pdf.numPages;i++){
+for(let i=1;i<=pdf.numPages;i++){
 
-        document.getElementById("progress").innerText =
-            `Procesando página ${i}/${pdf.numPages}`;
+const page=await pdf.getPage(i);
+const canvas=document.createElement("canvas");
+const ctx=canvas.getContext("2d");
 
-        const page = await pdf.getPage(i);
-        const viewport = page.getViewport({scale:2});
+const vp=page.getViewport({scale:2});
+canvas.width=vp.width;
+canvas.height=vp.height;
 
-        const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
+await page.render({canvasContext:ctx,viewport:vp}).promise;
 
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
+const img=canvas.toDataURL();
 
-        await page.render({canvasContext:ctx, viewport}).promise;
+await ocrPage(img,i);
+}
 
-        const img = canvas.toDataURL("image/png");
+save();
+alert("PDF cargado a base");
+};
 
-        await runOCR(img, i);
-    }
-
-    localStorage.setItem("emi_db_v28", JSON.stringify(db));
-
-    document.getElementById("progress").innerText =
-        "✅ PDF procesado completo";
-
-    log("💾 Base actual: " + db.length);
+reader.readAsArrayBuffer(file);
 }
 
 //////////////////////////////
-// 👁️ OCR POR PÁGINA
+// 👁 OCR
 //////////////////////////////
 
-async function runOCR(img, page){
+async function ocrPage(img,page){
 
-    const worker = await Tesseract.createWorker("eng");
+const worker=await Tesseract.createWorker("eng");
+await worker.loadLanguage("eng+spa");
+await worker.initialize("eng+spa");
 
-    await worker.loadLanguage("eng+spa");
-    await worker.initialize("eng+spa");
+const res=await worker.recognize(img);
+await worker.terminate();
 
-    const result = await worker.recognize(img);
+const text=res.data.text;
+const nums=text.match(/\d{4}/g);
 
-    await worker.terminate();
+if(nums){
 
-    const text = result.data.text;
+db.push({
+fecha:"pagina "+page,
+turno:detectTurn(text),
+numeros:nums,
+origen:"ocr"
+});
+}
+}
 
-    parseText(text, page);
+function detectTurn(t){
+t=t.toLowerCase();
+if(t.includes("previa"))return "PREVIA";
+if(t.includes("primera"))return "PRIMERA";
+if(t.includes("matutina"))return "MATUTINA";
+if(t.includes("vespertina"))return "VESPERTINA";
+if(t.includes("nocturna"))return "NOCTURNA";
+return "DESCONOCIDO";
 }
 
 //////////////////////////////
-// 🧠 PARSER INTELIGENTE
-//////////////////////////////
-
-function parseText(text, page){
-
-    const lines = text.split("\n");
-
-    lines.forEach(l => {
-
-        const nums = l.match(/\d{4}/g);
-
-        if(nums){
-
-            let type = "DESCONOCIDO";
-
-            if(l.toLowerCase().includes("previa")) type="PREVIA";
-            if(l.toLowerCase().includes("matutina")) type="MATUTINA";
-            if(l.toLowerCase().includes("vespertina")) type="VESPERTINA";
-            if(l.toLowerCase().includes("nocturna")) type="NOCTURNA";
-
-            db.push({
-                pagina: page,
-                tipo: type,
-                numeros: nums
-            });
-        }
-    });
-}
-
-//////////////////////////////
-// 🔮 IA AVANZADA
+// 🧠 IA CON PESO DINÁMICO
 //////////////////////////////
 
 function predict(){
 
-    let freq = {};
-    let rec = db.slice(-30);
+const turno=document.getElementById("turnoPredict").value;
 
-    db.forEach(d=>{
-        d.numeros.forEach(n=>{
-            freq[n] = (freq[n]||0)+1;
-        });
-    });
+let freq={};
+let recency={};
+let transition={};
 
-    let ranked = Object.entries(freq).map(([num,score])=>{
+// 🔥 recencia (últimos registros pesan más)
+let last=db.slice(-30);
 
-        let recencia = rec.filter(r=>r.numeros.includes(num)).length;
+// 📊 frecuencia global
+db.forEach(d=>{
+d.numeros.forEach(n=>{
+freq[n]=(freq[n]||0)+1;
+});
+});
 
-        return {
-            num,
-            score: score*5 + recencia*8
-        };
-    });
+// 🔗 transición entre registros consecutivos
+for(let i=0;i<db.length-1;i++){
+let a=db[i];
+let b=db[i+1];
 
-    ranked.sort((a,b)=>b.score-a.score);
+a.numeros.forEach(x=>{
+b.numeros.forEach(y=>{
+transition[x]=(transition[x]||0)+1;
+});
+});
+}
 
-    let top = ranked.slice(0,15);
+// 🧠 recencia por número
+last.forEach(d=>{
+d.numeros.forEach(n=>{
+recency[n]=(recency[n]||0)+1;
+});
+});
 
-    let cuaterno = top.slice(0,4).map(x=>x.num);
-    let terno = top.slice(0,3).map(x=>x.num);
-    let ambos = top.slice(0,6).map(x=>x.num);
+// 🔮 score final
+let ranked=Object.entries(freq).map(([num,f])=>{
 
-    document.getElementById("out").innerText =
+let r=recency[num]||0;
+let t=transition[num]||0;
+
+// 💥 PESO DINÁMICO REAL
+let score=(f*5)+(r*10)+(t*3);
+
+return {num,score};
+});
+
+ranked.sort((a,b)=>b.score-a.score);
+
+let top=ranked.slice(0,15);
+
+let cuaterno=top.slice(0,4).map(x=>x.num);
+let terno=top.slice(0,3).map(x=>x.num);
+let ambos=top.slice(0,6).map(x=>x.num);
+
+document.getElementById("out").innerText=
 `
-🔮 PREDICCIÓN AVANZADA V28
+🔮 V31 IA PREDICCIÓN (PESO DINÁMICO)
+
+🎯 TURNO: ${turno}
 
 🔥 CUATERNO:
 ${cuaterno.join(" - ")}
@@ -199,35 +240,20 @@ ${terno.join(" - ")}
 
 💥 AMBOS:
 ${ambos.join(" - ")}
+
+📊 BASE TOTAL: ${db.length}
+🧠 MODELO: frecuencia + recencia + transición
 `;
 }
 
 //////////////////////////////
-// 💾 MOSTRAR DB
-//////////////////////////////
-
-function showDB(){
-    document.getElementById("out").innerText =
-        JSON.stringify(db.slice(-10),null,2);
-}
-
-//////////////////////////////
-// 🧹 LIMPIAR
+// 🧹 RESET
 //////////////////////////////
 
 function clearDB(){
-    db = [];
-    localStorage.removeItem("emi_db_v28");
-    document.getElementById("out").innerText="";
-    log("🧹 base limpia");
-}
-
-//////////////////////////////
-// 🖥️ LOG
-//////////////////////////////
-
-function log(m){
-    document.getElementById("log").innerText += "\n"+m;
+db=[];
+save();
+document.getElementById("out").innerText="";
 }
 
 </script>

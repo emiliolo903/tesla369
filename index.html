@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>EMI Tesla PRO V24 FULL</title>
+<title>EMI Tesla PRO V25</title>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <style>
 body{
@@ -15,7 +17,6 @@ body{
 button{
     padding:10px;
     margin:5px;
-    cursor:pointer;
 }
 
 .box{
@@ -31,73 +32,58 @@ button{
 
 <body>
 
-<h2>🚀 EMI Tesla PRO V24 FULL SYSTEM</h2>
+<h2>🚀 EMI Tesla PRO V25 (REAL OCR)</h2>
 
 <input type="file" id="fileInput">
 
 <br>
 
-<button onclick="loadFile()">📥 Cargar archivo</button>
-<button onclick="runOCR()">📄 OCR + Limpiar</button>
+<button onclick="runOCR()">📄 OCR (Imagen / PDF)</button>
 <button onclick="buildDB()">🧠 Crear Base</button>
-<button onclick="showPrediction()">🔮 AMBOS PRO</button>
-<button onclick="exportData()">📤 Exportar</button>
+<button onclick="predict()">🔮 Predicción</button>
+<button onclick="exportDB()">📤 Exportar</button>
+<button onclick="importDB()">📥 Importar</button>
 <button onclick="clearAll()">🧹 Limpiar</button>
 
 <div class="box" id="log"></div>
-<div class="box" id="result"></div>
+<div class="box" id="out"></div>
 
 <script>
 
 //////////////////////////////
-// 📦 BASE
+// 📦 DB (persistente)
 //////////////////////////////
 
-let rawFile = "";
-let cleanedText = "";
-let db = [];
+let db = JSON.parse(localStorage.getItem("emi_db") || "[]");
+let rawText = "";
+let cleanText = "";
 
 //////////////////////////////
-// 📥 CARGAR
+// 📄 OCR REAL
 //////////////////////////////
 
-function loadFile(){
+async function runOCR(){
+
     const file = document.getElementById("fileInput").files[0];
+    if(!file) return log("⚠️ Subí imagen o PDF");
 
-    if(!file){
-        log("⚠️ No hay archivo");
-        return;
-    }
+    log("📄 Procesando OCR...");
 
-    const reader = new FileReader();
+    const result = await Tesseract.recognize(
+        file,
+        'spa',
+        {
+            logger: m => console.log(m)
+        }
+    );
 
-    reader.onload = e => {
-        rawFile = e.target.result;
-        log("📥 Archivo cargado");
-    };
+    rawText = result.data.text;
 
-    reader.readAsText(file);
-}
+    cleanText = rawText
+        .replace(/\s+/g," ")
+        .replace(/[^0-9a-zA-ZáéíóúÁÉÍÓÚ\/\-\n ]/g,"");
 
-//////////////////////////////
-// 📄 OCR / LIMPIEZA
-//////////////////////////////
-
-function runOCR(){
-
-    if(!rawFile){
-        log("⚠️ Cargá un archivo primero");
-        return;
-    }
-
-    let text = rawFile;
-
-    text = text.replace(/\s+/g," ");
-    text = text.replace(/[^0-9a-zA-ZáéíóúÁÉÍÓÚ\/\-\n ]/g,"");
-
-    cleanedText = text;
-
-    log("📄 OCR listo");
+    log("✅ OCR listo");
 }
 
 //////////////////////////////
@@ -106,14 +92,11 @@ function runOCR(){
 
 function buildDB(){
 
-    if(!cleanedText){
-        log("⚠️ Ejecutá OCR primero");
-        return;
-    }
+    if(!cleanText) return log("⚠️ Primero OCR");
 
-    db = [];
+    const lines = cleanText.split("\n");
 
-    const lines = cleanedText.split("\n");
+    let temp = [];
 
     lines.forEach(l => {
 
@@ -121,54 +104,61 @@ function buildDB(){
         const date = l.match(/\d{2}\/\d{2}\/\d{4}/)?.[0];
 
         if(nums){
-            db.push({
-                fecha: date || null,
+            temp.push({
+                fecha: date || "sin fecha",
                 numeros: nums
             });
         }
     });
 
-    log("🧠 DB creada: " + db.length + " registros");
+    db = db.concat(temp);
+
+    localStorage.setItem("emi_db", JSON.stringify(db));
+
+    log("🧠 Base actual: " + db.length);
 }
 
 //////////////////////////////
-// 🔮 PREDICCIÓN SIMPLE
+// 🔮 PREDICCIÓN REAL (freq + recencia)
 //////////////////////////////
 
 function predict(){
 
-    let map = {};
+    let freq = {};
 
-    db.forEach(d => {
-        d.numeros.forEach(n => {
-            map[n] = (map[n] || 0) + 1;
+    db.forEach(d=>{
+        d.numeros.forEach(n=>{
+            freq[n] = (freq[n]||0)+1;
         });
     });
 
-    return Object.entries(map)
-        .map(([num,score]) => ({num,score}))
-        .sort((a,b)=>b.score-a.score)
-        .slice(0,10);
-}
+    let ranked = Object.entries(freq).map(([num,score])=>{
 
-function showPrediction(){
+        const recencia = db.slice(-10)
+            .filter(d=>d.numeros.includes(num)).length;
 
-    const res = predict();
-
-    let html = "🔮 AMBOS PRO MAX\n\n";
-
-    res.forEach(r=>{
-        html += `Número: ${r.num} | Score: ${r.score}\n`;
+        return {
+            num,
+            score: score*5 + recencia*3
+        };
     });
 
-    document.getElementById("result").innerText = html;
+    ranked.sort((a,b)=>b.score-a.score);
+
+    let out = "🔮 AMBOS PRO V25\n\n";
+
+    ranked.slice(0,10).forEach(r=>{
+        out += `${r.num} → ${r.score}\n`;
+    });
+
+    document.getElementById("out").innerText = out;
 }
 
 //////////////////////////////
 // 📤 EXPORTAR
 //////////////////////////////
 
-function exportData(){
+function exportDB(){
 
     const blob = new Blob(
         [JSON.stringify(db,null,2)],
@@ -179,10 +169,30 @@ function exportData(){
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = "emi_tesla_v24_db.json";
+    a.download = "emi_tesla_v25_db.json";
     a.click();
 
-    log("📤 Exportado");
+    log("📤 exportado");
+}
+
+//////////////////////////////
+// 📥 IMPORTAR
+//////////////////////////////
+
+function importDB(){
+
+    const file = document.getElementById("fileInput").files[0];
+    if(!file) return log("⚠️ subí JSON");
+
+    const reader = new FileReader();
+
+    reader.onload = e => {
+        db = JSON.parse(e.target.result);
+        localStorage.setItem("emi_db", JSON.stringify(db));
+        log("📥 DB importada");
+    };
+
+    reader.readAsText(file);
 }
 
 //////////////////////////////
@@ -190,22 +200,27 @@ function exportData(){
 //////////////////////////////
 
 function clearAll(){
-    rawFile="";
-    cleanedText="";
-    db=[];
-    document.getElementById("fileInput").value="";
-
-    document.getElementById("result").innerText="";
-    log("🧹 Limpio");
+    db = [];
+    rawText = "";
+    cleanText = "";
+    localStorage.removeItem("emi_db");
+    document.getElementById("out").innerText="";
+    log("🧹 limpio total");
 }
 
 //////////////////////////////
 // 🖥️ LOG
 //////////////////////////////
 
-function log(msg){
-    document.getElementById("log").innerText += "\n" + msg;
+function log(m){
+    document.getElementById("log").innerText += "\n"+m;
 }
+
+//////////////////////////////
+// 🔁 AUTO CARGA DB
+//////////////////////////////
+
+log("🚀 V25 listo - DB cargada: " + db.length);
 
 </script>
 

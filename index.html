@@ -2,402 +2,228 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EMI Tesla PRO V20</title>
+<title>EMI Tesla PRO V24</title>
 
 <style>
-
-body{
-margin:0;
-padding:15px;
-background:#111;
-font-family:Arial;
-color:#fff;
+body {
+    font-family: Arial;
+    background: #111;
+    color: #fff;
+    padding: 15px;
 }
-
-.container{
-max-width:500px;
-margin:auto;
+button {
+    padding: 10px;
+    margin: 5px;
 }
-
-h1{
-text-align:center;
-color:#00F5E0;
+input {
+    margin: 10px 0;
 }
-
-h2{
-color:#FFD700;
-margin-top:25px;
+.box {
+    border: 1px solid #444;
+    padding: 10px;
+    margin-top: 10px;
 }
-
-textarea,input{
-width:100%;
-padding:12px;
-margin-bottom:10px;
-border:none;
-border-radius:8px;
-background:#222;
-color:#fff;
-font-size:16px;
-box-sizing:border-box;
-}
-
-button{
-width:100%;
-padding:12px;
-margin-bottom:10px;
-border:none;
-border-radius:8px;
-background:#00F5E0;
-color:#111;
-font-size:16px;
-font-weight:bold;
-cursor:pointer;
-}
-
-.resultado{
-background:#1E1E1E;
-padding:15px;
-border-radius:10px;
-line-height:1.6;
-margin-top:10px;
-}
-
-span{
-color:#00FF99;
-font-size:24px;
-font-weight:bold;
-}
-
-.alerta{
-color:#FFD700;
-font-weight:bold;
-margin-top:10px;
-}
-
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<h1>🚀 EMI Tesla PRO V24</h1>
 
-<h1>🔥 EMI Tesla PRO V20</h1>
+<input type="file" id="fileInput">
 
-<h2>Historial del Sorteo</h2>
+<button onclick="processFile()">Analizar Archivo</button>
+<button onclick="clearDB()">Limpiar</button>
+<button onclick="showPrediction()">AMBOS PRO MAX</button>
 
-<textarea
-id="historial"
-placeholder="Pegá números de 4 cifras">
-</textarea>
-
-<button onclick="guardarBloque('previa')">
-Guardar Previa
-</button>
-
-<button onclick="guardarBloque('primera')">
-Guardar Primera
-</button>
-
-<button onclick="guardarBloque('matutina')">
-Guardar Matutina
-</button>
-
-<button onclick="guardarBloque('vespertina')">
-Guardar Vespertina
-</button>
-
-<button onclick="guardarBloque('nocturna')">
-Guardar Nocturna
-</button>
-
-<h2>💣 Ambos Inteligentes</h2>
-
-<button onclick="generarAmbos()">
-Generar Ambos
-</button>
-
-<div id="resultado" class="resultado"></div>
-
-</div>
+<div class="box" id="results"></div>
+<div class="box" id="stats"></div>
 
 <script>
 
-/* ================= BASE ================= */
+//////////////////////////////
+// 🧠 BASE DE DATOS
+//////////////////////////////
 
-let bloques={
-
-previa:[],
-primera:[],
-matutina:[],
-vespertina:[],
-nocturna:[]
-
+const db = {
+    sorteos: [],
+    indexNumero: {},
+    learning: {}
 };
 
-/* ================= GUARDAR ================= */
+//////////////////////////////
+// 📥 IMPORTADOR
+//////////////////////////////
 
-function guardarBloque(tipo){
-
-let texto=document
-.getElementById("historial")
-.value
-.trim();
-
-let numeros=texto
-.split(/\s+/)
-.filter(n=>n.length===4);
-
-bloques[tipo]=numeros;
-
-alert(tipo+" guardado");
-
+function importFile(file) {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.readAsText(file);
+    });
 }
 
-/* ================= OBTENER ÚLTIMO ================= */
+//////////////////////////////
+// 🧹 PARSER SIMPLE
+//////////////////////////////
 
-function obtenerUltimo(){
+function parseText(text) {
+    const lines = text.split("\n");
+    let parsed = [];
 
-if(bloques.vespertina.length>0){
-return {
-nombre:"NOCTURNA",
-datos:bloques.vespertina
-};
+    lines.forEach(l => {
+        const nums = l.match(/\d{4}/g);
+        const date = l.match(/\d{2}\/\d{2}\/\d{4}/)?.[0];
+
+        if (nums) {
+            parsed.push({
+                fecha: date,
+                numeros: nums
+            });
+        }
+    });
+
+    return parsed;
 }
 
-if(bloques.matutina.length>0){
-return {
-nombre:"VESPERTINA",
-datos:bloques.matutina
-};
+//////////////////////////////
+// 📊 DB INSERT
+//////////////////////////////
+
+function insert(data) {
+    db.sorteos.push(data);
+
+    data.numeros.forEach(n => {
+        if (!db.indexNumero[n]) db.indexNumero[n] = [];
+        db.indexNumero[n].push(data);
+    });
 }
 
-if(bloques.primera.length>0){
-return {
-nombre:"MATUTINA",
-datos:bloques.primera
-};
+//////////////////////////////
+// 🔥 CLUSTERS
+//////////////////////////////
+
+function buildClusters() {
+    let map = {};
+
+    db.sorteos.forEach(s => {
+        const nums = s.numeros || [];
+
+        for (let i = 0; i < nums.length; i++) {
+            for (let j = i + 1; j < nums.length; j++) {
+                const key = nums[i] + "-" + nums[j];
+                map[key] = (map[key] || 0) + 1;
+            }
+        }
+    });
+
+    return map;
 }
 
-if(bloques.previa.length>0){
-return {
-nombre:"PRIMERA",
-datos:bloques.previa
-};
+//////////////////////////////
+// 🧠 SCORE V24
+//////////////////////////////
+
+function score(num, clusters) {
+    const freq = db.indexNumero[num]?.length || 0;
+    const learn = db.learning[num]?.peso || 1;
+
+    const rec = db.sorteos.slice(-20)
+        .filter(s => s.numeros.includes(num)).length;
+
+    const cluster = Object.keys(clusters)
+        .filter(k => k.includes(num)).length;
+
+    return (freq*5 + rec*6 + cluster*7) * learn;
 }
 
-return null;
+//////////////////////////////
+// 🔮 PREDICCIÓN
+//////////////////////////////
 
+function predict() {
+    const clusters = buildClusters();
+    const nums = Object.keys(db.indexNumero);
+
+    return nums.map(n => ({
+        num: n,
+        score: score(n, clusters)
+    }))
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,10);
 }
 
-/* ================= GENERADOR ================= */
+//////////////////////////////
+// 🧠 LEARNING
+//////////////////////////////
 
-function generarAmbos(){
+function learn(pred, real) {
+    pred.forEach(p => {
+        if (!db.learning[p.num]) db.learning[p.num] = {peso:1};
 
-let actual=obtenerUltimo();
+        if (real.includes(p.num)) {
+            db.learning[p.num].peso += 0.2;
+        } else {
+            db.learning[p.num].peso -= 0.1;
+        }
 
-if(!actual){
-
-document.getElementById(
-"resultado"
-).innerHTML="Sin datos";
-
-return;
-
+        if (db.learning[p.num].peso < 0.1)
+            db.learning[p.num].peso = 0.1;
+    });
 }
 
-let sorteo=actual.nombre;
+//////////////////////////////
+// 🚀 PROCESO ARCHIVO
+//////////////////////////////
 
-let datos=actual.datos;
+async function processFile() {
+    const file = document.getElementById("fileInput").files[0];
+    const text = await importFile(file);
 
-/* ================= EXTRAER AMBOS ================= */
+    const parsed = parseText(text);
 
-let ambos=[];
+    parsed.forEach(p => insert(p));
 
-datos.forEach(n=>{
-
-ambos.push(
-n.slice(2,4)
-);
-
-});
-
-/* ================= MOTOR CONTEXTUAL ================= */
-
-let pesos={};
-
-function sumar(numero,peso){
-
-pesos[numero]=
-(pesos[numero]||0)+peso;
-
+    render();
 }
 
-/* ================= ANALIZAR ================= */
+//////////////////////////////
+// 📊 RENDER
+//////////////////////////////
 
-ambos.forEach(a=>{
-
-let d1=a[0];
-let d2=a[1];
-
-/* peso directo */
-
-sumar(a,2);
-
-/* espejo */
-
-sumar(d2+d1,1.5);
-
-/* núcleo doble */
-
-sumar(d1+d2,1);
-
-/* continuidad */
-
-if(d1!==d2){
-
-sumar(d1+d2,1.2);
-sumar(d2+d1,1.2);
-
+function render() {
+    document.getElementById("stats").innerHTML =
+        "Sorteos: " + db.sorteos.length +
+        "<br>Números: " + Object.keys(db.indexNumero).length;
 }
 
-/* detectar 8-2 */
+//////////////////////////////
+// 🔮 MOSTRAR PREDICCIÓN
+//////////////////////////////
 
-if(
-(a==="28")
-||
-(a==="82")
-){
+function showPrediction() {
+    const res = predict();
 
-sumar("28",10);
-sumar("82",10);
+    let html = "<h2>🔥 AMBOS PRO MAX</h2>";
 
+    res.forEach(r => {
+        html += `Número: ${r.num} | Score: ${r.score.toFixed(2)}<br>`;
+    });
+
+    document.getElementById("results").innerHTML = html;
 }
 
-/* detectar continuidad 8 */
+//////////////////////////////
+// 🧹 LIMPIAR
+//////////////////////////////
 
-if(a.includes("8")){
+function clearDB() {
+    db.sorteos = [];
+    db.indexNumero = {};
+    db.learning = {};
 
-sumar("82",3);
-sumar("28",3);
-sumar("85",2);
-sumar("58",1.5);
-
-}
-
-/* detectar continuidad 2 */
-
-if(a.includes("2")){
-
-sumar("82",2);
-sumar("28",2);
-
-}
-
-/* detectar mutación 5 */
-
-if(a.includes("5")){
-
-sumar("85",4);
-sumar("58",3);
-sumar("65",2);
-
-}
-
-/* detectar crecimiento 6 */
-
-if(a.includes("6")){
-
-sumar("68",4);
-sumar("86",3);
-sumar("65",2);
-
-}
-
-});
-
-/* ================= ORDENAR ================= */
-
-let orden=Object
-.entries(pesos)
-.sort((a,b)=>b[1]-a[1]);
-
-let principal=orden[0][0];
-let apoyo=orden[1][0];
-let refuerzo=orden[2][0];
-
-/* ================= DOMINANTE ================= */
-
-let dominante=principal[0];
-
-/* ================= ALERTAS ================= */
-
-let alerta=
-"🟢 Núcleo estable";
-
-if(
-principal==="28"
-||
-principal==="82"
-){
-
-alerta=
-"⚠️ Continuidad fuerte 8-2";
-
-}
-
-if(
-principal==="85"
-||
-principal==="58"
-){
-
-alerta=
-"💣 Mutación hacia 5";
-
-}
-
-if(
-principal==="68"
-||
-principal==="65"
-){
-
-alerta=
-"💣 Transferencia hacia 6";
-
-}
-
-/* ================= RESULTADO ================= */
-
-document.getElementById(
-"resultado"
-).innerHTML=`
-
-<div class="resultado">
-
-🎯 PROYECCIÓN PARA ${sorteo}<br><br>
-
-💣 NÚCLEO DOMINANTE<br>
-<span>${dominante}</span><br><br>
-
-🎯 AMBOS PRINCIPAL<br>
-<span>${principal}</span><br><br>
-
-✔ APOYO ESTRATÉGICO<br>
-<span>${apoyo}</span><br><br>
-
-⚠️ REFUERZO<br>
-<span>${refuerzo}</span><br><br>
-
-<div class="alerta">
-${alerta}
-</div>
-
-</div>
-
-`;
-
+    document.getElementById("results").innerHTML = "";
+    render();
 }
 
 </script>

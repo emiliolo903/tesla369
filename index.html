@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>EMI Tesla PRO V31 - IA MEMORY</title>
+<title>EMI Tesla PRO V34 FINAL</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
@@ -11,15 +11,27 @@
 body{font-family:Arial;background:#111;color:#fff;padding:15px}
 button,select,input{padding:8px;margin:4px}
 .box{border:1px solid #444;padding:10px;margin-top:10px;max-height:300px;overflow:auto;white-space:pre-wrap}
+.bar{height:10px;background:#333;margin-top:10px}
+.bar>div{height:10px;background:#00ff88;width:0%}
+.small{font-size:12px;color:#aaa}
 </style>
 </head>
 
 <body>
 
-<h2>🚀 EMI Tesla PRO V31 - IA MEMORIA DINÁMICA</h2>
+<h2>🚀 EMI Tesla PRO V34 FINAL</h2>
 
-<h3>🧠 Carga Manual</h3>
+<h3>📄 OCR PDF</h3>
+<input type="file" id="fileInput">
+<button onclick="startOCR()">Iniciar OCR</button>
+<button onclick="cancelOCR()">Cancelar</button>
 
+<div class="bar"><div id="barFill"></div></div>
+<div id="ocrStatus" class="small"></div>
+
+<hr>
+
+<h3>✍️ Manual</h3>
 <select id="turnoManual">
 <option>PREVIA</option>
 <option>PRIMERA</option>
@@ -28,233 +40,163 @@ button,select,input{padding:8px;margin:4px}
 <option>NOCTURNA</option>
 </select>
 
-<input id="numsManual" placeholder="Ej: 1234 5678 9012">
-<button onclick="addManual()">➕ Guardar</button>
+<input id="numsManual" placeholder="1234 5678">
+<button onclick="addManual()">Guardar</button>
 
 <hr>
 
-<h3>📄 OCR PDF</h3>
-<input type="file" id="fileInput">
-<button onclick="processPDF()">📥 Cargar PDF</button>
+<h3>🔮 Predicción</h3>
+<button onclick="runPrediction()">Generar Predicción</button>
 
 <hr>
 
-<h3>🔮 Predicción IA</h3>
+<h3>📊 Historial</h3>
+<button onclick="showDB()">Ver Base</button>
+<button onclick="showPredictions()">Ver Predicciones</button>
+<button onclick="validatePrediction()">Validar</button>
 
-<select id="turnoPredict">
-<option>PREVIA</option>
-<option>PRIMERA</option>
-<option>MATUTINA</option>
-<option>VESPERTINA</option>
-<option>NOCTURNA</option>
-</select>
+<hr>
 
-<button onclick="predict()">🔮 Analizar IA</button>
-<button onclick="clearDB()">🧹 Limpiar</button>
+<h3>📤 Backup</h3>
+<button onclick="exportData()">Exportar</button>
+<input type="file" onchange="importData(event)">
 
 <div class="box" id="out"></div>
 
 <script>
 
-//////////////////////////////
-// 💾 BASE GLOBAL
-//////////////////////////////
-
-let db = JSON.parse(localStorage.getItem("v31_db") || "[]");
+let db = JSON.parse(localStorage.getItem("v34_db")||"[]");
+let predictions = JSON.parse(localStorage.getItem("v34_pred")||"[]");
+let worker=null;
+let cancel=false;
 
 function save(){
-localStorage.setItem("v31_db", JSON.stringify(db));
+localStorage.setItem("v34_db",JSON.stringify(db));
+localStorage.setItem("v34_pred",JSON.stringify(predictions));
 }
 
-//////////////////////////////
-// ➕ MANUAL INPUT
-//////////////////////////////
+function addRecord(r){
+db.push(r); save();
+}
 
 function addManual(){
-
-const turno = document.getElementById("turnoManual").value;
-const nums = document.getElementById("numsManual").value.match(/\d{4}/g);
-
-if(!nums) return alert("Sin números válidos");
-
-db.push({
-fecha:new Date().toISOString().split("T")[0],
-turno,
-numeros:nums,
-origen:"manual"
-});
-
-save();
-alert("Guardado en base");
+let turno=document.getElementById("turnoManual").value;
+let nums=document.getElementById("numsManual").value.match(/\d{4}/g);
+if(!nums)return alert("sin datos");
+addRecord({fecha:new Date().toISOString(),turno,numeros:nums,origen:"manual"});
 }
 
-//////////////////////////////
-// 📄 OCR PDF
-//////////////////////////////
+function analyze(){
+let freq={},rec={},trans={};
+db.forEach(r=>r.numeros.forEach(n=>freq[n]=(freq[n]||0)+1));
+db.slice(-50).forEach(r=>r.numeros.forEach(n=>rec[n]=(rec[n]||0)+2));
 
-async function processPDF(){
+for(let i=0;i<db.length-1;i++){
+db[i].numeros.forEach(x=>{
+db[i+1].numeros.forEach(()=>trans[x]=(trans[x]||0)+1);
+});
+}
 
-const file=document.getElementById("fileInput").files[0];
-if(!file) return alert("Subí PDF");
+return Object.entries(freq).map(([n,f])=>({
+num:n,
+score:f*5+(rec[n]||0)*10+(trans[n]||0)*3
+})).sort((a,b)=>b.score-a.score);
+}
 
-const reader=new FileReader();
+function predict(turno){
+let top=analyze().slice(0,20);
+return {
+cuaterno:top.slice(0,4).map(x=>x.num),
+terno:top.slice(0,3).map(x=>x.num),
+ambos:top.slice(0,6).map(x=>x.num)
+};
+}
 
-reader.onload=async function(e){
+function runPrediction(){
+let turno=prompt("turno actual");
+let p=predict(turno);
+predictions.push({turno,p});
+save();
+document.getElementById("out").innerText=JSON.stringify(p,null,2);
+}
 
-const pdfData=new Uint8Array(e.target.result);
-const pdf=await pdfjsLib.getDocument({data:pdfData}).promise;
+function showDB(){
+document.getElementById("out").innerText=JSON.stringify(db.slice(-10),null,2);
+}
+
+function showPredictions(){
+document.getElementById("out").innerText=JSON.stringify(predictions.slice(-10),null,2);
+}
+
+function validatePrediction(){
+alert("función base demo");
+}
+
+function exportData(){
+let blob=new Blob([JSON.stringify({db,predictions})],{type:"application/json"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="v34_backup.json";
+a.click();
+}
+
+function importData(e){
+let r=new FileReader();
+r.onload=ev=>{
+let d=JSON.parse(ev.target.result);
+db=d.db||[];
+predictions=d.predictions||[];
+save();
+};
+r.readAsText(e.target.files[0]);
+}
+
+async function startOCR(){
+let file=document.getElementById("fileInput").files[0];
+if(!file)return;
+
+let reader=new FileReader();
+reader.onload=async e=>{
+let pdf=await pdfjsLib.getDocument({data:new Uint8Array(e.target.result)}).promise;
+worker=await Tesseract.createWorker("eng+spa");
 
 for(let i=1;i<=pdf.numPages;i++){
+if(cancel)break;
 
-const page=await pdf.getPage(i);
-const canvas=document.createElement("canvas");
-const ctx=canvas.getContext("2d");
+let page=await pdf.getPage(i);
+let canvas=document.createElement("canvas");
+let ctx=canvas.getContext("2d");
 
-const vp=page.getViewport({scale:2});
+let vp=page.getViewport({scale:2});
 canvas.width=vp.width;
 canvas.height=vp.height;
 
 await page.render({canvasContext:ctx,viewport:vp}).promise;
 
-const img=canvas.toDataURL();
+document.getElementById("ocrStatus").innerText=`Página ${i}/${pdf.numPages}`;
+document.getElementById("barFill").style.width=(i/pdf.numPages*100)+"%";
 
-await ocrPage(img,i);
-}
-
-save();
-alert("PDF cargado a base");
-};
-
-reader.readAsArrayBuffer(file);
-}
-
-//////////////////////////////
-// 👁 OCR
-//////////////////////////////
-
-async function ocrPage(img,page){
-
-const worker=await Tesseract.createWorker("eng");
-await worker.loadLanguage("eng+spa");
-await worker.initialize("eng+spa");
-
-const res=await worker.recognize(img);
-await worker.terminate();
-
-const text=res.data.text;
-const nums=text.match(/\d{4}/g);
+let res=await worker.recognize(canvas);
+let nums=res.data.text.match(/\d{4}/g);
 
 if(nums){
-
-db.push({
-fecha:"pagina "+page,
-turno:detectTurn(text),
+addRecord({
+fecha:new Date().toISOString(),
+turno:"OCR",
 numeros:nums,
 origen:"ocr"
 });
 }
 }
 
-function detectTurn(t){
-t=t.toLowerCase();
-if(t.includes("previa"))return "PREVIA";
-if(t.includes("primera"))return "PRIMERA";
-if(t.includes("matutina"))return "MATUTINA";
-if(t.includes("vespertina"))return "VESPERTINA";
-if(t.includes("nocturna"))return "NOCTURNA";
-return "DESCONOCIDO";
+await worker.terminate();
+alert("OCR listo");
+};
+
+reader.readAsArrayBuffer(file);
 }
 
-//////////////////////////////
-// 🧠 IA CON PESO DINÁMICO
-//////////////////////////////
-
-function predict(){
-
-const turno=document.getElementById("turnoPredict").value;
-
-let freq={};
-let recency={};
-let transition={};
-
-// 🔥 recencia (últimos registros pesan más)
-let last=db.slice(-30);
-
-// 📊 frecuencia global
-db.forEach(d=>{
-d.numeros.forEach(n=>{
-freq[n]=(freq[n]||0)+1;
-});
-});
-
-// 🔗 transición entre registros consecutivos
-for(let i=0;i<db.length-1;i++){
-let a=db[i];
-let b=db[i+1];
-
-a.numeros.forEach(x=>{
-b.numeros.forEach(y=>{
-transition[x]=(transition[x]||0)+1;
-});
-});
-}
-
-// 🧠 recencia por número
-last.forEach(d=>{
-d.numeros.forEach(n=>{
-recency[n]=(recency[n]||0)+1;
-});
-});
-
-// 🔮 score final
-let ranked=Object.entries(freq).map(([num,f])=>{
-
-let r=recency[num]||0;
-let t=transition[num]||0;
-
-// 💥 PESO DINÁMICO REAL
-let score=(f*5)+(r*10)+(t*3);
-
-return {num,score};
-});
-
-ranked.sort((a,b)=>b.score-a.score);
-
-let top=ranked.slice(0,15);
-
-let cuaterno=top.slice(0,4).map(x=>x.num);
-let terno=top.slice(0,3).map(x=>x.num);
-let ambos=top.slice(0,6).map(x=>x.num);
-
-document.getElementById("out").innerText=
-`
-🔮 V31 IA PREDICCIÓN (PESO DINÁMICO)
-
-🎯 TURNO: ${turno}
-
-🔥 CUATERNO:
-${cuaterno.join(" - ")}
-
-⚡ TERNO:
-${terno.join(" - ")}
-
-💥 AMBOS:
-${ambos.join(" - ")}
-
-📊 BASE TOTAL: ${db.length}
-🧠 MODELO: frecuencia + recencia + transición
-`;
-}
-
-//////////////////////////////
-// 🧹 RESET
-//////////////////////////////
-
-function clearDB(){
-db=[];
-save();
-document.getElementById("out").innerText="";
-}
+function cancelOCR(){cancel=true;}
 
 </script>
 

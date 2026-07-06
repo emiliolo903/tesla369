@@ -2,228 +2,209 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>EMI Tesla PRO V24</title>
+<title>EMI Tesla PRO V24 FULL</title>
 
 <style>
-body {
+body{
     font-family: Arial;
-    background: #111;
-    color: #fff;
-    padding: 15px;
+    background:#111;
+    color:#fff;
+    padding:15px;
 }
-button {
-    padding: 10px;
-    margin: 5px;
+
+button{
+    padding:10px;
+    margin:5px;
+    cursor:pointer;
 }
-input {
-    margin: 10px 0;
-}
-.box {
-    border: 1px solid #444;
-    padding: 10px;
-    margin-top: 10px;
+
+.box{
+    border:1px solid #444;
+    padding:10px;
+    margin-top:10px;
+    white-space:pre-wrap;
+    max-height:300px;
+    overflow:auto;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🚀 EMI Tesla PRO V24</h1>
+<h2>🚀 EMI Tesla PRO V24 FULL SYSTEM</h2>
 
 <input type="file" id="fileInput">
 
-<button onclick="processFile()">Analizar Archivo</button>
-<button onclick="clearDB()">Limpiar</button>
-<button onclick="showPrediction()">AMBOS PRO MAX</button>
+<br>
 
-<div class="box" id="results"></div>
-<div class="box" id="stats"></div>
+<button onclick="loadFile()">📥 Cargar archivo</button>
+<button onclick="runOCR()">📄 OCR + Limpiar</button>
+<button onclick="buildDB()">🧠 Crear Base</button>
+<button onclick="showPrediction()">🔮 AMBOS PRO</button>
+<button onclick="exportData()">📤 Exportar</button>
+<button onclick="clearAll()">🧹 Limpiar</button>
+
+<div class="box" id="log"></div>
+<div class="box" id="result"></div>
 
 <script>
 
 //////////////////////////////
-// 🧠 BASE DE DATOS
+// 📦 BASE
 //////////////////////////////
 
-const db = {
-    sorteos: [],
-    indexNumero: {},
-    learning: {}
-};
+let rawFile = "";
+let cleanedText = "";
+let db = [];
 
 //////////////////////////////
-// 📥 IMPORTADOR
+// 📥 CARGAR
 //////////////////////////////
 
-function importFile(file) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.readAsText(file);
-    });
+function loadFile(){
+    const file = document.getElementById("fileInput").files[0];
+
+    if(!file){
+        log("⚠️ No hay archivo");
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = e => {
+        rawFile = e.target.result;
+        log("📥 Archivo cargado");
+    };
+
+    reader.readAsText(file);
 }
 
 //////////////////////////////
-// 🧹 PARSER SIMPLE
+// 📄 OCR / LIMPIEZA
 //////////////////////////////
 
-function parseText(text) {
-    const lines = text.split("\n");
-    let parsed = [];
+function runOCR(){
+
+    if(!rawFile){
+        log("⚠️ Cargá un archivo primero");
+        return;
+    }
+
+    let text = rawFile;
+
+    text = text.replace(/\s+/g," ");
+    text = text.replace(/[^0-9a-zA-ZáéíóúÁÉÍÓÚ\/\-\n ]/g,"");
+
+    cleanedText = text;
+
+    log("📄 OCR listo");
+}
+
+//////////////////////////////
+// 🧠 PARSER
+//////////////////////////////
+
+function buildDB(){
+
+    if(!cleanedText){
+        log("⚠️ Ejecutá OCR primero");
+        return;
+    }
+
+    db = [];
+
+    const lines = cleanedText.split("\n");
 
     lines.forEach(l => {
+
         const nums = l.match(/\d{4}/g);
         const date = l.match(/\d{2}\/\d{2}\/\d{4}/)?.[0];
 
-        if (nums) {
-            parsed.push({
-                fecha: date,
+        if(nums){
+            db.push({
+                fecha: date || null,
                 numeros: nums
             });
         }
     });
 
-    return parsed;
+    log("🧠 DB creada: " + db.length + " registros");
 }
 
 //////////////////////////////
-// 📊 DB INSERT
+// 🔮 PREDICCIÓN SIMPLE
 //////////////////////////////
 
-function insert(data) {
-    db.sorteos.push(data);
+function predict(){
 
-    data.numeros.forEach(n => {
-        if (!db.indexNumero[n]) db.indexNumero[n] = [];
-        db.indexNumero[n].push(data);
-    });
-}
-
-//////////////////////////////
-// 🔥 CLUSTERS
-//////////////////////////////
-
-function buildClusters() {
     let map = {};
 
-    db.sorteos.forEach(s => {
-        const nums = s.numeros || [];
-
-        for (let i = 0; i < nums.length; i++) {
-            for (let j = i + 1; j < nums.length; j++) {
-                const key = nums[i] + "-" + nums[j];
-                map[key] = (map[key] || 0) + 1;
-            }
-        }
+    db.forEach(d => {
+        d.numeros.forEach(n => {
+            map[n] = (map[n] || 0) + 1;
+        });
     });
 
-    return map;
+    return Object.entries(map)
+        .map(([num,score]) => ({num,score}))
+        .sort((a,b)=>b.score-a.score)
+        .slice(0,10);
 }
 
-//////////////////////////////
-// 🧠 SCORE V24
-//////////////////////////////
+function showPrediction(){
 
-function score(num, clusters) {
-    const freq = db.indexNumero[num]?.length || 0;
-    const learn = db.learning[num]?.peso || 1;
-
-    const rec = db.sorteos.slice(-20)
-        .filter(s => s.numeros.includes(num)).length;
-
-    const cluster = Object.keys(clusters)
-        .filter(k => k.includes(num)).length;
-
-    return (freq*5 + rec*6 + cluster*7) * learn;
-}
-
-//////////////////////////////
-// 🔮 PREDICCIÓN
-//////////////////////////////
-
-function predict() {
-    const clusters = buildClusters();
-    const nums = Object.keys(db.indexNumero);
-
-    return nums.map(n => ({
-        num: n,
-        score: score(n, clusters)
-    }))
-    .sort((a,b)=>b.score-a.score)
-    .slice(0,10);
-}
-
-//////////////////////////////
-// 🧠 LEARNING
-//////////////////////////////
-
-function learn(pred, real) {
-    pred.forEach(p => {
-        if (!db.learning[p.num]) db.learning[p.num] = {peso:1};
-
-        if (real.includes(p.num)) {
-            db.learning[p.num].peso += 0.2;
-        } else {
-            db.learning[p.num].peso -= 0.1;
-        }
-
-        if (db.learning[p.num].peso < 0.1)
-            db.learning[p.num].peso = 0.1;
-    });
-}
-
-//////////////////////////////
-// 🚀 PROCESO ARCHIVO
-//////////////////////////////
-
-async function processFile() {
-    const file = document.getElementById("fileInput").files[0];
-    const text = await importFile(file);
-
-    const parsed = parseText(text);
-
-    parsed.forEach(p => insert(p));
-
-    render();
-}
-
-//////////////////////////////
-// 📊 RENDER
-//////////////////////////////
-
-function render() {
-    document.getElementById("stats").innerHTML =
-        "Sorteos: " + db.sorteos.length +
-        "<br>Números: " + Object.keys(db.indexNumero).length;
-}
-
-//////////////////////////////
-// 🔮 MOSTRAR PREDICCIÓN
-//////////////////////////////
-
-function showPrediction() {
     const res = predict();
 
-    let html = "<h2>🔥 AMBOS PRO MAX</h2>";
+    let html = "🔮 AMBOS PRO MAX\n\n";
 
-    res.forEach(r => {
-        html += `Número: ${r.num} | Score: ${r.score.toFixed(2)}<br>`;
+    res.forEach(r=>{
+        html += `Número: ${r.num} | Score: ${r.score}\n`;
     });
 
-    document.getElementById("results").innerHTML = html;
+    document.getElementById("result").innerText = html;
+}
+
+//////////////////////////////
+// 📤 EXPORTAR
+//////////////////////////////
+
+function exportData(){
+
+    const blob = new Blob(
+        [JSON.stringify(db,null,2)],
+        {type:"application/json"}
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "emi_tesla_v24_db.json";
+    a.click();
+
+    log("📤 Exportado");
 }
 
 //////////////////////////////
 // 🧹 LIMPIAR
 //////////////////////////////
 
-function clearDB() {
-    db.sorteos = [];
-    db.indexNumero = {};
-    db.learning = {};
+function clearAll(){
+    rawFile="";
+    cleanedText="";
+    db=[];
+    document.getElementById("fileInput").value="";
 
-    document.getElementById("results").innerHTML = "";
-    render();
+    document.getElementById("result").innerText="";
+    log("🧹 Limpio");
+}
+
+//////////////////////////////
+// 🖥️ LOG
+//////////////////////////////
+
+function log(msg){
+    document.getElementById("log").innerText += "\n" + msg;
 }
 
 </script>

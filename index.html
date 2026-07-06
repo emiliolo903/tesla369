@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>EMI Tesla PRO V26 OCR FAST</title>
+<title>EMI Tesla PRO V27 STABLE</title>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
@@ -32,19 +32,18 @@ button{
 
 <body>
 
-<h2>🚀 EMI Tesla PRO V26 - OCR OPTIMIZADO</h2>
+<h2>🚀 EMI Tesla PRO V27 - STABLE OCR</h2>
 
 <input type="file" id="fileInput">
 
 <br>
 
-<button onclick="startOCR()">📄 OCR RÁPIDO</button>
+<button onclick="startOCR()">📄 OCR SEGURO</button>
 <button onclick="buildDB()">🧠 Crear Base</button>
 <button onclick="predict()">🔮 Predicción</button>
-<button onclick="exportDB()">📤 Exportar</button>
 <button onclick="clearAll()">🧹 Limpiar</button>
 
-<div class="box" id="progress">Progreso: esperando...</div>
+<div class="box" id="status">Estado: listo</div>
 <div class="box" id="log"></div>
 <div class="box" id="out"></div>
 
@@ -58,53 +57,104 @@ let db = [];
 let fullText = "";
 
 //////////////////////////////
-// ⚡ OCR POR PARTES
+// ⚡ OCR SEGURO CON TIMEOUT
 //////////////////////////////
 
 async function startOCR(){
 
     const file = document.getElementById("fileInput").files[0];
-    if(!file) return log("⚠️ Subí archivo");
 
-    log("📄 Iniciando OCR rápido...");
+    if(!file){
+        log("⚠️ Subí una imagen");
+        return;
+    }
 
-    const worker = await Tesseract.createWorker("spa");
+    document.getElementById("status").innerText = "🔄 Iniciando OCR...";
 
-    await worker.setParameters({
-        tessedit_pageseg_mode: Tesseract.PSM.AUTO
-    });
+    let finished = false;
 
-    // ⚡ dividir en chunks simulados (mejora estabilidad)
-    const result = await worker.recognize(file, {
-        logger: m => {
+    // 🔥 TIMEOUT DE SEGURIDAD (evita cuelgue infinito)
+    const timeout = setTimeout(()=>{
+        if(!finished){
+            document.getElementById("status").innerText =
+                "⚠️ OCR lento → usando modo fallback";
 
-            if(m.status === "recognizing text"){
-                document.getElementById("progress").innerText =
-                    "🔄 Procesando: " + Math.round(m.progress * 100) + "%";
-            }
+            fallbackOCR(file);
         }
-    });
+    }, 15000); // 15 segundos máximo inicio
 
-    fullText = result.data.text;
+    try {
 
-    fullText = fullText
-        .replace(/\s+/g," ")
-        .replace(/[^0-9a-zA-ZáéíóúÁÉÍÓÚ\/\-\n ]/g,"");
+        log("📄 Creando worker...");
 
-    await worker.terminate();
+        const worker = await Tesseract.createWorker("eng");
 
-    document.getElementById("progress").innerText = "✅ OCR COMPLETO";
+        await worker.loadLanguage("eng+spa");
+        await worker.initialize("eng+spa");
 
-    log("📄 OCR terminado");
+        log("📄 Procesando imagen...");
+
+        const result = await worker.recognize(file, {
+            logger: m => {
+                if(m.status === "recognizing text"){
+                    document.getElementById("status").innerText =
+                        "🔄 OCR: " + Math.round(m.progress*100) + "%";
+                }
+            }
+        });
+
+        finished = true;
+        clearTimeout(timeout);
+
+        fullText = result.data.text || "";
+
+        await worker.terminate();
+
+        document.getElementById("status").innerText = "✅ OCR COMPLETO";
+
+        log("📄 Texto extraído: " + fullText.length + " chars");
+
+    } catch (e) {
+
+        finished = true;
+        clearTimeout(timeout);
+
+        log("❌ Error OCR → fallback activado");
+        fallbackOCR(file);
+    }
 }
 
 //////////////////////////////
-// 🧠 PARSER RÁPIDO
+// ⚡ FALLBACK OCR (SIMPLIFICADO)
+//////////////////////////////
+
+function fallbackOCR(file){
+
+    const reader = new FileReader();
+
+    reader.onload = e => {
+
+        fullText = e.target.result;
+
+        document.getElementById("status").innerText =
+            "⚠️ Modo texto directo (fallback)";
+
+        log("📄 Fallback cargado");
+    };
+
+    reader.readAsText(file);
+}
+
+//////////////////////////////
+// 🧠 PARSER SIMPLE
 //////////////////////////////
 
 function buildDB(){
 
-    if(!fullText) return log("⚠️ Primero OCR");
+    if(!fullText){
+        log("⚠️ Primero OCR");
+        return;
+    }
 
     const lines = fullText.split("\n");
 
@@ -127,10 +177,15 @@ function buildDB(){
 }
 
 //////////////////////////////
-// 🔮 PREDICCIÓN SIMPLE V26
+// 🔮 PREDICCIÓN SIMPLE
 //////////////////////////////
 
 function predict(){
+
+    if(db.length === 0){
+        log("⚠️ Primero crear base");
+        return;
+    }
 
     let freq = {};
 
@@ -141,14 +196,11 @@ function predict(){
     });
 
     let ranked = Object.entries(freq)
-        .map(([num,score])=>({
-            num,
-            score: score
-        }))
+        .map(([num,score])=>({num,score}))
         .sort((a,b)=>b.score-a.score)
         .slice(0,10);
 
-    let out = "🔮 AMBOS PRO V26\n\n";
+    let out = "🔮 AMBOS PRO V27\n\n";
 
     ranked.forEach(r=>{
         out += `${r.num} → ${r.score}\n`;
@@ -158,35 +210,14 @@ function predict(){
 }
 
 //////////////////////////////
-// 📤 EXPORT
-//////////////////////////////
-
-function exportDB(){
-
-    const blob = new Blob(
-        [JSON.stringify(db,null,2)],
-        {type:"application/json"}
-    );
-
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "emi_tesla_v26.json";
-    a.click();
-
-    log("📤 exportado");
-}
-
-//////////////////////////////
 // 🧹 LIMPIAR
 //////////////////////////////
 
 function clearAll(){
     db = [];
     fullText = "";
-    document.getElementById("out").innerText = "";
-    document.getElementById("progress").innerText = "Progreso: esperando...";
+    document.getElementById("out").innerText="";
+    document.getElementById("status").innerText="Estado: listo";
     log("🧹 limpio");
 }
 

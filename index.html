@@ -1,204 +1,1020 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+
 <meta charset="UTF-8">
-<title>EMI Tesla PRO V34 FINAL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>EMI Tesla PRO V35</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <style>
-body{font-family:Arial;background:#111;color:#fff;padding:15px}
-button,select,input{padding:8px;margin:4px}
-.box{border:1px solid #444;padding:10px;margin-top:10px;max-height:300px;overflow:auto;white-space:pre-wrap}
-.bar{height:10px;background:#333;margin-top:10px}
-.bar>div{height:10px;background:#00ff88;width:0%}
-.small{font-size:12px;color:#aaa}
+
+body{
+background:#111;
+color:#fff;
+font-family:Arial, sans-serif;
+padding:15px;
+}
+
+h1{
+color:#00ff99;
+text-align:center;
+}
+
+.card{
+background:#222;
+border:1px solid #444;
+border-radius:10px;
+padding:15px;
+margin:10px 0;
+}
+
+button,input,select{
+padding:10px;
+margin:5px;
+border-radius:6px;
+border:none;
+}
+
+button{
+background:#00aa66;
+color:white;
+font-weight:bold;
+}
+
+button:hover{
+background:#00dd88;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+}
+
+.stat{
+background:#333;
+padding:15px;
+border-radius:8px;
+text-align:center;
+}
+
+.progress{
+width:100%;
+height:20px;
+background:#333;
+border-radius:10px;
+overflow:hidden;
+}
+
+#bar{
+height:100%;
+width:0%;
+background:#00ff99;
+}
+
+.output{
+background:#000;
+padding:10px;
+min-height:120px;
+white-space:pre-wrap;
+border-radius:8px;
+}
+
 </style>
+
 </head>
 
 <body>
 
-<h2>🚀 EMI Tesla PRO V34 FINAL</h2>
 
-<h3>📄 OCR PDF</h3>
-<input type="file" id="fileInput">
-<button onclick="startOCR()">Iniciar OCR</button>
-<button onclick="cancelOCR()">Cancelar</button>
+<h1>🚀 EMI Tesla PRO V35</h1>
 
-<div class="bar"><div id="barFill"></div></div>
-<div id="ocrStatus" class="small"></div>
 
-<hr>
+<div class="card">
 
-<h3>✍️ Manual</h3>
-<select id="turnoManual">
+<h2>📊 Dashboard</h2>
+
+<div class="grid">
+
+<div class="stat">
+Registros
+<br>
+<span id="total">0</span>
+</div>
+
+
+<div class="stat">
+Páginas PDF
+<br>
+<span id="paginas">0</span>
+</div>
+
+
+<div class="stat">
+Estado
+<br>
+<span id="estado">Listo</span>
+</div>
+
+
+<div class="stat">
+Versión
+<br>
+V35
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>📄 Importar PDF OCR</h2>
+
+<input type="file" id="pdf" accept=".pdf">
+
+<br>
+
+<button onclick="procesarPDF()">
+🚀 Iniciar OCR
+</button>
+
+
+<button onclick="cancelar()">
+⛔ Cancelar
+</button>
+
+
+<div class="progress">
+<div id="bar"></div>
+</div>
+
+
+<p id="info">
+Esperando archivo...
+</p>
+
+
+</div>
+
+
+
+<div class="card">
+
+<h2>✍️ Carga Manual</h2>
+
+
+<select id="turno">
+
 <option>PREVIA</option>
 <option>PRIMERA</option>
 <option>MATUTINA</option>
 <option>VESPERTINA</option>
 <option>NOCTURNA</option>
+
 </select>
 
-<input id="numsManual" placeholder="1234 5678">
-<button onclick="addManual()">Guardar</button>
 
-<hr>
+<input id="numeros" placeholder="Ej: 7134 2588 9001">
 
-<h3>🔮 Predicción</h3>
-<button onclick="runPrediction()">Generar Predicción</button>
 
-<hr>
+<button onclick="guardarManual()">
+💾 Guardar
+</button>
 
-<h3>📊 Historial</h3>
-<button onclick="showDB()">Ver Base</button>
-<button onclick="showPredictions()">Ver Predicciones</button>
-<button onclick="validatePrediction()">Validar</button>
 
-<hr>
+</div>
 
-<h3>📤 Backup</h3>
-<button onclick="exportData()">Exportar</button>
-<input type="file" onchange="importData(event)">
 
-<div class="box" id="out"></div>
 
+<div class="card">
+
+<h2>🔎 Resultado</h2>
+
+<div id="salida" class="output">
+
+EMI Tesla PRO V35 iniciado
+
+</div>
+
+</div>
 <script>
 
-let db = JSON.parse(localStorage.getItem("v34_db")||"[]");
-let predictions = JSON.parse(localStorage.getItem("v34_pred")||"[]");
-let worker=null;
-let cancel=false;
+//////////////////////////////////////////////////
+// BASE DE DATOS V35
+//////////////////////////////////////////////////
 
-function save(){
-localStorage.setItem("v34_db",JSON.stringify(db));
-localStorage.setItem("v34_pred",JSON.stringify(predictions));
+let base =
+JSON.parse(
+localStorage.getItem("EMI_V35_DB") || "[]"
+);
+
+
+let cancelarOCR=false;
+
+
+
+function guardarBase(){
+
+localStorage.setItem(
+"EMI_V35_DB",
+JSON.stringify(base)
+);
+
+actualizarContador();
+
 }
 
-function addRecord(r){
-db.push(r); save();
+
+
+
+function actualizarContador(){
+
+document.getElementById("total").innerText=
+base.length;
+
 }
 
-function addManual(){
-let turno=document.getElementById("turnoManual").value;
-let nums=document.getElementById("numsManual").value.match(/\d{4}/g);
-if(!nums)return alert("sin datos");
-addRecord({fecha:new Date().toISOString(),turno,numeros:nums,origen:"manual"});
+
+
+function mostrar(texto){
+
+document.getElementById(
+"salida"
+).innerText=texto;
+
 }
 
-function analyze(){
-let freq={},rec={},trans={};
-db.forEach(r=>r.numeros.forEach(n=>freq[n]=(freq[n]||0)+1));
-db.slice(-50).forEach(r=>r.numeros.forEach(n=>rec[n]=(rec[n]||0)+2));
 
-for(let i=0;i<db.length-1;i++){
-db[i].numeros.forEach(x=>{
-db[i+1].numeros.forEach(()=>trans[x]=(trans[x]||0)+1);
+
+//////////////////////////////////////////////////
+// CARGA MANUAL
+//////////////////////////////////////////////////
+
+
+function guardarManual(){
+
+
+let turno=
+document.getElementById(
+"turno"
+).value;
+
+
+let texto=
+document.getElementById(
+"numeros"
+).value;
+
+
+
+let numeros=
+texto.match(
+/\d{4}/g
+);
+
+
+
+if(!numeros){
+
+alert(
+"No hay números válidos"
+);
+
+return;
+
+}
+
+
+
+numeros.forEach(
+n=>{
+
+
+base.push({
+
+fecha:
+new Date()
+.toISOString()
+.split("T")[0],
+
+
+turno:turno,
+
+
+numero:n,
+
+
+origen:"MANUAL"
+
+
 });
+
+
+}
+);
+
+
+
+guardarBase();
+
+
+
+mostrar(
+
+"✅ Guardado\n\n"+
+"Turno: "+
+turno+
+"\n"+
+"Números: "+
+numeros.join(" - ")
+
+);
+
+
+
 }
 
-return Object.entries(freq).map(([n,f])=>({
-num:n,
-score:f*5+(rec[n]||0)*10+(trans[n]||0)*3
-})).sort((a,b)=>b.score-a.score);
+
+
+
+//////////////////////////////////////////////////
+// OCR PDF V35
+//////////////////////////////////////////////////
+
+
+async function procesarPDF(){
+
+
+let archivo=
+document.getElementById(
+"pdf"
+).files[0];
+
+
+
+if(!archivo){
+
+alert(
+"Seleccione PDF"
+);
+
+return;
+
 }
 
-function predict(turno){
-let top=analyze().slice(0,20);
-return {
-cuaterno:top.slice(0,4).map(x=>x.num),
-terno:top.slice(0,3).map(x=>x.num),
-ambos:top.slice(0,6).map(x=>x.num)
-};
+
+
+cancelarOCR=false;
+
+
+
+document.getElementById(
+"estado"
+).innerText=
+"Procesando";
+
+
+
+let datos=
+await archivo.arrayBuffer();
+
+
+
+let pdf=
+await pdfjsLib
+.getDocument(
+{
+data:datos
+}
+)
+.promise;
+
+
+
+document.getElementById(
+"paginas"
+).innerText=
+pdf.numPages;
+
+
+
+mostrar(
+
+"📄 PDF cargado\n"+
+"Total páginas: "+
+pdf.numPages
+
+);
+
+
+
+
+
+let worker=
+await Tesseract
+.createWorker(
+"spa"
+);
+
+
+
+
+
+for(
+let i=1;
+i<=pdf.numPages;
+i++
+){
+
+
+if(cancelarOCR)
+break;
+
+
+
+document.getElementById(
+"info"
+).innerText=
+
+"Procesando página "+
+i+
+" de "+
+pdf.numPages;
+
+
+
+
+let pagina=
+await pdf.getPage(
+i
+);
+
+
+
+let vista=
+pagina.getViewport(
+{
+scale:2
+}
+);
+
+
+
+let canvas=
+document.createElement(
+"canvas"
+);
+
+
+
+canvas.width=
+vista.width;
+
+
+
+canvas.height=
+vista.height;
+
+
+
+await pagina.render({
+
+canvasContext:
+canvas.getContext("2d"),
+
+viewport:vista
+
+})
+.promise;
+
+
+
+
+
+let resultado=
+await worker.recognize(
+canvas
+);
+
+
+
+let texto=
+resultado.data.text;
+
+
+
+guardarOCR(
+texto,
+i
+);
+
+
+
+
+
+let porcentaje=
+(i/pdf.numPages)*100;
+
+
+
+document.getElementById(
+"bar"
+).style.width=
+porcentaje+"%";
+
+
+
 }
 
-function runPrediction(){
-let turno=prompt("turno actual");
-let p=predict(turno);
-predictions.push({turno,p});
-save();
-document.getElementById("out").innerText=JSON.stringify(p,null,2);
-}
 
-function showDB(){
-document.getElementById("out").innerText=JSON.stringify(db.slice(-10),null,2);
-}
-
-function showPredictions(){
-document.getElementById("out").innerText=JSON.stringify(predictions.slice(-10),null,2);
-}
-
-function validatePrediction(){
-alert("función base demo");
-}
-
-function exportData(){
-let blob=new Blob([JSON.stringify({db,predictions})],{type:"application/json"});
-let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="v34_backup.json";
-a.click();
-}
-
-function importData(e){
-let r=new FileReader();
-r.onload=ev=>{
-let d=JSON.parse(ev.target.result);
-db=d.db||[];
-predictions=d.predictions||[];
-save();
-};
-r.readAsText(e.target.files[0]);
-}
-
-async function startOCR(){
-let file=document.getElementById("fileInput").files[0];
-if(!file)return;
-
-let reader=new FileReader();
-reader.onload=async e=>{
-let pdf=await pdfjsLib.getDocument({data:new Uint8Array(e.target.result)}).promise;
-worker=await Tesseract.createWorker("eng+spa");
-
-for(let i=1;i<=pdf.numPages;i++){
-if(cancel)break;
-
-let page=await pdf.getPage(i);
-let canvas=document.createElement("canvas");
-let ctx=canvas.getContext("2d");
-
-let vp=page.getViewport({scale:2});
-canvas.width=vp.width;
-canvas.height=vp.height;
-
-await page.render({canvasContext:ctx,viewport:vp}).promise;
-
-document.getElementById("ocrStatus").innerText=`Página ${i}/${pdf.numPages}`;
-document.getElementById("barFill").style.width=(i/pdf.numPages*100)+"%";
-
-let res=await worker.recognize(canvas);
-let nums=res.data.text.match(/\d{4}/g);
-
-if(nums){
-addRecord({
-fecha:new Date().toISOString(),
-turno:"OCR",
-numeros:nums,
-origen:"ocr"
-});
-}
-}
 
 await worker.terminate();
-alert("OCR listo");
-};
 
-reader.readAsArrayBuffer(file);
+
+
+guardarBase();
+
+
+
+document.getElementById(
+"estado"
+).innerText=
+"Finalizado";
+
+
+
+document.getElementById(
+"info"
+).innerText=
+"OCR terminado";
+
+
 }
 
-function cancelOCR(){cancel=true;}
+
+
+
+function cancelar(){
+
+cancelarOCR=true;
+
+mostrar(
+"⛔ OCR cancelado"
+);
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// GUARDAR RESULTADO OCR
+//////////////////////////////////////////////////
+
+
+function guardarOCR(
+texto,
+pagina
+){
+
+
+
+let numeros=
+texto.match(
+/\d{4}/g
+);
+
+
+
+if(!numeros)
+return;
+
+
+
+let turno=
+detectarTurno(
+texto
+);
+
+
+
+numeros.forEach(
+n=>{
+
+
+base.push({
+
+fecha:
+new Date()
+.toISOString()
+.split("T")[0],
+
+
+turno:turno,
+
+
+numero:n,
+
+
+pagina:pagina,
+
+
+origen:"OCR"
+
+
+});
+
+
+}
+);
+
+
+
+}
+
+
+
+//////////////////////////////////////////////////
+// DETECTAR TURNO
+//////////////////////////////////////////////////
+
+
+function detectarTurno(texto){
+
+
+let t=
+texto.toUpperCase();
+
+
+
+if(t.includes("PREVIA"))
+return "PREVIA";
+
+
+if(t.includes("PRIMERA"))
+return "PRIMERA";
+
+
+if(t.includes("MATUTINA"))
+return "MATUTINA";
+
+
+if(t.includes("VESPERTINA"))
+return "VESPERTINA";
+
+
+if(t.includes("NOCTURNA"))
+return "NOCTURNA";
+
+
+
+return "DESCONOCIDO";
+
+
+}
+
+
+actualizarContador();
+
+
+  </script>
+  <script>
+
+//////////////////////////////////////////////////
+// ANALISIS ESTADISTICO V35
+//////////////////////////////////////////////////
+
+
+function analizar(){
+
+let turno=
+prompt(
+"Ingrese turno:\nPREVIA\nPRIMERA\nMATUTINA\nVESPERTINA\nNOCTURNA"
+);
+
+
+
+if(!turno)
+return;
+
+
+
+turno=
+turno.toUpperCase();
+
+
+
+let siguiente=
+turnoSiguiente(
+turno
+);
+
+
+
+let datos=
+base.filter(
+x=>
+x.turno==siguiente
+);
+
+
+
+if(datos.length==0){
+
+mostrar(
+"No hay datos para analizar "+siguiente
+);
+
+return;
+
+}
+
+
+
+let frecuencia={};
+
+
+
+datos.forEach(
+r=>{
+
+
+frecuencia[r.numero]=
+(frecuencia[r.numero]||0)+1;
+
+
+}
+);
+
+
+
+let ranking=
+Object.entries(
+frecuencia
+)
+.sort(
+(a,b)=>b[1]-a[1]
+)
+.slice(0,20);
+
+
+
+let cuaterno=
+ranking
+.slice(0,4)
+.map(
+x=>x[0]
+);
+
+
+
+let terno=
+ranking
+.slice(0,3)
+.map(
+x=>x[0].slice(1)
+);
+
+
+
+let ambos=
+ranking
+.slice(0,6)
+.map(
+x=>x[0].slice(2)
+);
+
+
+
+
+mostrar(
+
+"🧠 EMI TESLA PRO V35\n\n"+
+
+"Modelo:\n"+
+turno+
+" → "+
+siguiente+
+
+"\n\n🔥 CUATERNO:\n"+
+cuaterno.join(" - ")
+
++
+
+"\n\n⚡ TERNO:\n"+
+terno.join(" - ")
+
++
+
+"\n\n💥 AMBOS:\n"+
+ambos.join(" - ")
+
++
+
+"\n\n📊 Datos usados: "+
+datos.length
+
+);
+
+
+}
+
+
+
+
+
+function turnoSiguiente(t){
+
+
+let mapa={
+
+"PREVIA":"PRIMERA",
+
+"PRIMERA":"MATUTINA",
+
+"MATUTINA":"VESPERTINA",
+
+"VESPERTINA":"NOCTURNA",
+
+"NOCTURNA":"PREVIA"
+
+};
+
+
+
+return mapa[t] || "";
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// RESUMEN BASE
+//////////////////////////////////////////////////
+
+
+function resumen(){
+
+
+let frecuencia={};
+
+
+
+base.forEach(
+r=>{
+
+
+frecuencia[r.numero]=
+(frecuencia[r.numero]||0)+1;
+
+
+}
+);
+
+
+
+let top=
+Object.entries(
+frecuencia
+)
+.sort(
+(a,b)=>b[1]-a[1]
+)
+.slice(0,10);
+
+
+
+mostrar(
+
+"📊 RESUMEN BASE V35\n\n"+
+
+"Total registros: "+
+base.length+
+
+"\n\n🔥 Más frecuentes:\n"+
+
+JSON.stringify(
+top,
+null,
+2
+)
+
+);
+
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// BACKUP
+//////////////////////////////////////////////////
+
+
+function exportar(){
+
+
+let blob=
+new Blob(
+[
+JSON.stringify(
+base,
+null,
+2
+)
+],
+{
+type:"application/json"
+}
+);
+
+
+
+let a=
+document.createElement(
+"a"
+);
+
+
+
+a.href=
+URL.createObjectURL(
+blob
+);
+
+
+
+a.download=
+"EMI_TESLA_V35_BACKUP.json";
+
+
+
+a.click();
+
+
+
+mostrar(
+"💾 Backup creado"
+);
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// INICIO
+//////////////////////////////////////////////////
+
+
+mostrar(
+
+"🚀 EMI Tesla PRO V35 listo\n\n"+
+"Base: "+
+base.length+
+" registros"
+
+);
+
+
 
 </script>
 
+
+<div class="card">
+
+<h2>🧠 Análisis</h2>
+
+<button onclick="analizar()">
+Generar análisis
+</button>
+
+
+<button onclick="resumen()">
+Resumen base
+</button>
+
+
+<button onclick="exportar()">
+Backup
+</button>
+
+
+</div>
+
+
 </body>
+
 </html>

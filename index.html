@@ -1287,7 +1287,7 @@ destino
 
 
 //////////////////////////////////////////////////
-// RANKING HISTÓRICO V36
+// MOTOR PUNTAJE IA V36 MEJORADO
 //////////////////////////////////////////////////
 
 function calcularRankingV36(
@@ -1300,7 +1300,6 @@ destino
 let puntos={};
 
 let terminaciones={};
-
 
 
 
@@ -1328,37 +1327,23 @@ puntos[numero]=0;
 
 
 
+// 40% frecuencia histórica
 
-
-// frecuencia histórica
-
-puntos[numero]+=50;
-
+puntos[numero]+=40;
 
 
 
 
 
+// 25% transición turno
 
-// terminación ambos
-
-let ambos=
-
-numero.slice(-2);
-
-
-
-terminaciones[ambos]=
-
-(terminaciones[ambos]||0)+1;
+puntos[numero]+=25;
 
 
 
 
 
-
-
-// peso fecha reciente
+// 20% reciente
 
 let dias=
 
@@ -1372,11 +1357,25 @@ new Date(r.fecha))
 
 puntos[numero]+=
 
-100/
+20/
 
 Math.max(1,dias);
 
 
+
+
+
+// 15% fuerza del ambos
+
+let ambos=
+
+numero.slice(-2);
+
+
+
+terminaciones[ambos]=
+
+(terminaciones[ambos]||0)+1;
 
 
 
@@ -1387,7 +1386,6 @@ Math.max(1,dias);
 
 
 
-// sumar fuerza de ambos
 
 Object.keys(puntos).forEach(numero=>{
 
@@ -1417,31 +1415,26 @@ terminaciones[ambos]*15;
 
 
 
-
 let ranking=
 
 Object.keys(puntos)
 
-.map(numero=>{
+.map(numero=>({
 
-
-return {
 
 numero,
 
 puntaje:puntos[numero]
 
-};
 
+}))
 
-})
 
 .sort((a,b)=>
 
 b.puntaje-a.puntaje
 
 );
-
 
 
 
@@ -1462,12 +1455,6 @@ datos.length
 
 
 }
-
-
-
-
-
-
 
 
 //////////////////////////////////////////////////

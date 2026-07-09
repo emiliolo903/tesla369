@@ -21,7 +21,7 @@ body{
 
 background:#101010;
 color:white;
-font-family:Arial,Helvetica,sans-serif;
+font-family:Arial;
 padding:15px;
 
 }
@@ -38,10 +38,10 @@ color:#00ff99;
 .card{
 
 background:#202020;
-border:1px solid #444;
 border-radius:12px;
 padding:15px;
 margin:12px 0;
+border:1px solid #444;
 
 }
 
@@ -62,14 +62,6 @@ button{
 background:#00aa66;
 color:white;
 font-weight:bold;
-cursor:pointer;
-
-}
-
-
-button:hover{
-
-background:#00dd88;
 
 }
 
@@ -86,7 +78,7 @@ gap:10px;
 .box{
 
 background:#292929;
-padding:12px;
+padding:10px;
 border-radius:8px;
 text-align:center;
 
@@ -99,14 +91,14 @@ background:#000;
 padding:15px;
 border-radius:10px;
 white-space:pre-wrap;
-min-height:200px;
+min-height:180px;
 
 }
 
 
 .progress{
 
-height:22px;
+height:20px;
 background:#333;
 border-radius:10px;
 overflow:hidden;
@@ -122,7 +114,9 @@ background:#00ff99;
 
 }
 
+
 </style>
+
 
 </head>
 
@@ -141,9 +135,16 @@ background:#00ff99;
 </h1>
 
 
+
 <div class="card">
 
-<h2>📊 Estado del Sistema</h2>
+
+<h2>
+
+📊 Estado del Sistema
+
+</h2>
+
 
 
 <div class="grid">
@@ -162,22 +163,26 @@ Registros
 
 <div class="box">
 
-Ciclos
+Páginas OCR
 
 <br>
 
-<span id="ciclosTotal">0</span>
+<span id="paginas">0</span>
 
 </div>
 
 
 <div class="box">
 
-Páginas OCR
+Estado
 
 <br>
 
-<span id="paginas">0</span>
+<span id="estado">
+
+LISTO
+
+</span>
 
 </div>
 
@@ -199,15 +204,26 @@ V36
 
 
 
+
 <div class="card">
 
-<h2>📄 Importar PDF Histórico</h2>
+
+<h2>
+
+📄 OCR PDF Histórico
+
+</h2>
 
 
-<input 
+
+<input
+
 type="file"
+
 id="archivoPDF"
+
 accept=".pdf">
+
 
 
 <button onclick="iniciarOCR()">
@@ -217,11 +233,13 @@ accept=".pdf">
 </button>
 
 
+
 <button onclick="detenerOCR()">
 
 ⛔ Detener OCR
 
 </button>
+
 
 
 <div class="progress">
@@ -231,9 +249,10 @@ accept=".pdf">
 </div>
 
 
+
 <p id="infoOCR">
 
-Esperando PDF...
+Esperando archivo...
 
 </p>
 
@@ -241,10 +260,17 @@ Esperando PDF...
 </div>
 
 
+
+
 <div class="card">
 
 
-<h2>✍️ Carga Manual</h2>
+<h2>
+
+✍️ Carga Manual
+
+</h2>
+
 
 
 <select id="turnoManual">
@@ -259,15 +285,16 @@ Esperando PDF...
 
 <option>NOCTURNA</option>
 
-
 </select>
+
 
 
 <input
 
 id="numerosManual"
 
-placeholder="Ej: 1234 5678 9012">
+placeholder="1234 5678 9012">
+
 
 
 <button onclick="guardarManual()">
@@ -277,13 +304,21 @@ placeholder="Ej: 1234 5678 9012">
 </button>
 
 
+
 </div>
+
 
 
 
 <div class="card">
 
-<h2>🧠 Resultado IA V36</h2>
+
+<h2>
+
+🧠 Resultado IA V36
+
+</h2>
+
 
 
 <div id="resultado" class="output">
@@ -319,6 +354,7 @@ let pararOCR=false;
 
 
 
+
 //////////////////////////////////////////////////
 // CARGAR BASES
 //////////////////////////////////////////////////
@@ -329,7 +365,9 @@ try{
 
 base =
 JSON.parse(
+
 localStorage.getItem(DB_KEY)||"[]"
+
 );
 
 
@@ -339,7 +377,6 @@ if(!Array.isArray(base)){
 base=[];
 
 }
-
 
 
 }catch(e){
@@ -357,7 +394,9 @@ try{
 
 ciclos =
 JSON.parse(
+
 localStorage.getItem(CICLOS_KEY)||"[]"
+
 );
 
 
@@ -369,12 +408,13 @@ ciclos=[];
 }
 
 
-
 }catch(e){
 
 ciclos=[];
 
 }
+
+
 
 
 
@@ -392,6 +432,7 @@ let salida =
 document.getElementById("resultado");
 
 
+
 if(salida){
 
 salida.innerText=texto;
@@ -405,6 +446,7 @@ salida.innerText=texto;
 
 
 
+
 //////////////////////////////////////////////////
 // ACTUALIZAR ESTADO
 //////////////////////////////////////////////////
@@ -413,8 +455,16 @@ salida.innerText=texto;
 function actualizarEstado(){
 
 
-document.getElementById("total").innerText =
+let total =
+document.getElementById("total");
+
+
+if(total){
+
+total.innerText =
 base.length;
+
+}
 
 
 
@@ -431,6 +481,9 @@ ciclos.length;
 
 
 }
+
+
+
 
 
 
@@ -453,10 +506,15 @@ JSON.stringify(base)
 );
 
 
+
 actualizarEstado();
 
 
 }
+
+
+
+
 
 
 
@@ -478,10 +536,14 @@ JSON.stringify(ciclos)
 );
 
 
+
 actualizarEstado();
 
 
 }
+
+
+
 
 
 
@@ -503,7 +565,6 @@ x.turno===r.turno &&
 
 x.fecha===r.fecha
 
-
 );
 
 
@@ -511,39 +572,6 @@ x.fecha===r.fecha
 
 
 
-
-
-//////////////////////////////////////////////////
-// AGREGAR REGISTRO HISTÓRICO
-//////////////////////////////////////////////////
-
-
-function agregarRegistro(r){
-
-
-
-if(!existeRegistro(r)){
-
-
-base.push(r);
-
-
-
-agregarAlCiclo(r);
-
-
-
-return true;
-
-
-}
-
-
-
-return false;
-
-
-}
 
 
 
@@ -587,6 +615,9 @@ nocturna:[]
 
 
 
+
+
+
 //////////////////////////////////////////////////
 // AGREGAR AL CICLO CRONOLÓGICO
 //////////////////////////////////////////////////
@@ -607,7 +638,6 @@ c.fecha===registro.fecha
 
 
 
-
 if(!ciclo){
 
 
@@ -623,11 +653,9 @@ ciclos.push(ciclo);
 
 
 
-
 let turno =
 
 registro.turno.toLowerCase();
-
 
 
 
@@ -649,44 +677,50 @@ registro.numero
 guardarCiclos();
 
 
-
 }
 
 
 
 
 
+
+
+
 //////////////////////////////////////////////////
-// ORDEN CRONOLÓGICO DE TURNOS
+// AGREGAR REGISTRO
 //////////////////////////////////////////////////
 
 
-function ordenTurno(turno){
+function agregarRegistro(r){
 
 
 
-let orden={
-
-
-"PREVIA":1,
-
-"PRIMERA":2,
-
-"MATUTINA":3,
-
-"VESPERTINA":4,
-
-"NOCTURNA":5
-
-
-};
+if(!existeRegistro(r)){
 
 
 
-return orden[turno]||0;
+base.push(r);
+
+
+
+agregarAlCiclo(r);
+
+
+
+return true;
 
 
 }
+
+
+
+return false;
+
+
+}
+
+
+
 
 
 
@@ -726,12 +760,7 @@ ciclos.length
 
 }
 
-
 );
-
-
-
-
   //////////////////////////////////////////////////
 // OCR PDF HISTÓRICO V36
 //////////////////////////////////////////////////
@@ -739,9 +768,12 @@ ciclos.length
 
 async function iniciarOCR(){
 
+try{
+
 
 let archivo =
 document.getElementById("archivoPDF").files[0];
+
 
 
 if(!archivo){
@@ -755,6 +787,7 @@ return;
 
 
 pararOCR=false;
+
 
 
 document.getElementById("infoOCR").innerText =
@@ -781,16 +814,23 @@ pdf.numPages;
 
 
 
-let worker = await Tesseract.createWorker("spa", 1);
+let worker =
+await Tesseract.createWorker("spa");
+
 
 
 
 
 for(
+
 let pagina=1;
+
 pagina<=pdf.numPages;
+
 pagina++
+
 ){
+
 
 
 if(pararOCR){
@@ -798,7 +838,6 @@ if(pararOCR){
 break;
 
 }
-
 
 
 
@@ -828,6 +867,7 @@ canvas.width =
 viewport.width;
 
 
+
 canvas.height =
 viewport.height;
 
@@ -837,6 +877,7 @@ viewport.height;
 await page.render({
 
 canvasContext:
+
 canvas.getContext("2d"),
 
 viewport
@@ -862,22 +903,21 @@ pagina
 
 
 
-
 document.getElementById("infoOCR").innerText =
 
 "Procesando página "+
-pagina+
-" de "+
-pdf.numPages;
 
+pagina+
+
+" de "+
+
+pdf.numPages;
 
 
 
 document.getElementById("barra").style.width =
 
 ((pagina/pdf.numPages)*100)+"%";
-
-
 
 
 
@@ -899,6 +939,7 @@ error
 
 
 
+
 await worker.terminate();
 
 
@@ -908,6 +949,7 @@ guardarBase();
 
 
 document.getElementById("infoOCR").innerText =
+
 "OCR finalizado";
 
 
@@ -915,10 +957,31 @@ document.getElementById("infoOCR").innerText =
 mostrar(
 
 "✅ OCR terminado\n\n"+
+
 "Registros: "+
+
 base.length
 
 );
+
+
+
+}catch(error){
+
+
+console.error(error);
+
+
+mostrar(
+
+"❌ Error OCR\n\n"+
+
+error.message
+
+);
+
+
+}
 
 
 
@@ -928,10 +991,7 @@ base.length
 
 
 
-
-
 function detenerOCR(){
-
 
 pararOCR=true;
 
@@ -949,26 +1009,23 @@ mostrar(
 
 
 
+
+
+
 //////////////////////////////////////////////////
-// EXTRAER NÚMEROS OCR
+// EXTRAER NÚMEROS
 //////////////////////////////////////////////////
 
 
 function extraerNumeros(texto){
 
 
-
-let numeros =
-
-texto.match(/\b\d{4}\b/g);
-
-
-
-return numeros || [];
-
+return texto.match(/\b\d{4}\b/g)||[];
 
 
 }
+
+
 
 
 
@@ -983,32 +1040,28 @@ return numeros || [];
 function guardarOCR(texto,pagina){
 
 
-
 if(!texto)
 return;
 
 
 
 let turno =
-
 detectarTurno(texto);
-
-
-
-
-let numeros =
-
-extraerNumeros(texto);
-
 
 
 
 let fecha =
 
 new Date()
+
 .toISOString()
+
 .split("T")[0];
 
+
+
+let numeros =
+extraerNumeros(texto);
 
 
 
@@ -1017,7 +1070,6 @@ numeros.forEach(numero=>{
 
 
 agregarRegistro({
-
 
 fecha,
 
@@ -1029,9 +1081,7 @@ pagina,
 
 origen:"OCR"
 
-
 });
-
 
 
 });
@@ -1039,6 +1089,8 @@ origen:"OCR"
 
 
 }
+
+
 
 
 
@@ -1053,17 +1105,15 @@ origen:"OCR"
 function detectarTurno(texto){
 
 
-
 let t =
 
 texto
-.toUpperCase()
-.normalize("NFD")
-.replace(
-/[\u0300-\u036f]/g,
-""
-);
 
+.toUpperCase()
+
+.normalize("NFD")
+
+.replace(/[\u0300-\u036f]/g,"");
 
 
 
@@ -1098,18 +1148,11 @@ return "NOCTURNA";
 
 
 
-
 return "DESCONOCIDO";
 
 
-}
-
-
-
-
-
-
-//////////////////////////////////////////////////
+  }
+  //////////////////////////////////////////////////
 // CARGA MANUAL V36
 //////////////////////////////////////////////////
 
@@ -1117,11 +1160,9 @@ return "DESCONOCIDO";
 function guardarManual(){
 
 
-
 let turno =
 
 document.getElementById("turnoManual").value;
-
 
 
 
@@ -1135,8 +1176,6 @@ document.getElementById("numerosManual").value;
 let numeros =
 
 texto.match(/\d{4}/g);
-
-
 
 
 
@@ -1158,11 +1197,12 @@ return;
 
 
 
-
 let fecha =
 
 new Date()
+
 .toISOString()
+
 .split("T")[0];
 
 
@@ -1174,7 +1214,6 @@ let nuevos=0;
 
 
 numeros.forEach(numero=>{
-
 
 
 let registro={
@@ -1243,7 +1282,15 @@ analizarTransicion(turno);
 
 
 }
-  //////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
 // TRANSICIÓN HISTÓRICA V36
 //////////////////////////////////////////////////
 
@@ -1269,45 +1316,20 @@ let mapa={
 
 
 
-return mapa[turno] || "";
-
+return mapa[turno]||"";
 
 
 }
 
 
 
-
-
-
-//////////////////////////////////////////////////
-// ANALIZAR TRANSICIÓN
-//////////////////////////////////////////////////
 
 
 function analizarTransicion(origen){
 
 
-
 let destino =
-
 turnoSiguiente(origen);
-
-
-
-
-
-if(!destino){
-
-mostrar(
-"⚠️ Turno no válido"
-);
-
-return;
-
-}
-
-
 
 
 
@@ -1315,52 +1337,31 @@ let datos=[];
 
 
 
-
 ciclos.forEach(ciclo=>{
 
 
-
-let origenDatos =
-
-ciclo[origen.toLowerCase()];
-
-
-let destinoDatos =
+let siguiente =
 
 ciclo[destino.toLowerCase()];
 
 
 
-
-if(
-
-origenDatos &&
-
-origenDatos.length &&
-
-destinoDatos &&
-
-destinoDatos.length
-
-){
+if(siguiente){
 
 
-
-destinoDatos.forEach(numero=>{
+siguiente.forEach(numero=>{
 
 
 datos.push({
 
-numero:numero,
+numero,
 
 fecha:ciclo.fecha
 
 });
 
 
-
 });
-
 
 
 }
@@ -1368,42 +1369,25 @@ fecha:ciclo.fecha
 
 
 });
-
-
-
 
 
 
 if(datos.length<3){
 
 
-mostrar(`
+mostrar(
 
-⚠️ Historial insuficiente
+"⚠️ Historial insuficiente\n\n"+
 
+origen+" → "+destino
 
-Modelo:
-
-${origen}
-
-→
-
-${destino}
-
-
-Registros:
-
-${datos.length}
-
-`);
-
+);
 
 
 return;
 
 
 }
-
 
 
 
@@ -1418,15 +1402,8 @@ destino
 );
 
 
-
-}
-
-
-
-
-
-
-//////////////////////////////////////////////////
+              }
+  //////////////////////////////////////////////////
 // RANKING IA V36
 //////////////////////////////////////////////////
 
@@ -1438,13 +1415,11 @@ destino
 ){
 
 
-
 let puntaje={};
 
 
 
-
-datos.forEach((r)=>{
+datos.forEach(r=>{
 
 
 let numero=r.numero;
@@ -1453,40 +1428,28 @@ let numero=r.numero;
 
 if(!puntaje[numero]){
 
-
 puntaje[numero]=0;
-
 
 }
 
 
 
-
-// frecuencia
+// frecuencia histórica
 
 puntaje[numero]+=50;
 
 
 
 
-
-// peso por fecha
+// peso cronológico
 
 let dias=
 
-(
+(Date.now()-
 
-Date.now()
+new Date(r.fecha))
 
--
-
-new Date(r.fecha)
-
-)
-
-/
-
-86400000;
+/86400000;
 
 
 
@@ -1495,16 +1458,16 @@ puntaje[numero]+=
 100/
 
 Math.max(
+
 1,
+
 dias
+
 );
 
 
 
-
-
 });
-
 
 
 
@@ -1519,7 +1482,6 @@ Object.keys(puntaje)
 
 return {
 
-
 numero,
 
 puntaje:
@@ -1531,13 +1493,12 @@ puntaje[numero]
 
 })
 
-.sort(
-
-(a,b)=>
+.sort((a,b)=>
 
 b.puntaje-a.puntaje
 
 );
+
 
 
 
@@ -1564,7 +1525,7 @@ datos.length
 
 
 //////////////////////////////////////////////////
-// GENERADOR PRINCIPAL Y APOYO V36
+// GENERADOR IA PRINCIPAL Y APOYO
 //////////////////////////////////////////////////
 
 
@@ -1586,7 +1547,9 @@ if(!ranking.length){
 
 
 mostrar(
-"⚠️ Sin datos"
+
+"⚠️ Sin datos para analizar"
+
 );
 
 
@@ -1608,20 +1571,18 @@ ranking.slice(0,8);
 
 let cuaternoPrincipal=
 
-top
-.slice(0,4)
-.map(x=>x.numero);
+top.slice(0,4)
 
+.map(x=>x.numero);
 
 
 
 
 let cuaternoApoyo=
 
-top
-.slice(4,8)
-.map(x=>x.numero);
+top.slice(4,8)
 
+.map(x=>x.numero);
 
 
 
@@ -1629,19 +1590,13 @@ top
 
 let ternoPrincipal=
 
-cuaternoPrincipal
-.slice(0,3);
-
-
+cuaternoPrincipal.slice(0,3);
 
 
 
 let ternoApoyo=
 
-cuaternoApoyo
-.slice(0,3);
-
-
+cuaternoApoyo.slice(0,3);
 
 
 
@@ -1649,8 +1604,7 @@ cuaternoApoyo
 
 let ambosPrincipal=
 
-cuaternoPrincipal
-.map(x=>
+cuaternoPrincipal.map(x=>
 
 x.slice(-2)
 
@@ -1660,11 +1614,9 @@ x.slice(-2)
 
 
 
-
 let ambosApoyo=
 
-cuaternoApoyo
-.map(x=>
+cuaternoApoyo.map(x=>
 
 x.slice(-2)
 
@@ -1687,6 +1639,7 @@ ${origen}
 ↓
 
 ${destino}
+
 
 
 
@@ -1741,7 +1694,12 @@ ${cantidad}
 
 
 }
-  <script>
+
+
+
+
+
+
 
 //////////////////////////////////////////////////
 // HERRAMIENTAS V36
@@ -1754,17 +1712,19 @@ function exportarBase(){
 let respaldo={
 
 
-version:"EMI TESLA PRO V36",
+version:
+
+"EMI TESLA PRO V36",
 
 
 fecha:
+
 new Date().toISOString(),
 
 
-base:base,
+base,
 
-
-ciclos:ciclos
+ciclos
 
 
 };
@@ -1772,20 +1732,28 @@ ciclos:ciclos
 
 
 
-let archivo =
+let archivo=
 
 new Blob(
 
 [
+
 JSON.stringify(
+
 respaldo,
+
 null,
+
 2
+
 )
+
 ],
 
 {
+
 type:"application/json"
+
 }
 
 );
@@ -1793,17 +1761,20 @@ type:"application/json"
 
 
 
-let enlace =
+let enlace=
+
 document.createElement("a");
 
 
 
-enlace.href =
+enlace.href=
+
 URL.createObjectURL(archivo);
 
 
 
-enlace.download =
+enlace.download=
+
 "EMI_TESLA_PRO_V36_BACKUP.json";
 
 
@@ -1811,242 +1782,11 @@ enlace.download =
 enlace.click();
 
 
-}
-
-
-
-
-
-//////////////////////////////////////////////////
-// IMPORTAR BACKUP
-//////////////////////////////////////////////////
-
-
-function importarBase(event){
-
-
-let archivo =
-event.target.files[0];
-
-
-
-if(!archivo)
-return;
-
-
-
-
-let lector =
-new FileReader();
-
-
-
-
-lector.onload=function(e){
-
-
-try{
-
-
-let datos =
-JSON.parse(
-e.target.result
-);
-
-
-
-
-if(datos.base){
-
-
-base =
-datos.base;
-
 
 }
 
 
 
-
-if(datos.ciclos){
-
-
-ciclos =
-datos.ciclos;
-
-
-}
-
-
-
-
-guardarBase();
-
-guardarCiclos();
-
-
-
-
-mostrar(`
-
-✅ BACKUP V36 CARGADO
-
-
-Registros:
-
-${base.length}
-
-
-Ciclos:
-
-${ciclos.length}
-
-`);
-
-
-
-
-}catch(error){
-
-
-
-mostrar(
-
-"❌ Error importando backup"
-
-);
-
-
-}
-
-
-
-};
-
-
-
-lector.readAsText(archivo);
-
-
-
-}
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// OPTIMIZAR BASE
-//////////////////////////////////////////////////
-
-
-function optimizarBase(){
-
-
-let antes =
-base.length;
-
-
-
-
-let limpia=[];
-
-
-
-
-base.forEach(r=>{
-
-
-if(
-
-r.numero &&
-
-/^\d{4}$/.test(r.numero)
-
-&&
-
-r.turno
-
-){
-
-
-
-if(!limpia.some(x=>
-
-x.numero===r.numero &&
-
-x.turno===r.turno &&
-
-x.fecha===r.fecha
-
-)){
-
-
-limpia.push(r);
-
-
-}
-
-
-
-}
-
-
-
-});
-
-
-
-
-base=limpia;
-
-
-
-
-guardarBase();
-
-
-
-
-
-mostrar(`
-
-⚙️ OPTIMIZACIÓN V36
-
-
-Antes:
-
-${antes}
-
-
-Después:
-
-${base.length}
-
-
-Eliminados:
-
-${antes-base.length}
-
-`);
-
-
-
-
-}
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// ESTADO DEL SISTEMA
-//////////////////////////////////////////////////
 
 
 function estadoSistema(){
@@ -2068,12 +1808,12 @@ ${base.length}
 ${ciclos.length}
 
 
-🧠 Motor IA:
+📄 OCR:
 
 ACTIVO
 
 
-📄 OCR:
+🧠 Motor IA:
 
 ACTIVO
 
@@ -2085,25 +1825,11 @@ LOCAL STORAGE
 
 `);
 
-
-
-
-
 }
 
 
 
-
-
-
-
-//////////////////////////////////////////////////
-// PRUEBA DEL SISTEMA
-//////////////////////////////////////////////////
-
-
 function pruebaSistema(){
-
 
 
 mostrar(`
@@ -2111,47 +1837,31 @@ mostrar(`
 🧪 PRUEBA V36
 
 
-✅ Base histórica:
+✅ Base:
 
 ${base.length}
 
 
-✅ Base cronológica:
+✅ Ciclos:
 
 ${ciclos.length}
 
 
 ✅ OCR:
 
-OK
+LISTO
 
 
-✅ Motor IA:
+✅ IA:
 
-OK
-
-
-✅ Guardado:
-
-OK
+LISTA
 
 
 `);
 
-
-
-
-
 }
 
 
-
-
-
-
-//////////////////////////////////////////////////
-// LIMPIAR BASE
-//////////////////////////////////////////////////
 
 
 function limpiarBase(){
@@ -2164,9 +1874,7 @@ if(confirm(
 )){
 
 
-
 base=[];
-
 
 ciclos=[];
 
@@ -2178,10 +1886,9 @@ guardarCiclos();
 
 
 
-
 mostrar(
 
-"🧹 Base V36 eliminada"
+"🧹 Base eliminada"
 
 );
 
@@ -2189,15 +1896,13 @@ mostrar(
 
 }
 
-
-
 }
 
 
 
 
 
-</script>
+
 
 
 
@@ -2205,8 +1910,11 @@ mostrar(
 
 
 <h2>
+
 🧠 Herramientas EMI Tesla PRO V36
+
 </h2>
+
 
 
 
@@ -2226,13 +1934,6 @@ mostrar(
 
 
 
-<button onclick="optimizarBase()">
-
-⚙️ Optimizar Base
-
-</button>
-
-
 
 <button onclick="exportarBase()">
 
@@ -2242,35 +1943,13 @@ mostrar(
 
 
 
+
 <button onclick="limpiarBase()">
 
 🧹 Limpiar Base
 
 </button>
 
-
-
-</div>
-
-
-
-
-<div class="card">
-
-
-<h2>
-📥 Importar Backup V36
-</h2>
-
-
-
-<input
-
-type="file"
-
-accept=".json"
-
-onchange="importarBase(event)">
 
 
 </div>

@@ -1538,51 +1538,75 @@ x+" = "+patrones[x]+" veces"
 
 
 }
-    //////////////////////////////////////////////////
-// GENERADOR RESULTADO FINAL V36
+ 
+
+//////////////////////////////////////////////////
+// GENERADOR INTELIGENTE V36
 //////////////////////////////////////////////////
 
 function generarResultadoV36(
-
 ranking,
-
 origen,
-
 destino,
-
 cantidad
-
 ){
-
 
 
 if(!ranking.length){
 
-
 mostrar("⚠️ Sin datos");
 
-
 return;
+
+}
+
+
+
+let principal =
+ranking[0].numero;
+
+
+
+let apoyo="";
+
+
+
+// Buscar un apoyo con terminación diferente
+
+for(let i=1;i<ranking.length;i++){
+
+
+let candidato =
+ranking[i].numero;
+
+
+
+if(
+
+candidato !== principal &&
+
+candidato.slice(-2)!==principal.slice(-2)
+
+){
+
+
+apoyo=candidato;
+
+break;
+
+
+}
 
 
 }
 
 
 
+if(!apoyo){
 
-let cuaternoPrincipal=
+apoyo=ranking[1].numero;
 
-ranking[0].numero;
-
-
-
-let cuaternoApoyo=
-
-ranking[1] ?
-
-ranking[1].numero :
-
-ranking[0].numero;
+}
 
 
 
@@ -1591,7 +1615,6 @@ ranking[0].numero;
 mostrar(`
 
 🧠 EMI TESLA PRO V36 IA HISTÓRICA
-
 
 
 MODELO:
@@ -1604,79 +1627,50 @@ ${destino}
 
 
 
-
-
 🔥 CUATERNO PRINCIPAL
 
-
-${cuaternoPrincipal}
-
-
+${principal}
 
 
 
 🟡 CUATERNO APOYO
 
-
-${cuaternoApoyo}
-
-
+${apoyo}
 
 
 
 ⚡ TERNO PRINCIPAL
 
-
-${cuaternoPrincipal.slice(-3)}
-
-
+${principal.slice(-3)}
 
 
 
 🟡 TERNO APOYO
 
-
-${cuaternoApoyo.slice(-3)}
-
-
-
+${apoyo.slice(-3)}
 
 
 
 💥 AMBOS PRINCIPAL
 
-
-${cuaternoPrincipal.slice(-2)}
-
-
-
+${principal.slice(-2)}
 
 
 
 🟡 AMBOS APOYO
 
-
-${cuaternoApoyo.slice(-2)}
-
+${apoyo.slice(-2)}
 
 
 
-
-
-📊 REGISTROS USADOS:
-
+📊 REGISTROS ANALIZADOS
 
 ${cantidad}
 
 
-
 `);
 
-
-
 }
-
-
 
 
 

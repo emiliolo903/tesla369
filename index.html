@@ -15,7 +15,6 @@
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 
-
 <style>
 
 body{
@@ -28,14 +27,12 @@ padding:15px;
 }
 
 
-
 h1{
 
 text-align:center;
 color:#00ff99;
 
 }
-
 
 
 .card{
@@ -45,6 +42,13 @@ border-radius:12px;
 padding:15px;
 margin:12px 0;
 border:1px solid #444;
+
+}
+
+
+h2{
+
+color:#00ff99;
 
 }
 
@@ -59,9 +63,9 @@ padding:12px;
 margin:5px 0;
 border-radius:8px;
 border:none;
+box-sizing:border-box;
 
 }
-
 
 
 button{
@@ -69,6 +73,14 @@ button{
 background:#00aa66;
 color:white;
 font-weight:bold;
+cursor:pointer;
+
+}
+
+
+button:hover{
+
+background:#00dd88;
 
 }
 
@@ -87,7 +99,7 @@ gap:10px;
 .box{
 
 background:#292929;
-padding:10px;
+padding:12px;
 border-radius:8px;
 text-align:center;
 
@@ -101,7 +113,7 @@ background:#000;
 padding:15px;
 border-radius:10px;
 white-space:pre-wrap;
-min-height:200px;
+min-height:220px;
 
 }
 
@@ -127,8 +139,16 @@ background:#00ff99;
 }
 
 
-</style>
 
+span{
+
+color:#00ff99;
+font-size:22px;
+
+}
+
+
+</style>
 
 </head>
 
@@ -137,13 +157,14 @@ background:#00ff99;
 <body>
 
 
+
 <h1>
 
 🚀 EMI Tesla PRO V36
 
 <br>
 
-🧠 IA HISTÓRICA
+🧠 IA HISTÓRICA MULTIPROVINCIA
 
 </h1>
 
@@ -152,7 +173,8 @@ background:#00ff99;
 
 <div class="card">
 
-<h2>📊 Estado del Sistema</h2>
+
+<h2>📊 Estado Sistema</h2>
 
 
 <div class="grid">
@@ -184,13 +206,13 @@ Páginas OCR
 
 <div class="box">
 
-Estado
+Provincia
 
 <br>
 
-<span id="estado">
+<span id="provActual">
 
-LISTO
+-
 
 </span>
 
@@ -204,14 +226,17 @@ Versión
 
 <br>
 
-V36
+V36 IA
+
+</div>
+
+
 
 </div>
 
 
 </div>
 
-</div>
 
 
 
@@ -221,11 +246,7 @@ V36
 <div class="card">
 
 
-<h2>
-
-📄 OCR PDF HISTÓRICO
-
-</h2>
+<h2>📄 Importar PDF Histórico</h2>
 
 
 
@@ -241,7 +262,7 @@ accept=".pdf">
 
 <button onclick="iniciarOCR()">
 
-📥 Procesar PDF
+📥 Procesar PDF IA
 
 </button>
 
@@ -255,13 +276,11 @@ accept=".pdf">
 
 
 
-
 <div class="progress">
 
 <div id="barra"></div>
 
 </div>
-
 
 
 
@@ -272,7 +291,9 @@ Esperando archivo...
 </p>
 
 
+
 </div>
+
 
 
 
@@ -282,15 +303,36 @@ Esperando archivo...
 <div class="card">
 
 
-<h2>
+<h2>🌎 Datos del Sorteo</h2>
 
-✍️ CARGA MANUAL
 
-</h2>
+
+<select id="provincia">
+
+
+<option>CORRIENTES</option>
+
+<option>SANTA FE</option>
+
+<option>CORDOBA</option>
+
+<option>CHACO</option>
+
+<option>ENTRE RIOS</option>
+
+<option>CIUDAD</option>
+
+<option>BONAERENSE</option>
+
+
+</select>
+
+
 
 
 
 <select id="turnoManual">
+
 
 <option>PREVIA</option>
 
@@ -302,7 +344,9 @@ Esperando archivo...
 
 <option>NOCTURNA</option>
 
+
 </select>
+
 
 
 
@@ -310,18 +354,22 @@ Esperando archivo...
 
 id="numerosManual"
 
-placeholder="Ejemplo: 1679 2653">
+placeholder="Ejemplo: 5482 7315 9082">
+
+
 
 
 
 <button onclick="guardarManual()">
 
-💾 Guardar y Analizar
+💾 Guardar Datos IA
 
 </button>
 
 
+
 </div>
+
 
 
 
@@ -331,48 +379,37 @@ placeholder="Ejemplo: 1679 2653">
 <div class="card">
 
 
-<h2>
-
-🧠 RESULTADO IA V36
-
-</h2>
-
+<h2>🧠 Centro Resultado IA V36</h2>
 
 
 <div id="resultado" class="output">
 
+
 EMI Tesla PRO V36 iniciado
+
 
 </div>
 
 
-  </div>
-  <script>
+</div>
+<script>
 
 //////////////////////////////////////////////////
-// BASE HISTÓRICA V36
+// BASE HISTÓRICA MULTIPROVINCIA V36
 //////////////////////////////////////////////////
 
-const DB_KEY="EMI_TESLA_V36_DB";
-
-const CICLOS_KEY="EMI_TESLA_V36_CICLOS";
-
+const DB_KEY="EMI_TESLA_V36_IA_DB";
 
 let base=[];
 
-let ciclos=[];
-
 let pararOCR=false;
-
 
 
 
 try{
 
 base=JSON.parse(
-
 localStorage.getItem(DB_KEY)||"[]"
-
 );
 
 
@@ -393,42 +430,13 @@ base=[];
 
 
 
-try{
-
-ciclos=JSON.parse(
-
-localStorage.getItem(CICLOS_KEY)||"[]"
-
-);
-
-
-if(!Array.isArray(ciclos)){
-
-ciclos=[];
-
-}
-
-
-}catch(e){
-
-ciclos=[];
-
-}
-
-
-
-
-
 //////////////////////////////////////////////////
 // MOSTRAR
 //////////////////////////////////////////////////
 
 function mostrar(texto){
 
-let salida=
-
-document.getElementById("resultado");
-
+let salida=document.getElementById("resultado");
 
 if(salida){
 
@@ -436,10 +444,7 @@ salida.innerText=texto;
 
 }
 
-
 }
-
-
 
 
 
@@ -450,10 +455,7 @@ salida.innerText=texto;
 
 function actualizarEstado(){
 
-let total=
-
-document.getElementById("total");
-
+let total=document.getElementById("total");
 
 if(total){
 
@@ -461,16 +463,14 @@ total.innerText=base.length;
 
 }
 
-
 }
 
 
 
 
 
-
 //////////////////////////////////////////////////
-// GUARDAR
+// GUARDAR BASE
 //////////////////////////////////////////////////
 
 function guardarBase(){
@@ -491,21 +491,6 @@ actualizarEstado();
 
 
 
-function guardarCiclos(){
-
-localStorage.setItem(
-
-CICLOS_KEY,
-
-JSON.stringify(ciclos)
-
-);
-
-
-}
-
-
-
 
 
 
@@ -519,18 +504,19 @@ function existeRegistro(r){
 
 return base.some(x=>
 
-x.numero===r.numero &&
+x.fecha===r.fecha &&
 
 x.turno===r.turno &&
 
-x.fecha===r.fecha
+x.provincia===r.provincia &&
+
+x.numero===r.numero
+
 
 );
 
 
 }
-
-
 
 
 
@@ -549,9 +535,6 @@ if(!existeRegistro(r)){
 base.push(r);
 
 
-agregarCiclo(r);
-
-
 return true;
 
 
@@ -567,13 +550,11 @@ return false;
 
 
 
-
 //////////////////////////////////////////////////
-// OCR PDF V36
+// OCR PDF V36 IA
 //////////////////////////////////////////////////
 
 async function iniciarOCR(){
-
 
 
 let archivo=
@@ -582,18 +563,13 @@ document.getElementById("archivoPDF").files[0];
 
 
 
-
 if(!archivo){
 
-
-alert("Seleccione un PDF");
-
+alert("Seleccione PDF");
 
 return;
 
-
 }
-
 
 
 
@@ -601,16 +577,29 @@ pararOCR=false;
 
 
 
-document.getElementById("estado").innerText=
+mostrar(
+"📄 Procesando PDF..."
+);
 
-"PROCESANDO";
+
+
+let provincia=
+
+document.getElementById("provincia").value;
+
+
+
+document.getElementById("provActual").innerText=
+
+provincia;
+
+
 
 
 
 let datos=
 
 await archivo.arrayBuffer();
-
 
 
 
@@ -634,11 +623,9 @@ pdf.numPages;
 
 
 
-
 let worker=
 
 await Tesseract.createWorker("spa");
-
 
 
 
@@ -655,18 +642,15 @@ pagina++
 ){
 
 
-
 if(pararOCR)
 
 break;
 
 
 
-
 let page=
 
 await pdf.getPage(pagina);
-
 
 
 
@@ -677,7 +661,6 @@ page.getViewport({
 scale:2
 
 });
-
 
 
 
@@ -714,7 +697,6 @@ viewport
 
 
 
-
 let texto=
 
 await worker.recognize(canvas);
@@ -727,9 +709,12 @@ guardarOCR(
 
 texto.data.text,
 
-pagina
+pagina,
+
+provincia
 
 );
+
 
 
 
@@ -741,16 +726,7 @@ document.getElementById("barra").style.width=
 
 
 
-
-document.getElementById("infoOCR").innerText=
-
-"Procesando página "+pagina+" de "+pdf.numPages;
-
-
-
-
 }
-
 
 
 
@@ -763,15 +739,11 @@ guardarBase();
 
 
 
-document.getElementById("estado").innerText=
-
-"FINALIZADO";
-
-
-
 mostrar(
 
-"✅ OCR terminado\n\nRegistros: "+base.length
+"✅ OCR terminado\n\n"+
+"Registros: "+
+base.length
 
 );
 
@@ -787,33 +759,13 @@ mostrar(
 
 function detenerOCR(){
 
-
 pararOCR=true;
 
-
-mostrar("⛔ OCR detenido");
-
-
-}
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// EXTRAER NUMEROS
-//////////////////////////////////////////////////
-
-function extraerNumeros(texto){
-
-
-return texto.match(/\b\d{4}\b/g)||[];
-
+mostrar(
+"⛔ OCR detenido"
+);
 
 }
-
-
 
 
 
@@ -823,18 +775,29 @@ return texto.match(/\b\d{4}\b/g)||[];
 // GUARDAR OCR
 //////////////////////////////////////////////////
 
-function guardarOCR(texto,pagina){
+function guardarOCR(
+
+texto,
+
+pagina,
+
+provincia
+
+){
 
 
 let numeros=
 
-extraerNumeros(texto);
+texto.match(/\b\d{4}\b/g)||[];
+
 
 
 
 let turno=
 
 detectarTurno(texto);
+
+
 
 
 
@@ -849,12 +812,15 @@ new Date()
 
 
 
+
 numeros.forEach(numero=>{
 
 
 agregarRegistro({
 
 fecha,
+
+provincia,
 
 turno,
 
@@ -864,7 +830,9 @@ pagina,
 
 origen:"OCR"
 
+
 });
+
 
 
 });
@@ -877,17 +845,16 @@ origen:"OCR"
 
 
 
+//////////////////////////////////////////////////
+// DETECTAR TURNO
+//////////////////////////////////////////////////
 
 function detectarTurno(texto){
 
 
 let t=
 
-texto.toUpperCase()
-
-.normalize("NFD")
-
-.replace(/[\u0300-\u036f]/g,"");
+texto.toUpperCase();
 
 
 
@@ -921,137 +888,39 @@ return "DESCONOCIDO";
 
 
 }
-    //////////////////////////////////////////////////
-// CICLOS HISTÓRICOS V36
-//////////////////////////////////////////////////
-
-function crearCiclo(fecha){
-
-return {
-
-fecha:fecha,
-
-PREVIA:[],
-
-PRIMERA:[],
-
-MATUTINA:[],
-
-VESPERTINA:[],
-
-NOCTURNA:[]
-
-};
-
-
-}
-
-
-
-
-
-
-function agregarCiclo(r){
-
-
-let ciclo=
-
-ciclos.find(c=>
-
-c.fecha===r.fecha
-
-);
-
-
-
-if(!ciclo){
-
-
-ciclo=
-
-crearCiclo(r.fecha);
-
-
-ciclos.push(ciclo);
-
-
-}
-
-
-
-
-
-if(ciclo[r.turno]){
-
-
-ciclo[r.turno].push(r.numero);
-
-
-}
-
-
-
-guardarCiclos();
-
-
-
-}
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// CARGA MANUAL
+  //////////////////////////////////////////////////
+// CARGA MANUAL V36 IA
 //////////////////////////////////////////////////
 
 function guardarManual(){
 
 
+let provincia=document.getElementById("provincia").value;
 
-let turno=
+let turno=document.getElementById("turnoManual").value;
 
-document.getElementById("turnoManual").value;
-
-
-
-let texto=
-
-document.getElementById("numerosManual").value;
+let texto=document.getElementById("numerosManual").value;
 
 
 
-let numeros=
-
-texto.match(/\d{4}/g);
-
-
+let numeros=texto.match(/\d{4}/g);
 
 
 
 if(!numeros){
 
-
 mostrar("⚠️ Ingrese números de 4 cifras");
 
-
 return;
-
 
 }
 
 
 
-let fecha=
 
-new Date()
-
+let fecha=new Date()
 .toISOString()
-
 .split("T")[0];
-
 
 
 
@@ -1059,32 +928,22 @@ let nuevos=0;
 
 
 
-
 numeros.forEach(numero=>{
 
 
-if(
-
-agregarRegistro({
+if(agregarRegistro({
 
 fecha,
-
+provincia,
 turno,
-
 numero,
-
 origen:"MANUAL"
 
-})
-
-){
-
+})){
 
 nuevos++;
 
-
 }
-
 
 
 });
@@ -1096,26 +955,23 @@ guardarBase();
 
 
 
+mostrar(
 
-mostrar(`
+`✅ DATOS GUARDADOS
 
-✅ DATOS GUARDADOS
-
+Provincia:
+${provincia}
 
 Turno:
-
 ${turno}
 
-
 Nuevos:
-
 ${nuevos}
 
 
-🧠 Analizando transición...
+🧠 Analizando transición...`
 
-`);
-
+);
 
 
 
@@ -1131,19 +987,15 @@ analizarTransicion(turno);
 
 
 //////////////////////////////////////////////////
-// ORDEN DE TURNOS
+// TRANSICIONES V36
 //////////////////////////////////////////////////
 
 const ORDEN_TURNOS=[
 
 "PREVIA",
-
 "PRIMERA",
-
 "MATUTINA",
-
 "VESPERTINA",
-
 "NOCTURNA"
 
 ];
@@ -1151,22 +1003,15 @@ const ORDEN_TURNOS=[
 
 
 
-
-
-
 function turnoSiguiente(turno){
 
 
-let pos=
-
-ORDEN_TURNOS.indexOf(turno);
-
+let pos=ORDEN_TURNOS.indexOf(turno);
 
 
 if(pos===4)
 
 return "PREVIA";
-
 
 
 return ORDEN_TURNOS[pos+1];
@@ -1180,90 +1025,42 @@ return ORDEN_TURNOS[pos+1];
 
 
 
-function turnoAnterior(turno){
-
-
-let pos=
-
-ORDEN_TURNOS.indexOf(turno);
-
-
-
-if(pos<=0)
-
-return "";
-
-
-return ORDEN_TURNOS[pos-1];
-
-
-                }
-    //////////////////////////////////////////////////
-// TRANSICIÓN IA V36
-//////////////////////////////////////////////////
-
 function analizarTransicion(origen){
 
 
-let destino=
-
-turnoSiguiente(origen);
+let destino=turnoSiguiente(origen);
 
 
 
-let datos=[];
+let datos=base.filter(r=>
 
+r.turno===destino
 
-
-base.forEach(r=>{
-
-
-if(r.turno===destino){
-
-
-datos.push(r);
-
-
-}
-
-
-
-});
-
-
+);
 
 
 
 if(datos.length<3){
 
 
-mostrar(`
+mostrar(
 
-⚠️ Poco historial
-
-
-Modelo:
+`⚠️ Poco historial
 
 ${origen}
-
 ↓
 
 ${destino}
 
-
-
 Registros:
+${datos.length}`
 
-${datos.length}
-
-`);
+);
 
 
 return;
 
-
 }
-
 
 
 
@@ -1278,8 +1075,8 @@ destino
 );
 
 
-
 }
+
 
 
 
@@ -1291,15 +1088,21 @@ destino
 //////////////////////////////////////////////////
 
 function calcularRankingV36(
+
 datos,
+
 origen,
+
 destino
+
 ){
+
 
 
 let puntos={};
 
 let terminaciones={};
+
 
 
 
@@ -1319,37 +1122,31 @@ return;
 
 
 
-if(!puntos[numero]){
+puntos[numero]=
 
-puntos[numero]=0;
-
-}
+(puntos[numero]||0);
 
 
 
-// 40% frecuencia histórica
+
+// frecuencia histórica
 
 puntos[numero]+=40;
 
 
 
-
-
-// 25% transición turno
+// transición
 
 puntos[numero]+=25;
 
 
 
 
-
-// 20% reciente
+// reciente
 
 let dias=
 
-(Date.now()-
-
-new Date(r.fecha))
+(Date.now()-new Date(r.fecha))
 
 /86400000;
 
@@ -1357,15 +1154,11 @@ new Date(r.fecha))
 
 puntos[numero]+=
 
-20/
-
-Math.max(1,dias);
+20/Math.max(1,dias);
 
 
 
 
-
-// 15% fuerza del ambos
 
 let ambos=
 
@@ -1376,6 +1169,7 @@ numero.slice(-2);
 terminaciones[ambos]=
 
 (terminaciones[ambos]||0)+1;
+
 
 
 
@@ -1396,15 +1190,9 @@ numero.slice(-2);
 
 
 
-if(terminaciones[ambos]){
-
-
 puntos[numero]+=
 
-terminaciones[ambos]*15;
-
-
-}
+(terminaciones[ambos]||0)*15;
 
 
 
@@ -1453,89 +1241,29 @@ datos.length
 );
 
 
-
 }
 
 
-//////////////////////////////////////////////////
-// PATRONES HISTÓRICOS
-//////////////////////////////////////////////////
-
-function analizarPatrones(){
-
-
-let patrones={};
-
-
-
-base.forEach(r=>{
-
-
-let ambos=
-
-r.numero.slice(-2);
-
-
-
-patrones[ambos]=
-
-(patrones[ambos]||0)+1;
-
-
-
-});
 
 
 
 
 
-
-let orden=
-
-Object.keys(patrones)
-
-.sort((a,b)=>
-
-patrones[b]-patrones[a]
-
-)
-
-.slice(0,20);
-
-
-
-
-
-
-
-mostrar(`
-
-🔬 PATRONES HISTÓRICOS V36
-
-
-${orden.map(x=>
-
-x+" = "+patrones[x]+" veces"
-
-).join("\n")}
-
-
-`);
-
-
-
-}
- 
 
 //////////////////////////////////////////////////
 // GENERADOR INTELIGENTE V36
 //////////////////////////////////////////////////
 
 function generarResultadoV36(
+
 ranking,
+
 origen,
+
 destino,
+
 cantidad
+
 ){
 
 
@@ -1549,51 +1277,20 @@ return;
 
 
 
-let principal =
+let principal=
+
 ranking[0].numero;
 
 
 
-let apoyo="";
+let apoyo=
 
+ranking[1] ?
 
+ranking[1].numero :
 
-// Buscar un apoyo con terminación diferente
+principal;
 
-for(let i=1;i<ranking.length;i++){
-
-
-let candidato =
-ranking[i].numero;
-
-
-
-if(
-
-candidato !== principal &&
-
-candidato.slice(-2)!==principal.slice(-2)
-
-){
-
-
-apoyo=candidato;
-
-break;
-
-
-}
-
-
-}
-
-
-
-if(!apoyo){
-
-apoyo=ranking[1].numero;
-
-}
 
 
 
@@ -1601,7 +1298,7 @@ apoyo=ranking[1].numero;
 
 mostrar(`
 
-🧠 EMI TESLA PRO V36 IA HISTÓRICA
+🧠 EMI TESLA PRO V36 IA
 
 
 MODELO:
@@ -1650,12 +1347,105 @@ ${apoyo.slice(-2)}
 
 
 
-📊 REGISTROS ANALIZADOS
+📊 DATOS ANALIZADOS
 
 ${cantidad}
 
 
 `);
+
+
+
+  }
+  //////////////////////////////////////////////////
+// MATRIZ PROVINCIAS V36
+//////////////////////////////////////////////////
+
+function matrizProvincias(){
+
+
+let matriz={};
+
+
+
+base.forEach(r=>{
+
+
+if(!matriz[r.provincia]){
+
+matriz[r.provincia]={};
+
+}
+
+
+
+let ambos=
+
+r.numero.slice(-2);
+
+
+
+matriz[r.provincia][ambos]=
+
+(matriz[r.provincia][ambos]||0)+1;
+
+
+
+});
+
+
+
+
+
+let texto=
+
+"🌎 MATRIZ PROVINCIAS V36\n\n";
+
+
+
+
+Object.keys(matriz).forEach(prov=>{
+
+
+texto+=
+
+"📍 "+prov+"\n";
+
+
+
+let top=
+
+Object.entries(matriz[prov])
+
+.sort((a,b)=>b[1]-a[1])
+
+.slice(0,5);
+
+
+
+top.forEach(x=>{
+
+
+texto+=
+
+x[0]+" → "+x[1]+" veces\n";
+
+
+});
+
+
+
+texto+="\n";
+
+
+});
+
+
+
+
+
+mostrar(texto);
+
 
 }
 
@@ -1664,17 +1454,391 @@ ${cantidad}
 
 
 
+
 //////////////////////////////////////////////////
-// ESTADÍSTICAS
+// NUCLEOS V36
+//////////////////////////////////////////////////
+
+function analizarNucleos(){
+
+
+let nucleos={};
+
+
+
+base.forEach(r=>{
+
+
+let ambos=
+
+r.numero.slice(-2);
+
+
+
+let invertido=
+
+ambos[1]+ambos[0];
+
+
+
+
+nucleos[ambos]=
+
+(nucleos[ambos]||0)+1;
+
+
+
+nucleos[invertido]=
+
+(nucleos[invertido]||0)+0.5;
+
+
+
+});
+
+
+
+
+
+
+
+let ranking=
+
+Object.entries(nucleos)
+
+.sort((a,b)=>b[1]-a[1])
+
+.slice(0,20);
+
+
+
+
+
+mostrar(
+
+`🧠 NÚCLEOS DOMINANTES V36
+
+
+${
+
+ranking.map(x=>
+
+x[0]+" = "+x[1]
+
+).join("\n")
+
+}
+
+`
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// TERMINACIONES ENTRE PROVINCIAS
+//////////////////////////////////////////////////
+
+function compararProvincias(){
+
+
+let grupos={};
+
+
+
+base.forEach(r=>{
+
+
+let ambos=r.numero.slice(-2);
+
+
+
+if(!grupos[ambos]){
+
+grupos[ambos]=[];
+
+}
+
+
+
+grupos[ambos].push(r.provincia);
+
+
+
+});
+
+
+
+
+
+let texto=
+
+"🔄 COINCIDENCIAS ENTRE PROVINCIAS\n\n";
+
+
+
+
+Object.keys(grupos).forEach(x=>{
+
+
+if(grupos[x].length>1){
+
+
+texto+=
+
+x+" aparece en: "+
+
+[...new Set(grupos[x])]
+
+.join(", ")
+
++"\n";
+
+
+}
+
+
+});
+
+
+
+mostrar(texto);
+
+
+
+}
+  //////////////////////////////////////////////////
+// ACOMPAÑANTES HISTÓRICOS V36
+//////////////////////////////////////////////////
+
+function analizarAcompanantes(){
+
+let relaciones={};
+
+
+
+base.forEach(r=>{
+
+
+let ambos=r.numero.slice(-2);
+
+
+
+if(!relaciones[ambos]){
+
+relaciones[ambos]={};
+
+}
+
+
+
+base.forEach(x=>{
+
+
+if(
+
+x.numero!==r.numero &&
+
+x.turno===r.turno
+
+){
+
+
+let otro=x.numero.slice(-2);
+
+
+
+relaciones[ambos][otro]=
+
+(relaciones[ambos][otro]||0)+1;
+
+
+}
+
+
+});
+
+
+});
+
+
+
+
+
+let texto=
+
+"🧠 ACOMPAÑANTES HISTÓRICOS V36\n\n";
+
+
+
+
+
+Object.keys(relaciones).forEach(a=>{
+
+
+let top=
+
+Object.entries(relaciones[a])
+
+.sort((x,y)=>y[1]-x[1])
+
+.slice(0,5);
+
+
+
+texto+=
+
+"🔥 Núcleo "+a+"\n";
+
+
+
+top.forEach(t=>{
+
+
+texto+=
+
+"→ "+t[0]+" ("+t[1]+" veces)\n";
+
+
+});
+
+
+texto+="\n";
+
+
+});
+
+
+
+
+
+mostrar(texto);
+
+
+}
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// RANKING TERMINACIONES
+//////////////////////////////////////////////////
+
+function rankingTerminaciones(){
+
+
+let datos={};
+
+
+
+base.forEach(r=>{
+
+
+let ambos=
+
+r.numero.slice(-2);
+
+
+
+datos[ambos]=
+
+(datos[ambos]||0)+1;
+
+
+
+});
+
+
+
+
+let ranking=
+
+Object.entries(datos)
+
+.sort((a,b)=>b[1]-a[1])
+
+.slice(0,20);
+
+
+
+
+
+mostrar(
+
+`📊 TERMINACIONES MÁS FUERTES V36
+
+
+${
+
+ranking.map(x=>
+
+x[0]+" = "+x[1]+" veces"
+
+).join("\n")
+
+}
+
+`
+
+);
+
+
+}
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// ESTADÍSTICAS GENERALES
 //////////////////////////////////////////////////
 
 function estadisticasBase(){
 
 
+let provincias={};
 
-mostrar(`
+let turnos={};
 
-📊 ESTADÍSTICAS V36
+
+
+base.forEach(r=>{
+
+
+provincias[r.provincia]=
+
+(provincias[r.provincia]||0)+1;
+
+
+
+turnos[r.turno]=
+
+(turnos[r.turno]||0)+1;
+
+
+
+});
+
+
+
+
+
+mostrar(
+
+`📊 ESTADÍSTICAS EMI TESLA V36
 
 
 TOTAL REGISTROS:
@@ -1683,29 +1847,51 @@ ${base.length}
 
 
 
-OCR:
-
-${base.filter(x=>x.origen==="OCR").length}
+🌎 PROVINCIAS
 
 
+${
 
-MANUAL:
+Object.entries(provincias)
 
-${base.filter(x=>x.origen==="MANUAL").length}
+.map(x=>
+
+x[0]+" : "+x[1]
+
+)
+
+.join("\n")
+
+}
 
 
 
-CICLOS:
 
-${ciclos.length}
-
+🔄 TURNOS
 
 
-`);
+${
 
+Object.entries(turnos)
+
+.map(x=>
+
+x[0]+" : "+x[1]
+
+)
+
+.join("\n")
+
+}
+
+
+`
+
+);
 
 
 }
+
 
 
 
@@ -1720,36 +1906,42 @@ ${ciclos.length}
 function estadoSistema(){
 
 
-mostrar(`
+mostrar(
 
-🚀 EMI TESLA PRO V36
+`🚀 EMI TESLA PRO V36 IA HISTÓRICA
 
 
-📊 Registros:
+Estado:
+
+🟢 Activo
+
+
+Registros:
 
 ${base.length}
 
 
+Motores:
 
-🧠 IA:
+✅ Ranking IA
 
-ACTIVA
+✅ Transiciones
 
+✅ Matriz Provincias
 
+✅ Núcleos
 
-📄 OCR:
-
-ACTIVO
-
-
-
-💾 Base:
-
-LOCAL STORAGE
+✅ Acompañantes
 
 
-`);
+Base:
 
+LocalStorage
+
+
+`
+
+);
 
 
 }
@@ -1762,7 +1954,7 @@ LOCAL STORAGE
 
 
 //////////////////////////////////////////////////
-// INICIO
+// INICIO SISTEMA
 //////////////////////////////////////////////////
 
 window.onload=function(){
@@ -1772,9 +1964,9 @@ actualizarEstado();
 
 
 
-mostrar(`
+mostrar(
 
-🚀 EMI TESLA PRO V36 INICIADO
+`🚀 EMI TESLA PRO V36 INICIADO
 
 
 Registros cargados:
@@ -1782,52 +1974,50 @@ Registros cargados:
 ${base.length}
 
 
-`);
+IA HISTÓRICA LISTA`
 
+);
 
 
 };
+  <div class="card">
 
-</script>
-
-
-
-
-
-<div class="card">
-
-<h2>
-
-🧠 Herramientas V36
-
-</h2>
+<h2>🧠 Herramientas IA V36</h2>
 
 
 <button onclick="estadisticasBase()">
-
 📊 Estadísticas
-
 </button>
 
 
-<button onclick="analizarPatrones()">
+<button onclick="matrizProvincias()">
+🌎 Matriz Provincias
+</button>
 
-🔬 Patrones
 
+<button onclick="compararProvincias()">
+🔄 Comparar Provincias
+</button>
+
+
+<button onclick="analizarNucleos()">
+🧠 Núcleos Dominantes
+</button>
+
+
+<button onclick="analizarAcompanantes()">
+🤝 Acompañantes
+</button>
+
+
+<button onclick="rankingTerminaciones()">
+🔥 Terminaciones Fuertes
 </button>
 
 
 <button onclick="estadoSistema()">
-
-🧠 Estado Sistema
-
+🚀 Estado IA
 </button>
 
 
 </div>
-
-
-
-</body>
-
-</html>

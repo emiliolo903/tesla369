@@ -428,7 +428,117 @@ salida.innerText=texto;
 }
 
 
+//////////////////////////////////////////////////
+// DETECTOR PROVINCIA OCR AUTOMÁTICO V36.2
+//////////////////////////////////////////////////
 
+function detectarProvincia(texto){
+
+
+let t = texto
+.toUpperCase()
+.normalize("NFD")
+.replace(/[\u0300-\u036f]/g,"");
+
+
+
+// CORRIENTES
+
+if(
+t.includes("CORRIENTES") ||
+t.includes("CORR1ENTES") ||
+t.includes("CORRIENTE")
+){
+
+return "CORRIENTES";
+
+}
+
+
+
+// SANTA FE
+
+if(
+t.includes("SANTA FE") ||
+t.includes("SANTAFE")
+){
+
+return "SANTA FE";
+
+}
+
+
+
+// CORDOBA
+
+if(
+t.includes("CORDOBA") ||
+t.includes("CORDOBA")
+){
+
+return "CORDOBA";
+
+}
+
+
+
+// ENTRE RIOS
+
+if(
+t.includes("ENTRE RIOS") ||
+t.includes("ENTRERIOS")
+){
+
+return "ENTRE RIOS";
+
+}
+
+
+
+// CHACO
+
+if(
+t.includes("CHACO")
+){
+
+return "CHACO";
+
+}
+
+
+
+// BONAERENSE
+
+if(
+t.includes("BONAERENSE") ||
+t.includes("BUENOS AIRES")
+){
+
+return "BONAERENSE";
+
+}
+
+
+
+// CIUDAD
+
+if(
+t.includes("CIUDAD") ||
+t.includes("CAPITAL FEDERAL")
+){
+
+return "CIUDAD";
+
+}
+
+
+
+// SI NO ENCUENTRA
+
+return "DESCONOCIDA";
+
+
+  }
 
 
 //////////////////////////////////////////////////

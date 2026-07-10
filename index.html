@@ -932,8 +932,26 @@ return "DESCONOCIDO";
 
 
 
-function guardarOCR(texto,pagina,provincia){
+let provinciaDetectada = detectarProvincia(texto.data.text);
 
+
+if(provinciaDetectada==="DESCONOCIDA"){
+
+provinciaDetectada = provincia;
+
+}
+
+
+
+guardarOCR(
+
+texto.data.text,
+
+pagina,
+
+provinciaDetectada
+
+);
 
 let numeros=
 

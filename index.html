@@ -824,9 +824,18 @@ viewport
 
 
 
-let texto=
-
+let texto =
 await worker.recognize(canvas);
+
+
+let provinciaDetectada = detectarProvincia(texto.data.text);
+
+
+if(provinciaDetectada==="DESCONOCIDA"){
+
+provinciaDetectada = provincia;
+
+}
 
 
 
@@ -836,7 +845,7 @@ texto.data.text,
 
 pagina,
 
-provincia
+provinciaDetectada
 
 );
 

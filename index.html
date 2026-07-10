@@ -7,51 +7,22 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>
-EMI Tesla PRO V37 IA HISTÓRICA
-</title>
-
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
+<title>EMI Tesla PRO V38 IA Histórica</title>
 
 <style>
 
-*{
-box-sizing:border-box;
-}
-
-
 body{
-
 margin:0;
 padding:15px;
 background:#101010;
 color:white;
-font-family:Arial,Helvetica,sans-serif;
-
+font-family:Arial, sans-serif;
 }
-
-
 
 h1{
-
 text-align:center;
 color:#00ff99;
-
 }
-
-
-
-h2{
-
-color:#00ff99;
-
-}
-
-
 
 .card{
 
@@ -63,42 +34,16 @@ margin-bottom:15px;
 
 }
 
-
-
-.grid{
-
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
-
-}
-
-
-
-.box{
-
-background:#2b2b2b;
-padding:12px;
-border-radius:8px;
-text-align:center;
-
-}
-
-
-
-button,
-input,
-select{
+button,input,select{
 
 width:100%;
 padding:12px;
 margin-top:8px;
-border:none;
 border-radius:8px;
+border:none;
+font-size:15px;
 
 }
-
-
 
 button{
 
@@ -108,48 +53,26 @@ font-weight:bold;
 
 }
 
-
-
 button:hover{
 
 background:#00cc77;
 
 }
 
-
-
-.output{
+.estado{
 
 background:#000;
 padding:15px;
 border-radius:10px;
-white-space:pre-wrap;
-min-height:240px;
+min-height:100px;
 
 }
 
+.verde{
 
-
-.progress{
-
-height:18px;
-background:#333;
-border-radius:10px;
-overflow:hidden;
+color:#00ff99;
 
 }
-
-
-
-#barra{
-
-height:100%;
-width:0%;
-background:#00ff99;
-
-}
-
-
 
 </style>
 
@@ -161,130 +84,69 @@ background:#00ff99;
 
 <h1>
 
-🚀 EMI TESLA PRO V37
+🚀 EMI TESLA PRO V38
 
 <br>
 
 🧠 IA HISTÓRICA
 
-+
-
-🌎 MATRIZ PROVINCIAL
-
-+
-
-🎯 ACOMPAÑANTE EXACTO
-
 </h1>
 
 
 
-
-
 <div class="card">
 
-<h2>📊 Estado del Sistema</h2>
+<h2>📊 Estado</h2>
 
 
-<div class="grid">
+<p>
 
+Versión:
 
-<div class="box">
+<span class="verde">
 
-Registros
-
-<br>
-
-<span id="total">0</span>
-
-</div>
-
-
-
-<div class="box">
-
-Páginas OCR
-
-<br>
-
-<span id="paginas">0</span>
-
-</div>
-
-
-
-<div class="box">
-
-Estado
-
-<br>
-
-<span id="estado">
-
-LISTO
+V38
 
 </span>
 
+</p>
+
+
+<p>
+
+Base:
+
+<span id="estadoBase">
+
+Preparando...
+
+</span>
+
+</p>
+
+
+<p>
+
+Sistema:
+
+<span id="estadoSistema">
+
+INICIADO
+
+</span>
+
+</p>
+
+
 </div>
-
-
-
-<div class="box">
-
-Versión
-
-<br>
-
-V37
-
-</div>
-
-
-</div>
-
-</div>
-
 
 
 
 
 <div class="card">
 
-<h2>
 
-📄 OCR PDF HISTÓRICO
-
-</h2>
-
-
-
-<select id="provinciaOCR">
-
-<option value="AUTO">
-
-AUTOMÁTICO
-
-</option>
-
-
-<option>CORRIENTES</option>
-
-<option>SANTA FE</option>
-
-<option>CORDOBA</option>
-
-<option>CHACO</option>
-
-<option>ENTRE RIOS</option>
-
-<option>CIUDAD</option>
-
-<option>BONAERENSE</option>
-
-
-</select>
-
-
+<h2>📄 OCR PDF HISTÓRICO</h2>
 
 
 <input
@@ -296,38 +158,11 @@ id="archivoPDF"
 accept=".pdf">
 
 
-
-
-
-<button onclick="iniciarOCR()">
+<button>
 
 📥 Procesar PDF
 
 </button>
-
-
-
-<button onclick="detenerOCR()">
-
-⛔ Detener OCR
-
-</button>
-
-
-
-<div class="progress">
-
-<div id="barra"></div>
-
-</div>
-
-
-
-<p id="infoOCR">
-
-Esperando archivo...
-
-</p>
 
 
 </div>
@@ -338,15 +173,12 @@ Esperando archivo...
 
 <div class="card">
 
-<h2>
 
-✍️ CARGA MANUAL
-
-</h2>
+<h2>✍️ Carga Manual</h2>
 
 
+<select id="provincia">
 
-<select id="provinciaManual">
 
 <option>CORRIENTES</option>
 
@@ -362,12 +194,13 @@ Esperando archivo...
 
 <option>BONAERENSE</option>
 
+
 </select>
 
 
 
+<select id="turno">
 
-<select id="turnoManual">
 
 <option>PREVIA</option>
 
@@ -379,26 +212,29 @@ Esperando archivo...
 
 <option>NOCTURNA</option>
 
+
 </select>
 
 
 
 <input
 
-id="numerosManual"
+id="numero"
 
-placeholder="Ejemplo: 2814 5629 9038">
+placeholder="Ejemplo: 1234">
 
 
+<button>
 
-<button onclick="guardarManual()">
-
-💾 Guardar y Analizar
+💾 Guardar registro
 
 </button>
 
 
+
 </div>
+
+
 
 
 
@@ -406,482 +242,203 @@ placeholder="Ejemplo: 2814 5629 9038">
 
 <div class="card">
 
-<h2>
 
-🧠 RESULTADO IA V37
-
-</h2>
+<h2>🧠 Resultado IA</h2>
 
 
-<div id="resultado" class="output">
+<div class="estado" id="resultado">
 
-EMI Tesla PRO V37 iniciado...
 
-</div>
+EMI Tesla PRO V38 listo...
 
 
 </div>
 
 
-
-
-<div class="card">
-
-<h2>
-
-🧰 Herramientas IA
-
-</h2>
-
-
-
-<button onclick="estadisticasBase()">
-
-📊 Estadísticas
-
-</button>
-
-
-
-<button onclick="analizarPatrones()">
-
-🔬 Patrones
-
-</button>
-
-
-
-<button onclick="analizarProvincias()">
-
-🌎 Matriz Provincial
-
-</button>
-
-
-
-<button onclick="analizarNocturna()">
-
-🌙 Patrones Nocturna
-
-</button>
-
-
-
-<button onclick="estadoSistema()">
-
-🚀 Estado Sistema
-
-</button>
-
-
 </div>
+
+
+
+
 
 
 
 <script>
-  //////////////////////////////////////////////////
-// BASE HISTÓRICA V37 CORREGIDA
-//////////////////////////////////////////////////
-
-const DB_KEY="EMI_TESLA_V37_DB";
-
-const CICLOS_KEY="EMI_TESLA_V37_CICLOS";
-
-const MATRIZ_KEY="EMI_TESLA_V37_MATRIZ";
-
-const ACOMP_KEY="EMI_TESLA_V37_ACOMP";
 
 
-let base=[];
+console.log(
 
-let ciclos=[];
-
-let matriz=[];
-
-let acompañantes=[];
-
-let pararOCR=false;
-
-
-
-
-//////////////////////////////////////////////////
-// CARGAR DATOS GUARDADOS
-//////////////////////////////////////////////////
-
-function cargarDatos(){
-
-
-try{
-
-base=JSON.parse(
-
-localStorage.getItem(DB_KEY)||"[]"
+"EMI Tesla PRO V38 iniciado"
 
 );
 
 
-if(!Array.isArray(base))
-base=[];
 
+document.getElementById(
 
-}catch(e){
+"estadoSistema"
 
-base=[];
+).innerHTML=
 
-}
-
+"ACTIVO";
 
 
 
-try{
+document.getElementById(
 
-ciclos=JSON.parse(
+"estadoBase"
 
-localStorage.getItem(CICLOS_KEY)||"[]"
+).innerHTML=
+
+"Base preparada";
+
+
+</script>
+
+
+</body>
+
+</html>
+//////////////////////////////////////////////////
+// EMI TESLA PRO V38
+// BASE 2 - MOTOR INDEXEDDB
+//////////////////////////////////////////////////
+
+const DB_NAME = "EMI_TESLA_PRO_V38";
+
+const DB_VERSION = 1;
+
+const STORE_NAME = "registros";
+
+
+let db = null;
+
+
+
+//////////////////////////////////////////////////
+// ABRIR BASE DE DATOS
+//////////////////////////////////////////////////
+
+function abrirBase(){
+
+return new Promise((resolve,reject)=>{
+
+
+let solicitud = indexedDB.open(
+
+DB_NAME,
+
+DB_VERSION
 
 );
 
 
-if(!Array.isArray(ciclos))
-ciclos=[];
+
+solicitud.onupgradeneeded = function(e){
 
 
-}catch(e){
+let base = e.target.result;
 
-ciclos=[];
+
+
+if(!base.objectStoreNames.contains(STORE_NAME)){
+
+
+let store = base.createObjectStore(
+
+STORE_NAME,
+
+{
+
+keyPath:"id",
+
+autoIncrement:true
 
 }
-
-
-
-
-try{
-
-matriz=JSON.parse(
-
-localStorage.getItem(MATRIZ_KEY)||"[]"
 
 );
 
 
-if(!Array.isArray(matriz))
-matriz=[];
 
+store.createIndex(
 
-}catch(e){
+"provincia",
 
-matriz=[];
+"provincia",
 
-}
-
-
-
-
-try{
-
-acompañantes=JSON.parse(
-
-localStorage.getItem(ACOMP_KEY)||"[]"
+{unique:false}
 
 );
 
 
-if(!Array.isArray(acompañantes))
-acompañantes=[];
 
+store.createIndex(
 
-}catch(e){
+"turno",
 
-acompañantes=[];
+"turno",
 
-}
-
-
-}
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// GUARDAR TODO
-//////////////////////////////////////////////////
-
-function guardarTodo(){
-
-
-localStorage.setItem(
-
-DB_KEY,
-
-JSON.stringify(base)
+{unique:false}
 
 );
 
 
-localStorage.setItem(
 
-CICLOS_KEY,
+store.createIndex(
 
-JSON.stringify(ciclos)
+"numero",
 
-);
+"numero",
 
-
-localStorage.setItem(
-
-MATRIZ_KEY,
-
-JSON.stringify(matriz)
+{unique:false}
 
 );
 
 
-localStorage.setItem(
-
-ACOMP_KEY,
-
-JSON.stringify(acompañantes)
-
-);
-
-
-actualizarEstado();
-
 
 }
 
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// MOSTRAR
-//////////////////////////////////////////////////
-
-function mostrar(texto){
-
-
-let salida=
-
-document.getElementById("resultado");
-
-
-if(salida){
-
-salida.innerText=texto;
-
-}
-
-
-}
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// ACTUALIZAR ESTADO
-//////////////////////////////////////////////////
-
-function actualizarEstado(){
-
-
-let t=
-
-document.getElementById("total");
-
-
-if(t){
-
-t.innerText=base.length;
-
-}
-
-
-}
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// EVITAR DUPLICADOS
-//////////////////////////////////////////////////
-
-function existeRegistro(r){
-
-
-return base.some(x=>
-
-x.numero===r.numero &&
-
-x.turno===r.turno &&
-
-x.fecha===r.fecha &&
-
-x.provincia===r.provincia
-
-);
-
-
-}
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// AGREGAR REGISTRO
-//////////////////////////////////////////////////
-
-function agregarRegistro(r){
-
-
-if(!existeRegistro(r)){
-
-
-base.push(r);
-
-
-agregarCiclo(r);
-
-
-agregarMatriz(r);
-
-
-return true;
-
-
-}
-
-
-return false;
-
-
-}
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// CICLOS HISTÓRICOS
-//////////////////////////////////////////////////
-
-function crearCiclo(fecha){
-
-
-return {
-
-fecha:fecha,
-
-PREVIA:[],
-
-PRIMERA:[],
-
-MATUTINA:[],
-
-VESPERTINA:[],
-
-NOCTURNA:[]
 
 };
 
 
-}
 
 
 
-
-function agregarCiclo(r){
-
-
-let ciclo=
-
-ciclos.find(c=>
-
-c.fecha===r.fecha
-
-);
+solicitud.onsuccess=function(e){
 
 
-
-if(!ciclo){
-
-
-ciclo=crearCiclo(r.fecha);
+db=e.target.result;
 
 
-ciclos.push(ciclo);
+console.log(
 
-
-}
-
-
-
-
-if(ciclo[r.turno]){
-
-
-ciclo[r.turno].push(r.numero);
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// MATRIZ PROVINCIAL
-//////////////////////////////////////////////////
-
-function agregarMatriz(r){
-
-
-let existe=
-
-matriz.some(x=>
-
-x.provincia===r.provincia &&
-
-x.numero===r.numero
+"Base IndexedDB activa"
 
 );
 
 
 
-if(!existe){
+resolve(db);
 
 
-matriz.push({
 
-provincia:r.provincia,
+};
 
-numero:r.numero,
 
-ambos:r.numero.slice(-2),
 
-turno:r.turno
+
+
+solicitud.onerror=function(e){
+
+
+reject(e);
+
+
+
+};
+
+
 
 });
 
@@ -889,18 +446,316 @@ turno:r.turno
 }
 
 
-  }
-  //////////////////////////////////////////////////
-// OCR HISTÓRICO V37
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// GUARDAR REGISTRO
 //////////////////////////////////////////////////
 
-async function iniciarOCR(){
+function guardarRegistro(datos){
 
 
-let archivo=
+return new Promise((resolve,reject)=>{
 
-document.getElementById("archivoPDF").files[0];
 
+let transaccion = db.transaction(
+
+STORE_NAME,
+
+"readwrite"
+
+);
+
+
+
+let store = transaccion.objectStore(
+
+STORE_NAME
+
+);
+
+
+
+let agregar = store.add(datos);
+
+
+
+
+
+agregar.onsuccess=function(){
+
+
+resolve(true);
+
+
+};
+
+
+
+agregar.onerror=function(e){
+
+
+reject(e);
+
+
+};
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// LEER TODOS LOS REGISTROS
+//////////////////////////////////////////////////
+
+function leerBase(){
+
+
+return new Promise((resolve,reject)=>{
+
+
+let transaccion = db.transaction(
+
+STORE_NAME,
+
+"readonly"
+
+);
+
+
+
+let store = transaccion.objectStore(
+
+STORE_NAME
+
+);
+
+
+
+let solicitud = store.getAll();
+
+
+
+
+solicitud.onsuccess=function(){
+
+
+resolve(
+
+solicitud.result
+
+);
+
+
+};
+
+
+
+
+solicitud.onerror=function(e){
+
+
+reject(e);
+
+
+};
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// BUSCAR POR PROVINCIA
+//////////////////////////////////////////////////
+
+function buscarProvincia(provincia){
+
+
+return new Promise((resolve,reject)=>{
+
+
+let transaccion = db.transaction(
+
+STORE_NAME,
+
+"readonly"
+
+);
+
+
+
+let store = transaccion.objectStore(
+
+STORE_NAME
+
+);
+
+
+
+let indice = store.index(
+
+"provincia"
+
+);
+
+
+
+let consulta = indice.getAll(
+
+provincia
+
+);
+
+
+
+consulta.onsuccess=function(){
+
+
+resolve(
+
+consulta.result
+
+);
+
+
+};
+
+
+
+consulta.onerror=function(e){
+
+
+reject(e);
+
+
+};
+
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// CONTAR REGISTROS
+//////////////////////////////////////////////////
+
+async function contarRegistros(){
+
+
+let datos = await leerBase();
+
+
+
+return datos.length;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// INICIO BASE
+//////////////////////////////////////////////////
+
+window.addEventListener(
+
+"load",
+
+async()=>{
+
+
+await abrirBase();
+
+
+
+let total = await contarRegistros();
+
+
+
+let estado = document.getElementById(
+
+"estadoBase"
+
+);
+
+
+
+if(estado){
+
+
+estado.innerHTML=
+
+"Registros guardados: "+total;
+
+
+
+}
+
+
+
+}
+
+);
+//////////////////////////////////////////////////
+// EMI TESLA PRO V38
+// BASE 3 - OCR PDF
+//////////////////////////////////////////////////
+
+
+let detenerLectura=false;
+
+
+
+async function procesarPDF(){
+
+
+let archivo=document.getElementById(
+"archivoPDF"
+).files[0];
 
 
 if(!archivo){
@@ -913,26 +768,15 @@ return;
 
 
 
-
-try{
-
-
-pararOCR=false;
-
-
-document.getElementById("estado").innerText="PROCESANDO";
+detenerLectura=false;
 
 
 
-let datos=
-
-await archivo.arrayBuffer();
+let datos=await archivo.arrayBuffer();
 
 
 
-let pdf=
-
-await pdfjsLib.getDocument({
+let pdf=await pdfjsLib.getDocument({
 
 data:datos
 
@@ -940,50 +784,24 @@ data:datos
 
 
 
-
-document.getElementById("paginas").innerText=
-
-pdf.numPages;
+let totalPaginas=pdf.numPages;
 
 
 
-
-let provincia=
-
-document.getElementById("provinciaOCR").value;
+for(let pagina=1; pagina<=totalPaginas; pagina++){
 
 
-
-
-
-let worker=
-
-await Tesseract.createWorker("spa");
-
-
-
-
-for(let pagina=1; pagina<=pdf.numPages; pagina++){
-
-
-
-if(pararOCR)
+if(detenerLectura)
 
 break;
 
 
 
-
-
-let page=
-
-await pdf.getPage(pagina);
+let page=await pdf.getPage(pagina);
 
 
 
-let viewport=
-
-page.getViewport({
+let viewport=page.getViewport({
 
 scale:2
 
@@ -991,13 +809,7 @@ scale:2
 
 
 
-
-
-let canvas=
-
-document.createElement("canvas");
-
-
+let canvas=document.createElement("canvas");
 
 canvas.width=viewport.width;
 
@@ -1005,68 +817,25 @@ canvas.height=viewport.height;
 
 
 
-
-
 await page.render({
 
 canvasContext:canvas.getContext("2d"),
 
-viewport
+viewport:viewport
 
 }).promise;
 
 
 
-
-
-let resultado=
-
-await worker.recognize(canvas);
+let worker=await Tesseract.createWorker("spa");
 
 
 
-let texto=
-
-resultado.data.text || "";
+let resultado=await worker.recognize(canvas);
 
 
 
-
-
-if(texto.length>0){
-
-
-guardarOCR(
-
-texto,
-
-pagina,
-
-provincia
-
-);
-
-
-}
-
-
-
-
-
-document.getElementById("barra").style.width=
-
-((pagina/pdf.numPages)*100)+"%";
-
-
-
-document.getElementById("infoOCR").innerText=
-
-"Página "+pagina+" de "+pdf.numPages;
-
-
-
-}
-
+let texto=resultado.data.text.toUpperCase();
 
 
 
@@ -1074,32 +843,50 @@ await worker.terminate();
 
 
 
-guardarTodo();
+let numeros=extraerNumerosOCR(texto);
 
 
 
-
-document.getElementById("estado").innerText="FINALIZADO";
-
+for(let numero of numeros){
 
 
-mostrar(
-
-"✅ OCR FINALIZADO\n\n"+
-"Registros: "+base.length+
-"\n\nBase guardada."
-
-);
+await guardarRegistro({
 
 
+fecha:new Date()
+.toISOString()
+.split("T")[0],
 
-}catch(error){
+
+provincia:detectarProvincia(texto),
+
+
+turno:detectarTurno(texto),
+
+
+numero:numero,
+
+
+origen:"OCR"
+
+
+});
 
 
 
-mostrar(
+}
 
-"❌ ERROR OCR\n\n"+error
+
+
+mostrarResultado(
+
+"Procesando página "+
+
+pagina+
+
+" de "+
+
+totalPaginas
 
 );
 
@@ -1109,7 +896,17 @@ mostrar(
 
 
 
+mostrarResultado(
+
+"✅ OCR FINALIZADO\n\nBase guardada correctamente"
+
+);
+
+
+
 }
+
+
 
 
 
@@ -1118,10 +915,7 @@ mostrar(
 function detenerOCR(){
 
 
-pararOCR=true;
-
-
-mostrar("⛔ OCR detenido");
+detenerLectura=true;
 
 
 }
@@ -1132,15 +926,12 @@ mostrar("⛔ OCR detenido");
 
 
 
-//////////////////////////////////////////////////
-// EXTRAER NÚMEROS
-//////////////////////////////////////////////////
-
-function extraerNumeros(texto){
+function extraerNumerosOCR(texto){
 
 
 return texto.match(/\b\d{4}\b/g)||[];
 
+
 }
 
 
@@ -1149,40 +940,66 @@ return texto.match(/\b\d{4}\b/g)||[];
 
 
 
-//////////////////////////////////////////////////
-// DETECTAR TURNO
-//////////////////////////////////////////////////
+
+function detectarProvincia(texto){
+
+
+if(texto.includes("CORRIENTES"))
+return "CORRIENTES";
+
+
+if(texto.includes("SANTA FE"))
+return "SANTA FE";
+
+
+if(texto.includes("CORDOBA"))
+return "CORDOBA";
+
+
+if(texto.includes("CHACO"))
+return "CHACO";
+
+
+if(texto.includes("ENTRE RIOS"))
+return "ENTRE RIOS";
+
+
+if(texto.includes("BONAERENSE"))
+return "BONAERENSE";
+
+
+return "DESCONOCIDA";
+
+
+}
+
+
+
+
+
+
+
 
 function detectarTurno(texto){
 
 
-let t=
-
-texto.toUpperCase()
-
-.normalize("NFD")
-
-.replace(/[\u0300-\u036f]/g,"");
-
-
-
-if(t.includes("PREV"))
+if(texto.includes("PREVIA"))
 return "PREVIA";
 
 
-if(t.includes("PRIMER"))
+if(texto.includes("PRIMERA"))
 return "PRIMERA";
 
 
-if(t.includes("MATU"))
+if(texto.includes("MATUTINA"))
 return "MATUTINA";
 
 
-if(t.includes("VES"))
+if(texto.includes("VESPERTINA"))
 return "VESPERTINA";
 
 
-if(t.includes("NOC"))
+if(texto.includes("NOCTURNA"))
 return "NOCTURNA";
 
 
@@ -1190,103 +1007,49 @@ return "DESCONOCIDO";
 
 
 }
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// GUARDAR OCR
+  //////////////////////////////////////////////////
+// EMI TESLA PRO V38
+// BASE 4 - MOTOR IA
 //////////////////////////////////////////////////
 
-function guardarOCR(texto,pagina,provincia){
 
-
-let numeros=
-
-extraerNumeros(texto);
-
-
-
-let turno=
-
-detectarTurno(texto);
-
-
-
-let fecha=
-
-new Date()
-
-.toISOString()
-
-.split("T")[0];
-
-
-
-
-
-numeros.forEach(numero=>{
-
-
-agregarRegistro({
-
-fecha,
+async function analizarTransicion(
 
 provincia,
 
-turno,
+turno
 
-numero,
-
-pagina,
-
-origen:"OCR"
-
-});
+){
 
 
-});
+let datos=await buscarProvincia(
 
+provincia
 
-  }
-  //////////////////////////////////////////////////
-// CARGA MANUAL V37
-//////////////////////////////////////////////////
-
-function guardarManual(){
-
-
-let provincia=
-
-document.getElementById("provinciaManual").value;
+);
 
 
 
-let turno=
-
-document.getElementById("turnoManual").value;
+let siguiente=turnoSiguiente(turno);
 
 
 
-let texto=
+let historial=datos.filter(x=>
 
-document.getElementById("numerosManual").value;
+x.turno===siguiente
 
-
-
-let numeros=
-
-texto.match(/\d{4}/g);
+);
 
 
 
-if(!numeros){
+if(historial.length===0){
 
 
-mostrar("⚠️ Ingrese números de 4 cifras");
+mostrarResultado(
+
+"Sin historial suficiente"
+
+);
 
 
 return;
@@ -1296,44 +1059,20 @@ return;
 
 
 
-let fecha=
-
-new Date()
-
-.toISOString()
-
-.split("T")[0];
+let ranking={};
 
 
 
-let nuevos=0;
+historial.forEach(r=>{
+
+
+let ambos=r.numero.slice(-2);
 
 
 
-numeros.forEach(numero=>{
+ranking[ambos]=
 
-
-if(agregarRegistro({
-
-
-fecha,
-
-provincia,
-
-turno,
-
-numero,
-
-origen:"MANUAL"
-
-
-})){
-
-
-nuevos++;
-
-
-}
+(ranking[ambos]||0)+1;
 
 
 
@@ -1342,33 +1081,50 @@ nuevos++;
 
 
 
+let orden=
 
-guardarTodo();
+Object.keys(ranking)
 
+.sort((a,b)=>
 
-
-
-mostrar(
-
-"✅ DATOS GUARDADOS\n\n"+
-
-"Provincia: "+provincia+
-
-"\nTurno: "+turno+
-
-"\nNuevos: "+nuevos
+ranking[b]-ranking[a]
 
 );
 
 
 
 
+let principal=orden[0]||"--";
 
-analizarTransicion(
+let apoyo=orden[1]||"--";
 
-provincia,
 
-turno
+
+
+
+mostrarResultado(
+
+"🧠 IA V38\n\n"+
+
+"Transición:\n"+
+
+turno+
+
+" → "+
+
+siguiente+
+
+"\n\n"+
+
+"💥 Ambos Principal:\n"+
+
+principal+
+
+"\n\n"+
+
+"🟡 Ambos Apoyo:\n"+
+
+apoyo
 
 );
 
@@ -1383,12 +1139,10 @@ turno
 
 
 
+function turnoSiguiente(turno){
 
-//////////////////////////////////////////////////
-// ORDEN DE TURNOS
-//////////////////////////////////////////////////
 
-const TURNOS=[
+let orden=[
 
 "PREVIA",
 
@@ -1404,29 +1158,16 @@ const TURNOS=[
 
 
 
-
-function turnoSiguiente(t){
-
-
-let p=
-
-TURNOS.indexOf(t);
+let pos=orden.indexOf(turno);
 
 
 
-if(p<0)
+if(pos===4)
 
 return "PREVIA";
 
 
-
-if(p===TURNOS.length-1)
-
-return "PREVIA";
-
-
-
-return TURNOS[p+1];
+return orden[pos+1];
 
 
 }
@@ -1438,55 +1179,46 @@ return TURNOS[p+1];
 
 
 
+function mostrarResultado(texto){
 
+
+let div=document.getElementById(
+
+"resultado"
+
+);
+
+
+
+if(div)
+
+div.innerText=texto;
+
+
+}
+  //////////////////////////////////////////////////
+// EMI TESLA PRO V38
+// BASE 5 - MATRIZ PROVINCIAL
 //////////////////////////////////////////////////
-// TRANSICIÓN HISTÓRICA
-//////////////////////////////////////////////////
-
-function analizarTransicion(provincia,origen){
 
 
-let destino=
-
-turnoSiguiente(origen);
-
+async function generarMatriz(provincia){
 
 
 let datos=
 
-base.filter(r=>
-
-r.provincia===provincia &&
-
-r.turno===destino
-
-);
+await buscarProvincia(provincia);
 
 
 
+if(datos.length===0){
 
 
-if(datos.length<3){
+mostrarResultado(
 
-
-mostrar(
-
-"⚠️ POCO HISTORIAL\n\n"+
-
-provincia+
-
-"\n"+
-
-origen+
-
-" → "+
-
-destino+
-
-"\n\nRegistros: "+datos.length
+"⚠️ Sin datos para "+provincia
 
 );
-
 
 
 return;
@@ -1496,70 +1228,257 @@ return;
 
 
 
-
-calcularRankingV37(
-
-datos,
-
-provincia,
-
-origen,
-
-destino
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// MOTOR IA V37
-//////////////////////////////////////////////////
-
-function calcularRankingV37(
-
-datos,
-
-provincia,
-
-origen,
-
-destino
-
-){
-
-
-let puntos={};
-
-
-
-let terminaciones={};
+let matriz={};
 
 
 
 datos.forEach(r=>{
 
 
-let numero=r.numero;
+let ambos=
+
+r.numero.slice(-2);
 
 
 
-if(!/^\d{4}$/.test(numero))
-
-return;
+if(!matriz[ambos]){
 
 
+matriz[ambos]={
 
-puntos[numero]=(puntos[numero]||0)+50;
+cantidad:0,
+
+turnos:{}
+
+};
+
+
+}
+
+
+
+matriz[ambos].cantidad++;
+
+
+
+if(!matriz[ambos].turnos[r.turno])
+
+matriz[ambos].turnos[r.turno]=0;
+
+
+
+matriz[ambos].turnos[r.turno]++;
+
+
+
+});
+
+
+
+
+
+let ranking=
+
+Object.keys(matriz)
+
+.sort((a,b)=>
+
+matriz[b].cantidad-
+
+matriz[a].cantidad
+
+);
+
+
+
+
+
+
+let salida=
+
+"🌎 MATRIZ "+provincia+"\n\n";
+
+
+
+ranking.slice(0,20)
+
+.forEach(a=>{
+
+
+salida+=
+
+a+
+
+"  →  "+
+
+matriz[a].cantidad+
+
+" apariciones\n";
+
+
+});
+
+
+
+mostrarResultado(salida);
+
+
+
+}
+  //////////////////////////////////////////////////
+// EMI TESLA PRO V38
+// BASE 6 - ACOMPAÑANTE EXACTO IA
+//////////////////////////////////////////////////
+
+
+async function buscarAcompanante(
+
+provincia,
+
+numeroPrincipal
+
+){
+
+
+
+let datos=
+
+await buscarProvincia(provincia);
+
+
+
+let objetivo=
+
+numeroPrincipal.slice(-2);
+
+
+
+let candidatos={};
+
+
+
+datos.forEach(r=>{
+
+
+let ambos=
+
+r.numero.slice(-2);
+
+
+
+if(ambos===objetivo){
+
+
+
+let anterior=
+
+r.numero.slice(0,2);
+
+
+
+candidatos[anterior]=
+
+(candidatos[anterior]||0)+1;
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+let orden=
+
+Object.keys(candidatos)
+
+.sort((a,b)=>
+
+candidatos[b]-
+
+candidatos[a]
+
+);
+
+
+
+
+
+let principal=
+
+orden[0]||"--";
+
+
+
+let respaldo=
+
+orden[1]||"--";
+
+
+
+
+
+
+
+mostrarResultado(
+
+"🎯 ACOMPAÑANTE EXACTO IA\n\n"+
+
+"Principal:\n"+
+
+numeroPrincipal+
+
+"\n\n"+
+
+"Acompañante Principal:\n"+
+
+principal+
+
+"\n\n"+
+
+"Acompañante Respaldo:\n"+
+
+respaldo+
+
+"\n\n"+
+
+"Base analizada:\n"+
+
+datos.length+
+
+" registros"
+
+);
+
+
+
+}
+  //////////////////////////////////////////////////
+// EMI TESLA PRO V38
+// BASE 7 - AUDITOR IA
+//////////////////////////////////////////////////
+
+
+async function auditarResultado(
+
+provincia,
+
+numero
+
+){
+
+
+let datos=
+
+await buscarProvincia(provincia);
+
+
+
+let puntaje=0;
 
 
 
@@ -1569,24 +1488,16 @@ numero.slice(-2);
 
 
 
-terminaciones[ambos]=
-
-(terminaciones[ambos]||0)+1;
+let apariciones=0;
 
 
 
-});
+datos.forEach(r=>{
 
 
+if(r.numero.slice(-2)===ambos)
 
-
-
-Object.keys(puntos).forEach(numero=>{
-
-
-puntos[numero]+=
-
-(terminaciones[numero.slice(-2)]||0)*15;
+apariciones++;
 
 
 
@@ -1596,202 +1507,154 @@ puntos[numero]+=
 
 
 
+if(apariciones>5)
 
-let ranking=
+puntaje+=30;
 
-Object.keys(puntos)
 
-.map(n=>({
 
-numero:n,
+if(apariciones>15)
 
-puntaje:puntos[n]
+puntaje-=10;
 
-}))
 
-.sort((a,b)=>
 
-b.puntaje-a.puntaje
+if(numero.length===4)
+
+puntaje+=20;
+
+
+
+let nivel="BAJO";
+
+
+
+if(puntaje>=40)
+
+nivel="ALTO";
+
+else if(puntaje>=20)
+
+nivel="MEDIO";
+
+
+
+
+
+mostrarResultado(
+
+"🛡️ AUDITOR IA\n\n"+
+
+"Número:\n"+numero+
+
+"\n\nPuntaje:\n"+puntaje+
+
+"\n\nConfianza:\n"+nivel+
+
+"\n\nApariciones ambos:\n"+apariciones
 
 );
 
 
 
-
-
-generarResultadoV37(
-
-ranking,
-
-provincia,
-
-origen,
-
-destino,
-
-datos.length
-
-);
-
-
-
-  }
+}
   //////////////////////////////////////////////////
-// GENERADOR FINAL
+// EMI TESLA PRO V38
+// BASE 8 - APRENDIZAJE HISTÓRICO
 //////////////////////////////////////////////////
 
-function generarResultadoV37(
 
-ranking,
+const APRENDIZAJE_KEY=
 
-provincia,
+"EMI_V38_APRENDIZAJE";
 
-origen,
 
-destino,
 
-cantidad
+
+function guardarAprendizaje(datos){
+
+
+let historial=
+
+JSON.parse(
+
+localStorage.getItem(
+
+APRENDIZAJE_KEY
+
+)||"[]"
+
+);
+
+
+
+
+historial.push(datos);
+
+
+
+
+
+localStorage.setItem(
+
+APRENDIZAJE_KEY,
+
+JSON.stringify(historial)
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+function evaluarPrediccion(
+
+predicho,
+
+resultado
 
 ){
 
 
 
-if(!ranking.length){
+let acierto=
 
+predicho===resultado;
 
-mostrar("⚠️ Sin datos suficientes");
 
 
-return;
+guardarAprendizaje({
 
 
-}
+fecha:new Date()
 
+.toISOString(),
 
 
-let principal=
+prediccion:predicho,
 
-ranking[0].numero;
 
+resultado:resultado,
 
 
-let apoyo=
+acierto:acierto
 
-ranking.length>1
-
-?
-
-ranking[1].numero
-
-:
-
-principal;
-
-
-
-
-
-mostrar(
-
-"🧠 EMI TESLA PRO V37\n\n"+
-
-"🌎 Provincia: "+provincia+
-
-"\n\n"+
-
-"🔄 "+origen+" → "+destino+
-
-"\n\n"+
-
-"🔥 CUATERNO PRINCIPAL\n"+principal+
-
-"\n\n"+
-
-"🟡 CUATERNO APOYO\n"+apoyo+
-
-"\n\n"+
-
-"⚡ TERNO PRINCIPAL\n"+principal.slice(-3)+
-
-"\n\n"+
-
-"🟡 TERNO APOYO\n"+apoyo.slice(-3)+
-
-"\n\n"+
-
-"💥 AMBOS PRINCIPAL\n"+principal.slice(-2)+
-
-"\n\n"+
-
-"🟡 AMBOS APOYO\n"+apoyo.slice(-2)+
-
-"\n\n"+
-
-"📊 Datos usados: "+cantidad
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// PATRONES
-//////////////////////////////////////////////////
-
-function analizarPatrones(){
-
-
-let mapa={};
-
-
-
-base.forEach(r=>{
-
-
-let a=r.numero.slice(-2);
-
-
-
-mapa[a]=(mapa[a]||0)+1;
 
 
 });
 
 
 
-let salida="";
 
 
-
-Object.keys(mapa)
-
-.sort((a,b)=>mapa[b]-mapa[a])
-
-.slice(0,20)
-
-.forEach(a=>{
-
-
-salida+=a+" = "+mapa[a]+" veces\n";
-
-
-});
-
-
-
-mostrar(
-
-"🔬 PATRONES\n\n"+salida
-
-);
+return acierto;
 
 
 
@@ -1804,237 +1667,82 @@ mostrar(
 
 
 
-
-//////////////////////////////////////////////////
-// MATRIZ PROVINCIAL
-//////////////////////////////////////////////////
-
-function analizarProvincias(){
-
-
-let datos={};
+function mostrarAprendizaje(){
 
 
 
-matriz.forEach(r=>{
+let historial=
 
+JSON.parse(
 
-let clave=
+localStorage.getItem(
 
-r.provincia+
+APRENDIZAJE_KEY
 
-" → "+
+)||"[]"
 
-r.ambos;
-
-
-
-datos[clave]=(datos[clave]||0)+1;
-
-
-});
+);
 
 
 
-let salida="";
+
+let aciertos=
+
+historial.filter(x=>
+
+x.acierto
+
+).length;
 
 
 
-Object.keys(datos)
-
-.sort((a,b)=>datos[b]-datos[a])
-
-.slice(0,25)
-
-.forEach(x=>{
 
 
-salida+=x+" = "+datos[x]+"\n";
-
-
-});
+let porcentaje=0;
 
 
 
-mostrar(
+if(historial.length>0)
 
-"🌎 MATRIZ PROVINCIAL\n\n"+salida
+porcentaje=
+
+(aciertos/historial.length)*100;
+
+
+
+
+
+mostrarResultado(
+
+"🧠 APRENDIZAJE HISTÓRICO\n\n"+
+
+"Evaluaciones: "+historial.length+
+
+"\n\nAciertos: "+aciertos+
+
+"\n\nPrecisión: "+
+
+porcentaje.toFixed(2)+
+
+"%"
 
 );
 
 
 
 }
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// NOCTURNA
-//////////////////////////////////////////////////
-
-function analizarNocturna(){
-
-
-let datos={};
-
-
-
-base.filter(r=>
-
-r.turno==="NOCTURNA"
-
-)
-
-.forEach(r=>{
-
-
-let a=r.numero.slice(-2);
-
-
-
-datos[a]=(datos[a]||0)+1;
-
-
-});
-
-
-
-let salida="";
-
-
-
-Object.keys(datos)
-
-.sort((a,b)=>datos[b]-datos[a])
-
-.slice(0,20)
-
-.forEach(x=>{
-
-
-salida+=x+" = "+datos[x]+"\n";
-
-
-});
-
-
-
-mostrar(
-
-"🌙 NOCTURNA\n\n"+salida
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// ESTADISTICAS
-//////////////////////////////////////////////////
-
-function estadisticasBase(){
-
-
-mostrar(
-
-"📊 ESTADISTICAS\n\n"+
-
-"Registros: "+base.length+
-
-"\nCiclos: "+ciclos.length+
-
-"\nMatriz: "+matriz.length
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// ESTADO
-//////////////////////////////////////////////////
-
-function estadoSistema(){
-
-
-mostrar(
-
-"🚀 EMI TESLA PRO V37\n\n"+
-
-"Base: "+base.length+
-
-"\nCiclos: "+ciclos.length+
-
-"\nMatriz: "+matriz.length+
-
-"\n\n💾 Memoria permanente ACTIVA"
-
-);
-
-
-
-}
-
-
-
-
-
-
-
-
-
-//////////////////////////////////////////////////
-// INICIO
-//////////////////////////////////////////////////
-
-window.onload=function(){
-
-
-cargarDatos();
-
-
-actualizarEstado();
-
-
-mostrar(
-
-"🚀 EMI TESLA PRO V37 iniciado\n\n"+
-
-"Registros: "+base.length
-
-);
-
-
-
-};
-
-</script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script src="database.js"></script>
+<script src="ocr.js"></script>
+<script src="ia.js"></script>
+<script src="matriz.js"></script>
+<script src="acompanante.js"></script>
+<script src="auditor.js"></script>
+<script src="aprendizaje.js"></script>
 
 </body>
-
 </html>
+  

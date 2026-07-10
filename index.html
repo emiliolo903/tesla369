@@ -534,14 +534,13 @@ let pararOCR=false;
 
 
 //////////////////////////////////////////////////
-// CARGAR MEMORIA
+// CARGAR DATOS
 //////////////////////////////////////////////////
 
 function cargarDatos(){
 
 
 try{
-
 
 base=
 
@@ -557,7 +556,6 @@ if(!Array.isArray(base))
 base=[];
 
 
-
 }catch(e){
 
 base=[];
@@ -568,7 +566,6 @@ base=[];
 
 
 try{
-
 
 ciclos=
 
@@ -584,7 +581,6 @@ if(!Array.isArray(ciclos))
 ciclos=[];
 
 
-
 }catch(e){
 
 ciclos=[];
@@ -595,7 +591,6 @@ ciclos=[];
 
 
 try{
-
 
 matriz=
 
@@ -611,7 +606,6 @@ if(!Array.isArray(matriz))
 matriz=[];
 
 
-
 }catch(e){
 
 matriz=[];
@@ -621,9 +615,7 @@ matriz=[];
 
 
 
-
 try{
-
 
 acompañantes=
 
@@ -639,7 +631,6 @@ if(!Array.isArray(acompañantes))
 acompañantes=[];
 
 
-
 }catch(e){
 
 acompañantes=[];
@@ -647,9 +638,7 @@ acompañantes=[];
 }
 
 
-
 }
-
 
 
 
@@ -672,7 +661,6 @@ JSON.stringify(base)
 );
 
 
-
 localStorage.setItem(
 
 CICLOS_KEY,
@@ -680,7 +668,6 @@ CICLOS_KEY,
 JSON.stringify(ciclos)
 
 );
-
 
 
 localStorage.setItem(
@@ -692,7 +679,6 @@ JSON.stringify(matriz)
 );
 
 
-
 localStorage.setItem(
 
 ACOMP_KEY,
@@ -700,7 +686,6 @@ ACOMP_KEY,
 JSON.stringify(acompañantes)
 
 );
-
 
 
 actualizarEstado();
@@ -715,7 +700,7 @@ actualizarEstado();
 
 
 //////////////////////////////////////////////////
-// ESTADO
+// ACTUALIZAR ESTADO
 //////////////////////////////////////////////////
 
 function actualizarEstado(){
@@ -724,7 +709,6 @@ function actualizarEstado(){
 let total=
 
 document.getElementById("total");
-
 
 
 if(total){
@@ -744,8 +728,9 @@ base.length;
 
 
 
+
 //////////////////////////////////////////////////
-// MOSTRAR RESULTADO
+// MOSTRAR
 //////////////////////////////////////////////////
 
 function mostrar(texto){
@@ -759,16 +744,15 @@ document.getElementById("resultado");
 
 if(salida){
 
-
 salida.innerText=
 
 texto;
 
-
 }
 
 
 }
+
 
 
 
@@ -806,12 +790,12 @@ x.provincia===r.provincia
 
 
 
+
 //////////////////////////////////////////////////
 // AGREGAR REGISTRO
 //////////////////////////////////////////////////
 
 function agregarRegistro(r){
-
 
 
 if(!existeRegistro(r)){
@@ -820,28 +804,119 @@ if(!existeRegistro(r)){
 base.push(r);
 
 
-
 agregarCiclo(r);
-
 
 
 agregarMatriz(r);
 
 
-
 return true;
 
 
-
 }
-
 
 
 return false;
 
 
+}
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// CREAR CICLO HISTÓRICO
+//////////////////////////////////////////////////
+
+function crearCiclo(fecha){
+
+
+return{
+
+
+fecha:fecha,
+
+
+PREVIA:[],
+
+
+PRIMERA:[],
+
+
+MATUTINA:[],
+
+
+VESPERTINA:[],
+
+
+NOCTURNA:[]
+
+
+};
+
 
 }
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// AGREGAR CICLO
+//////////////////////////////////////////////////
+
+function agregarCiclo(r){
+
+
+
+let ciclo=
+
+ciclos.find(c=>
+
+c.fecha===r.fecha
+
+);
+
+
+
+
+if(!ciclo){
+
+
+ciclo=
+
+crearCiclo(r.fecha);
+
+
+ciclos.push(ciclo);
+
+
+}
+
+
+
+
+
+
+if(ciclo[r.turno]){
+
+
+ciclo[r.turno].push(r.numero);
+
+
+}
+
+
+
+}
+
 
 
 
@@ -856,20 +931,17 @@ return false;
 function agregarMatriz(r){
 
 
-
 let existe=
 
-
 matriz.some(x=>
-
 
 x.provincia===r.provincia &&
 
 x.numero===r.numero
 
-
-
 );
+
+
 
 
 
@@ -891,9 +963,7 @@ ambos:r.numero.slice(-2),
 turno:r.turno
 
 
-
 });
-
 
 
 }
@@ -1608,7 +1678,7 @@ datos.length
 
 
 
-  }
+               }
   //////////////////////////////////////////////////
 // GENERADOR FINAL V37
 //////////////////////////////////////////////////

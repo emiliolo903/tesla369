@@ -619,13 +619,14 @@ let salida=
 
 document.getElementById("resultado");
   //////////////////////////////////////////////////
-// OCR INTELIGENTE V37
+// OCR INTELIGENTE V37 CORREGIDO
 //////////////////////////////////////////////////
 
 async function iniciarOCR(){
 
-let archivo=
+let archivo =
 document.getElementById("archivoPDF").files[0];
+
 
 if(!archivo){
 
@@ -635,93 +636,250 @@ return;
 
 }
 
+
 pararOCR=false;
 
-document.getElementById("estado").innerText="PROCESANDO";
 
-let datos=
+document.getElementById("estado").innerText =
+"PROCESANDO";
+
+
+document.getElementById("infoOCR").innerText =
+"Iniciando motor OCR...";
+
+
+
+let datos =
 await archivo.arrayBuffer();
 
-let pdf=
+
+
+let pdf =
 await pdfjsLib.getDocument({
+
 data:datos
+
 }).promise;
 
-document.getElementById("paginas").innerText=
+
+
+document.getElementById("paginas").innerText =
 pdf.numPages;
 
-let worker=
-await Tesseract.createWorker("spa");
 
-let provinciaSeleccionada=
+
+let provinciaSeleccionada =
 document.getElementById("provinciaOCR").value;
 
-let provinciaActual=
+
+
+let provinciaActual =
 provinciaSeleccionada==="AUTO"
-? "DESCONOCIDA"
-: provinciaSeleccionada;
+?
+"DESCONOCIDA"
+:
+provinciaSeleccionada;
 
-for(let pagina=1;pagina<=pdf.numPages;pagina++){
 
-if(pararOCR)break;
 
-let page=
+let worker =
+await Tesseract.createWorker("spa",1);
+
+
+
+
+
+for(
+
+let pagina=1;
+
+pagina<=pdf.numPages;
+
+pagina++
+
+){
+
+
+
+if(pararOCR)
+
+break;
+
+
+
+
+
+document.getElementById("infoOCR").innerText =
+
+"Procesando página "+pagina+
+" de "+
+pdf.numPages;
+
+
+
+
+
+let page =
 await pdf.getPage(pagina);
 
-let viewport=
+
+
+
+
+let viewport =
 page.getViewport({
+
 scale:2
+
 });
 
-let canvas=
+
+
+
+
+let canvas =
 document.createElement("canvas");
 
-canvas.width=viewport.width;
-canvas.height=viewport.height;
+
+
+canvas.width =
+viewport.width;
+
+
+canvas.height =
+viewport.height;
+
+
+
+
+
+let contexto =
+canvas.getContext("2d");
+
+
+
+
 
 await page.render({
 
-canvasContext:
-canvas.getContext("2d"),
+canvasContext:contexto,
 
-viewport
+viewport:viewport
 
 }).promise;
 
-let resultado=
+
+
+
+
+
+
+let resultado;
+
+
+
+try{
+
+
+resultado =
 await worker.recognize(canvas);
 
-let texto=
-resultado.data.text.toUpperCase();
+
+
+}catch(error){
+
+
+console.log(
+
+"Error OCR página "+pagina,
+
+error
+
+);
+
+
+continue;
+
+
+}
+
+
+
+
+
+
+
+let texto =
+(resultado.data.text || "")
+
+.toUpperCase();
+
+
+
+
+
 
 //////////////////////////////////////////////////
-// DETECTAR PROVINCIA
+// DETECCIÓN DE PROVINCIA
 //////////////////////////////////////////////////
+
 
 if(provinciaSeleccionada==="AUTO"){
 
+
+
 if(texto.includes("CORRIENTES"))
+
 provinciaActual="CORRIENTES";
 
+
+
 if(texto.includes("SANTA FE"))
+
 provinciaActual="SANTA FE";
 
-if(texto.includes("CORDOBA"))
+
+
+if(texto.includes("CORDOBA") ||
+
+texto.includes("CÓRDOBA"))
+
 provinciaActual="CORDOBA";
 
+
+
 if(texto.includes("CHACO"))
+
 provinciaActual="CHACO";
 
-if(texto.includes("ENTRE RIOS"))
+
+
+if(texto.includes("ENTRE RIOS") ||
+
+texto.includes("ENTRE RÍOS"))
+
 provinciaActual="ENTRE RIOS";
 
+
+
 if(texto.includes("CIUDAD"))
+
 provinciaActual="CIUDAD";
 
+
+
 if(texto.includes("BONAERENSE"))
+
 provinciaActual="BONAERENSE";
 
+
 }
+
+
+
+
+
+
 
 guardarOCR(
 
@@ -733,33 +891,63 @@ provinciaActual
 
 );
 
-document.getElementById("barra").style.width=
+
+
+
+
+
+
+document.getElementById("barra").style.width =
 
 ((pagina/pdf.numPages)*100)+"%";
 
-document.getElementById("infoOCR").innerText=
 
-"Página "+pagina+" de "+pdf.numPages;
 
 }
+
+
+
+
 
 await worker.terminate();
 
+
+
+
 guardarTodo();
 
-document.getElementById("estado").innerText="FINALIZADO";
+
+
+
+
+document.getElementById("estado").innerText =
+
+"FINALIZADO";
+
+
+
 
 mostrar(
 
-"✅ OCR FINALIZADO\n\n"+
+"✅ OCR TERMINADO\n\n"+
 
-"Registros: "+base.length+
+"Registros guardados: "+
 
-"\n\nBase guardada correctamente."
+base.length
 
 );
 
+
+
 }
+
+
+
+
+
+
+
+
 
 //////////////////////////////////////////////////
 // DETENER OCR
@@ -767,11 +955,26 @@ mostrar(
 
 function detenerOCR(){
 
+
 pararOCR=true;
 
-mostrar("⛔ OCR detenido");
+
+mostrar(
+
+"⛔ OCR detenido"
+
+);
+
 
 }
+
+
+
+
+
+
+
+
 
 //////////////////////////////////////////////////
 // EXTRAER NUMEROS
@@ -779,9 +982,19 @@ mostrar("⛔ OCR detenido");
 
 function extraerNumeros(texto){
 
+
 return texto.match(/\b\d{4}\b/g)||[];
 
+
 }
+
+
+
+
+
+
+
+
 
 //////////////////////////////////////////////////
 // DETECTAR TURNO
@@ -789,30 +1002,59 @@ return texto.match(/\b\d{4}\b/g)||[];
 
 function detectarTurno(texto){
 
-let t=
+
+let t =
 
 texto.toUpperCase()
+
 .normalize("NFD")
+
 .replace(/[\u0300-\u036f]/g,"");
 
+
+
 if(t.includes("PREV"))
+
 return "PREVIA";
 
+
+
 if(t.includes("PRIMER"))
+
 return "PRIMERA";
 
+
+
 if(t.includes("MATU"))
+
 return "MATUTINA";
 
+
+
 if(t.includes("VES"))
+
 return "VESPERTINA";
 
+
+
 if(t.includes("NOC"))
+
 return "NOCTURNA";
+
+
 
 return "DESCONOCIDO";
 
+
 }
+
+
+
+
+
+
+
+
 
 //////////////////////////////////////////////////
 // GUARDAR OCR
@@ -828,18 +1070,35 @@ provincia
 
 ){
 
-let numeros=
+
+
+let numeros =
+
 extraerNumeros(texto);
 
-let turno=
+
+
+let turno =
+
 detectarTurno(texto);
 
-let fecha=
+
+
+let fecha =
+
 new Date()
+
 .toISOString()
+
 .split("T")[0];
 
+
+
+
+
 numeros.forEach(numero=>{
+
+
 
 agregarRegistro({
 
@@ -857,7 +1116,11 @@ origen:"OCR"
 
 });
 
+
+
 });
+
+
 
   }
   //////////////////////////////////////////////////
@@ -1155,7 +1418,7 @@ datos.length
 
 );
 
-}
+  }
   //////////////////////////////////////////////////
 // GENERADOR FINAL V37
 //////////////////////////////////////////////////
@@ -1512,7 +1775,7 @@ base.length
 
 };
 
-
+</script>
 
 </body>
 

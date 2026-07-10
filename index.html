@@ -619,13 +619,16 @@ let salida=
 
 document.getElementById("resultado");
   //////////////////////////////////////////////////
-// OCR INTELIGENTE V37 CORREGIDO
+// OCR INTELIGENTE V37 CORREGIDO 2
 //////////////////////////////////////////////////
 
 async function iniciarOCR(){
 
+
 let archivo =
+
 document.getElementById("archivoPDF").files[0];
+
 
 
 if(!archivo){
@@ -637,24 +640,36 @@ return;
 }
 
 
+
 pararOCR=false;
 
 
-document.getElementById("estado").innerText =
-"PROCESANDO";
+
+document.getElementById("estado").innerText=
+
+"PREPARANDO OCR";
 
 
-document.getElementById("infoOCR").innerText =
-"Iniciando motor OCR...";
+
+document.getElementById("infoOCR").innerText=
+
+"Cargando PDF...";
+
+
+
+
+try{
 
 
 
 let datos =
+
 await archivo.arrayBuffer();
 
 
 
 let pdf =
+
 await pdfjsLib.getDocument({
 
 data:datos
@@ -663,27 +678,80 @@ data:datos
 
 
 
-document.getElementById("paginas").innerText =
+
+document.getElementById("paginas").innerText=
+
 pdf.numPages;
 
 
 
+
+
 let provinciaSeleccionada =
+
 document.getElementById("provinciaOCR").value;
 
 
 
 let provinciaActual =
+
 provinciaSeleccionada==="AUTO"
+
 ?
+
 "DESCONOCIDA"
+
 :
+
 provinciaSeleccionada;
 
 
 
-let worker =
-await Tesseract.createWorker("spa",1);
+
+
+
+let worker;
+
+
+
+try{
+
+
+
+worker =
+
+await Tesseract.createWorker("spa");
+
+
+
+}catch(error){
+
+
+
+mostrar(
+
+"❌ Error iniciando OCR\n\n"+
+
+error
+
+);
+
+
+
+return;
+
+
+}
+
+
+
+
+
+document.getElementById("estado").innerText=
+
+"PROCESANDO";
+
+
 
 
 
@@ -709,24 +777,34 @@ break;
 
 
 
-document.getElementById("infoOCR").innerText =
 
-"Procesando página "+pagina+
+document.getElementById("infoOCR").innerText=
+
+"Procesando página "+
+
+pagina+
+
 " de "+
+
 pdf.numPages;
 
 
 
 
 
+
+
 let page =
+
 await pdf.getPage(pagina);
 
 
 
 
 
+
 let viewport =
+
 page.getViewport({
 
 scale:2
@@ -737,24 +815,33 @@ scale:2
 
 
 
+
+
 let canvas =
+
 document.createElement("canvas");
 
 
 
-canvas.width =
+canvas.width=
+
 viewport.width;
 
 
-canvas.height =
+
+canvas.height=
+
 viewport.height;
 
 
 
 
 
-let contexto =
+
+let ctx=
+
 canvas.getContext("2d");
+
 
 
 
@@ -762,7 +849,7 @@ canvas.getContext("2d");
 
 await page.render({
 
-canvasContext:contexto,
+canvasContext:ctx,
 
 viewport:viewport
 
@@ -774,31 +861,46 @@ viewport:viewport
 
 
 
-let resultado;
+
+let texto="";
+
 
 
 
 try{
 
 
-resultado =
+
+let resultado =
+
 await worker.recognize(canvas);
+
+
+
+texto =
+
+(resultado.data.text || "")
+
+.toUpperCase();
 
 
 
 }catch(error){
 
 
+
 console.log(
 
-"Error OCR página "+pagina,
+"Error página "+pagina,
 
 error
 
 );
 
 
+
 continue;
+
 
 
 }
@@ -809,19 +911,12 @@ continue;
 
 
 
-let texto =
-(resultado.data.text || "")
-
-.toUpperCase();
-
-
-
-
 
 
 //////////////////////////////////////////////////
-// DETECCIÓN DE PROVINCIA
+// DETECCION PROVINCIA
 //////////////////////////////////////////////////
+
 
 
 if(provinciaSeleccionada==="AUTO"){
@@ -834,46 +929,61 @@ provinciaActual="CORRIENTES";
 
 
 
-if(texto.includes("SANTA FE"))
+else if(texto.includes("SANTA FE"))
 
 provinciaActual="SANTA FE";
 
 
 
-if(texto.includes("CORDOBA") ||
+else if(
 
-texto.includes("CÓRDOBA"))
+texto.includes("CORDOBA")
+
+||
+
+texto.includes("CÓRDOBA")
+
+)
 
 provinciaActual="CORDOBA";
 
 
 
-if(texto.includes("CHACO"))
+else if(texto.includes("CHACO"))
 
 provinciaActual="CHACO";
 
 
 
-if(texto.includes("ENTRE RIOS") ||
+else if(
 
-texto.includes("ENTRE RÍOS"))
+texto.includes("ENTRE RIOS")
+
+||
+
+texto.includes("ENTRE RÍOS")
+
+)
 
 provinciaActual="ENTRE RIOS";
 
 
 
-if(texto.includes("CIUDAD"))
+else if(texto.includes("CIUDAD"))
 
 provinciaActual="CIUDAD";
 
 
 
-if(texto.includes("BONAERENSE"))
+else if(texto.includes("BONAERENSE"))
 
 provinciaActual="BONAERENSE";
 
 
+
 }
+
+
 
 
 
@@ -897,13 +1007,18 @@ provinciaActual
 
 
 
-document.getElementById("barra").style.width =
+
+document.getElementById("barra").style.width=
 
 ((pagina/pdf.numPages)*100)+"%";
 
 
 
+
+
 }
+
+
 
 
 
@@ -914,15 +1029,18 @@ await worker.terminate();
 
 
 
+
 guardarTodo();
 
 
 
 
 
-document.getElementById("estado").innerText =
+
+document.getElementById("estado").innerText=
 
 "FINALIZADO";
+
 
 
 
@@ -939,8 +1057,38 @@ base.length
 
 
 
+
+
+
+}catch(error){
+
+
+
+console.log(error);
+
+
+
+document.getElementById("estado").innerText=
+
+"ERROR";
+
+
+
+mostrar(
+
+"❌ Error procesando PDF\n\n"+
+
+error
+
+);
+
+
+
 }
 
+
+
+}
 
 
 
@@ -975,7 +1123,6 @@ mostrar(
 
 
 
-
 //////////////////////////////////////////////////
 // EXTRAER NUMEROS
 //////////////////////////////////////////////////
@@ -995,7 +1142,6 @@ return texto.match(/\b\d{4}\b/g)||[];
 
 
 
-
 //////////////////////////////////////////////////
 // DETECTAR TURNO
 //////////////////////////////////////////////////
@@ -1003,9 +1149,11 @@ return texto.match(/\b\d{4}\b/g)||[];
 function detectarTurno(texto){
 
 
-let t =
+let t=
 
-texto.toUpperCase()
+texto
+
+.toUpperCase()
 
 .normalize("NFD")
 
@@ -1045,12 +1193,7 @@ return "NOCTURNA";
 
 return "DESCONOCIDO";
 
-
 }
-
-
-
-
 
 
 
@@ -1072,25 +1215,26 @@ provincia
 
 
 
-let numeros =
+let numeros=
 
 extraerNumeros(texto);
 
 
 
-let turno =
+let turno=
 
 detectarTurno(texto);
 
 
 
-let fecha =
+let fecha=
 
 new Date()
 
 .toISOString()
 
 .split("T")[0];
+
 
 
 

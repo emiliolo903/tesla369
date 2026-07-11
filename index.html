@@ -1340,78 +1340,89 @@ ${datos.length}
 
 
 //////////////////////////////////////////////////
-// MATRIZ PROVINCIAL IA
+// EMI TESLA PRO V38
+// MATRIZ PROVINCIAL POR TRANSICIÓN
 //////////////////////////////////////////////////
 
 async function analizarMatriz(){
 
 let datos=await leerBase();
 
+if(datos.length<5){
 
-if(datos.length===0){
-
-mostrar(
-"⚠️ Sin datos históricos"
-);
+mostrar("⚠️ No hay historial suficiente");
 
 return;
 
 }
 
+let provincia=
+document.getElementById("provinciaManual").value;
 
+const ciclos={
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
+};
 
-let matriz={};
+let salida="🌎 MATRIZ PROVINCIAL IA\n";
+salida+="📍 "+provincia+"\n\n";
 
+for(let origen in ciclos){
 
+let destino=ciclos[origen];
 
-datos.forEach(r=>{
+let cuaternos={};
+let ternos={};
+let ambos={};
 
+for(let i=0;i<datos.length-1;i++){
 
-let provincia=r.provincia||"DESCONOCIDA";
+let actual=datos[i];
+let siguiente=datos[i+1];
 
+if(
+actual.provincia===provincia &&
+siguiente.provincia===provincia &&
+actual.turno===origen &&
+siguiente.turno===destino
+){
 
-if(!matriz[provincia])
+let numero=siguiente.numero;
 
-matriz[provincia]={};
+if(!/^\d{4}$/.test(numero))
+continue;
 
+cuaternos[numero]=(cuaternos[numero]||0)+1;
 
-let ambos=r.numero.slice(-2);
+let t=numero.slice(-3);
+ternos[t]=(ternos[t]||0)+1;
 
+let a=numero.slice(-2);
+ambos[a]=(ambos[a]||0)+1;
 
-matriz[provincia][ambos]=(matriz[provincia][ambos]||0)+1;
+}
 
+}
 
-});
+function mejor(obj){
+return Object.keys(obj).sort((a,b)=>obj[b]-obj[a]);
+}
 
+let c=mejor(cuaternos);
+let t=mejor(ternos);
+let a=mejor(ambos);
 
+salida+=
+"🔄 "+origen+" ➜ "+destino+"\n";
 
-let salida="🌎 MATRIZ PROVINCIAL IA\n\n";
+salida+="Cuaterno: "+(c[0]||"--")+"\n";
+salida+="Terno: "+(t[0]||"--")+"\n";
+salida+="Ambos: "+(a[0]||"--")+"\n\n";
 
-
-
-Object.keys(matriz).forEach(p=>{
-
-
-salida+="📍 "+p+"\n";
-
-
-Object.keys(matriz[p])
-.sort((a,b)=>matriz[p][b]-matriz[p][a])
-.slice(0,5)
-.forEach(n=>{
-
-
-salida+=n+" = "+matriz[p][n]+" veces\n";
-
-
-});
-
-
-salida+="\n";
-
-
-});
-
+}
 
 mostrar(salida);
 

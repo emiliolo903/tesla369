@@ -999,274 +999,262 @@ return "DESCONOCIDO";
   }
 //////////////////////////////////////////////////
 // EMI TESLA PRO V38
-// MOTOR IA POR TRANSICIÓN DE TURNOS
-// CUATERNO - TERNO - AMBOS
+// MOTOR IA V39
+// PARTE 1
 //////////////////////////////////////////////////
 
 async function generarJuegoCompletoIA(){
 
+let datos=await leerBase();
 
-let datos = await leerBase();
+if(datos.length<20){
 
-
-
-if(datos.length < 5){
-
-mostrar(
-"⚠️ Falta historial para analizar"
-);
+mostrar("⚠️ Historial insuficiente");
 
 return;
 
 }
 
+let provincia=
+document.getElementById("provinciaManual").value;
 
-
-// Lee el último turno seleccionado
-let turnoActual = 
+let turnoActual=
 document.getElementById("turnoManual").value;
 
+let entrada=
+document.getElementById("numerosManual").value
+.match(/\d{4}/g)||[];
 
+if(entrada.length===0){
 
-let siguienteTurno = "";
+mostrar("⚠️ Debe cargar primero las 7 agencias");
 
+return;
 
+}
 
-if(turnoActual==="PREVIA")
-siguienteTurno="PRIMERA";
+const siguiente={
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
+};
 
+let turnoDestino=
+siguiente[turnoActual];
 
-if(turnoActual==="PRIMERA")
-siguienteTurno="MATUTINA";
+let bloques=[];
 
+for(let i=0;i<datos.length-6;i++){
 
-if(turnoActual==="MATUTINA")
-siguienteTurno="VESPERTINA";
-
-
-if(turnoActual==="VESPERTINA")
-siguienteTurno="NOCTURNA";
-
-
-if(turnoActual==="NOCTURNA")
-siguienteTurno="PREVIA";
-
-
-
-
-
-let cuaternos={};
-
-let ternos={};
-
-let ambos={};
-
-
-
-
-
-for(let i=0;i<datos.length-1;i++){
-
-
-
-let actual=datos[i];
-
-let futuro=datos[i+1];
-
-
-
-
-// Solo mira la transición correcta
+let bloque=datos.slice(i,i+7);
 
 if(
-actual.turno===turnoActual &&
-futuro.turno===siguienteTurno
+bloque.every(x=>
+x.provincia===provincia &&
+x.turno===turnoActual
+)
 ){
 
+bloques.push({
+base:bloque,
+inicio:i
+});
 
+}
 
-let numero=futuro.numero;
+}
 
+let candidatos=[];
+//////////////////////////////////////////////////
+// MOTOR IA V39
+// PARTE 2
+//////////////////////////////////////////////////
 
+for(let item of bloques){
 
-if(!/^\d{4}$/.test(numero))
-continue;
+let bloque=item.base;
 
+let similitud=0;
 
+entrada.forEach(nuevo=>{
 
+let ambosNuevo=nuevo.slice(-2);
+let ternoNuevo=nuevo.slice(-3);
 
-let peso=1;
+bloque.forEach(reg=>{
 
+let numero=reg.numero;
 
+if(numero===nuevo)
+similitud+=100;
 
-// Más peso si pertenece a la misma provincia
+else if(numero.slice(-3)===ternoNuevo)
+similitud+=25;
 
-let provincia=
+else if(numero.slice(-2)===ambosNuevo)
+similitud+=10;
 
-document.getElementById(
-"provinciaManual"
-).value;
+else if(numero[0]===nuevo[0])
+similitud+=3;
 
+else if(numero[3]===nuevo[3])
+similitud+=2;
 
+});
 
-if(futuro.provincia===provincia)
-peso+=3;
+});
 
+if(similitud>0){
 
+candidatos.push({
 
+inicio:item.inicio,
 
+puntaje:similitud
+
+});
+
+}
+
+}
+
+candidatos.sort((a,b)=>b.puntaje-a.puntaje);
+
+if(candidatos.length===0){
+
+mostrar("⚠️ No se encontraron bloques históricos similares");
+
+return;
+
+}
+
+let cuaternos={};
+let ternos={};
+let ambos={};
+ //////////////////////////////////////////////////
+// MOTOR IA V39
+// PARTE 3
+//////////////////////////////////////////////////
+
+for(let candidato of candidatos){
+
+let indice=candidato.inicio+7;
+
+while(
+
+indice<datos.length &&
+
+datos[indice].provincia===provincia &&
+
+datos[indice].turno===turnoDestino
+
+){
+
+let numero=datos[indice].numero;
+
+let peso=candidato.puntaje;
 
 cuaternos[numero]=
-
 (cuaternos[numero]||0)+peso;
 
-
-
-
-
 let terno=
-
 numero.slice(-3);
 
-
-
 ternos[terno]=
-
 (ternos[terno]||0)+peso;
 
-
-
-
-
-let a=
-
+let amb=
 numero.slice(-2);
 
+ambos[amb]=
+(ambos[amb]||0)+peso;
 
-
-ambos[a]=
-
-(ambos[a]||0)+peso;
-
-
+indice++;
 
 }
 
-
-
 }
-
-
-
-
-
 
 function ordenar(obj){
 
 return Object.keys(obj)
-
-.sort((a,b)=>
-
-obj[b]-obj[a]
-
-);
+.sort((a,b)=>obj[b]-obj[a]);
 
 }
 
-
-
-
-
-let listaCuaterno=
-
+let listaCuaternos=
 ordenar(cuaternos);
 
-
-
-let listaTerno=
-
+let listaTernos=
 ordenar(ternos);
 
-
-
 let listaAmbos=
-
 ordenar(ambos);
+ //////////////////////////////////////////////////
+// MOTOR IA V39
+// PARTE 4 (FINAL)
+//////////////////////////////////////////////////
 
+let cuaternoPrincipal=listaCuaternos[0]||"--";
+let cuaternoApoyo=listaCuaternos[1]||"--";
 
+let ternoPrincipal=listaTernos[0]||"--";
+let ternoApoyo=listaTernos[1]||"--";
 
-
-
+let ambosPrincipal=listaAmbos[0]||"--";
+let ambosApoyo=listaAmbos[1]||"--";
 
 mostrar(`
 
-🧠 EMI TESLA PRO V38 IA
+🧠 EMI TESLA PRO V39
 
+📍 Provincia
+${provincia}
 
+🔄 Predicción
 
-🔄 TRANSICIÓN
-
-${turnoActual} ➜ ${siguienteTurno}
-
-
+${turnoActual}
+➡
+${turnoDestino}
 
 🎯 CUATERNO PRINCIPAL
 
-${listaCuaterno[0]||"--"}
-
-
+${cuaternoPrincipal}
 
 🟡 CUATERNO APOYO
 
-${listaCuaterno[1]||"--"}
-
-
+${cuaternoApoyo}
 
 ⚡ TERNO PRINCIPAL
 
-${listaTerno[0]||"--"}
-
-
+${ternoPrincipal}
 
 🟡 TERNO APOYO
 
-${listaTerno[1]||"--"}
-
-
+${ternoApoyo}
 
 💥 AMBOS PRINCIPAL
 
-${listaAmbos[0]||"--"}
-
-
+${ambosPrincipal}
 
 🟡 AMBOS APOYO
 
-${listaAmbos[1]||"--"}
+${ambosApoyo}
 
+📊 Bloques similares
 
+${candidatos.length}
 
-📊 DATOS ANALIZADOS
+📚 Historial analizado
 
 ${datos.length}
-
-
 
 `);
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
+ 
 //////////////////////////////////////////////////
 // GENERADOR TESLA IA
 //////////////////////////////////////////////////

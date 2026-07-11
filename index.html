@@ -43,7 +43,6 @@ color:#00ff99;
 }
 
 
-
 .card{
 
 background:#202020;
@@ -55,13 +54,11 @@ margin-bottom:15px;
 }
 
 
-
 h2{
 
 color:#00ff99;
 
 }
-
 
 
 button,input,select{
@@ -76,7 +73,6 @@ font-size:15px;
 }
 
 
-
 button{
 
 background:#00aa66;
@@ -86,13 +82,11 @@ font-weight:bold;
 }
 
 
-
 button:hover{
 
 background:#00cc77;
 
 }
-
 
 
 .grid{
@@ -104,7 +98,6 @@ gap:10px;
 }
 
 
-
 .box{
 
 background:#303030;
@@ -113,7 +106,6 @@ border-radius:8px;
 text-align:center;
 
 }
-
 
 
 .resultado{
@@ -152,9 +144,6 @@ white-space:pre-wrap;
 🎯 ACOMPAÑANTE EXACTO
 
 </h1>
-
-
-
 <div class="card">
 
 <h2>📊 Estado Sistema</h2>
@@ -218,7 +207,8 @@ V38 IA
 </div>
 
 </div>
-<!-- CONTINUACIÓN BLOQUE 2/5 -->
+
+
 
 <div class="card">
 
@@ -405,6 +395,12 @@ EMI Tesla PRO V38 IA iniciado...
 
 
 </div>
+
+
+
+<script>
+
+
 //////////////////////////////////////////////////
 // EMI TESLA PRO V38
 // BASE HISTORICA INDEXEDDB
@@ -419,10 +415,7 @@ const STORE_NAME="historico";
 let db=null;
 
 let pararOCR=false;
-
-
-
-function abrirBase(){
+ function abrirBase(){
 
 return new Promise((resolve,reject)=>{
 
@@ -716,8 +709,10 @@ mostrar(
 
 
 }
-  //////////////////////////////////////////////////
-// EMI TESLA PRO V38
+
+
+
+//////////////////////////////////////////////////
 // OCR PDF HISTORICO
 //////////////////////////////////////////////////
 
@@ -767,10 +762,7 @@ data:buffer
 let worker=await Tesseract.createWorker(
 "spa"
 );
-
-
-
-for(let p=1;p<=pdf.numPages;p++){
+  for(let p=1;p<=pdf.numPages;p++){
 
 
 
@@ -1004,21 +996,15 @@ return "NOCTURNA";
 return "DESCONOCIDO";
 
 
-}
+  }
   //////////////////////////////////////////////////
-// EMI TESLA PRO V38
 // MOTOR IA JUEGO COMPLETO
 // CUATERNO - TERNO - AMBOS
 //////////////////////////////////////////////////
 
-
 async function generarJuegoCompletoIA(){
 
-
-let datos=
-
-await leerBase();
-
+let datos=await leerBase();
 
 
 if(datos.length<5){
@@ -1032,14 +1018,11 @@ return;
 }
 
 
-
 let cuaternos={};
 
 let ternos={};
 
 let ambos={};
-
-
 
 
 
@@ -1049,90 +1032,56 @@ datos.forEach(r=>{
 let numero=r.numero;
 
 
-
 if(!/^\d{4}$/.test(numero))
 
 return;
-
 
 
 let peso=1;
 
 
 
-
-// Peso por turno
-
 if(r.turno==="NOCTURNA")
-
 peso+=5;
 
 
 if(r.turno==="VESPERTINA")
-
 peso+=3;
 
 
 if(r.turno==="MATUTINA")
-
 peso+=2;
 
 
 
-
-// Peso por provincia
-
 if(r.provincia==="CORRIENTES")
-
 peso+=3;
 
 
 if(r.provincia==="SANTA FE")
-
 peso+=2;
 
 
 if(r.provincia==="CORDOBA")
-
 peso+=2;
 
 
 
-// CUATERNO
-
-cuaternos[numero]=
-
-(cuaternos[numero]||0)+peso;
+cuaternos[numero]=(cuaternos[numero]||0)+peso;
 
 
 
+let terno=numero.slice(-3);
 
-// TERNO
 
-let terno=
-
-numero.slice(-3);
+ternos[terno]=(ternos[terno]||0)+peso;
 
 
 
-ternos[terno]=
-
-(ternos[terno]||0)+peso;
+let a=numero.slice(-2);
 
 
-
-
-// AMBOS
-
-let a=
-
-numero.slice(-2);
-
-
-
-ambos[a]=
-
-(ambos[a]||0)+peso;
+ambos[a]=(ambos[a]||0)+peso;
 
 
 
@@ -1141,51 +1090,26 @@ ambos[a]=
 
 
 
-
-
 function ordenar(obj){
 
 return Object.keys(obj)
-
-.sort((a,b)=>
-
-obj[b]-obj[a]
-
-);
+.sort((a,b)=>obj[b]-obj[a]);
 
 }
 
 
 
+let listaCuaterno=ordenar(cuaternos);
 
+let listaTerno=ordenar(ternos);
 
-let listaCuaterno=
-
-ordenar(cuaternos);
-
-
-
-let listaTerno=
-
-ordenar(ternos);
-
-
-
-let listaAmbos=
-
-ordenar(ambos);
-
-
-
-
+let listaAmbos=ordenar(ambos);
 
 
 
 mostrar(`
 
-
 🧠 EMI TESLA PRO V38 IA
-
 
 
 🎯 CUATERNO PRINCIPAL
@@ -1193,12 +1117,9 @@ mostrar(`
 ${listaCuaterno[0]||"--"}
 
 
-
 🟡 CUATERNO APOYO
 
 ${listaCuaterno[1]||"--"}
-
-
 
 
 ⚡ TERNO PRINCIPAL
@@ -1206,12 +1127,9 @@ ${listaCuaterno[1]||"--"}
 ${listaTerno[0]||"--"}
 
 
-
 🟡 TERNO APOYO
 
 ${listaTerno[1]||"--"}
-
-
 
 
 💥 AMBOS PRINCIPAL
@@ -1219,19 +1137,14 @@ ${listaTerno[1]||"--"}
 ${listaAmbos[0]||"--"}
 
 
-
 🟡 AMBOS APOYO
 
 ${listaAmbos[1]||"--"}
 
 
-
-
 📊 REGISTROS ANALIZADOS
 
 ${datos.length}
-
-
 
 `);
 
@@ -1245,14 +1158,9 @@ ${datos.length}
 // GENERADOR TESLA IA
 //////////////////////////////////////////////////
 
-
 async function generarTeslaIA(){
 
-
-let datos=
-
-await leerBase();
-
+let datos=await leerBase();
 
 
 if(datos.length===0){
@@ -1273,43 +1181,24 @@ let mapa={};
 
 datos.forEach(r=>{
 
-
-let ambos=
-
-r.numero.slice(-2);
+let ambos=r.numero.slice(-2);
 
 
-
-mapa[ambos]=
-
-(mapa[ambos]||0)+1;
+mapa[ambos]=(mapa[ambos]||0)+1;
 
 
 });
 
 
 
-
-
-let ranking=
-
-Object.keys(mapa)
-
-.sort((a,b)=>
-
-mapa[b]-mapa[a]
-
-);
-
-
+let ranking=Object.keys(mapa)
+.sort((a,b)=>mapa[b]-mapa[a]);
 
 
 
 mostrar(`
 
-
 🚀 TESLA IA V38
-
 
 
 💥 AMBOS PRINCIPAL
@@ -1317,11 +1206,9 @@ mostrar(`
 ${ranking[0]||"--"}
 
 
-
 🟡 AMBOS APOYO
 
 ${ranking[1]||"--"}
-
 
 
 ⚡ TERCERA OPCIÓN
@@ -1329,30 +1216,23 @@ ${ranking[1]||"--"}
 ${ranking[2]||"--"}
 
 
-
-
 📊 DATOS
 
 ${datos.length}
 
-
-
 `);
 
 }
-  //////////////////////////////////////////////////
-// EMI TESLA PRO V38
+
+
+
+//////////////////////////////////////////////////
 // MATRIZ PROVINCIAL IA
 //////////////////////////////////////////////////
 
-
 async function analizarMatriz(){
 
-
-let datos=
-
-await leerBase();
-
+let datos=await leerBase();
 
 
 if(datos.length===0){
@@ -1377,65 +1257,41 @@ datos.forEach(r=>{
 let provincia=r.provincia||"DESCONOCIDA";
 
 
-
 if(!matriz[provincia])
 
 matriz[provincia]={};
 
 
-
 let ambos=r.numero.slice(-2);
 
 
-
-matriz[provincia][ambos]=
-
-(matriz[provincia][ambos]||0)+1;
-
+matriz[provincia][ambos]=(matriz[provincia][ambos]||0)+1;
 
 
 });
 
 
 
-
-
-let salida=
-
-"🌎 MATRIZ PROVINCIAL IA\n\n";
-
+let salida="🌎 MATRIZ PROVINCIAL IA\n\n";
 
 
 
 Object.keys(matriz).forEach(p=>{
 
 
-salida+=
-
-"📍 "+p+"\n";
-
+salida+="📍 "+p+"\n";
 
 
 Object.keys(matriz[p])
-
-.sort((a,b)=>
-
-matriz[p][b]-matriz[p][a]
-
-)
-
+.sort((a,b)=>matriz[p][b]-matriz[p][a])
 .slice(0,5)
-
 .forEach(n=>{
 
 
-salida+=
-
-n+" = "+matriz[p][n]+" veces\n";
+salida+=n+" = "+matriz[p][n]+" veces\n";
 
 
 });
-
 
 
 salida+="\n";
@@ -1444,84 +1300,46 @@ salida+="\n";
 });
 
 
-
 mostrar(salida);
-
-
 
 }
 
 
 
-
-
-
-
 //////////////////////////////////////////////////
-// TRANSICIÓN DE TURNOS
+// TRANSICIÓN - ACOMPAÑANTE - PATRONES
 //////////////////////////////////////////////////
-
 
 async function analizarTransicionIA(){
 
-
-let datos=
-
-await leerBase();
-
-
+let datos=await leerBase();
 
 let trans={};
-
 
 
 for(let i=0;i<datos.length-1;i++){
 
 
-
-let actual=datos[i];
-
-let siguiente=datos[i+1];
-
-
-
 let clave=
-
-actual.turno+
-
+datos[i].turno+
 " ➜ "+
-
-siguiente.turno;
-
+datos[i+1].turno;
 
 
-let ambos=
-
-siguiente.numero.slice(-2);
-
+let ambos=datos[i+1].numero.slice(-2);
 
 
 if(!trans[clave])
-
 trans[clave]={};
 
 
-
-trans[clave][ambos]=
-
-(trans[clave][ambos]||0)+1;
-
+trans[clave][ambos]=(trans[clave][ambos]||0)+1;
 
 
 }
 
 
-
-
-let salida=
-
-"🔄 TRANSICIÓN IA\n\n";
-
+let salida="🔄 TRANSICIÓN IA\n\n";
 
 
 Object.keys(trans).forEach(t=>{
@@ -1530,88 +1348,54 @@ Object.keys(trans).forEach(t=>{
 salida+=t+"\n";
 
 
-
 Object.keys(trans[t])
-
-.sort((a,b)=>
-
-trans[t][b]-trans[t][a]
-
-)
-
+.sort((a,b)=>trans[t][b]-trans[t][a])
 .slice(0,5)
-
 .forEach(n=>{
 
 
-salida+=
-
-"  "+n+" = "+trans[t][n]+"\n";
+salida+=" "+n+" = "+trans[t][n]+"\n";
 
 
 });
 
 
-
-salida+="\n";
-
-
 });
-
 
 
 mostrar(salida);
 
-
-
 }
-  //////////////////////////////////////////////////
-// EMI TESLA PRO V38
-// ACOMPAÑANTE EXACTO
-//////////////////////////////////////////////////
+
+
+
 
 
 async function buscarAcompananteV2(){
 
-
-let entrada=
-
-document.getElementById(
+let entrada=document.getElementById(
 "numerosManual"
 ).value.trim();
 
 
-
 if(!/^\d{4}$/.test(entrada)){
-
 
 mostrar(
 "⚠️ Ingrese un cuaterno de 4 cifras"
 );
-
 
 return;
 
 }
 
 
+let datos=await leerBase();
 
 
-let datos=
-
-await leerBase();
-
-
-
-let ambos=
-
-entrada.slice(-2);
-
+let ambos=entrada.slice(-2);
 
 
 let acompañantes={};
-
-
 
 
 datos.forEach(r=>{
@@ -1620,15 +1404,10 @@ datos.forEach(r=>{
 if(r.numero.slice(-2)===ambos){
 
 
-let cabeza=
-
-r.numero.slice(0,2);
+let cabeza=r.numero.slice(0,2);
 
 
-
-acompañantes[cabeza]=
-
-(acompañantes[cabeza]||0)+1;
+acompañantes[cabeza]=(acompañantes[cabeza]||0)+1;
 
 
 }
@@ -1638,20 +1417,8 @@ acompañantes[cabeza]=
 
 
 
-
-
-
-let ranking=
-
-Object.keys(acompañantes)
-
-.sort((a,b)=>
-
-acompañantes[b]-acompañantes[a]
-
-);
-
-
+let ranking=Object.keys(acompañantes)
+.sort((a,b)=>acompañantes[b]-acompañantes[a]);
 
 
 
@@ -1660,11 +1427,9 @@ mostrar(`
 🎯 ACOMPAÑANTE EXACTO IA
 
 
-
 BASE:
 
 ${entrada}
-
 
 
 AMBOS:
@@ -1672,18 +1437,14 @@ AMBOS:
 ${ambos}
 
 
-
 🔥 PRINCIPAL:
 
 ${ranking[0]||"--"}${ambos}
 
 
-
 🟡 APOYO:
 
 ${ranking[1]||"--"}${ambos}
-
-
 
 `);
 
@@ -1693,250 +1454,122 @@ ${ranking[1]||"--"}${ambos}
 
 
 
-
-
-//////////////////////////////////////////////////
-// PATRONES HISTÓRICOS
-//////////////////////////////////////////////////
-
-
 async function analizarPatrones(){
 
-
-let datos=
-
-await leerBase();
-
-
+let datos=await leerBase();
 
 let mapa={};
-
 
 
 datos.forEach(r=>{
 
 
-let ambos=
-
-r.numero.slice(-2);
+let ambos=r.numero.slice(-2);
 
 
-
-mapa[ambos]=
-
-(mapa[ambos]||0)+1;
+mapa[ambos]=(mapa[ambos]||0)+1;
 
 
 });
 
 
+let salida="🔬 PATRONES HISTÓRICOS IA\n\n";
 
-
-let orden=
 
 Object.keys(mapa)
-
-.sort((a,b)=>
-
-mapa[b]-mapa[a]
-
-)
-
-.slice(0,20);
+.sort((a,b)=>mapa[b]-mapa[a])
+.slice(0,20)
+.forEach(n=>{
 
 
-
-
-
-let salida=
-
-"🔬 PATRONES HISTÓRICOS IA\n\n";
-
-
-
-orden.forEach(x=>{
-
-
-salida+=
-
-x+" = "+mapa[x]+" veces\n";
+salida+=n+" = "+mapa[n]+" veces\n";
 
 
 });
-
 
 
 mostrar(salida);
 
-
-
 }
 
 
-
-
-
-
-
-//////////////////////////////////////////////////
-// PATRONES NOCTURNA
-//////////////////////////////////////////////////
 
 
 async function analizarNocturna(){
 
-
-let datos=
-
-await leerBase();
-
-
+let datos=await leerBase();
 
 let mapa={};
 
 
-
-datos
-
-.filter(r=>
-
-r.turno==="NOCTURNA"
-
-)
-
+datos.filter(r=>r.turno==="NOCTURNA")
 .forEach(r=>{
 
 
-let ambos=
-
-r.numero.slice(-2);
+let ambos=r.numero.slice(-2);
 
 
-
-mapa[ambos]=
-
-(mapa[ambos]||0)+1;
+mapa[ambos]=(mapa[ambos]||0)+1;
 
 
 });
 
 
+let salida="🌙 PATRONES NOCTURNA IA\n\n";
 
-
-
-let orden=
 
 Object.keys(mapa)
-
-.sort((a,b)=>
-
-mapa[b]-mapa[a]
-
-)
-
-.slice(0,20);
+.sort((a,b)=>mapa[b]-mapa[a])
+.slice(0,20)
+.forEach(n=>{
 
 
-
-
-
-let salida=
-
-"🌙 PATRONES NOCTURNA IA\n\n";
-
-
-
-orden.forEach(x=>{
-
-
-salida+=
-
-x+" = "+mapa[x]+"\n";
+salida+=n+" = "+mapa[n]+"\n";
 
 
 });
-
 
 
 mostrar(salida);
-
-
 
 }
 
 
 
 
-
-
-
-//////////////////////////////////////////////////
-// ESTADÍSTICAS
-//////////////////////////////////////////////////
-
-
 async function estadisticasBase(){
 
-
-let datos=
-
-await leerBase();
-
+let datos=await leerBase();
 
 
 let provincias={};
 
 
-
 datos.forEach(r=>{
 
-
 provincias[r.provincia]=
-
 (provincias[r.provincia]||0)+1;
 
-
 });
-
-
-
 
 
 let texto=
-
 "📊 ESTADÍSTICAS EMI TESLA PRO V38\n\n";
 
 
-
-texto+=
-
-"TOTAL REGISTROS: "+datos.length+"\n\n";
+texto+="TOTAL REGISTROS: "+datos.length+"\n\n";
 
 
+Object.keys(provincias).forEach(p=>{
 
-Object.keys(provincias)
-
-.forEach(p=>{
-
-
-texto+=
-
-p+" : "+provincias[p]+"\n";
-
+texto+=p+" : "+provincias[p]+"\n";
 
 });
-
 
 
 mostrar(texto);
 
-
-
 }
-
-
-
-
 
 
 
@@ -1945,10 +1578,7 @@ mostrar(texto);
 // INICIO DEL SISTEMA
 //////////////////////////////////////////////////
 
-
-window.onload=
-
-async function(){
+window.onload=async function(){
 
 
 try{
@@ -1957,11 +1587,7 @@ try{
 await abrirBase();
 
 
-
-let total=
-
-await contarRegistros();
-
+let total=await contarRegistros();
 
 
 document.getElementById(
@@ -1981,7 +1607,6 @@ mostrar(`
 🚀 EMI TESLA PRO V38 IA MATRIZ
 
 
-
 ✅ Base activa
 
 ✅ OCR listo
@@ -1993,14 +1618,11 @@ mostrar(`
 ✅ Acompañante activo
 
 
-
 REGISTROS:
 
 ${total}
 
 `);
-
-
 
 
 }
@@ -2009,18 +1631,14 @@ catch(e){
 
 
 mostrar(
-
 "❌ Error inicio\n\n"+e
-
 );
 
 
 }
 
 
-
 }
-
 
 
 </script>
@@ -2029,3 +1647,4 @@ mostrar(
 </body>
 
 </html>
+  

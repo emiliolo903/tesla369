@@ -1431,67 +1431,104 @@ mostrar(salida);
 
 
 //////////////////////////////////////////////////
-// TRANSICIÓN - ACOMPAÑANTE - PATRONES
+// EMI TESLA PRO V38
+// TRANSICIÓN IA POR PROVINCIA Y TURNOS
 //////////////////////////////////////////////////
 
 async function analizarTransicionIA(){
 
 let datos=await leerBase();
 
-let trans={};
+if(datos.length<5){
 
+mostrar("⚠️ Historial insuficiente");
+
+return;
+
+}
+
+let provincia=
+document.getElementById("provinciaManual").value;
+
+const siguiente={
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
+};
+
+let turnoActual=
+document.getElementById("turnoManual").value;
+
+let turnoDestino=
+siguiente[turnoActual];
+
+let frecuencia={};
 
 for(let i=0;i<datos.length-1;i++){
 
+let actual=datos[i];
+let prox=datos[i+1];
 
-let clave=
-datos[i].turno+
-" ➜ "+
-datos[i+1].turno;
+if(
+actual.provincia===provincia &&
+prox.provincia===provincia &&
+actual.turno===turnoActual &&
+prox.turno===turnoDestino
+){
 
+let ambos=prox.numero.slice(-2);
 
-let ambos=datos[i+1].numero.slice(-2);
-
-
-if(!trans[clave])
-trans[clave]={};
-
-
-trans[clave][ambos]=(trans[clave][ambos]||0)+1;
-
+frecuencia[ambos]=
+(frecuencia[ambos]||0)+1;
 
 }
 
-
-let salida="🔄 TRANSICIÓN IA\n\n";
-
-
-Object.keys(trans).forEach(t=>{
-
-
-salida+=t+"\n";
-
-
-Object.keys(trans[t])
-.sort((a,b)=>trans[t][b]-trans[t][a])
-.slice(0,5)
-.forEach(n=>{
-
-
-salida+=" "+n+" = "+trans[t][n]+"\n";
-
-
-});
-
-
-});
-
-
-mostrar(salida);
-
 }
 
+let ranking=
+Object.keys(frecuencia)
+.sort((a,b)=>frecuencia[b]-frecuencia[a]);
 
+mostrar(`
+
+🔄 TRANSICIÓN IA
+
+Provincia:
+${provincia}
+
+Turno:
+
+${turnoActual}
+
+↓
+
+${turnoDestino}
+
+
+💥 Ambos Principal
+
+${ranking[0]||"--"}
+
+
+🟡 Ambos Apoyo
+
+${ranking[1]||"--"}
+
+
+⚡ Tercera Opción
+
+${ranking[2]||"--"}
+
+
+📊 Analizados
+
+${Object.keys(frecuencia).length}
+
+`);
+
+}
 
 
 

@@ -1060,9 +1060,8 @@ return "DESCONOCIDO";
   }
   //////////////////////////////////////////////////
 // EMI TESLA PRO V38
-// MOTOR IA MATRIZ
+// MOTOR IA JUEGO COMPLETO CORREGIDO
 //////////////////////////////////////////////////
-
 
 
 async function generarJuegoCompletoIA(){
@@ -1076,7 +1075,7 @@ await leerBase();
 
 if(datos.length<5){
 
-mostrar("⚠️ Falta historial");
+mostrar("⚠️ Falta historial para analizar");
 
 return;
 
@@ -1084,30 +1083,64 @@ return;
 
 
 
-let ranking={};
+let puntaje={};
+
+let fuerzaAmbos={};
+
+
 
 
 
 datos.forEach(r=>{
 
 
-let n=r.numero;
+let numero=r.numero;
 
 
 
-if(!ranking[n])
+if(!/^\d{4}$/.test(numero))
 
-ranking[n]=0;
-
-
-
-ranking[n]+=10;
+return;
 
 
+
+
+
+if(!puntaje[numero])
+
+puntaje[numero]=0;
+
+
+
+// Fuerza histórica
+
+puntaje[numero]+=10;
+
+
+
+
+
+// Más peso a nocturna
 
 if(r.turno==="NOCTURNA")
 
-ranking[n]+=20;
+puntaje[numero]+=15;
+
+
+
+
+
+// Fuerza del ambos
+
+let ambos=
+
+numero.slice(-2);
+
+
+
+fuerzaAmbos[ambos]=
+
+(fuerzaAmbos[ambos]||0)+1;
 
 
 
@@ -1117,13 +1150,39 @@ ranking[n]+=20;
 
 
 
-let lista=
 
-Object.keys(ranking)
+// Sumar fuerza de terminación
+
+Object.keys(puntaje).forEach(numero=>{
+
+
+let ambos=
+
+numero.slice(-2);
+
+
+
+puntaje[numero]+=
+
+(fuerzaAmbos[ambos]||0)*5;
+
+
+
+});
+
+
+
+
+
+
+
+let ranking=
+
+Object.keys(puntaje)
 
 .sort((a,b)=>
 
-ranking[b]-ranking[a]
+puntaje[b]-puntaje[a]
 
 );
 
@@ -1131,15 +1190,61 @@ ranking[b]-ranking[a]
 
 
 
-let principal=
+let principal="";
 
-lista.slice(0,4);
+let apoyo="";
 
 
 
-let apoyo=
 
-lista.slice(4,8);
+
+// Buscar principal
+
+principal=
+
+ranking[0];
+
+
+
+
+
+
+// Buscar apoyo diferente
+
+for(let i=1;i<ranking.length;i++){
+
+
+if(
+
+ranking[i].slice(-2)!==
+
+principal.slice(-2)
+
+){
+
+
+apoyo=
+
+ranking[i];
+
+break;
+
+
+}
+
+
+}
+
+
+
+
+
+if(!apoyo)
+
+apoyo=
+
+ranking[1];
+
 
 
 
@@ -1154,46 +1259,148 @@ mostrar(`
 
 🔥 CUATERNO PRINCIPAL
 
-${principal.join(" - ")}
+${principal}
 
 
 
 🟡 CUATERNO APOYO
 
-${apoyo.join(" - ")}
+${apoyo}
 
 
 
 ⚡ TERNO PRINCIPAL
 
-${principal.slice(0,3).join(" - ")}
+${principal.slice(-3)}
 
 
 
 🟡 TERNO APOYO
 
-${apoyo.slice(0,3).join(" - ")}
+${apoyo.slice(-3)}
 
 
 
 💥 AMBOS PRINCIPAL
 
-${principal.map(x=>x.slice(-2)).join(" - ")}
+${principal.slice(-2)}
 
 
 
 🟡 AMBOS APOYO
 
-${apoyo.map(x=>x.slice(-2)).join(" - ")}
+${apoyo.slice(-2)}
 
 
 
-📊 Registros:
+📊 Registros analizados
 
 ${datos.length}
 
 
+
 `);
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// GENERADOR TESLA IA MEJORADO
+//////////////////////////////////////////////////
+
+
+async function generarTeslaIA(){
+
+
+let datos=
+
+await leerBase();
+
+
+
+if(datos.length===0){
+
+mostrar("⚠️ Sin datos");
+
+return;
+
+}
+
+
+
+let mapa={};
+
+
+
+datos.forEach(r=>{
+
+
+let ambos=
+
+r.numero.slice(-2);
+
+
+
+mapa[ambos]=
+
+(mapa[ambos]||0)+1;
+
+
+});
+
+
+
+
+
+let ranking=
+
+Object.keys(mapa)
+
+.sort((a,b)=>
+
+mapa[b]-mapa[a]
+
+);
+
+
+
+
+
+mostrar(`
+
+🚀 TESLA V38
+
+
+
+💥 AMBOS PRINCIPAL
+
+${ranking[0]||"--"}
+
+
+
+🟡 AMBOS APOYO
+
+${ranking[1]||"--"}
+
+
+
+⚡ TERCERA OPCIÓN
+
+${ranking[2]||"--"}
+
+
+
+📊 Analizados:
+
+${datos.length}
+
+
+
+`);
+
+
 
 }
 

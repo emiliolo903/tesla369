@@ -997,17 +997,20 @@ return "DESCONOCIDO";
 
 
   }
-  //////////////////////////////////////////////////
-// MOTOR IA JUEGO COMPLETO
+//////////////////////////////////////////////////
+// EMI TESLA PRO V38
+// MOTOR IA POR TRANSICIÓN DE TURNOS
 // CUATERNO - TERNO - AMBOS
 //////////////////////////////////////////////////
 
 async function generarJuegoCompletoIA(){
 
-let datos=await leerBase();
+
+let datos = await leerBase();
 
 
-if(datos.length<5){
+
+if(datos.length < 5){
 
 mostrar(
 "⚠️ Falta historial para analizar"
@@ -1018,6 +1021,40 @@ return;
 }
 
 
+
+// Lee el último turno seleccionado
+let turnoActual = 
+document.getElementById("turnoManual").value;
+
+
+
+let siguienteTurno = "";
+
+
+
+if(turnoActual==="PREVIA")
+siguienteTurno="PRIMERA";
+
+
+if(turnoActual==="PRIMERA")
+siguienteTurno="MATUTINA";
+
+
+if(turnoActual==="MATUTINA")
+siguienteTurno="VESPERTINA";
+
+
+if(turnoActual==="VESPERTINA")
+siguienteTurno="NOCTURNA";
+
+
+if(turnoActual==="NOCTURNA")
+siguienteTurno="PREVIA";
+
+
+
+
+
 let cuaternos={};
 
 let ternos={};
@@ -1026,66 +1063,100 @@ let ambos={};
 
 
 
-datos.forEach(r=>{
 
 
-let numero=r.numero;
+for(let i=0;i<datos.length-1;i++){
+
+
+
+let actual=datos[i];
+
+let futuro=datos[i+1];
+
+
+
+
+// Solo mira la transición correcta
+
+if(
+actual.turno===turnoActual &&
+futuro.turno===siguienteTurno
+){
+
+
+
+let numero=futuro.numero;
+
 
 
 if(!/^\d{4}$/.test(numero))
+continue;
 
-return;
+
 
 
 let peso=1;
 
 
 
-if(r.turno==="NOCTURNA")
-peso+=5;
+// Más peso si pertenece a la misma provincia
+
+let provincia=
+
+document.getElementById(
+"provinciaManual"
+).value;
 
 
-if(r.turno==="VESPERTINA")
+
+if(futuro.provincia===provincia)
 peso+=3;
 
 
-if(r.turno==="MATUTINA")
-peso+=2;
 
 
 
-if(r.provincia==="CORRIENTES")
-peso+=3;
+cuaternos[numero]=
 
-
-if(r.provincia==="SANTA FE")
-peso+=2;
-
-
-if(r.provincia==="CORDOBA")
-peso+=2;
+(cuaternos[numero]||0)+peso;
 
 
 
-cuaternos[numero]=(cuaternos[numero]||0)+peso;
+
+
+let terno=
+
+numero.slice(-3);
 
 
 
-let terno=numero.slice(-3);
+ternos[terno]=
 
-
-ternos[terno]=(ternos[terno]||0)+peso;
-
-
-
-let a=numero.slice(-2);
-
-
-ambos[a]=(ambos[a]||0)+peso;
+(ternos[terno]||0)+peso;
 
 
 
-});
+
+
+let a=
+
+numero.slice(-2);
+
+
+
+ambos[a]=
+
+(ambos[a]||0)+peso;
+
+
+
+}
+
+
+
+}
+
+
 
 
 
@@ -1093,17 +1164,37 @@ ambos[a]=(ambos[a]||0)+peso;
 function ordenar(obj){
 
 return Object.keys(obj)
-.sort((a,b)=>obj[b]-obj[a]);
+
+.sort((a,b)=>
+
+obj[b]-obj[a]
+
+);
 
 }
 
 
 
-let listaCuaterno=ordenar(cuaternos);
 
-let listaTerno=ordenar(ternos);
 
-let listaAmbos=ordenar(ambos);
+let listaCuaterno=
+
+ordenar(cuaternos);
+
+
+
+let listaTerno=
+
+ordenar(ternos);
+
+
+
+let listaAmbos=
+
+ordenar(ambos);
+
+
+
 
 
 
@@ -1112,9 +1203,17 @@ mostrar(`
 🧠 EMI TESLA PRO V38 IA
 
 
+
+🔄 TRANSICIÓN
+
+${turnoActual} ➜ ${siguienteTurno}
+
+
+
 🎯 CUATERNO PRINCIPAL
 
 ${listaCuaterno[0]||"--"}
+
 
 
 🟡 CUATERNO APOYO
@@ -1122,9 +1221,11 @@ ${listaCuaterno[0]||"--"}
 ${listaCuaterno[1]||"--"}
 
 
+
 ⚡ TERNO PRINCIPAL
 
 ${listaTerno[0]||"--"}
+
 
 
 🟡 TERNO APOYO
@@ -1132,9 +1233,11 @@ ${listaTerno[0]||"--"}
 ${listaTerno[1]||"--"}
 
 
+
 💥 AMBOS PRINCIPAL
 
 ${listaAmbos[0]||"--"}
+
 
 
 🟡 AMBOS APOYO
@@ -1142,13 +1245,23 @@ ${listaAmbos[0]||"--"}
 ${listaAmbos[1]||"--"}
 
 
-📊 REGISTROS ANALIZADOS
+
+📊 DATOS ANALIZADOS
 
 ${datos.length}
+
+
 
 `);
 
 }
+
+
+
+
+
+
+
 
 
 

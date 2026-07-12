@@ -257,25 +257,10 @@ accept=".pdf">
 
 <div class="card">
 
-<h2>✍️ Carga Manual</h2>
+<h2>✍️ CARGA BLOQUE PROVINCIAL IA</h2>
 
 
-<select id="provinciaManual">
-
-<option>CORRIENTES</option>
-<option>SANTA FE</option>
-<option>CORDOBA</option>
-<option>CHACO</option>
-<option>ENTRE RIOS</option>
-<option>CIUDAD</option>
-<option>BONAERENSE</option>
-
-</select>
-
-
-
-
-<select id="turnoManual">
+<select id="turnoBloque">
 
 <option>PREVIA</option>
 <option>PRIMERA</option>
@@ -286,22 +271,43 @@ accept=".pdf">
 </select>
 
 
+<h3>CORRIENTES</h3>
+<input id="corrientesBloque" placeholder="Ej: 1342">
 
 
-<input 
-id="numerosManual"
-placeholder="Ejemplo: 1234 5678 9012">
+<h3>CIUDAD</h3>
+<input id="ciudadBloque" placeholder="Ej: 6534">
 
 
-<button onclick="guardarManual()">
+<h3>BONAERENSE</h3>
+<input id="bonaerenseBloque" placeholder="Ej: 7821">
 
-💾 Guardar Datos
+
+<h3>SANTA FE</h3>
+<input id="santafeBloque" placeholder="Ej: 9045">
+
+
+<h3>CÓRDOBA</h3>
+<input id="cordobaBloque" placeholder="Ej: 2267">
+
+
+<h3>ENTRE RÍOS</h3>
+<input id="entreriosBloque" placeholder="Ej: 5180">
+
+
+<h3>CHACO</h3>
+<input id="chacoBloque" placeholder="Ej: 3391">
+
+
+
+<button onclick="guardarBloqueIA()">
+
+💾 Guardar Bloque Provincial
 
 </button>
 
 
 </div>
-
 
 
 

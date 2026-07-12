@@ -630,54 +630,61 @@ document.getElementById(
 
 
 
-async function guardarManual(){
+//////////////////////////////////////////////////
+// EMI TESLA PRO V39
+// GUARDAR BLOQUE PROVINCIAL IA
+//////////////////////////////////////////////////
+
+async function guardarBloqueIA(){
+
+let turno =
+document.getElementById("turnoBloque").value;
 
 
-let texto=document.getElementById(
-"numerosManual"
-).value;
+let provincias={
+
+"CORRIENTES":
+document.getElementById("corrientesBloque").value,
+
+"CIUDAD":
+document.getElementById("ciudadBloque").value,
+
+"BONAERENSE":
+document.getElementById("bonaerenseBloque").value,
+
+"SANTA FE":
+document.getElementById("santafeBloque").value,
+
+"CORDOBA":
+document.getElementById("cordobaBloque").value,
+
+"ENTRE RIOS":
+document.getElementById("entreriosBloque").value,
+
+"CHACO":
+document.getElementById("chacoBloque").value
+
+};
 
 
 
-let provincia=document.getElementById(
-"provinciaManual"
-).value;
+let cantidad=0;
 
 
-
-let turno=document.getElementById(
-"turnoManual"
-).value;
+for(let provincia in provincias){
 
 
-
-let numeros=texto.match(/\d{4}/g);
-
+let numero=provincias[provincia].trim();
 
 
-if(!numeros){
-
-mostrar(
-"⚠️ Ingrese números de 4 cifras"
-);
-
-return;
-
-}
-
-
-
-
-for(let numero of numeros){
+if(/^\d{4}$/.test(numero)){
 
 
 await guardarRegistro({
 
-
 fecha:new Date()
 .toISOString()
 .split("T")[0],
-
 
 provincia,
 
@@ -685,36 +692,52 @@ turno,
 
 numero,
 
-origen:"MANUAL"
-
+origen:"BLOQUE_IA"
 
 });
 
 
+cantidad++;
+
+
 }
 
+
+}
 
 
 
 let total=await contarRegistros();
 
 
-
-document.getElementById(
-"total"
-).innerText=total;
+document.getElementById("total")
+.innerText=total;
 
 
 
-mostrar(
+mostrar(`
 
-"✅ Datos guardados\n\n"+
-"Registros: "+total
+✅ BLOQUE PROVINCIAL GUARDADO
 
-);
 
+Turno:
+
+${turno}
+
+
+Provincias cargadas:
+
+${cantidad}
+
+
+Total registros:
+
+${total}
+
+`);
 
 }
+
 
 
 

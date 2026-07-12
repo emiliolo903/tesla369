@@ -1691,7 +1691,285 @@ ${ranking[2]||"--"}
 }
 
 
+//////////////////////////////////////////////////
+// EMI TESLA PRO V40.1
+// MOTOR TRANSICIÓN TURNO + PROVINCIA
+//////////////////////////////////////////////////
 
+
+async function motorTransicionProvinciaV40(){
+
+
+let datos = await leerBase();
+
+
+if(datos.length===0){
+
+mostrar("⚠️ No hay historial");
+
+return;
+
+}
+
+
+
+let turnoActual =
+document.getElementById(
+"turnoBloque"
+).value;
+
+
+
+let siguiente={
+
+
+"PREVIA":"PRIMERA",
+
+"PRIMERA":"MATUTINA",
+
+"MATUTINA":"VESPERTINA",
+
+"VESPERTINA":"NOCTURNA",
+
+"NOCTURNA":"PREVIA"
+
+
+};
+
+
+
+let turnoDestino =
+siguiente[turnoActual];
+
+
+
+let matriz={};
+
+
+
+datos.forEach(r=>{
+
+
+if(r.turno!==turnoDestino)
+
+return;
+
+
+
+let ambos =
+r.numero.slice(-2);
+
+
+
+if(!matriz[r.provincia]){
+
+matriz[r.provincia]={};
+
+}
+
+
+
+matriz[r.provincia][ambos]=
+
+(matriz[r.provincia][ambos]||0)+1;
+
+
+
+});
+
+
+
+
+let salida=
+
+"🔄 MOTOR TRANSICIÓN V40.1\n\n";
+
+
+salida+=
+
+"ORIGEN: "+turnoActual+"\n";
+
+salida+=
+
+"DESTINO: "+turnoDestino+"\n\n";
+
+
+
+
+for(let provincia in matriz){
+
+
+
+let ranking=
+
+Object.keys(matriz[provincia])
+
+.sort((a,b)=>
+
+matriz[provincia][b]-
+
+matriz[provincia][a]
+
+);
+
+
+
+salida+=
+
+"📍 "+provincia+"\n";
+
+
+
+salida+=
+
+"🔥 Principal: "+
+
+(ranking[0]||"--")+
+
+"\n";
+
+
+
+salida+=
+
+"🟡 Apoyo: "+
+
+(ranking[1]||"--")+
+
+"\n\n";
+
+
+
+}
+
+
+
+mostrar(salida);
+
+
+}
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// CONTINUIDAD DE NÚMEROS ENTRE PROVINCIAS
+//////////////////////////////////////////////////
+
+
+async function continuidadEntreProvinciasV40(){
+
+
+let datos=
+
+await leerBase();
+
+
+
+let mapa={};
+
+
+
+datos.forEach(r=>{
+
+
+let ambos=
+
+r.numero.slice(-2);
+
+
+
+if(!mapa[ambos]){
+
+mapa[ambos]={};
+
+}
+
+
+
+mapa[ambos][r.provincia]=
+
+(mapa[ambos][r.provincia]||0)+1;
+
+
+
+});
+
+
+
+let ranking=
+
+Object.keys(mapa)
+
+.sort((a,b)=>{
+
+
+let sumaA=
+
+Object.values(mapa[a])
+
+.reduce((x,y)=>x+y,0);
+
+
+
+let sumaB=
+
+Object.values(mapa[b])
+
+.reduce((x,y)=>x+y,0);
+
+
+
+return sumaB-sumaA;
+
+
+});
+
+
+
+
+let salida=
+
+"🌎 CONTINUIDAD ENTRE PROVINCIAS\n\n";
+
+
+
+ranking.slice(0,10)
+
+.forEach(n=>{
+
+
+salida+=
+
+"💥 "+n+"\n";
+
+
+Object.keys(mapa[n])
+
+.forEach(p=>{
+
+
+salida+=
+
+"   "+p+" : "+mapa[n][p]+"\n";
+
+
+});
+
+
+salida+="\n";
+
+
+});
+
+
+
+mostrar(salida);
+
+
+  }
 
 
 //////////////////////////////////////////////////

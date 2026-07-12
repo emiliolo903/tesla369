@@ -725,14 +725,18 @@ document.getElementById(
 // GUARDAR BLOQUE 7 PROVINCIAS
 //////////////////////////////////////////////////
 
-async function guardarBloqueIA(){
 
+  async function guardarBloqueIA(){
 
+// Crear un nuevo identificador para cada bloque cargado
+BLOQUE_ACTIVO = Date.now();
 
 let turno=
 document.getElementById(
 "turnoBloque"
 ).value;
+
+
 
 
 

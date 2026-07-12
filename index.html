@@ -683,7 +683,27 @@ reject(e);
 
 }
 
+//////////////////////////////////////////////////
+// OBTENER ÚLTIMO BLOQUE CARGADO
+//////////////////////////////////////////////////
 
+async function obtenerUltimoBloque(){
+
+let datos = await leerBase();
+
+if(datos.length===0){
+return [];
+}
+
+let ultimoBloque = Math.max(
+...datos
+.filter(x=>x.bloque)
+.map(x=>x.bloque)
+);
+
+return datos.filter(x=>x.bloque===ultimoBloque);
+
+ }
 
 
 

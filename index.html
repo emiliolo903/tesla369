@@ -1107,22 +1107,18 @@ return "DESCONOCIDO";
 
   }
   //////////////////////////////////////////////////
-// MOTOR IA CUATERNO TERNO AMBOS V39
+// MOTOR IA TRANSICIÓN V39.1 MEJORADO
 //////////////////////////////////////////////////
 
 async function generarJuegoCompletoIA(){
 
 
-let datos=
-await leerBase();
+let datos = await leerBase();
 
 
+if(datos.length < 7){
 
-if(datos.length<7){
-
-mostrar(
-"⚠️ Falta historial"
-);
+mostrar("⚠️ Falta historial");
 
 return;
 
@@ -1130,53 +1126,132 @@ return;
 
 
 
-let cuaternos={};
+let turnoActual =
+document.getElementById("turnoBloque").value;
 
-let ternos={};
 
-let ambos={};
+
+let siguiente={
+
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
+
+};
+
+
+
+let destino =
+siguiente[turnoActual];
+
+
+
+let puntaje={};
 
 
 
 datos.forEach(r=>{
 
 
-if(!/^\d{4}$/.test(r.numero))
+if(r.turno !== destino)
+
 return;
 
 
 
-let peso=1;
+if(!/^\d{4}$/.test(r.numero))
+
+return;
 
 
 
-if(r.origen==="BLOQUE_7_PROVINCIAS")
-peso+=5;
+let numero=r.numero;
 
 
 
-cuaternos[r.numero]=
-(cuaternos[r.numero]||0)+peso;
+let puntos=0;
 
 
 
-let t=
-r.numero.slice(-3);
+// Fuerza histórica
+
+puntos += 20;
 
 
 
-ternos[t]=
-(ternos[t]||0)+peso;
+// Bloque 7 provincias
+
+if(r.origen==="BLOQUE_7_PROVINCIAS"){
+
+puntos += 30;
+
+}
 
 
 
-let a=
-r.numero.slice(-2);
+// Ambos fuerte
+
+let ambos=
+numero.slice(-2);
 
 
 
-ambos[a]=
-(ambos[a]||0)+peso;
+let repetidos =
+datos.filter(x=>
+
+x.numero.slice(-2)===ambos
+
+).length;
+
+
+
+puntos += repetidos * 5;
+
+
+
+
+// Movimiento entre provincias
+
+let provincias =
+datos.filter(x=>
+
+x.numero.slice(-2)===ambos
+
+).length;
+
+
+
+puntos += provincias * 2;
+
+
+
+
+// Inversión
+
+let invertido =
+ambos[1]+ambos[0];
+
+
+if(datos.some(x=>
+
+x.numero.slice(-2)===invertido
+
+)){
+
+
+puntos += 15;
+
+
+}
+
+
+
+
+puntaje[numero]=
+
+(puntaje[numero]||0)+puntos;
 
 
 
@@ -1186,67 +1261,103 @@ ambos[a]=
 
 
 
-function ordenar(obj){
+let ranking =
 
-return Object.keys(obj)
-.sort((a,b)=>obj[b]-obj[a]);
+Object.keys(puntaje)
+
+.map(n=>({
+
+numero:n,
+
+puntos:puntaje[n]
+
+}))
+
+.sort((a,b)=>
+
+b.puntos-a.puntos
+
+);
+
+
+
+
+
+if(!ranking.length){
+
+mostrar("⚠️ Sin transición histórica");
+
+return;
 
 }
 
 
 
 
-let c=
-ordenar(cuaternos);
+
+let principal =
+ranking[0].numero;
 
 
 
-let t=
-ordenar(ternos);
+let apoyo =
+ranking[1] ?
 
+ranking[1].numero :
 
-
-let a=
-ordenar(ambos);
+principal;
 
 
 
 
 mostrar(`
 
-🧠 EMI TESLA PRO V39
+🧠 EMI TESLA PRO V39.1 IA
 
 
-🎯 CUATERNO PRINCIPAL
+TRANSICIÓN
 
-${c[0]||"--"}
+${turnoActual}
+
+⬇
+
+${destino}
+
+
+
+🔥 CUATERNO PRINCIPAL
+
+${principal}
+
 
 
 🟡 CUATERNO APOYO
 
-${c[1]||"--"}
+${apoyo}
 
 
 
 ⚡ TERNO PRINCIPAL
 
-${t[0]||"--"}
+${principal.slice(-3)}
+
 
 
 🟡 TERNO APOYO
 
-${t[1]||"--"}
+${apoyo.slice(-3)}
 
 
 
 💥 AMBOS PRINCIPAL
 
-${a[0]||"--"}
+${principal.slice(-2)}
+
 
 
 🟡 AMBOS APOYO
 
-${a[1]||"--"}
+${apoyo.slice(-2)}
 
 
 
@@ -1257,8 +1368,6 @@ ${datos.length}
 `);
 
 }
-
-
 
 
 

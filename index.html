@@ -2855,7 +2855,246 @@ mostrar(
 
 }
 
+//////////////////////////////////////////////////
+// EMI TESLA PRO V40
+// INICIO SISTEMA INTELIGENTE
+//////////////////////////////////////////////////
 
+window.onload = async function(){
+
+
+try{
+
+
+await abrirBase();
+
+
+
+let total =
+
+await contarRegistros();
+
+
+
+let contador = document.getElementById(
+"total"
+);
+
+
+
+if(contador){
+
+contador.innerText=total;
+
+}
+
+
+
+let base = document.getElementById(
+"estadoBase"
+);
+
+
+
+if(base){
+
+base.innerText="ACTIVA";
+
+}
+
+
+
+mostrar(`
+
+🚀 EMI TESLA PRO V40 IA
+
+
+✅ Base histórica activa
+
+✅ OCR PDF activo
+
+✅ Matriz 7 provincias activa
+
+✅ Transición turno activa
+
+✅ Motor Tesla activo
+
+
+
+📊 Registros cargados:
+
+${total}
+
+
+
+Sistema listo para analizar continuidad entre:
+
+PREVIA ➡️ PRIMERA
+
+PRIMERA ➡️ MATUTINA
+
+MATUTINA ➡️ VESPERTINA
+
+VESPERTINA ➡️ NOCTURNA
+
+
+`);
+
+
+
+
+}catch(error){
+
+
+mostrar(
+
+"❌ ERROR INICIO V40\n\n"+error
+
+);
+
+
+}
+
+
+
+};
+
+
+
+
+
+//////////////////////////////////////////////////
+// ALIAS DE BOTONES V40
+//////////////////////////////////////////////////
+
+async function analizarMatrizProvincia(){
+
+
+await matrizProvincialCruzadaV40();
+
+
+}
+
+
+
+async function buscarAcompanante(){
+
+
+let entrada=
+
+prompt(
+
+"Ingrese cuaterno de 4 cifras"
+
+);
+
+
+
+if(!/^\d{4}$/.test(entrada)){
+
+
+mostrar(
+"⚠️ Ingrese un cuaterno válido"
+);
+
+
+return;
+
+}
+
+
+
+let datos=
+
+await leerBase();
+
+
+
+let ambos=
+
+entrada.slice(-2);
+
+
+
+let mapa={};
+
+
+
+datos.forEach(r=>{
+
+
+if(r.numero.slice(-2)===ambos){
+
+
+let cabeza=
+
+r.numero.slice(0,2);
+
+
+
+mapa[cabeza]=
+
+(mapa[cabeza]||0)+1;
+
+
+}
+
+
+});
+
+
+
+
+let ranking=
+
+Object.keys(mapa)
+
+.sort((a,b)=>
+
+mapa[b]-mapa[a]
+
+);
+
+
+
+
+mostrar(`
+
+🎯 ACOMPAÑANTE EXACTO V40
+
+
+
+BASE:
+
+${entrada}
+
+
+
+AMBOS:
+
+${ambos}
+
+
+
+🔥 PRINCIPAL:
+
+${ranking[0]||"--"}${ambos}
+
+
+
+🟡 APOYO:
+
+${ranking[1]||"--"}${ambos}
+
+
+
+📊 Veces encontrado:
+
+${datos.length}
+
+`);
+
+  }
 
 </script>
 

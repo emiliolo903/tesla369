@@ -1754,28 +1754,90 @@ ${datos.length}
 
 async function generarResultadoFinalV40(){
 
-
 let datos = await leerBase();
-
-
 
 if(datos.length < 7){
 
-mostrar(
-"⚠️ Falta historial para analizar"
-);
-
+mostrar("⚠️ Falta historial para analizar");
 return;
 
 }
 
 
+let turnoActual =
+document.getElementById("turnoBloque").value;
+
+
+let siguiente={
+
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
+
+};
+
+
+let destino = siguiente[turnoActual];
+
+
+// ===============================
+// 1) BUSCAR CONTINUIDAD
+// ===============================
+
+let ambosContinuidad={};
+
+
+datos.forEach(r=>{
+
+
+if(r.turno===destino){
+
+
+let fin =
+r.numero.slice(-2);
+
+
+ambosContinuidad[fin]=
+(ambosContinuidad[fin]||0)+1;
+
+
+}
+
+});
+
+
+
+let rankingAmbos =
+
+Object.keys(ambosContinuidad)
+
+.sort((a,b)=>
+ambosContinuidad[b]-
+ambosContinuidad[a]
+);
+
+
+
+
+// Toma los 3 ambos de continuidad
+
+let candidatos =
+
+rankingAmbos.slice(0,3);
+
+
+
+
+// ===============================
+// 2) BUSCAR CUATERNOS Y TERNOS
+// ===============================
+
 
 let cuaternos={};
 
 let ternos={};
-
-let ambos={};
 
 
 
@@ -1783,73 +1845,37 @@ datos.forEach(r=>{
 
 
 if(!/^\d{4}$/.test(r.numero))
-
 return;
 
 
 
-let peso=1;
+let ambos =
+r.numero.slice(-2);
 
 
 
-// Datos cargados manualmente tienen más fuerza
-
-if(r.origen==="BLOQUE_7"){
-
-peso+=5;
-
-}
+if(candidatos.includes(ambos)){
 
 
 
-// Cada provincia suma información
-
-if(r.provincia){
-
-peso+=2;
-
-}
+cuaternos[r.numero]=
+(cuaternos[r.numero]||0)+1;
 
 
 
-
-let numero=r.numero;
-
-
-
-cuaternos[numero]=
-
-(cuaternos[numero]||0)+peso;
-
-
-
-let terno=
-
-numero.slice(-3);
-
+let terno =
+r.numero.slice(-3);
 
 
 ternos[terno]=
-
-(ternos[terno]||0)+peso;
-
+(ternos[terno]||0)+1;
 
 
-let fin=
-
-numero.slice(-2);
-
-
-
-ambos[fin]=
-
-(ambos[fin]||0)+peso;
+}
 
 
 
 });
-
-
 
 
 
@@ -1860,86 +1886,78 @@ function ordenar(obj){
 return Object.keys(obj)
 
 .sort((a,b)=>
-
 obj[b]-obj[a]
-
 );
 
 }
 
 
 
-
-let rankingCuaterno=
-
+let rankingCuaternos =
 ordenar(cuaternos);
 
 
 
-let rankingTerno=
-
+let rankingTernos =
 ordenar(ternos);
 
 
 
-let rankingAmbos=
 
-ordenar(ambos);
-
-
-
-
-
+// ===============================
+// RESULTADO FINAL
+// ===============================
 
 
 mostrar(`
 
 🚀 EMI TESLA PRO V40
 
-🧠 MOTOR IA MATRIZ ACTIVO
+🔄 CONTINUIDAD TURNO
+
+${turnoActual}
+
+⬇
+
+${destino}
+
+
+
+💥 AMBOS CONTINUIDAD
+
+1) ${candidatos[0]||"--"}
+
+2) ${candidatos[1]||"--"}
+
+3) ${candidatos[2]||"--"}
 
 
 
 🎯 CUATERNO PRINCIPAL
 
-${rankingCuaterno[0]||"--"}
+${rankingCuaternos[0]||"--"}
 
 
 
 🟡 CUATERNO APOYO
 
-${rankingCuaterno[1]||"--"}
-
+${rankingCuaternos[1]||"--"}
 
 
 
 ⚡ TERNO PRINCIPAL
 
-${rankingTerno[0]||"--"}
+${rankingTernos[0]||"--"}
 
 
 
 🟡 TERNO APOYO
 
-${rankingTerno[1]||"--"}
+${rankingTernos[1]||"--"}
 
 
 
-
-💥 AMBOS PRINCIPAL
-
-${rankingAmbos[0]||"--"}
-
-
-
-🟡 AMBOS APOYO
-
-${rankingAmbos[1]||"--"}
-
-
-
-
-📊 REGISTROS ANALIZADOS
+📊 DATOS ANALIZADOS
 
 ${datos.length}
 

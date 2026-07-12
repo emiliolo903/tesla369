@@ -1027,76 +1027,201 @@ return "DESCONOCIDO";
 
   }
 //////////////////////////////////////////////////
-// EMI TESLA PRO V38
-// MOTOR IA V39
-// PARTE 1
+// EMI TESLA PRO V39
+// MOTOR IA BLOQUES PROVINCIALES
+// PARTE 3
 //////////////////////////////////////////////////
 
 async function generarJuegoCompletoIA(){
 
 let datos=await leerBase();
 
-if(datos.length<20){
 
-mostrar("⚠️ Historial insuficiente");
+if(datos.length<14){
+
+mostrar("⚠️ Falta historial de bloques");
 
 return;
 
 }
 
-let provincia=
-document.getElementById("provinciaManual").value;
 
 let turnoActual=
-document.getElementById("turnoManual").value;
+document.getElementById("turnoBloque").value;
 
-let entrada=
-document.getElementById("numerosManual").value
-.match(/\d{4}/g)||[];
-
-if(entrada.length===0){
-
-mostrar("⚠️ Debe cargar primero las 7 agencias");
-
-return;
-
-}
 
 const siguiente={
+
 "PREVIA":"PRIMERA",
 "PRIMERA":"MATUTINA",
 "MATUTINA":"VESPERTINA",
 "VESPERTINA":"NOCTURNA",
 "NOCTURNA":"PREVIA"
+
 };
 
-let turnoDestino=
-siguiente[turnoActual];
 
-let bloques=[];
+let turnoBuscar=siguiente[turnoActual];
 
-for(let i=0;i<datos.length-6;i++){
 
-let bloque=datos.slice(i,i+7);
+let cuaternos={};
+let ternos={};
+let ambos={};
 
-if(
-bloque.every(x=>
-x.provincia===provincia &&
-x.turno===turnoActual
-)
-){
 
-bloques.push({
-base:bloque,
-inicio:i
+
+datos.forEach((r,i)=>{
+
+
+if(r.turno!==turnoBuscar)
+
+return;
+
+
+
+let peso=1;
+
+
+
+// mismo bloque provincial
+
+if(r.origen==="BLOQUE_IA")
+
+peso+=5;
+
+
+
+// peso por provincia
+
+if(r.provincia==="CORRIENTES")
+peso+=3;
+
+
+if(r.provincia==="CIUDAD")
+peso+=2;
+
+
+if(r.provincia==="BONAERENSE")
+peso+=2;
+
+
+
+let numero=r.numero;
+
+
+
+cuaternos[numero]=
+(cuaternos[numero]||0)+peso;
+
+
+
+let terno=
+numero.slice(-3);
+
+
+
+ternos[terno]=
+(ternos[terno]||0)+peso;
+
+
+
+let a=
+numero.slice(-2);
+
+
+
+ambos[a]=
+(ambos[a]||0)+peso;
+
+
+
 });
 
-}
+
+
+function ordenar(obj){
+
+return Object.keys(obj)
+.sort((a,b)=>obj[b]-obj[a]);
 
 }
 
-let candidatos=[];
+
+
+let listaCuaterno=
+ordenar(cuaternos);
+
+
+let listaTerno=
+ordenar(ternos);
+
+
+let listaAmbos=
+ordenar(ambos);
 //////////////////////////////////////////////////
+// EMI TESLA PRO V39
+// MOTOR IA BLOQUES PROVINCIALES
+// PARTE 4
+//////////////////////////////////////////////////
+
+mostrar(`
+
+🧠 EMI TESLA PRO V39
+
+
+🔄 TRANSICIÓN
+
+${turnoActual}
+➡
+${turnoBuscar}
+
+
+
+🎯 CUATERNO PRINCIPAL
+
+${listaCuaterno[0]||"--"}
+
+
+
+🟡 CUATERNO APOYO
+
+${listaCuaterno[1]||"--"}
+
+
+
+⚡ TERNO PRINCIPAL
+
+${listaTerno[0]||"--"}
+
+
+
+🟡 TERNO APOYO
+
+${listaTerno[1]||"--"}
+
+
+
+💥 AMBOS PRINCIPAL
+
+${listaAmbos[0]||"--"}
+
+
+
+🟡 AMBOS APOYO
+
+${listaAmbos[1]||"--"}
+
+
+
+📊 REGISTROS ANALIZADOS
+
+${datos.length}
+
+
+`);
+
+}
+ //////////////////////////////////////////////////
 // MOTOR IA V39
 // PARTE 2
 //////////////////////////////////////////////////

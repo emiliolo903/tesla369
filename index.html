@@ -1715,7 +1715,320 @@ ${datos.length}
 
 }
 
+//////////////////////////////////////////////////
+// EMI TESLA PRO V40
+// GENERADOR FINAL IA MATRIZ + TRANSICIÓN
+//////////////////////////////////////////////////
 
+async function generarResultadoFinalV40(){
+
+
+let datos = await leerBase();
+
+
+
+if(datos.length < 7){
+
+mostrar(
+"⚠️ Falta historial para analizar"
+);
+
+return;
+
+}
+
+
+
+let cuaternos={};
+
+let ternos={};
+
+let ambos={};
+
+
+
+datos.forEach(r=>{
+
+
+if(!/^\d{4}$/.test(r.numero))
+
+return;
+
+
+
+let peso=1;
+
+
+
+// Datos cargados manualmente tienen más fuerza
+
+if(r.origen==="BLOQUE_7"){
+
+peso+=5;
+
+}
+
+
+
+// Cada provincia suma información
+
+if(r.provincia){
+
+peso+=2;
+
+}
+
+
+
+
+let numero=r.numero;
+
+
+
+cuaternos[numero]=
+
+(cuaternos[numero]||0)+peso;
+
+
+
+let terno=
+
+numero.slice(-3);
+
+
+
+ternos[terno]=
+
+(ternos[terno]||0)+peso;
+
+
+
+let fin=
+
+numero.slice(-2);
+
+
+
+ambos[fin]=
+
+(ambos[fin]||0)+peso;
+
+
+
+});
+
+
+
+
+
+
+
+function ordenar(obj){
+
+return Object.keys(obj)
+
+.sort((a,b)=>
+
+obj[b]-obj[a]
+
+);
+
+}
+
+
+
+
+let rankingCuaterno=
+
+ordenar(cuaternos);
+
+
+
+let rankingTerno=
+
+ordenar(ternos);
+
+
+
+let rankingAmbos=
+
+ordenar(ambos);
+
+
+
+
+
+
+
+mostrar(`
+
+🚀 EMI TESLA PRO V40
+
+🧠 MOTOR IA MATRIZ ACTIVO
+
+
+
+🎯 CUATERNO PRINCIPAL
+
+${rankingCuaterno[0]||"--"}
+
+
+
+🟡 CUATERNO APOYO
+
+${rankingCuaterno[1]||"--"}
+
+
+
+
+⚡ TERNO PRINCIPAL
+
+${rankingTerno[0]||"--"}
+
+
+
+🟡 TERNO APOYO
+
+${rankingTerno[1]||"--"}
+
+
+
+
+💥 AMBOS PRINCIPAL
+
+${rankingAmbos[0]||"--"}
+
+
+
+🟡 AMBOS APOYO
+
+${rankingAmbos[1]||"--"}
+
+
+
+
+📊 REGISTROS ANALIZADOS
+
+${datos.length}
+
+`);
+
+}
+
+
+
+//////////////////////////////////////////////////
+// AUDITORÍA V40
+//////////////////////////////////////////////////
+
+async function auditoriaV40(){
+
+
+let datos=
+
+await leerBase();
+
+
+
+let provincias={};
+
+let turnos={};
+
+
+
+datos.forEach(r=>{
+
+
+provincias[r.provincia]=
+
+(provincias[r.provincia]||0)+1;
+
+
+
+turnos[r.turno]=
+
+(turnos[r.turno]||0)+1;
+
+
+
+});
+
+
+
+
+
+mostrar(`
+
+🛡️ AUDITORÍA EMI TESLA V40
+
+
+
+📊 TOTAL REGISTROS
+
+${datos.length}
+
+
+
+🌎 PROVINCIAS
+
+
+${Object.keys(provincias)
+
+.map(p=>
+
+p+" : "+provincias[p]
+
+)
+
+.join("\n")}
+
+
+
+🔄 TURNOS
+
+
+${Object.keys(turnos)
+
+.map(t=>
+
+t+" : "+turnos[t]
+
+)
+
+.join("\n")}
+
+
+
+✅ MATRIZ ACTIVA
+
+✅ TRANSICIÓN ACTIVA
+
+✅ MOTOR IA ACTIVO
+
+
+`);
+
+}
+
+
+
+//////////////////////////////////////////////////
+// EJECUCIÓN COMPLETA V40
+//////////////////////////////////////////////////
+
+async function ejecutarSistemaV40(){
+
+
+await matrizProvincialCruzadaV40();
+
+
+await continuidadProvinciaTurnoV40();
+
+
+await generarResultadoFinalV40();
+
+
+ }
 
 //////////////////////////////////////////////////
 // GENERADOR TESLA IA

@@ -814,6 +814,25 @@ return document.getElementById("turnoBloque").value;
 
   }
   //////////////////////////////////////////////////
+// DETECTAR FECHA OCR V42
+//////////////////////////////////////////////////
+
+function detectarFechaOCR(texto){
+
+texto = texto.toUpperCase();
+
+let m = texto.match(/\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/);
+
+if(m){
+
+return `${m[3]}-${m[2]}-${m[1]}`;
+
+}
+
+return new Date().toISOString().slice(0,10);
+
+}
+  //////////////////////////////////////////////////
 // OCR HISTÓRICO V41
 //////////////////////////////////////////////////
 
@@ -936,15 +955,15 @@ detectarProvinciaOCR(texto);
 
 let turnoDetectado =
 detectarTurnoOCR(texto);
-
+let fechaDetectada =
+detectarFechaOCR(texto);
 
 // Guardar números encontrados
 
 for(let numero of numeros){
 
 let fechaRegistro=
-new Date().toISOString().slice(0,10);
-
+fechaDetectada;
 if(
 
 !(await existeRegistro(

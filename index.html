@@ -1227,18 +1227,26 @@ ${datos.length}
 
   }
   //////////////////////////////////////////////////
-// GENERADOR FINAL V41
+// GENERADOR FINAL IA V42
 //////////////////////////////////////////////////
 
 async function generarResultadoFinalV41(){
 
-
-let datos=
+let datos =
 await leerBase();
 
 
+if(datos.length < 7){
 
-let turno=
+mostrar("⚠️ Falta historial para analizar");
+
+return;
+
+}
+
+
+
+let turno =
 document.getElementById(
 "turnoBloque"
 ).value;
@@ -1247,122 +1255,162 @@ document.getElementById(
 
 let siguiente={
 
-PREVIA:"PRIMERA",
-
-PRIMERA:"MATUTINA",
-
-MATUTINA:"VESPERTINA",
-
-VESPERTINA:"NOCTURNA",
-
-NOCTURNA:"PREVIA"
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
 
 };
 
 
 
-let destino=
+let destino =
 siguiente[turno];
 
 
 
-let mapa={};
+let puntaje={};
 
 
 
-datos.forEach(r=>{
+// ANALISIS TRANSICIÓN + ARRASTRE
+
+datos.forEach(origen=>{
 
 
-if(
-r.origen!=="MANUAL_V41"
-){
+if(origen.turno!==turno)
+return;
 
 
-let a=
-r.numero.slice(-2);
+
+let base =
+origen.numero.slice(-2);
 
 
-mapa[a]=(mapa[a]||0)+1;
 
+datos.forEach(llegada=>{
+
+
+if(llegada.turno!==destino)
+return;
+
+
+
+let salida =
+llegada.numero.slice(-2);
+
+
+
+let puntos=0;
+
+
+
+// mismo ambos
+
+if(salida===base){
+
+puntos+=50;
 
 }
 
 
+
+// invertido
+
+if(
+salida===base[1]+base[0]
+){
+
+puntos+=35;
+
+}
+
+
+
+// misma provincia
+
+if(
+origen.provincia===llegada.provincia
+){
+
+puntos+=10;
+
+}
+
+
+
+// arrastre provincia
+
+if(
+origen.provincia!==llegada.provincia
+){
+
+puntos+=20;
+
+}
+
+
+
+puntaje[llegada.numero]=
+
+(puntaje[llegada.numero]||0)
+
++puntos;
+
+
+
 });
+
+});
+
 
 
 
 let ranking=
-Object.keys(mapa)
+
+Object.keys(puntaje)
 
 .sort((a,b)=>
-mapa[b]-mapa[a]
+
+puntaje[b]-puntaje[a]
+
 );
 
 
 
-let ambos=
+let cuaternos =
 ranking.slice(0,3);
 
 
 
-let cuaternos={};
+let ternos =
+cuaternos.map(n=>
 
-let ternos={};
+n.slice(-3)
 
-
-
-datos.forEach(r=>{
-
-
-if(
-r.origen!=="MANUAL_V41" &&
-ambos.includes(r.numero.slice(-2))
-){
-
-
-cuaternos[r.numero]=
-(cuaternos[r.numero]||0)+1;
-
-
-
-let t=
-r.numero.slice(-3);
-
-
-ternos[t]=
-(ternos[t]||0)+1;
-
-
-}
-
-
-});
-
-
-
-let rc=
-Object.keys(cuaternos)
-.sort((a,b)=>
-cuaternos[b]-cuaternos[a]
 );
 
 
 
-let rt=
-Object.keys(ternos)
-.sort((a,b)=>
-ternos[b]-ternos[a]
+let ambos =
+
+cuaternos.map(n=>
+
+n.slice(-2)
+
 );
+
+
 
 
 
 mostrar(`
 
-🚀 EMI TESLA PRO V41 IA
+🚀 EMI TESLA PRO V42 IA
 
 
-TRANSICIÓN
+🔄 TRANSICIÓN
 
 ${turno}
 
@@ -1372,7 +1420,8 @@ ${destino}
 
 
 
-💥 AMBOS
+💥 AMBOS PRINCIPALES
+
 
 1) ${ambos[0]||"--"}
 
@@ -1384,23 +1433,39 @@ ${destino}
 
 🎯 CUATERNO
 
-${rc[0]||"--"}
+
+1) ${cuaternos[0]||"--"}
+
+2) ${cuaternos[1]||"--"}
 
 
 
 ⚡ TERNO
 
-${rt[0]||"--"}
+
+1) ${ternos[0]||"--"}
+
+2) ${ternos[1]||"--"}
 
 
 
-📊 DATOS
+🧠 FUERZA IA
+
+
+${puntaje[ranking[0]]||0}
+
+
+
+📊 REGISTROS
 
 ${datos.length}
 
 `);
 
-}
+       }
+
+
+
 
 //////////////////////////////////////////////////
 // ARRASTRE PROVINCIAL IA V42

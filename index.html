@@ -684,10 +684,10 @@ reject(e);
 }
 
 //////////////////////////////////////////////////
-// OBTENER ÚLTIMO BLOQUE CARGADO
+// OBTENER ÚLTIMA CARGA REAL
 //////////////////////////////////////////////////
 
-async function obtenerUltimoBloque(){
+async function obtenerUltimaCarga(){
 
 let datos = await leerBase();
 
@@ -695,30 +695,20 @@ if(datos.length===0){
 return [];
 }
 
-let ultimoBloque = Math.max(
-...datos
-.filter(x=>x.bloque)
-.map(x=>x.bloque)
+
+// toma los registros más recientes
+let fechaMax = Math.max(
+...datos.map(x=>x.id)
 );
 
-return datos.filter(x=>x.bloque===ultimoBloque);
 
- }
+return datos.filter(x=>{
 
+return x.id >= fechaMax-6;
 
-
-
-async function contarRegistros(){
-
-let datos=
-await leerBase();
-
-return datos.length;
+});
 
 }
-
-
-
 
 
 

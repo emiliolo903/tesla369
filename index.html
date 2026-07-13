@@ -1376,18 +1376,47 @@ mostrar(salida);
 
 
 //////////////////////////////////////////////////
-// CONTINUIDAD ENTRE TURNOS
+// CONTINUIDAD ENTRE TURNOS V40.2 CORREGIDA
 //////////////////////////////////////////////////
 
 async function continuidadProvinciaTurnoV40(){
 
-let datos =
-await obtenerUltimoBloque();
+let datos = await leerBase();
+
+if(datos.length===0){
+
+mostrar("⚠️ Sin datos históricos");
+
+return;
+
+}
+
+
+// Tomar la última carga realizada
+let ultimaFecha = Math.max(
+...datos.map(x=>x.id)
+);
+
+
+let actual = datos.filter(x=>
+
+x.id >= ultimaFecha-6
+
+);
 
 
 
-let turno=
+if(actual.length===0){
 
+mostrar("⚠️ No hay carga actual");
+
+return;
+
+}
+
+
+
+let turnoActual =
 document.getElementById(
 "turnoBloque"
 ).value;
@@ -1396,29 +1425,41 @@ document.getElementById(
 
 let siguiente={
 
-
 "PREVIA":"PRIMERA",
-
 "PRIMERA":"MATUTINA",
-
 "MATUTINA":"VESPERTINA",
-
 "VESPERTINA":"NOCTURNA",
-
 "NOCTURNA":"PREVIA"
-
 
 };
 
 
+let destino = siguiente[turnoActual];
 
-let destino=siguiente[turno];
+
+// Sacar ambos de la carga actual
+
+let nucleos=[];
+
+
+actual.forEach(r=>{
+
+if(/^\d{4}$/.test(r.numero)){
+
+nucleos.push(
+r.numero.slice(-2)
+);
+
+}
+
+});
 
 
 
 let mapa={};
 
 
+// Buscar qué pasó después de esos ambos
 
 datos.forEach(r=>{
 
@@ -1426,16 +1467,19 @@ datos.forEach(r=>{
 if(r.turno===destino){
 
 
-let ambos=
-
+let fin =
 r.numero.slice(-2);
 
 
 
-mapa[ambos]=
+if(nucleos.includes(fin)){
 
-(mapa[ambos]||0)+1;
 
+mapa[fin]=
+(mapa[fin]||0)+1;
+
+
+}
 
 
 }
@@ -1445,9 +1489,7 @@ mapa[ambos]=
 
 
 
-
-
-let ranking=
+let ranking =
 
 Object.keys(mapa)
 
@@ -1459,25 +1501,23 @@ mapa[b]-mapa[a]
 
 
 
-
 mostrar(`
 
-🔄 CONTINUIDAD V40
+🔄 CONTINUIDAD TURNO V40.2
 
 
 TURNO ACTUAL:
 
-${turno}
+${turnoActual}
 
 
-
-PRÓXIMO TURNO:
+PRÓXIMO:
 
 ${destino}
 
 
 
-🔥 TERMINACIONES ACTIVAS
+🔥 AMBOS ENCONTRADOS
 
 
 1) ${ranking[0]||"--"}
@@ -1488,14 +1528,23 @@ ${destino}
 
 
 
-📊 TOTAL DATOS
+📊 CARGA ANALIZADA:
+
+${actual.length}
+
+
+
+📚 HISTORIAL:
 
 ${datos.length}
 
 `);
 
+}
 
- }
+
+
+
   //////////////////////////////////////////////////
 // MOTOR IA TRANSICIÓN V39.1 MEJORADO
 //////////////////////////////////////////////////

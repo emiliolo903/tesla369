@@ -1384,148 +1384,23 @@ mostrar(salida);
 
 async function continuidadProvinciaTurnoV40(){
 
-if(ULTIMA_CARGA.length===0){
-console.log("ULTIMA CARGA:", ULTIMA_CARGA);
-mostrar(`
-⚠️ NO HAY CARGA NUEVA
-
-Primero cargue las 7 provincias
-y presione GUARDAR BLOQUE
-`);
-
-return;
-
-}
-
-
-let turno =
-document.getElementById(
-"turnoBloque"
-).value;
-
-
-
-let siguiente={
-
-"PREVIA":"PRIMERA",
-"PRIMERA":"MATUTINA",
-"MATUTINA":"VESPERTINA",
-"VESPERTINA":"NOCTURNA",
-"NOCTURNA":"PREVIA"
-
-};
-
-
-let destino =
-siguiente[turno];
-
-
-
-let datos =
-await leerBase();
-
-
-
-let mapa={};
-
-
-
-// analiza la relación de la carga nueva
-// contra el historial
-
-ULTIMA_CARGA.forEach(actual=>{
-
-
-let ambosActual =
-actual.numero.slice(-2);
-
-
+// BUSCAR CONTINUIDAD REAL EN HISTORIAL
 
 datos.forEach(r=>{
 
-
 if(r.turno===destino){
 
+let ambosSalida = r.numero.slice(-2);
 
-let ambosSalida =
-r.numero.slice(-2);
-
-
-
-if(ambosSalida===ambosActual){
-
-
-mapa[ambosSalida]=
+mapa[ambosSalida] =
 (mapa[ambosSalida]||0)+1;
 
-
 }
-
-
-}
-
 
 });
 
 
-});
-
-
-
-let ranking=
-
-Object.keys(mapa)
-
-.sort((a,b)=>
-
-mapa[b]-mapa[a]
-
-);
-
-
-
-mostrar(`
-
-🔄 CONTINUIDAD TURNO V40.3
-
-
-TURNO:
-
-${turno}
-
-
-SIGUIENTE:
-
-${destino}
-
-
-
-🔥 AMBOS RESULTADO
-
-
-1) ${ranking[0]||"--"}
-
-2) ${ranking[1]||"--"}
-
-3) ${ranking[2]||"--"}
-
-
-
-📌 BLOQUE ACTUAL:
-
-${ULTIMA_CARGA.length}
-
-📊 HISTORIAL:
-
-${datos.length}
-
-`);
-
 }
-
-
-
-
 
 
 

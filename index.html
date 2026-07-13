@@ -1376,97 +1376,51 @@ siguiente[turno];
 
 let puntaje={};
 
-
-
-// ANALISIS TRANSICIÓN + ARRASTRE
-
 datos.forEach(origen=>{
 
+if(origen.turno!==turno) return;
 
-if(origen.turno!==turno)
-return;
-
-
-
-let base =
-origen.numero.slice(-2);
-
-
+let base=origen.numero.slice(-2);
 
 datos.forEach(llegada=>{
 
-
-if(llegada.turno!==destino)
-return;
-
-
-
-let salida =
-llegada.numero.slice(-2);
-
-
+if(llegada.turno!==destino) return;
 
 let puntos=0;
 
-
+let ambos=llegada.numero.slice(-2);
 
 // mismo ambos
-
-if(salida===base){
-
-puntos+=50;
-
-}
-
-
+if(ambos===base) puntos+=60;
 
 // invertido
-
-if(
-salida===base[1]+base[0]
-){
-
-puntos+=35;
-
-}
-
-
+if(ambos===base[1]+base[0]) puntos+=40;
 
 // misma provincia
+if(origen.provincia===llegada.provincia)
+puntos+=15;
 
-if(
-origen.provincia===llegada.provincia
-){
+// provincia distinta (arrastre)
+else
+puntos+=25;
 
-puntos+=10;
-
-}
-
-
-
-// arrastre provincia
-
-if(
-origen.provincia!==llegada.provincia
-){
-
+// misma fecha
+if(origen.fecha===llegada.fecha)
 puntos+=20;
 
-}
+// continuidad directa
+if(origen.numero===llegada.numero)
+puntos+=30;
 
-
-
+// acumular puntaje
 puntaje[llegada.numero]=
-
-(puntaje[llegada.numero]||0)
-
-+puntos;
-
-
+(puntaje[llegada.numero]||0)+puntos;
 
 });
 
 });
+
+
 
 
 

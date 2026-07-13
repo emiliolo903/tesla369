@@ -524,7 +524,24 @@ reject(e);
 
 
 
+//////////////////////////////////////////////////
+// EXISTE REGISTRO
+//////////////////////////////////////////////////
 
+async function existeRegistro(fecha,provincia,turno,numero){
+
+let datos=await leerBase();
+
+return datos.some(r=>
+
+r.fecha===fecha &&
+r.provincia===provincia &&
+r.turno===turno &&
+r.numero===numero
+
+);
+
+}
 //////////////////////////////////////////////////
 // GUARDAR REGISTRO
 //////////////////////////////////////////////////
@@ -925,10 +942,28 @@ detectarTurnoOCR(texto);
 
 for(let numero of numeros){
 
+let fechaRegistro=
+new Date().toISOString().slice(0,10);
+
+if(
+
+!(await existeRegistro(
+
+fechaRegistro,
+
+provinciaDetectada,
+
+turnoDetectado,
+
+numero
+
+))
+
+){
+
 await guardarRegistro({
 
-fecha:new Date()
-.toISOString().slice(0,10),
+fecha:fechaRegistro,
 
 provincia:provinciaDetectada,
 
@@ -941,7 +976,6 @@ origen:"OCR_V42"
 });
 
 }
-
 
 
 

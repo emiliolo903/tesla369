@@ -962,19 +962,19 @@ pararOCR=true;
 
 
 //////////////////////////////////////////////////
-// CONTINUIDAD TURNO PROVINCIA V41
+// CONTINUIDAD TURNO PROVINCIA V42
 //////////////////////////////////////////////////
 
 async function continuidadProvinciaTurnoV41(){
 
+let datos = await leerBase();
 
 
-if(ULTIMA_CARGA.length===0){
-
+if(datos.length===0){
 
 mostrar(`
 
-⚠️ PRIMERO GUARDE BLOQUE
+⚠️ NO HAY HISTORIAL
 
 `);
 
@@ -984,7 +984,7 @@ return;
 
 
 
-let turno=
+let turno =
 document.getElementById(
 "turnoBloque"
 ).value;
@@ -993,54 +993,111 @@ document.getElementById(
 
 let siguiente={
 
-
-PREVIA:"PRIMERA",
-
-PRIMERA:"MATUTINA",
-
-MATUTINA:"VESPERTINA",
-
-VESPERTINA:"NOCTURNA",
-
-NOCTURNA:"PREVIA"
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
 
 };
 
 
 
-let destino=
-siguiente[turno];
+let destino=siguiente[turno];
 
 
 
-let datos=
-await leerBase();
+let matriz={};
 
 
 
-let mapa={};
+datos.forEach(origen=>{
 
-
-
-datos.forEach(r=>{
-
-
-// NO USA LA CARGA NUEVA
 
 if(
-r.origen!=="MANUAL_V41"
-){
+origen.origen==="MANUAL_V41"
+) return;
 
 
-let ambos=
-r.numero.slice(-2);
+
+if(
+origen.turno!==turno
+) return;
 
 
-mapa[ambos]=
-(mapa[ambos]||0)+1;
 
+let base =
+origen.numero.slice(-2);
+
+
+
+datos.forEach(siguienteRegistro=>{
+
+
+if(
+siguienteRegistro.origen==="MANUAL_V41"
+) return;
+
+
+
+if(
+siguienteRegistro.turno!==destino
+) return;
+
+
+
+if(
+origen.provincia===siguienteRegistro.provincia
+) return;
+
+
+
+let salida =
+siguienteRegistro.numero.slice(-2);
+
+
+
+let invertido =
+base[1]+base[0];
+
+
+
+let peso=1;
+
+
+
+if(salida===base){
+
+peso+=3;
 
 }
+
+
+
+if(salida===invertido){
+
+peso+=2;
+
+}
+
+
+
+let clave =
+origen.provincia+
+" → "+
+siguienteRegistro.provincia+
+" : "+
+salida;
+
+
+
+matriz[clave]=
+(matriz[clave]||0)+peso;
+
+
+
+});
+
 
 
 });
@@ -1048,17 +1105,20 @@ mapa[ambos]=
 
 
 let ranking=
-Object.keys(mapa)
+
+Object.keys(matriz)
 
 .sort((a,b)=>
-mapa[b]-mapa[a]
+
+matriz[b]-matriz[a]
+
 );
 
 
 
 mostrar(`
 
-🔄 CONTINUIDAD V41
+🔄 CONTINUIDAD V42
 
 
 ${turno}
@@ -1069,28 +1129,42 @@ ${destino}
 
 
 
-💥 AMBOS
+🌎 ARRASTRE PROVINCIAL
 
 
 1) ${ranking[0]||"--"}
 
+FUERZA:
+${matriz[ranking[0]]||0}
+
+
+
 2) ${ranking[1]||"--"}
+
+FUERZA:
+${matriz[ranking[1]]||0}
+
+
 
 3) ${ranking[2]||"--"}
 
+FUERZA:
+${matriz[ranking[2]]||0}
 
 
-📊 HISTORIAL:
+
+📊 REGISTROS:
 
 ${datos.length}
+
+
+🧠 MATRIZ:
+
+PROVINCIA → PROVINCIA
 
 `);
 
 }
-
-
-
-
 
 
 //////////////////////////////////////////////////

@@ -1431,30 +1431,26 @@ let datos=
 await leerBase();
 
 
-
 mostrar(`
 
 🛡️ AUDITORÍA V41
 
-
 REGISTROS:
-
 ${datos.length}
 
 
-BASE:
+TURNOS EN BASE:
 
-ACTIVA
+${[...new Set(datos.map(x=>x.turno))].join("\n")}
 
 
-IA:
+PROVINCIAS:
 
-ACTIVA
-
+${[...new Set(datos.map(x=>x.provincia))].join("\n")}
 
 `);
 
-}
+
 
 
 

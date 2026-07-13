@@ -912,30 +912,38 @@ let numeros=
 texto.match(/\d{4}/g)||[];
 
 
+// Detectar provincia y turno automáticamente
 
+let provinciaDetectada =
+detectarProvinciaOCR(texto);
+
+let turnoDetectado =
+detectarTurnoOCR(texto);
+
+
+// Guardar números encontrados
 
 for(let numero of numeros){
-
 
 await guardarRegistro({
 
 fecha:new Date()
-.toISOString()
-.slice(0,10),
+.toISOString().slice(0,10),
 
-provincia:
-document.getElementById("provinciaOCR").value,
+provincia:provinciaDetectada,
 
-turno:document.getElementById("turnoBloque").value,
+turno:turnoDetectado,
 
-numero,
+numero:numero,
 
 origen:"OCR_V42"
 
 });
 
-
 }
+
+
+
 
 
 

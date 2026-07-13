@@ -1819,34 +1819,36 @@ ${datos.length}
 
 
 //////////////////////////////////////////////////
-// AUDITORÍA V42
+// AUDITORÍA V42.1
 //////////////////////////////////////////////////
 
 async function auditoriaV41(){
-
 
 let datos =
 await leerBase();
 
 
-
 let manual=0;
-
 let ocr=0;
-
+let otros=0;
 
 
 datos.forEach(r=>{
 
 
-if(r.origen==="MANUAL_V41")
-
+if(r.origen==="MANUAL_V41"){
 manual++;
-
-
-if(r.origen==="OCR_V42")
-
+}
+else if(
+r.origen==="OCR" ||
+r.origen==="OCR_V41" ||
+r.origen==="OCR_V42"
+){
 ocr++;
+}
+else{
+otros++;
+}
 
 
 });
@@ -1855,8 +1857,7 @@ ocr++;
 
 mostrar(`
 
-🛡️ AUDITORÍA V42
-
+🛡️ AUDITORÍA V42.1
 
 
 REGISTROS TOTALES:
@@ -1874,6 +1875,12 @@ ${manual}
 OCR:
 
 ${ocr}
+
+
+
+OTROS:
+
+${otros}
 
 
 
@@ -1901,7 +1908,9 @@ OK
 
 `);
 
-}
+ }
+
+
 
 
 //////////////////////////////////////////////////

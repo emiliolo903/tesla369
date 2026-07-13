@@ -1828,27 +1828,24 @@ let destino = siguiente[turnoActual];
 
 
 // ===============================
-// 1) BUSCAR CONTINUIDAD
+// 1) BUSCAR CONTINUIDAD NUEVA
 // ===============================
 
 let ambosContinuidad={};
 
 
-datos.forEach(r=>{
+// usa la carga actual, no toda la historia
+
+ULTIMA_CARGA.forEach(actual=>{
 
 
-if(r.turno===destino){
+let ambos =
+actual.numero.slice(-2);
 
 
-let fin =
-r.numero.slice(-2);
+ambosContinuidad[ambos]=
+(ambosContinuidad[ambos]||0)+1;
 
-
-ambosContinuidad[fin]=
-(ambosContinuidad[fin]||0)+1;
-
-
-}
 
 });
 
@@ -1859,17 +1856,15 @@ let rankingAmbos =
 Object.keys(ambosContinuidad)
 
 .sort((a,b)=>
+
 ambosContinuidad[b]-
 ambosContinuidad[a]
+
 );
 
 
 
-
-// Toma los 3 ambos de continuidad
-
 let candidatos =
-
 rankingAmbos.slice(0,3);
 
 

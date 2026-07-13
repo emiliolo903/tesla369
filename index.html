@@ -1328,7 +1328,190 @@ ${datos.length}
 
 }
 
+//////////////////////////////////////////////////
+// ARRASTRE PROVINCIAL IA V41.1
+//////////////////////////////////////////////////
 
+async function analizarArrastreProvincialV41(){
+
+
+let datos =
+await leerBase();
+
+
+
+if(datos.length===0){
+
+mostrar(`
+
+⚠️ NO HAY DATOS HISTÓRICOS
+
+`);
+
+return;
+
+}
+
+
+
+let origenes = {};
+
+
+
+// Busca movimientos entre provincias
+
+for(let i=0;i<datos.length;i++){
+
+
+let actual = datos[i];
+
+
+if(actual.origen==="MANUAL_V41")
+continue;
+
+
+
+let ambos =
+actual.numero.slice(-2);
+
+
+
+if(!origenes[ambos]){
+
+origenes[ambos]={};
+
+}
+
+
+
+for(let j=0;j<datos.length;j++){
+
+
+let siguiente =
+datos[j];
+
+
+if(
+siguiente.provincia &&
+actual.provincia &&
+siguiente.provincia!==actual.provincia
+){
+
+
+let destino =
+siguiente.numero.slice(-2);
+
+
+
+if(!origenes[ambos][destino]){
+
+origenes[ambos][destino]=0;
+
+}
+
+
+origenes[ambos][destino]++;
+
+
+}
+
+
+}
+
+
+
+}
+
+
+
+let candidatos=[];
+
+
+
+Object.keys(origenes).forEach(base=>{
+
+
+let movimientos=
+origenes[base];
+
+
+Object.keys(movimientos).forEach(n=>{
+
+
+candidatos.push({
+
+numero:n,
+
+peso:movimientos[n],
+
+base:base
+
+});
+
+
+});
+
+
+});
+
+
+
+candidatos.sort((a,b)=>
+
+b.peso-a.peso
+
+);
+
+
+
+mostrar(`
+
+🌎 ARRASTRE PROVINCIAL IA V41.1
+
+
+📊 REGISTROS ANALIZADOS:
+
+${datos.length}
+
+
+
+🔥 MOVIMIENTOS DOMINANTES
+
+
+1) ${candidatos[0]?.numero || "--"}
+
+Desde ${candidatos[0]?.base || "--"}
+
+Fuerza:
+${candidatos[0]?.peso || 0}
+
+
+
+2) ${candidatos[1]?.numero || "--"}
+
+Desde ${candidatos[1]?.base || "--"}
+
+Fuerza:
+${candidatos[1]?.peso || 0}
+
+
+
+3) ${candidatos[2]?.numero || "--"}
+
+Desde ${candidatos[2]?.base || "--"}
+
+Fuerza:
+${candidatos[2]?.peso || 0}
+
+
+
+🧠 MATRIZ ACTIVA
+
+PROVINCIA ➜ PROVINCIA
+
+`);
+
+  }
 
 
 //////////////////////////////////////////////////

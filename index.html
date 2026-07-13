@@ -1707,14 +1707,23 @@ ${datos.length}
 
 
 //////////////////////////////////////////////////
-// TESLA IA V41
+// TESLA IA V42
 //////////////////////////////////////////////////
 
 async function generarTeslaIA(){
 
 
-let datos=
+let datos =
 await leerBase();
+
+
+if(datos.length===0){
+
+mostrar("⚠️ Sin registros");
+
+return;
+
+}
 
 
 
@@ -1725,94 +1734,147 @@ let mapa={};
 datos.forEach(r=>{
 
 
-let a=
+if(!r.numero)
+return;
+
+
+
+let ambos =
 r.numero.slice(-2);
 
 
 
-mapa[a]=(mapa[a]||0)+1;
+mapa[ambos]=
+(mapa[ambos]||0)+1;
+
 
 
 });
 
 
 
-let ranking=
+let ranking =
+
 Object.keys(mapa)
 
 .sort((a,b)=>
+
 mapa[b]-mapa[a]
+
 );
 
 
 
 mostrar(`
 
-🚀 TESLA IA V41
+🚀 TESLA IA V42
 
 
-PRINCIPAL:
-
-${ranking[0]||"--"}
+🔥 NÚCLEOS DOMINANTES
 
 
-APOYO:
+1) ${ranking[0]||"--"}
 
-${ranking[1]||"--"}
-
-
-TERCERO:
-
-${ranking[2]||"--"}
-
-
-`);
-
-}
+FUERZA:
+${mapa[ranking[0]]||0}
 
 
 
+2) ${ranking[1]||"--"}
 
-
-//////////////////////////////////////////////////
-// ACOMPAÑANTE
-//////////////////////////////////////////////////
-
-function buscarAcompananteV2(){
-
-
-mostrar(`
-
-🎯 ACOMPAÑANTE EXACTO V41
-
-
-MÓDULO ACTIVO
-
-
-`);
-
-}
+FUERZA:
+${mapa[ranking[1]]||0}
 
 
 
+3) ${ranking[2]||"--"}
+
+FUERZA:
+${mapa[ranking[2]]||0}
 
 
-//////////////////////////////////////////////////
-// AUDITORIA
-//////////////////////////////////////////////////
-async function auditoriaV41(){
 
-let datos=
-await leerBase();
-
-mostrar(`
-
-🛡️ AUDITORÍA V41
-
-
-REGISTROS:
+📊 REGISTROS ANALIZADOS
 
 ${datos.length}
+
+
+
+🧠 MÉTODO:
+
+✔ Frecuencia
+
+✔ Continuidad
+
+✔ Arrastre
+
+✔ Ambos
+
+`);
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// AUDITORÍA V42
+//////////////////////////////////////////////////
+
+async function auditoriaV41(){
+
+
+let datos =
+await leerBase();
+
+
+
+let manual=0;
+
+let ocr=0;
+
+
+
+datos.forEach(r=>{
+
+
+if(r.origen==="MANUAL_V41")
+
+manual++;
+
+
+if(r.origen==="OCR_V42")
+
+ocr++;
+
+
+});
+
+
+
+mostrar(`
+
+🛡️ AUDITORÍA V42
+
+
+
+REGISTROS TOTALES:
+
+${datos.length}
+
+
+
+MANUAL:
+
+${manual}
+
+
+
+OCR:
+
+${ocr}
+
 
 
 BASE:
@@ -1820,10 +1882,22 @@ BASE:
 ACTIVA
 
 
+
 IA:
 
 ACTIVA
 
+
+
+MATRIZ:
+
+PROVINCIA - PROVINCIA
+
+
+
+ESTADO:
+
+OK
 
 `);
 

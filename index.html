@@ -758,6 +758,45 @@ ${total}
 
 }
   //////////////////////////////////////////////////
+// DETECTAR PROVINCIA OCR V42
+//////////////////////////////////////////////////
+
+function detectarProvinciaOCR(texto){
+
+texto = texto.toUpperCase();
+
+if(texto.includes("CORRIENTES")) return "CORRIENTES";
+if(texto.includes("CIUDAD")) return "CIUDAD";
+if(texto.includes("BONAERENSE")) return "BONAERENSE";
+if(texto.includes("SANTA FE")) return "SANTA FE";
+if(texto.includes("CORDOBA")) return "CORDOBA";
+if(texto.includes("CÓRDOBA")) return "CORDOBA";
+if(texto.includes("ENTRE RIOS")) return "ENTRE RIOS";
+if(texto.includes("ENTRE RÍOS")) return "ENTRE RIOS";
+if(texto.includes("CHACO")) return "CHACO";
+
+return document.getElementById("provinciaOCR").value;
+
+}
+
+//////////////////////////////////////////////////
+// DETECTAR TURNO OCR V42
+//////////////////////////////////////////////////
+
+function detectarTurnoOCR(texto){
+
+texto = texto.toUpperCase();
+
+if(texto.includes("PREVIA")) return "PREVIA";
+if(texto.includes("PRIMERA")) return "PRIMERA";
+if(texto.includes("MATUTINA")) return "MATUTINA";
+if(texto.includes("VESPERTINA")) return "VESPERTINA";
+if(texto.includes("NOCTURNA")) return "NOCTURNA";
+
+return document.getElementById("turnoBloque").value;
+
+  }
+  //////////////////////////////////////////////////
 // OCR HISTÓRICO V41
 //////////////////////////////////////////////////
 

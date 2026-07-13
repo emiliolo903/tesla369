@@ -962,23 +962,18 @@ detectarFechaOCR(texto);
 
 for(let numero of numeros){
 
-let fechaRegistro=
-fechaDetectada;
-if(
+let fechaRegistro = fechaDetectada;
 
-!(await existeRegistro(
-
+let existe =
+await existeRegistro(
 fechaRegistro,
-
 provinciaDetectada,
-
 turnoDetectado,
-
 numero
+);
 
-))
 
-){
+if(!existe){
 
 await guardarRegistro({
 
@@ -996,6 +991,7 @@ origen:"OCR_V42"
 
 }
 
+}
 
 
 

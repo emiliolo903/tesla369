@@ -1905,33 +1905,78 @@ OK
 
 
 //////////////////////////////////////////////////
-// INICIO SISTEMA
+// INICIO SISTEMA V42
 //////////////////////////////////////////////////
 
-window.onload=async function(){
+window.onload = async function(){
 
 
 await abrirBase();
 
 
 
-let datos=
+let datos =
 await leerBase();
 
 
 
 document.getElementById(
 "total"
-).innerText=datos.length;
+).innerText = datos.length;
 
 
 
 document.getElementById(
 "estadoBase"
-).innerText="ACTIVA";
+).innerText = "ACTIVA";
 
+
+
+document.getElementById(
+"estadoOCR"
+).innerText = "LISTO";
+
+
+
+mostrar(`
+
+🚀 EMI TESLA PRO V42 IA
+
+
+✅ SISTEMA INICIADO
+
+
+🧠 Motor IA:
+
+ACTIVO
+
+
+🌎 Matriz Provincial:
+
+ACTIVA
+
+
+🔄 Continuidad:
+
+ACTIVA
+
+
+🎯 Arrastre Provincial:
+
+ACTIVO
+
+
+📊 Registros:
+
+${datos.length}
+
+
+`);
 
 };
+
+
+
 
 </script>
 

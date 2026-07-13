@@ -1403,15 +1403,13 @@ ${datos.length}
 }
 
 //////////////////////////////////////////////////
-// ARRASTRE PROVINCIAL IA V41.1
+// ARRASTRE PROVINCIAL IA V42
 //////////////////////////////////////////////////
 
 async function analizarArrastreProvincialV41(){
 
-
 let datos =
 await leerBase();
-
 
 
 if(datos.length===0){
@@ -1428,97 +1426,136 @@ return;
 
 
 
-let origenes = {};
+let turno =
+document.getElementById(
+"turnoBloque"
+).value;
 
 
 
-// Busca movimientos entre provincias
+let siguiente={
 
-for(let i=0;i<datos.length;i++){
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
 
+};
 
-let actual = datos[i];
-
-
-if(actual.origen==="MANUAL_V41")
-continue;
-
-
-
-let ambos =
-actual.numero.slice(-2);
-
-
-
-if(!origenes[ambos]){
-
-origenes[ambos]={};
-
-}
-
-
-
-for(let j=0;j<datos.length;j++){
-
-
-let siguiente =
-datos[j];
-
-
-if(
-siguiente.provincia &&
-actual.provincia &&
-siguiente.provincia!==actual.provincia
-){
 
 
 let destino =
-siguiente.numero.slice(-2);
+siguiente[turno];
 
 
 
-if(!origenes[ambos][destino]){
+let matriz={};
 
-origenes[ambos][destino]=0;
+
+
+datos.forEach(origen=>{
+
+
+if(
+origen.origen==="MANUAL_V41"
+) return;
+
+
+
+if(
+origen.turno!==turno
+) return;
+
+
+
+let base =
+origen.numero.slice(-2);
+
+
+
+datos.forEach(llegada=>{
+
+
+if(
+llegada.origen==="MANUAL_V41"
+) return;
+
+
+
+if(
+llegada.turno!==destino
+) return;
+
+
+
+if(
+origen.provincia===llegada.provincia
+) return;
+
+
+
+let numero =
+llegada.numero.slice(-2);
+
+
+
+let peso=1;
+
+
+
+// mismo ambos
+
+if(numero===base){
+
+peso+=5;
 
 }
 
 
-origenes[ambos][destino]++;
 
+// invertido
+
+if(
+numero===base[1]+base[0]
+){
+
+peso+=4;
 
 }
 
 
+
+// mismo día si existe fecha
+
+if(
+origen.fecha &&
+llegada.fecha &&
+origen.fecha===llegada.fecha
+){
+
+peso+=3;
+
 }
 
 
 
-}
+let clave=
+
+origen.provincia+
+" ➜ "+
+llegada.provincia+
+" | "+
+base+
+" ➜ "+
+numero;
 
 
 
-let candidatos=[];
+matriz[clave]=
+(matriz[clave]||0)+peso;
 
 
-
-Object.keys(origenes).forEach(base=>{
-
-
-let movimientos=
-origenes[base];
-
-
-Object.keys(movimientos).forEach(n=>{
-
-
-candidatos.push({
-
-numero:n,
-
-peso:movimientos[n],
-
-base:base
 
 });
 
@@ -1526,13 +1563,14 @@ base:base
 });
 
 
-});
 
+let ranking=
 
+Object.keys(matriz)
 
-candidatos.sort((a,b)=>
+.sort((a,b)=>
 
-b.peso-a.peso
+matriz[b]-matriz[a]
 
 );
 
@@ -1540,52 +1578,67 @@ b.peso-a.peso
 
 mostrar(`
 
-🌎 ARRASTRE PROVINCIAL IA V41.1
+🌎 ARRASTRE PROVINCIAL IA V42
 
 
-📊 REGISTROS ANALIZADOS:
+TRANSICIÓN
 
-${datos.length}
+${turno}
+
+⬇
+
+${destino}
 
 
 
 🔥 MOVIMIENTOS DOMINANTES
 
 
-1) ${candidatos[0]?.numero || "--"}
 
-Desde ${candidatos[0]?.base || "--"}
+1) ${ranking[0]||"--"}
 
-Fuerza:
-${candidatos[0]?.peso || 0}
-
-
-
-2) ${candidatos[1]?.numero || "--"}
-
-Desde ${candidatos[1]?.base || "--"}
-
-Fuerza:
-${candidatos[1]?.peso || 0}
+FUERZA:
+${matriz[ranking[0]]||0}
 
 
 
-3) ${candidatos[2]?.numero || "--"}
+2) ${ranking[1]||"--"}
 
-Desde ${candidatos[2]?.base || "--"}
-
-Fuerza:
-${candidatos[2]?.peso || 0}
+FUERZA:
+${matriz[ranking[1]]||0}
 
 
 
-🧠 MATRIZ ACTIVA
+3) ${ranking[2]||"--"}
 
-PROVINCIA ➜ PROVINCIA
+FUERZA:
+${matriz[ranking[2]]||0}
+
+
+
+📊 HISTORIAL:
+
+${datos.length}
+
+
+
+🧠 ANALIZA:
+
+✔ Provincia
+
+✔ Turno
+
+✔ Directo
+
+✔ Invertido
+
+✔ Continuidad
 
 `);
 
   }
+
+
 
 
 //////////////////////////////////////////////////

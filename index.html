@@ -1423,36 +1423,34 @@ MÓDULO ACTIVO
 //////////////////////////////////////////////////
 // AUDITORIA
 //////////////////////////////////////////////////
-
 async function auditoriaV41(){
-
 
 let datos=
 await leerBase();
-
 
 mostrar(`
 
 🛡️ AUDITORÍA V41
 
+
 REGISTROS:
+
 ${datos.length}
 
 
-TURNOS EN BASE:
+BASE:
 
-${[...new Set(datos.map(x=>x.turno))].join("\n")}
+ACTIVA
 
 
-PROVINCIAS:
+IA:
 
-${[...new Set(datos.map(x=>x.provincia))].join("\n")}
+ACTIVA
+
 
 `);
 
-
-
-
+}
 
 
 //////////////////////////////////////////////////

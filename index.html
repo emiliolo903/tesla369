@@ -1383,21 +1383,90 @@ mostrar(salida);
 //////////////////////////////////////////////////
 
 async function continuidadProvinciaTurnoV40(){
+let datos = await leerBase();
 
-// BUSCAR CONTINUIDAD REAL EN HISTORIAL
+if(datos.length===0){
 
+mostrar("⚠️ No hay historial cargado");
+return;
+
+}
+
+
+let turno =
+document.getElementById("turnoBloque").value;
+
+
+let siguiente={
+
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
+
+};
+
+
+let destino = siguiente[turno];
+
+
+let mapa={};
+
+
+// BUSCA SOLO EN EL TURNO SIGUIENTE HISTÓRICO
 datos.forEach(r=>{
 
 if(r.turno===destino){
 
-let ambosSalida = r.numero.slice(-2);
+let ambos = r.numero.slice(-2);
 
-mapa[ambosSalida] =
-(mapa[ambosSalida]||0)+1;
+mapa[ambos]=(mapa[ambos]||0)+1;
 
 }
 
 });
+
+
+
+let ranking = Object.keys(mapa)
+
+.sort((a,b)=>mapa[b]-mapa[a]);
+
+
+
+mostrar(`
+
+🔄 CONTINUIDAD TURNO / PROVINCIA V40
+
+
+TURNO ACTUAL:
+
+${turno}
+
+
+BUSCANDO EN:
+
+${destino}
+
+
+
+💥 AMBOS CONTINUIDAD HISTÓRICA
+
+
+1) ${ranking[0]||"--"}
+
+2) ${ranking[1]||"--"}
+
+3) ${ranking[2]||"--"}
+
+
+
+📊 DATOS ANALIZADOS:
+
+${datos.length}
+
+`);
 
 
 }

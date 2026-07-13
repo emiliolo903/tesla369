@@ -1858,7 +1858,11 @@ otros++;
 });
 
 
+let turnos={};
 
+datos.forEach(r=>{
+    turnos[r.turno]=(turnos[r.turno]||0)+1;
+});
 mostrar(`
 
 🛡️ AUDITORÍA V42.1

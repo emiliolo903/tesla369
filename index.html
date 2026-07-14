@@ -836,11 +836,179 @@ return new Date().toISOString().slice(0,10);
   //////////////////////////////////////////////////
 // OCR HISTÓRICO V41
 //////////////////////////////////////////////////
+async function iniciarOCR(){
 
- async function iniciarOCR(){
+let archivo =
+document.getElementById("archivoPDF").files[0];
 
-mostrar("OCR EN PRUEBA");
 
+if(!archivo){
+
+alert("Seleccione PDF");
+
+return;
+
+}
+
+
+try{
+
+pararOCR=false;
+
+document.getElementById("estadoOCR").innerText="PROCESANDO";
+
+
+let buffer =
+await archivo.arrayBuffer();
+
+
+let pdf =
+await pdfjsLib.getDocument({
+data:buffer
+}).promise;
+
+
+let worker =
+await Tesseract.createWorker("spa");
+
+
+for(
+let pagina=1;
+pagina<=pdf.numPages;
+pagina++
+){
+
+
+if(pararOCR) break;
+
+
+let page =
+await pdf.getPage(pagina);
+
+
+let viewport =
+page.getViewport({
+scale:3
+});
+
+
+let canvas =
+document.createElement("canvas");
+
+
+canvas.width =
+viewport.width;
+
+canvas.height =
+viewport.height;
+
+
+let ctx =
+canvas.getContext("2d");
+
+
+await page.render({
+
+canvasContext:ctx,
+
+viewport:viewport
+
+}).promise;
+
+
+
+let lectura =
+await worker.recognize(canvas);
+
+
+let texto =
+lectura.data.text.toUpperCase();
+
+
+
+let numeros =
+texto.match(/\d{4}/g)||[];
+
+
+
+let provincia =
+detectarProvinciaOCR(texto);
+
+
+let turno =
+detectarTurnoOCR(texto);
+
+
+let fecha =
+detectarFechaOCR(texto);
+
+
+
+for(let numero of numeros){
+
+
+await guardarRegistro({
+
+fecha,
+
+provincia,
+
+turno,
+
+numero,
+
+origen:"OCR_V42"
+
+});
+
+
+}
+
+
+
+document.getElementById("estadoOCR").innerText =
+"Página "+pagina+"/"+pdf.numPages;
+
+
+}
+
+
+
+await worker.terminate();
+
+
+
+let total =
+(await leerBase()).length;
+
+
+document.getElementById("total").innerText=total;
+
+
+mostrar(`
+
+✅ OCR TERMINADO
+
+REGISTROS:
+
+${total}
+
+`);
+
+
+}catch(e){
+
+
+mostrar(
+"ERROR OCR\n"+e
+);
+
+
+}
+
+
+  }
+ 
 }
 
 

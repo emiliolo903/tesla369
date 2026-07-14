@@ -981,25 +981,31 @@ numero
 
 if(!existe){
 
+let turnoDetectado =
+detectarTurnoOCR(texto);
+
+
+let provinciaDetectada =
+detectarProvinciaOCR(texto);
+
+
 await guardarRegistro({
 
-fecha:fechaRegistro,
+fecha:new Date()
+.toISOString()
+.slice(0,10),
 
 provincia:provinciaDetectada,
 
 turno:turnoDetectado,
 
-numero:numero,
+numero,
 
 origen:"OCR_V42"
 
 });
 
 }
-
-}
-
-
 
 
 document.getElementById(

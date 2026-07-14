@@ -1427,24 +1427,18 @@ detectarFechaOCR(texto);
 
 for(let numero of numeros){
 
-
-await guardarRegistro({
-
-fecha,
-
-provincia,
-
-turno,
-
-numero,
-
-origen:"OCR_V42"
-
-});
-
+    await guardarRegistro({
+        fecha,
+        provincia,
+        turno,
+        numero,
+        origen:"OCR_V42"
+    });
 
 }
 
+document.getElementById("estadoOCR").innerText =
+"Página "+pagina+"/"+pdf.numPages;
 
 
 

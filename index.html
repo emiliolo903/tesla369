@@ -462,31 +462,16 @@ DB_VERSION
 
 
 request.onupgradeneeded=function(e){
-if(!base.objectStoreNames.contains(STORE_MEMORIA)){
-
-let memoria = base.createObjectStore(
-STORE_MEMORIA,
-{
-keyPath:"id",
-autoIncrement:true
-});
-
-memoria.createIndex(
-"fecha",
-"fecha",
-{unique:false}
-);
-
- }
 
 let base=e.target.result;
 
 
+// TABLA HISTÓRICA
 
 if(!base.objectStoreNames.contains(STORE_NAME)){
 
 
-let tabla=
+let tabla =
 base.createObjectStore(
 STORE_NAME,
 {
@@ -496,13 +481,11 @@ autoIncrement:true
 );
 
 
-
 tabla.createIndex(
 "provincia",
 "provincia",
 {unique:false}
 );
-
 
 
 tabla.createIndex(
@@ -515,33 +498,32 @@ tabla.createIndex(
 }
 
 
-};
+// TABLA MEMORIA IA
+
+if(!base.objectStoreNames.contains(STORE_MEMORIA)){
 
 
-
-request.onsuccess=function(e){
-
-db=e.target.result;
-
-resolve(db);
-
-};
-
-
-
-request.onerror=function(e){
-
-reject(e);
-
-};
+let memoria =
+base.createObjectStore(
+STORE_MEMORIA,
+{
+keyPath:"id",
+autoIncrement:true
+}
+);
 
 
-});
+memoria.createIndex(
+"fecha",
+"fecha",
+{unique:false}
+);
 
 
 }
 
 
+};
 
 
 //////////////////////////////////////////////////

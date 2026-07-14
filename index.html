@@ -837,151 +837,16 @@ return new Date().toISOString().slice(0,10);
 // OCR HISTÓRICO V41
 //////////////////////////////////////////////////
 
-  async function iniciarOCR(){
+ async function iniciarOCR(){
 
-mostrar("OCR DESACTIVADO PRUEBA");
-return;
-
-
-let archivo=
-document.getElementById(
-"archivoPDF"
-).files[0];
-
-
-if(!archivo){
-
-alert("Seleccione PDF");
-
-return;
+mostrar("OCR EN PRUEBA");
 
 }
 
 
-try{
+function detenerOCR(){
 
-
-pararOCR=false;
-
-
-document.getElementById(
-"estadoOCR"
-).innerText="PROCESANDO";
-
-
-let buffer=
-await archivo.arrayBuffer();
-
-
-
-let pdf=
-await pdfjsLib
-.getDocument({
-data:buffer
-})
-.promise;
-
-
-
-let worker =
-await Tesseract.createWorker("spa", 1, {
-
-corePath:
-"https://cdn.jsdelivr.net/npm/tesseract.js-core@v5.1.1/tesseract-core.wasm.js",
-
-workerPath:
-"https://cdn.jsdelivr.net/npm/tesseract.js@v5/dist/worker.min.js"
-
-});
-
-for(
-let pagina=1;
-pagina<=pdf.numPages;
-pagina++
-){
-
-
-if(pararOCR)
-break;
-
-
-
-let page=
-await pdf.getPage(pagina);
-
-
-
-let viewport=
-page.getViewport({
-scale:3
-});
-
-
-
-let canvas=
-document.createElement("canvas");
-
-canvas.width=
-viewport.width;
-
-canvas.height=
-viewport.height;
-
-
-
-let ctx=
-canvas.getContext("2d");
-
-
-
-await page.render({
-
-canvasContext:ctx,
-
-viewport:viewport
-
-}).promise;
-
-
-
-
-
-await worker.terminate();
-
-
-
-let total=
-(await leerBase()).length;
-
-
-document.getElementById(
-"total"
-).innerText=total;
-
-
-
-mostrar(`
-
-✅ OCR FINALIZADO V41
-
-REGISTROS:
-
-${total}
-
-`);
-
-
-
-}catch(e){
-
-
-mostrar(
-"ERROR OCR\n"+e
-);
-
-
-}
-
+pararOCR=true;
 
 }
 

@@ -334,6 +334,9 @@ accept=".pdf">
 📊 ESTADÍSTICAS IA
 </button>
 
+ <button onclick="mostrarTopTransiciones()">
+🔄 MATRIZ TRANSICIONES
+ </button>
 <button onclick="generarResultadoFinalV41()">
 
 🎯 GENERAR CUATERNO / TERNO / AMBOS
@@ -681,6 +684,110 @@ datos.forEach(r=>{
 return estadisticas;
 
   }
+  //////////////////////////////////////////////////
+// MATRIZ DE TRANSICIONES IA V44
+//////////////////////////////////////////////////
+
+async function generarMatrizTransiciones(){
+
+let datos = await leerBase();
+
+let siguiente = {
+    "PREVIA":"PRIMERA",
+    "PRIMERA":"MATUTINA",
+    "MATUTINA":"VESPERTINA",
+    "VESPERTINA":"NOCTURNA",
+    "NOCTURNA":"PREVIA"
+};
+
+let matriz = {};
+
+datos.forEach(origen=>{
+
+    let destino = siguiente[origen.turno];
+
+    if(!destino) return;
+
+    datos.forEach(llegada=>{
+
+        if(llegada.turno!==destino) return;
+
+        if(origen.fecha!==llegada.fecha) return;
+
+        let ambosOrigen = origen.numero.slice(-2);
+        let ambosDestino = llegada.numero.slice(-2);
+
+        let clave =
+            origen.turno+"→"+destino+
+            "|"+ambosOrigen+
+            "|"+ambosDestino;
+
+        if(!matriz[clave]){
+
+            matriz[clave]={
+
+                origen:origen.turno,
+
+                destino:destino,
+
+                ambosOrigen,
+
+                ambosDestino,
+
+                veces:0
+
+            };
+
+        }
+
+        matriz[clave].veces++;
+
+    });
+
+});
+
+return matriz;
+
+}
+  //////////////////////////////////////////////////
+// TOP TRANSICIONES IA
+//////////////////////////////////////////////////
+
+async function mostrarTopTransiciones(){
+
+let matriz =
+await generarMatrizTransiciones();
+
+let ranking =
+Object.values(matriz);
+
+ranking.sort((a,b)=>b.veces-a.veces);
+
+let txt="🔄 TOP TRANSICIONES IA\n\n";
+
+for(let i=0;i<10 && i<ranking.length;i++){
+
+txt +=
+`${i+1})
+
+${ranking[i].origen}
+→
+${ranking[i].destino}
+
+${ranking[i].ambosOrigen}
+→
+${ranking[i].ambosDestino}
+
+Veces:
+${ranking[i].veces}
+
+\n`;
+
+}
+
+mostrar(txt);
+
+}
 //////////////////////////////////////////////////
 // TOP ESTADÍSTICAS IA
 //////////////////////////////////////////////////

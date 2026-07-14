@@ -627,8 +627,94 @@ datos.onerror=e=>reject(e);
 
 }
 
+//////////////////////////////////////////////////
+// MOTOR ESTADÍSTICAS IA V44
+//////////////////////////////////////////////////
 
+async function generarEstadisticasIA(){
 
+let datos = await leerBase();
+
+let estadisticas = {};
+
+datos.forEach(r=>{
+
+    if(!r.numero) return;
+
+    let ambos = r.numero.slice(-2);
+
+    let clave =
+        r.turno + "|" +
+        r.provincia + "|" +
+        ambos;
+
+    if(!estadisticas[clave]){
+
+        estadisticas[clave]={
+
+            turno:r.turno,
+
+            provincia:r.provincia,
+
+            ambos:ambos,
+
+            cantidad:0,
+
+            ultimaFecha:r.fecha
+
+        };
+
+    }
+
+    estadisticas[clave].cantidad++;
+
+    if(r.fecha > estadisticas[clave].ultimaFecha){
+
+        estadisticas[clave].ultimaFecha=r.fecha;
+
+    }
+
+});
+
+return estadisticas;
+
+  }
+//////////////////////////////////////////////////
+// TOP ESTADÍSTICAS IA
+//////////////////////////////////////////////////
+
+async function mostrarTopEstadisticas(){
+
+let estadisticas =
+await generarEstadisticasIA();
+
+let ranking =
+Object.values(estadisticas);
+
+ranking.sort((a,b)=>b.cantidad-a.cantidad);
+
+let txt="📊 TOP IA HISTÓRICO\n\n";
+
+for(let i=0;i<10 && i<ranking.length;i++){
+
+    txt +=
+`${i+1}) ${ranking[i].ambos}
+
+Turno: ${ranking[i].turno}
+
+Provincia: ${ranking[i].provincia}
+
+Veces: ${ranking[i].cantidad}
+
+Última: ${ranking[i].ultimaFecha}
+
+\n`;
+
+}
+
+mostrar(txt);
+
+  }
 
 //////////////////////////////////////////////////
 // MOSTRAR RESULTADO

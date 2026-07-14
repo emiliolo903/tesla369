@@ -799,20 +799,44 @@ return document.getElementById("provinciaOCR").value;
 //////////////////////////////////////////////////
 // DETECTAR TURNO OCR V42
 //////////////////////////////////////////////////
-
 function detectarTurnoOCR(texto){
 
 texto = texto.toUpperCase();
 
-if(texto.includes("PREVIA")) return "PREVIA";
-if(texto.includes("PRIMERA")) return "PRIMERA";
-if(texto.includes("MATUTINA")) return "MATUTINA";
-if(texto.includes("VESPERTINA")) return "VESPERTINA";
-if(texto.includes("NOCTURNA")) return "NOCTURNA";
+if(
+texto.includes("NOCT") ||
+texto.includes("NOC")
+) return "NOCTURNA";
 
-return document.getElementById("turnoBloque").value;
 
-  }
+if(
+texto.includes("VES") ||
+texto.includes("VESPERT")
+) return "VESPERTINA";
+
+
+if(
+texto.includes("MAT") ||
+texto.includes("MATUT")
+) return "MATUTINA";
+
+
+if(
+texto.includes("PRIMER") ||
+texto.includes("1RA")
+) return "PRIMERA";
+
+
+if(
+texto.includes("PREV") ||
+texto.includes("PREVIA")
+) return "PREVIA";
+
+
+return "SIN_TURNO";
+
+}
+
   //////////////////////////////////////////////////
 // DETECTAR FECHA OCR V42
 //////////////////////////////////////////////////

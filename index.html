@@ -339,6 +339,11 @@ accept=".pdf">
  </button>
 <button onclick="generarResultadoFinalV41()">
 
+ <button onclick="compararResultadoIA()">
+
+📈 PROBAR RESULTADO EN VIVO
+
+ </button>
 🎯 GENERAR CUATERNO / TERNO / AMBOS
 
 </button>
@@ -985,6 +990,107 @@ datos.onerror=e=>reject(e);
 });
 
  }
+  //////////////////////////////////////////////////
+// COMPARADOR IA EN VIVO V44
+//////////////////////////////////////////////////
+
+async function compararResultadoIA(){
+
+let resultado =
+prompt("Ingrese número ganador de 4 cifras:");
+
+if(!resultado || resultado.length!==4){
+
+mostrar("⚠️ Ingrese un número de 4 cifras");
+
+return;
+
+}
+
+
+let memoria =
+await leerMemoriaIA();
+
+
+if(memoria.length===0){
+
+mostrar("⚠️ No hay predicciones guardadas");
+
+return;
+
+}
+
+
+let ultima =
+memoria[memoria.length-1];
+
+
+let ambosReal =
+resultado.slice(-2);
+
+let ternoReal =
+resultado.slice(-3);
+
+
+let cuaternoReal =
+resultado;
+
+
+let aciertoAmbos =
+ultima.ambos.includes(ambosReal);
+
+
+let aciertoTerno =
+ultima.ternos.includes(ternoReal);
+
+
+let aciertoCuaterno =
+ultima.cuaternos.includes(cuaternoReal);
+
+
+
+mostrar(`
+
+🧠 PRUEBA IA EN VIVO
+
+
+NÚMERO REAL:
+
+${resultado}
+
+
+AMBOS:
+
+${ambosReal}
+
+${aciertoAmbos ? "✅ ACIERTO" : "❌ FALLÓ"}
+
+
+
+TERNO:
+
+${ternoReal}
+
+${aciertoTerno ? "✅ ACIERTO" : "❌ FALLÓ"}
+
+
+
+CUATERNO:
+
+${cuaternoReal}
+
+${aciertoCuaterno ? "✅ ACIERTO" : "❌ FALLÓ"}
+
+
+
+PREDICCIÓN USADA:
+
+${ultima.ambos.join(" - ")}
+
+
+`);
+
+}
 //////////////////////////////////////////////////
 // MOSTRAR RESULTADO
 //////////////////////////////////////////////////

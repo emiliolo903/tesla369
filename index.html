@@ -1381,6 +1381,28 @@ frecuencia[ambos]=(frecuencia[ambos]||0)+1;
 return frecuencia;
 
 }
+  function filtrarResultadosV43(ranking,puntaje){
+
+let usados = {};
+let resultado = [];
+
+for(let numero of ranking){
+
+let ambos = numero.slice(-2);
+
+if(usados[ambos]) continue;
+
+usados[ambos] = true;
+
+resultado.push(numero);
+
+if(resultado.length>=10) break;
+
+}
+
+return resultado;
+
+  }
   //////////////////////////////////////////////////
 // GENERADOR FINAL IA V42
 //////////////////////////////////////////////////

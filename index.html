@@ -1499,13 +1499,9 @@ n.slice(-2)
 );
 
 
-
-
-
 mostrar(`
 
-🚀 EMI TESLA PRO V42 IA
-
+🚀 EMI TESLA PRO V43 IA
 
 🔄 TRANSICIÓN
 
@@ -1515,52 +1511,45 @@ ${turno}
 
 ${destino}
 
+🏆 TOP IA
 
+${ranking.slice(0,5).join("  |  ")}
 
-💥 AMBOS PRINCIPALES
+💥 AMBOS
 
+1) ${ambos[0]||"--"}   (${puntaje[cuaternos[0]]||0})
 
-1) ${ambos[0]||"--"}
+2) ${ambos[1]||"--"}   (${puntaje[cuaternos[1]]||0})
 
-2) ${ambos[1]||"--"}
+3) ${ambos[2]||"--"}   (${puntaje[cuaternos[2]]||0})
 
-3) ${ambos[2]||"--"}
-
-
-
-🎯 CUATERNO
-
+🎯 CUATERNOS
 
 1) ${cuaternos[0]||"--"}
 
 2) ${cuaternos[1]||"--"}
 
+3) ${cuaternos[2]||"--"}
 
-
-⚡ TERNO
-
+⚡ TERNOS
 
 1) ${ternos[0]||"--"}
 
 2) ${ternos[1]||"--"}
 
+3) ${ternos[2]||"--"}
 
-
-🧠 FUERZA IA
-
-
-${puntaje[ranking[0]]||0}
-
-
-
-📊 REGISTROS
+📊 HISTORIAL
 
 ${datos.length}
 
+🧠 MOTOR IA V43
+Continuidad ✔
+Arrastre ✔
+Frecuencia ✔
+Filtro ✔
+
 `);
-
-       }
-
 
 
 

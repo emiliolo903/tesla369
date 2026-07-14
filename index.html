@@ -1361,6 +1361,27 @@ return puntos;
 
 }
   //////////////////////////////////////////////////
+// MEMORIA HISTÓRICA IA V43
+//////////////////////////////////////////////////
+
+function calcularFrecuenciaHistorica(datos){
+
+let frecuencia={};
+
+datos.forEach(r=>{
+
+if(!r.numero) return;
+
+let ambos=r.numero.slice(-2);
+
+frecuencia[ambos]=(frecuencia[ambos]||0)+1;
+
+});
+
+return frecuencia;
+
+}
+  //////////////////////////////////////////////////
 // GENERADOR FINAL IA V42
 //////////////////////////////////////////////////
 
@@ -1448,7 +1469,11 @@ Object.keys(puntaje)
 puntaje[b]-puntaje[a]
 
 );
-
+ranking=
+filtrarResultadosV43(
+ranking,
+puntaje
+);
 
 
 let cuaternos =

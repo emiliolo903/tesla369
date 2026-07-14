@@ -931,7 +931,60 @@ Veces: ${ranking[i].cantidad}
 mostrar(txt);
 
   }
+//////////////////////////////////////////////////
+// MEMORIA IA V44
+//////////////////////////////////////////////////
 
+function guardarMemoriaIA(datos){
+
+return new Promise((resolve,reject)=>{
+
+let tx=db.transaction(
+STORE_MEMORIA,
+"readwrite"
+);
+
+let tabla=
+tx.objectStore(
+STORE_MEMORIA
+);
+
+tabla.add(datos);
+
+tx.oncomplete=()=>resolve(true);
+
+tx.onerror=e=>reject(e);
+
+});
+
+}
+
+
+
+function leerMemoriaIA(){
+
+return new Promise((resolve,reject)=>{
+
+let tx=db.transaction(
+STORE_MEMORIA,
+"readonly"
+);
+
+let tabla=
+tx.objectStore(
+STORE_MEMORIA
+);
+
+let datos=
+tabla.getAll();
+
+datos.onsuccess=()=>resolve(datos.result);
+
+datos.onerror=e=>reject(e);
+
+});
+
+ }
 //////////////////////////////////////////////////
 // MOSTRAR RESULTADO
 //////////////////////////////////////////////////

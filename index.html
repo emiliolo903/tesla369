@@ -462,7 +462,22 @@ DB_VERSION
 
 
 request.onupgradeneeded=function(e){
+if(!base.objectStoreNames.contains(STORE_MEMORIA)){
 
+let memoria = base.createObjectStore(
+STORE_MEMORIA,
+{
+keyPath:"id",
+autoIncrement:true
+});
+
+memoria.createIndex(
+"fecha",
+"fecha",
+{unique:false}
+);
+
+ }
 
 let base=e.target.result;
 
@@ -631,7 +646,64 @@ datos.onerror=e=>reject(e);
 
 
 }
+//////////////////////////////////////////////////
+// GUARDAR MEMORIA IA
+//////////////////////////////////////////////////
 
+function guardarMemoriaIA(datos){
+
+return new Promise((resolve,reject)=>{
+
+let tx =
+db.transaction(
+STORE_MEMORIA,
+"readwrite"
+);
+
+let tabla =
+tx.objectStore(
+STORE_MEMORIA
+);
+
+tabla.add(datos);
+
+tx.oncomplete=()=>resolve(true);
+
+tx.onerror=e=>reject(e);
+
+});
+
+}
+
+//////////////////////////////////////////////////
+// LEER MEMORIA IA
+//////////////////////////////////////////////////
+
+function leerMemoriaIA(){
+
+return new Promise((resolve,reject)=>{
+
+let tx =
+db.transaction(
+STORE_MEMORIA,
+"readonly"
+);
+
+let tabla =
+tx.objectStore(
+STORE_MEMORIA
+);
+
+let datos =
+tabla.getAll();
+
+datos.onsuccess=()=>resolve(datos.result);
+
+datos.onerror=e=>reject(e);
+
+});
+
+  }
 //////////////////////////////////////////////////
 // MOTOR ESTADÍSTICAS IA V44
 //////////////////////////////////////////////////

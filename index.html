@@ -2097,7 +2097,27 @@ cuaternos.push(r.numero);
 
 cuaternos=cuaternos.slice(0,2);
 
+//////////////////////////////////////////////////
+// GUARDAR PREDICCIÓN EN MEMORIA IA V44
+//////////////////////////////////////////////////
 
+await guardarMemoriaIA({
+
+fecha:new Date().toISOString().slice(0,10),
+
+turno:turno,
+
+destino:destino,
+
+ambos:ambosFinal,
+
+ternos:ternos,
+
+cuaternos:cuaternos,
+
+origen:"IA_V44"
+
+});
 
 // =============================
 // RESULTADO

@@ -1438,14 +1438,9 @@ if(resultado.length>=10) break;
 return resultado;
 
   }
-  //////////////////////////////////////////////////
-// GENERADOR FINAL IA V42
-//////////////////////////////////////////////////
+  async function generarResultadoFinalV41(){
 
-async function generarResultadoFinalV41(){
-alert("Entró");
-let datos =
-await leerBase();
+let datos = await leerBase();
 
 
 if(datos.length < 7){
@@ -1457,12 +1452,8 @@ return;
 }
 
 
-
 let turno =
-document.getElementById(
-"turnoBloque"
-).value;
-
+document.getElementById("turnoBloque").value;
 
 
 let siguiente={
@@ -1476,125 +1467,231 @@ let siguiente={
 };
 
 
-
-let destino =
-siguiente[turno];
+let destino=siguiente[turno];
 
 
+// =============================
+// RANKING DE AMBOS
+// =============================
 
-let puntaje={};
+let puntajeAmbos={};
+
 
 datos.forEach(origen=>{
 
+
 if(origen.turno!==turno) return;
+
 
 let base=origen.numero.slice(-2);
 
+
+
 datos.forEach(llegada=>{
+
 
 if(llegada.turno!==destino) return;
 
-// Nuevo motor IA V43
-let puntos =
-calcularPuntajeV43(
-origen,
-llegada
-);
 
-let ambos =
-llegada.numero.slice(-2);
-
-// acumular puntaje
-puntaje[llegada.numero]=
-(puntaje[llegada.numero]||0)+puntos;
-
-});
-
-});
+let salida=llegada.numero.slice(-2);
 
 
+let puntos=0;
 
 
+// ambos directo
 
+if(salida===base){
 
-let ranking=
-
-Object.keys(puntaje)
-
-.sort((a,b)=>
-
-puntaje[b]-puntaje[a]
-
-);
-ranking=
-filtrarResultadosV43(
-ranking,
-puntaje
-);
-console.log("Ranking:", ranking);
-
-if(ranking.length===0){
-
-mostrar("No hay candidatos.");
-
-return;
+puntos+=60;
 
 }
 
-let cuaternos =
-ranking.slice(0,3);
+
+// invertido
+
+if(salida===base[1]+base[0]){
+
+puntos+=40;
+
+}
 
 
+// arrastre provincia
 
-let ternos =
-cuaternos.map(n=>
+if(origen.provincia!==llegada.provincia){
 
-n.slice(-3)
+puntos+=25;
+
+}
+
+
+// mismo día
+
+if(origen.fecha===llegada.fecha){
+
+puntos+=15;
+
+}
+
+
+// frecuencia
+
+puntos+=5;
+
+
+puntajeAmbos[salida]=
+(puntajeAmbos[salida]||0)+puntos;
+
+
+});
+
+
+});
+
+
+// ordenar ambos
+
+let rankingAmbos=
+
+Object.keys(puntajeAmbos)
+
+.sort((a,b)=>
+
+puntajeAmbos[b]-puntajeAmbos[a]
 
 );
 
 
+// evitar repetidos seguidos
 
-let ambos =
+let ambosFinal=[];
 
-cuaternos.map(n=>
 
-n.slice(-2)
+for(let n of rankingAmbos){
 
-);
+if(!ambosFinal.includes(n)){
 
-alert("Llegó al final");
+ambosFinal.push(n);
+
+}
+
+
+if(ambosFinal.length>=3) break;
+
+}
+
+
+
+// =============================
+// CREAR TERNOS
+// =============================
+
+let ternos=[];
+
+
+ambosFinal.forEach(a=>{
+
+
+datos.forEach(r=>{
+
+
+let ultimos=r.numero.slice(-3);
+
+
+if(
+ultimos.slice(-2)===a
+){
+
+if(!ternos.includes(ultimos)){
+
+ternos.push(ultimos);
+
+}
+
+}
+
+
+});
+
+
+});
+
+
+
+// máximo 2
+
+ternos=ternos.slice(0,2);
+
+
+
+// =============================
+// CREAR CUATERNOS
+// =============================
+
+let cuaternos=[];
+
+
+ambosFinal.forEach(a=>{
+
+
+datos.forEach(r=>{
+
+
+if(
+r.numero.slice(-2)===a
+){
+
+
+if(!cuaternos.includes(r.numero)){
+
+cuaternos.push(r.numero);
+
+}
+
+
+}
+
+
+});
+
+
+});
+
+
+// máximo 2
+
+cuaternos=cuaternos.slice(0,2);
+
+
+
+// =============================
+// RESULTADO
+// =============================
+
+
 mostrar(`
 
-🚀 EMI TESLA PRO V43 IA
+🚀 EMI TESLA PRO V41 IA
 
-🔄 TRANSICIÓN
+TRANSICIÓN
 
 ${turno}
 
-⬇
+⬇️
 
 ${destino}
 
-🏆 TOP IA
 
-${ranking.slice(0,5).join("  |  ")}
+🔥 RANKING AMBOS
 
-💥 AMBOS
+1) ${ambosFinal[0]||"--"}
 
-1) ${ambos[0]||"--"}   (${puntaje[cuaternos[0]]||0})
+2) ${ambosFinal[1]||"--"}
 
-2) ${ambos[1]||"--"}   (${puntaje[cuaternos[1]]||0})
+3) ${ambosFinal[2]||"--"}
 
-3) ${ambos[2]||"--"}   (${puntaje[cuaternos[2]]||0})
 
-🎯 CUATERNOS
-
-1) ${cuaternos[0]||"--"}
-
-2) ${cuaternos[1]||"--"}
-
-3) ${cuaternos[2]||"--"}
 
 ⚡ TERNOS
 
@@ -1602,21 +1699,29 @@ ${ranking.slice(0,5).join("  |  ")}
 
 2) ${ternos[1]||"--"}
 
-3) ${ternos[2]||"--"}
+
+
+🎯 CUATERNOS
+
+1) ${cuaternos[0]||"--"}
+
+2) ${cuaternos[1]||"--"}
+
+
 
 📊 HISTORIAL
 
 ${datos.length}
 
-🧠 MOTOR IA V43
-Continuidad ✔
-Arrastre ✔
-Frecuencia ✔
-Filtro ✔
+
+🧠 MOTOR NUEVO
+
+AMBOS → TERNO → CUATERNO
 
 `);
 
-}
+  }
+
 
 //////////////////////////////////////////////////
 // ARRASTRE PROVINCIAL IA V42

@@ -955,47 +955,83 @@ lectura.data.text.toUpperCase();
 let numeros=
 texto.match(/\d{4}/g)||[];
 
+let worker =
+await Tesseract.createWorker("spa");
 
-// Detectar provincia y turno automáticamente
+
+for(
+let pagina=1;
+pagina<=pdf.numPages;
+pagina++
+){
+
+let page=
+await pdf.getPage(pagina);
+
+
+let viewport=
+page.getViewport({
+scale:3
+});
+
+
+let canvas=
+document.createElement("canvas");
+
+canvas.width=viewport.width;
+canvas.height=viewport.height;
+
+
+let ctx=
+canvas.getContext("2d");
+
+
+await page.render({
+
+canvasContext:ctx,
+viewport:viewport
+
+}).promise;
+
+
+let lectura=
+await worker.recognize(canvas);
+
+
+let texto=
+lectura.data.text.toUpperCase();
+
+
+let numeros=
+texto.match(/\d{4}/g)||[];
+
 
 let provinciaDetectada =
 detectarProvinciaOCR(texto);
 
+
 let turnoDetectado =
 detectarTurnoOCR(texto);
+
+
 let fechaDetectada =
 detectarFechaOCR(texto);
 
-// Guardar números encontrados
+
 
 for(let numero of numeros){
 
-let fechaRegistro = fechaDetectada;
 
-let existe =
-await existeRegistro(
-fechaRegistro,
+if(!(await existeRegistro(
+fechaDetectada,
 provinciaDetectada,
 turnoDetectado,
 numero
-);
-
-
-if(!existe){
-
-let turnoDetectado =
-detectarTurnoOCR(texto);
-
-
-let provinciaDetectada =
-detectarProvinciaOCR(texto);
-
+))){
 
 await guardarRegistro({
 
-fecha:new Date()
-.toISOString()
-.slice(0,10),
+fecha:fechaDetectada,
 
 provincia:provinciaDetectada,
 
@@ -1009,6 +1045,8 @@ origen:"OCR_V42"
 
 }
 
+}
+
 
 document.getElementById(
 "estadoOCR"
@@ -1016,8 +1054,7 @@ document.getElementById(
 "Página "+pagina+"/"+pdf.numPages;
 
 
-}
-
+  }
 
 
 await worker.terminate();

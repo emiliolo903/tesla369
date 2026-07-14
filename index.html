@@ -1633,6 +1633,85 @@ if(resultado.length>=10) break;
 return resultado;
 
   }
+  //////////////////////////////////////////////////
+// RANKING INTELIGENTE IA V44
+//////////////////////////////////////////////////
+
+async function generarRankingAmbosV44(){
+
+let datos = await leerBase();
+
+let turno =
+document.getElementById("turnoBloque").value;
+
+let siguiente = {
+
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
+
+};
+
+let destino = siguiente[turno];
+
+let ranking = {};
+
+datos.forEach(origen=>{
+
+    if(origen.turno!==turno) return;
+
+    datos.forEach(llegada=>{
+
+        if(llegada.turno!==destino) return;
+
+        if(origen.fecha!==llegada.fecha) return;
+
+        let ambos = llegada.numero.slice(-2);
+
+        let puntos = 0;
+
+        // mismo ambos
+        if(origen.numero.slice(-2)==ambos)
+            puntos+=50;
+
+        // invertido
+        if(origen.numero.slice(-2)==ambos[1]+ambos[0])
+            puntos+=35;
+
+        // cambio de provincia
+        if(origen.provincia!=llegada.provincia)
+            puntos+=20;
+
+        // misma provincia
+        else
+            puntos+=10;
+
+        // reciente
+        let dias = Math.floor(
+            (new Date()-new Date(llegada.fecha))/86400000
+        );
+
+        if(dias<=7)
+            puntos+=30;
+        else if(dias<=30)
+            puntos+=15;
+
+        ranking[ambos] =
+            (ranking[ambos]||0)+puntos;
+
+    });
+
+});
+
+return Object.keys(ranking)
+
+.sort((a,b)=>ranking[b]-ranking[a])
+
+.slice(0,3);
+
+         }
   async function generarResultadoFinalV41(){
 
 let datos = await leerBase();
@@ -1760,7 +1839,8 @@ puntajeAmbos[b]-puntajeAmbos[a]
 
 // evitar repetidos seguidos
 
-let ambosFinal=[];
+let ambosFinal =
+await generarRankingAmbosV44();
 
 
 for(let n of rankingAmbos){

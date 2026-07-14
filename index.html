@@ -645,6 +645,42 @@ datos.onerror=e=>reject(e);
 
 
 }
+  //////////////////////////////////////////////////
+// CACHE IA V44 - OPTIMIZACIÓN
+//////////////////////////////////////////////////
+
+let CACHE_IA=[];
+
+let CACHE_FECHA=null;
+
+
+async function cargarCacheIA(){
+
+let datos = await leerBase();
+
+CACHE_IA = datos;
+
+CACHE_FECHA = new Date();
+
+return CACHE_IA;
+
+}
+
+
+
+async function obtenerDatosIA(){
+
+if(
+CACHE_IA.length===0
+){
+
+return await cargarCacheIA();
+
+}
+
+return CACHE_IA;
+
+}
 //////////////////////////////////////////////////
 // GUARDAR MEMORIA IA
 //////////////////////////////////////////////////

@@ -525,7 +525,24 @@ memoria.createIndex(
 
 };
 
+request.onsuccess=function(e){
 
+db=e.target.result;
+
+resolve(db);
+
+};
+
+
+request.onerror=function(e){
+
+reject(e);
+
+};
+
+
+});
+}
 //////////////////////////////////////////////////
 // EXISTE REGISTRO
 //////////////////////////////////////////////////

@@ -1310,56 +1310,91 @@ ${datos.length}
 
   }
   //////////////////////////////////////////////////
-// MOTOR IA V43 - PUNTAJE
+// MOTOR IA V43.1 - PUNTAJE MIXTO
 //////////////////////////////////////////////////
 
 function calcularPuntajeV43(origen,llegada){
 
 let puntos=0;
 
+
 let base=origen.numero.slice(-2);
+
 let ambos=llegada.numero.slice(-2);
 
-// Ambos directo
-if(ambos===base) puntos+=60;
 
-// Ambos invertido
-if(ambos===base[1]+base[0]) puntos+=40;
+// 1) Ambos directo
+if(ambos===base){
+puntos+=60;
+}
 
-// Misma provincia
-if(origen.provincia===llegada.provincia)
-puntos+=15;
-else
+
+// 2) Ambos invertido
+if(ambos===base[1]+base[0]){
+puntos+=45;
+}
+
+
+// 3) Arrastre provincial
+if(origen.provincia!==llegada.provincia){
 puntos+=25;
+}
+else{
+puntos+=15;
+}
 
-// Misma fecha
-if(origen.fecha===llegada.fecha)
+
+// 4) Misma fecha
+if(origen.fecha===llegada.fecha){
 puntos+=20;
+}
 
-// Continuidad exacta
-if(origen.numero===llegada.numero)
-puntos+=30;
 
-// Frecuencia
-puntos+=5;
+// 5) Continuidad exacta
+if(origen.numero===llegada.numero){
+puntos+=25;
+}
 
-// Registros recientes
+
+// 6) Fuerza del último dígito
+if(base[1]===ambos[1]){
+puntos+=10;
+}
+
+
+// 7) Cambio controlado de ciclo
+if(base[0]===ambos[1]){
+puntos+=8;
+}
+
+
+// 8) Premio por registro reciente
 let hoy=new Date();
 let fecha=new Date(llegada.fecha);
-let dias=Math.floor((hoy-fecha)/86400000);
 
-if(dias<=7)
+let dias=Math.floor(
+(hoy-fecha)/86400000
+);
+
+
+if(dias<=7){
 puntos+=20;
-else if(dias<=30)
+}
+else if(dias<=30){
 puntos+=10;
+}
 
-// Penalizar repetidos
-if(origen.numero===llegada.numero)
-puntos-=10;
+
+// 9) Penalización por repetición exacta
+if(origen.numero===llegada.numero){
+puntos-=15;
+}
+
 
 return puntos;
 
 }
+
   //////////////////////////////////////////////////
 // MEMORIA HISTÓRICA IA V43
 //////////////////////////////////////////////////

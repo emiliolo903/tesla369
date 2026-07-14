@@ -836,7 +836,7 @@ return new Date().toISOString().slice(0,10);
   //////////////////////////////////////////////////
 // OCR HISTÓRICO V41
 //////////////////////////////////////////////////
-async function iniciarOCR(){
+  async function iniciarOCR(){
 
 let archivo =
 document.getElementById("archivoPDF").files[0];
@@ -966,6 +966,13 @@ origen:"OCR_V42"
 
 
 
+
+function detenerOCR(){
+
+pararOCR=true;
+
+ }
+
 document.getElementById("estadoOCR").innerText =
 "Página "+pagina+"/"+pdf.numPages;
 
@@ -1008,27 +1015,6 @@ mostrar(
 
 
   }
- 
-}
-
-
-function detenerOCR(){
-
-pararOCR=true;
-
-}
-
-
-
-function detenerOCR(){
-
-pararOCR=true;
-
-}
-
-
-
-
 
 //////////////////////////////////////////////////
 // CONTINUIDAD TURNO PROVINCIA V42

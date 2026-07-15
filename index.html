@@ -1048,19 +1048,14 @@ return new Date()
 
 
 
-
 //////////////////////////////////////////////////
-// OCR PDF HISTÓRICO V45
+// OCR HISTÓRICO V45 SEPARADO POR TURNOS
 //////////////////////////////////////////////////
 
 async function iniciarOCR(){
 
-
 let archivo =
-document.getElementById(
-"archivoPDF"
-).files[0];
-
+document.getElementById("archivoPDF").files[0];
 
 
 if(!archivo){
@@ -1072,17 +1067,12 @@ return;
 }
 
 
-
 try{
 
 
 pararOCR=false;
 
-
-
-document.getElementById(
-"estadoOCR"
-).innerText="PROCESANDO";
+document.getElementById("estadoOCR").innerText="PROCESANDO";
 
 
 
@@ -1092,17 +1082,14 @@ await archivo.arrayBuffer();
 
 
 let pdf =
-await pdfjsLib
-.getDocument({
+await pdfjsLib.getDocument({
 data:buffer
-})
-.promise;
+}).promise;
 
 
 
 let worker =
-await Tesseract
-.createWorker("spa");
+await Tesseract.createWorker("spa");
 
 
 
@@ -1113,9 +1100,7 @@ pagina++
 ){
 
 
-
-if(pararOCR)
-break;
+if(pararOCR) break;
 
 
 
@@ -1132,15 +1117,10 @@ scale:3
 
 
 let canvas =
-document.createElement(
-"canvas"
-);
-
-
+document.createElement("canvas");
 
 canvas.width=
 viewport.width;
-
 
 canvas.height=
 viewport.height;
@@ -1148,9 +1128,7 @@ viewport.height;
 
 
 let ctx =
-canvas.getContext(
-"2d"
-);
+canvas.getContext("2d");
 
 
 
@@ -1164,22 +1142,13 @@ viewport:viewport
 
 
 
-
 let lectura =
-await worker.recognize(
-canvas
-);
+await worker.recognize(canvas);
 
 
 
 let texto =
-lectura.data.text
-.toUpperCase();
-
-
-
-let numeros =
-texto.match(/\d{4}/g)||[];
+lectura.data.text.toUpperCase();
 
 
 
@@ -1188,13 +1157,74 @@ detectarProvinciaOCR(texto);
 
 
 
-let turno =
-detectarTurnoOCR(texto);
-
-
-
 let fecha =
 detectarFechaOCR(texto);
+
+
+
+// BUSCAR CADA TURNO
+
+let bloques=[
+
+{
+nombre:"PREVIA",
+clave:["PREVIA","PREV"]
+},
+
+{
+nombre:"PRIMERA",
+clave:["PRIMERA","1RA"]
+},
+
+{
+nombre:"MATUTINA",
+clave:["MATUTINA","MAT"]
+},
+
+{
+nombre:"VESPERTINA",
+clave:["VESPERTINA","VES"]
+},
+
+{
+nombre:"NOCTURNA",
+clave:["NOCTURNA","NOCT"]
+}
+
+];
+
+
+
+for(let bloque of bloques){
+
+
+
+let inicio=-1;
+
+
+
+for(let palabra of bloque.clave){
+
+inicio=
+texto.indexOf(palabra);
+
+if(inicio>=0) break;
+
+}
+
+
+
+if(inicio<0) continue;
+
+
+
+let zona =
+texto.substring(inicio,inicio+1500);
+
+
+
+let numeros =
+zona.match(/\d{4}/g)||[];
 
 
 
@@ -1208,11 +1238,12 @@ fecha,
 
 provincia,
 
-turno,
+turno:
+bloque.nombre,
 
 numero,
 
-origen:"OCR_V45"
+origen:"OCR_V45_TURNO"
 
 });
 
@@ -1221,14 +1252,17 @@ origen:"OCR_V45"
 
 
 
-document.getElementById(
-"estadoOCR"
-).innerText=
+}
+
+
+
+document.getElementById("estadoOCR").innerText=
 
 "Página "+
 pagina+
 "/"+
 pdf.numPages;
+
 
 
 }
@@ -1244,20 +1278,36 @@ let total =
 
 
 
-document.getElementById(
-"total"
-).innerText=total;
+document.getElementById("total").innerText=total;
 
 
 
 mostrar(`
 
-✅ OCR FINALIZADO V45
+✅ OCR V45 COMPLETO
+
+
+PÁGINAS PROCESADAS
+
+${pdf.numPages}
 
 
 REGISTROS:
 
 ${total}
+
+
+TURNOS SEPARADOS:
+
+✔ PREVIA
+
+✔ PRIMERA
+
+✔ MATUTINA
+
+✔ VESPERTINA
+
+✔ NOCTURNA
 
 `);
 
@@ -1276,6 +1326,7 @@ mostrar(
 
 
 }
+
 
 
 

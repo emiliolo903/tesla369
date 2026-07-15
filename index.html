@@ -8,9 +8,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
-EMI TESLA PRO V41 IA MATRIZ HISTÓRICA
+EMI TESLA PRO V45 IA MATRIZ HISTÓRICA
 </title>
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
@@ -22,7 +21,6 @@ EMI TESLA PRO V41 IA MATRIZ HISTÓRICA
 *{
 box-sizing:border-box;
 }
-
 
 body{
 
@@ -82,13 +80,6 @@ font-weight:bold;
 }
 
 
-button:hover{
-
-background:#00cc77;
-
-}
-
-
 .grid{
 
 display:grid;
@@ -118,7 +109,6 @@ white-space:pre-wrap;
 
 }
 
-
 </style>
 
 </head>
@@ -129,7 +119,7 @@ white-space:pre-wrap;
 
 <h1>
 
-🚀 EMI TESLA PRO V41
+🚀 EMI TESLA PRO V45
 
 <br>
 
@@ -141,7 +131,7 @@ white-space:pre-wrap;
 
 <br>
 
-🎯 ACOMPAÑANTE EXACTO
+🎯 RANKING AMBOS / TERNO / CUATERNO
 
 </h1>
 
@@ -149,10 +139,7 @@ white-space:pre-wrap;
 
 <div class="card">
 
-<h2>
-📊 ESTADO SISTEMA
-</h2>
-
+<h2>📊 ESTADO SISTEMA</h2>
 
 <div class="grid">
 
@@ -211,7 +198,7 @@ VERSIÓN
 
 <br>
 
-V41
+V45
 
 </div>
 
@@ -219,6 +206,7 @@ V41
 </div>
 
 </div>
+
 
 
 
@@ -264,6 +252,11 @@ accept=".pdf">
 
 
 </div>
+
+
+
+
+
 <div class="card">
 
 <h2>
@@ -284,32 +277,38 @@ accept=".pdf">
 
 
 <h3>CORRIENTES</h3>
-<input id="corrientesBloque" placeholder="Ej: 1342">
+
+<input id="corrientesBloque">
 
 
 <h3>CIUDAD</h3>
-<input id="ciudadBloque" placeholder="Ej: 6534">
+
+<input id="ciudadBloque">
 
 
 <h3>BONAERENSE</h3>
-<input id="bonaerenseBloque" placeholder="Ej: 7821">
+
+<input id="bonaerenseBloque">
 
 
 <h3>SANTA FE</h3>
-<input id="santafeBloque" placeholder="Ej: 9045">
+
+<input id="santafeBloque">
 
 
 <h3>CÓRDOBA</h3>
-<input id="cordobaBloque" placeholder="Ej: 2267">
+
+<input id="cordobaBloque">
 
 
 <h3>ENTRE RÍOS</h3>
-<input id="entreriosBloque" placeholder="Ej: 5180">
+
+<input id="entreriosBloque">
 
 
 <h3>CHACO</h3>
-<input id="chacoBloque" placeholder="Ej: 3391">
 
+<input id="chacoBloque">
 
 
 <button onclick="guardarBloqueIA()">
@@ -324,86 +323,49 @@ accept=".pdf">
 
 
 
-
 <div class="card">
 
 <h2>
-🧠 MOTOR IA V41
+🧠 MOTOR IA V45
 </h2>
 
-<button onclick="mostrarTopEstadisticas()">
-📊 ESTADÍSTICAS IA
-</button>
 
-<button onclick="mostrarTopTransiciones()">
-🔄 MATRIZ TRANSICIONES
-</button>
+<button onclick="generarResultadoFinalV45()">
 
-<button onclick="generarResultadoFinalV41()">
 🎯 GENERAR CUATERNO / TERNO / AMBOS
+
 </button>
 
-<button onclick="compararResultadoIA()">
-📈 PROBAR RESULTADO EN VIVO
-</button>
 
 <button onclick="generarTeslaIA()">
+
 🚀 TESLA IA
-</button>
- 
-
-
-
-<button onclick="continuidadProvinciaTurnoV41()">
-
-🔄 CONTINUIDAD TURNO / PROVINCIA
 
 </button>
 
 
+<button onclick="mostrarTopTransiciones()">
 
-<button onclick="matrizProvincialCruzadaV41()">
-
-🌎 MATRIZ CRUZADA
-
-</button>
-
-<button onclick="analizarArrastreProvincialV41()">
-
-🌎 ARRASTRE PROVINCIAL IA
+🔄 MATRIZ TRANSICIONES
 
 </button>
 
-<button onclick="auditoriaV41()">
 
-🛡️ AUDITORÍA V41
+<button onclick="auditoriaV45()">
+
+🛡️ AUDITORÍA
+
+</button>
+
+
+<button onclick="compararResultadoIA()">
+
+📈 PROBAR RESULTADO
 
 </button>
 
 
 </div>
-
-
-
-
-
-<div class="card">
-
-<h2>
-🎯 ACOMPAÑANTE EXACTO
-</h2>
-
-
-<button onclick="buscarAcompananteV2()">
-
-🎯 BUSCAR ACOMPAÑANTE
-
-</button>
-
-
-</div>
-
-
 
 
 
@@ -416,37 +378,58 @@ accept=".pdf">
 
 <div id="resultado" class="resultado">
 
-EMI TESLA PRO V41 INICIADO...
+EMI TESLA PRO V45 INICIADO...
 
 </div>
 
 
- </div>
- <script>
+</div>
+
+
+<script>
+
 
 //////////////////////////////////////////////////
-// BASE HISTORICA V41
+// BASE V45
 //////////////////////////////////////////////////
 
-const DB_NAME="EMI_TESLA_PRO_V41";
+
+const DB_NAME="EMI_TESLA_PRO_V45";
 
 const DB_VERSION=1;
 
+
 const STORE_NAME="historico";
+
 const STORE_MEMORIA="memoriaIA";
 
+
 let db=null;
+
 
 let pararOCR=false;
 
 
-// solamente guarda la última carga manual
-let ULTIMA_CARGA=[];
+let CACHE_IA=[];
 
 
 
 //////////////////////////////////////////////////
-// ABRIR BASE
+// CONFIGURACIÓN MOTOR
+//////////////////////////////////////////////////
+
+
+const CONFIG_V45={
+
+MAX_AMBOS:3,
+
+MAX_TERNOS:2,
+
+MAX_CUATERNOS:2
+
+};
+ //////////////////////////////////////////////////
+// ABRIR BASE V45
 //////////////////////////////////////////////////
 
 function abrirBase(){
@@ -454,7 +437,7 @@ function abrirBase(){
 return new Promise((resolve,reject)=>{
 
 
-let request=
+let request =
 indexedDB.open(
 DB_NAME,
 DB_VERSION
@@ -464,10 +447,12 @@ DB_VERSION
 
 request.onupgradeneeded=function(e){
 
+
 let base=e.target.result;
 
 
-// TABLA HISTÓRICA
+
+// HISTORIAL
 
 if(!base.objectStoreNames.contains(STORE_NAME)){
 
@@ -482,24 +467,32 @@ autoIncrement:true
 );
 
 
+
 tabla.createIndex(
 "provincia",
 "provincia",
-{unique:false}
+{
+unique:false
+}
 );
 
 
+
 tabla.createIndex(
 "turno",
 "turno",
-{unique:false}
+{
+unique:false
+}
 );
 
 
 }
 
 
-// TABLA MEMORIA IA
+
+
+// MEMORIA IA
 
 if(!base.objectStoreNames.contains(STORE_MEMORIA)){
 
@@ -514,11 +507,15 @@ autoIncrement:true
 );
 
 
+
 memoria.createIndex(
 "fecha",
 "fecha",
-{unique:false}
+{
+unique:false
+}
 );
+
 
 
 }
@@ -526,13 +523,21 @@ memoria.createIndex(
 
 };
 
+
+
 request.onsuccess=function(e){
 
 db=e.target.result;
 
+document.getElementById(
+"estadoBase"
+).innerText="ACTIVA";
+
+
 resolve(db);
 
 };
+
 
 
 request.onerror=function(e){
@@ -543,27 +548,14 @@ reject(e);
 
 
 });
-}
-//////////////////////////////////////////////////
-// EXISTE REGISTRO
-//////////////////////////////////////////////////
 
-async function existeRegistro(fecha,provincia,turno,numero){
-
-let datos=await leerBase();
-
-return datos.some(r=>
-
-r.fecha===fecha &&
-r.provincia===provincia &&
-r.turno===turno &&
-r.numero===numero
-
-);
 
 }
+
+
+
 //////////////////////////////////////////////////
-// GUARDAR REGISTRO
+// GUARDAR REGISTRO HISTÓRICO
 //////////////////////////////////////////////////
 
 function guardarRegistro(datos){
@@ -571,15 +563,14 @@ function guardarRegistro(datos){
 return new Promise((resolve,reject)=>{
 
 
-let tx=
+let tx =
 db.transaction(
 STORE_NAME,
 "readwrite"
 );
 
 
-
-let tabla=
+let tabla =
 tx.objectStore(
 STORE_NAME
 );
@@ -590,10 +581,21 @@ tabla.add(datos);
 
 
 
-tx.oncomplete=()=>resolve(true);
+tx.oncomplete=function(){
+
+CACHE_IA=[];
+
+resolve(true);
+
+};
 
 
-tx.onerror=e=>reject(e);
+
+tx.onerror=function(e){
+
+reject(e);
+
+};
 
 
 });
@@ -606,7 +608,7 @@ tx.onerror=e=>reject(e);
 
 
 //////////////////////////////////////////////////
-// LEER BASE
+// LEER BASE HISTÓRICA
 //////////////////////////////////////////////////
 
 function leerBase(){
@@ -614,7 +616,7 @@ function leerBase(){
 return new Promise((resolve,reject)=>{
 
 
-let tx=
+let tx =
 db.transaction(
 STORE_NAME,
 "readonly"
@@ -622,23 +624,31 @@ STORE_NAME,
 
 
 
-let tabla=
+let tabla =
 tx.objectStore(
 STORE_NAME
 );
 
 
 
-let datos=
+let datos =
 tabla.getAll();
 
 
 
-datos.onsuccess=()=>resolve(datos.result);
+datos.onsuccess=function(){
+
+resolve(datos.result);
+
+};
 
 
 
-datos.onerror=e=>reject(e);
+datos.onerror=function(e){
+
+reject(e);
+
+};
 
 
 
@@ -646,453 +656,41 @@ datos.onerror=e=>reject(e);
 
 
 }
-  //////////////////////////////////////////////////
-// CACHE IA V44 - OPTIMIZACIÓN
+
+
+
+
+//////////////////////////////////////////////////
+// CACHE MOTOR IA V45
 //////////////////////////////////////////////////
 
-let CACHE_IA=[];
-
-let CACHE_FECHA=null;
-
-
-async function cargarCacheIA(){
-
-let datos = await leerBase();
-
-CACHE_IA = datos;
-
-CACHE_FECHA = new Date();
-
-return CACHE_IA;
-
-}
-
-
-
 async function obtenerDatosIA(){
+
 
 if(
 CACHE_IA.length===0
 ){
 
-return await cargarCacheIA();
+CACHE_IA =
+await leerBase();
 
 }
+
 
 return CACHE_IA;
 
-}
-//////////////////////////////////////////////////
-// GUARDAR MEMORIA IA
-//////////////////////////////////////////////////
-
-function guardarMemoriaIA(datos){
-
-return new Promise((resolve,reject)=>{
-
-let tx =
-db.transaction(
-STORE_MEMORIA,
-"readwrite"
-);
-
-let tabla =
-tx.objectStore(
-STORE_MEMORIA
-);
-
-tabla.add(datos);
-
-tx.oncomplete=()=>resolve(true);
-
-tx.onerror=e=>reject(e);
-
-});
 
 }
 
-//////////////////////////////////////////////////
-// LEER MEMORIA IA
-//////////////////////////////////////////////////
 
-function leerMemoriaIA(){
 
-return new Promise((resolve,reject)=>{
 
-let tx =
-db.transaction(
-STORE_MEMORIA,
-"readonly"
-);
 
-let tabla =
-tx.objectStore(
-STORE_MEMORIA
-);
-
-let datos =
-tabla.getAll();
-
-datos.onsuccess=()=>resolve(datos.result);
-
-datos.onerror=e=>reject(e);
-
-});
-
-  }
-//////////////////////////////////////////////////
-// MOTOR ESTADÍSTICAS IA V44
-//////////////////////////////////////////////////
-
-async function generarEstadisticasIA(){
-
-let datos = await leerBase();
-
-let estadisticas = {};
-
-datos.forEach(r=>{
-
-    if(!r.numero) return;
-
-    let ambos = r.numero.slice(-2);
-
-    let clave =
-        r.turno + "|" +
-        r.provincia + "|" +
-        ambos;
-
-    if(!estadisticas[clave]){
-
-        estadisticas[clave]={
-
-            turno:r.turno,
-
-            provincia:r.provincia,
-
-            ambos:ambos,
-
-            cantidad:0,
-
-            ultimaFecha:r.fecha
-
-        };
-
-    }
-
-    estadisticas[clave].cantidad++;
-
-    if(r.fecha > estadisticas[clave].ultimaFecha){
-
-        estadisticas[clave].ultimaFecha=r.fecha;
-
-    }
-
-});
-
-return estadisticas;
-
-  }
-  //////////////////////////////////////////////////
-// MATRIZ DE TRANSICIONES IA V44
-//////////////////////////////////////////////////
-
-async function generarMatrizTransiciones(){
-
-let datos = await leerBase();
-
-let siguiente = {
-    "PREVIA":"PRIMERA",
-    "PRIMERA":"MATUTINA",
-    "MATUTINA":"VESPERTINA",
-    "VESPERTINA":"NOCTURNA",
-    "NOCTURNA":"PREVIA"
-};
-
-let matriz = {};
-
-datos.forEach(origen=>{
-
-    let destino = siguiente[origen.turno];
-
-    if(!destino) return;
-
-    datos.forEach(llegada=>{
-
-        if(llegada.turno!==destino) return;
-
-        if(origen.fecha!==llegada.fecha) return;
-
-        let ambosOrigen = origen.numero.slice(-2);
-        let ambosDestino = llegada.numero.slice(-2);
-
-        let clave =
-            origen.turno+"→"+destino+
-            "|"+ambosOrigen+
-            "|"+ambosDestino;
-
-        if(!matriz[clave]){
-
-            matriz[clave]={
-
-                origen:origen.turno,
-
-                destino:destino,
-
-                ambosOrigen,
-
-                ambosDestino,
-
-                veces:0
-
-            };
-
-        }
-
-        matriz[clave].veces++;
-
-    });
-
-});
-
-return matriz;
-
-}
-  //////////////////////////////////////////////////
-// TOP TRANSICIONES IA
-//////////////////////////////////////////////////
-
-async function mostrarTopTransiciones(){
-
-let matriz =
-await generarMatrizTransiciones();
-
-let ranking =
-Object.values(matriz);
-
-ranking.sort((a,b)=>b.veces-a.veces);
-
-let txt="🔄 TOP TRANSICIONES IA\n\n";
-
-for(let i=0;i<10 && i<ranking.length;i++){
-
-txt +=
-`${i+1})
-
-${ranking[i].origen}
-→
-${ranking[i].destino}
-
-${ranking[i].ambosOrigen}
-→
-${ranking[i].ambosDestino}
-
-Veces:
-${ranking[i].veces}
-
-\n`;
-
-}
-
-mostrar(txt);
-
-}
-//////////////////////////////////////////////////
-// TOP ESTADÍSTICAS IA
-//////////////////////////////////////////////////
-
-async function mostrarTopEstadisticas(){
-
-let estadisticas =
-await generarEstadisticasIA();
-
-let ranking =
-Object.values(estadisticas);
-
-ranking.sort((a,b)=>b.cantidad-a.cantidad);
-
-let txt="📊 TOP IA HISTÓRICO\n\n";
-
-for(let i=0;i<10 && i<ranking.length;i++){
-
-    txt +=
-`${i+1}) ${ranking[i].ambos}
-
-Turno: ${ranking[i].turno}
-
-Provincia: ${ranking[i].provincia}
-
-Veces: ${ranking[i].cantidad}
-
-Última: ${ranking[i].ultimaFecha}
-
-\n`;
-
-}
-
-mostrar(txt);
-
-  }
-//////////////////////////////////////////////////
-// MEMORIA IA V44
-//////////////////////////////////////////////////
-
-function guardarMemoriaIA(datos){
-
-return new Promise((resolve,reject)=>{
-
-let tx=db.transaction(
-STORE_MEMORIA,
-"readwrite"
-);
-
-let tabla=
-tx.objectStore(
-STORE_MEMORIA
-);
-
-tabla.add(datos);
-
-tx.oncomplete=()=>resolve(true);
-
-tx.onerror=e=>reject(e);
-
-});
-
-}
-
-
-
-function leerMemoriaIA(){
-
-return new Promise((resolve,reject)=>{
-
-let tx=db.transaction(
-STORE_MEMORIA,
-"readonly"
-);
-
-let tabla=
-tx.objectStore(
-STORE_MEMORIA
-);
-
-let datos=
-tabla.getAll();
-
-datos.onsuccess=()=>resolve(datos.result);
-
-datos.onerror=e=>reject(e);
-
-});
-
- }
-  //////////////////////////////////////////////////
-// COMPARADOR IA EN VIVO V44
-//////////////////////////////////////////////////
-
-async function compararResultadoIA(){
-
-let resultado =
-prompt("Ingrese número ganador de 4 cifras:");
-
-if(!resultado || resultado.length!==4){
-
-mostrar("⚠️ Ingrese un número de 4 cifras");
-
-return;
-
-}
-
-
-let memoria =
-await leerMemoriaIA();
-
-
-if(memoria.length===0){
-
-mostrar("⚠️ No hay predicciones guardadas");
-
-return;
-
-}
-
-
-let ultima =
-memoria[memoria.length-1];
-
-
-let ambosReal =
-resultado.slice(-2);
-
-let ternoReal =
-resultado.slice(-3);
-
-
-let cuaternoReal =
-resultado;
-
-
-let aciertoAmbos =
-ultima.ambos.includes(ambosReal);
-
-
-let aciertoTerno =
-ultima.ternos.includes(ternoReal);
-
-
-let aciertoCuaterno =
-ultima.cuaternos.includes(cuaternoReal);
-
-
-
-mostrar(`
-
-🧠 PRUEBA IA EN VIVO
-
-
-NÚMERO REAL:
-
-${resultado}
-
-
-AMBOS:
-
-${ambosReal}
-
-${aciertoAmbos ? "✅ ACIERTO" : "❌ FALLÓ"}
-
-
-
-TERNO:
-
-${ternoReal}
-
-${aciertoTerno ? "✅ ACIERTO" : "❌ FALLÓ"}
-
-
-
-CUATERNO:
-
-${cuaternoReal}
-
-${aciertoCuaterno ? "✅ ACIERTO" : "❌ FALLÓ"}
-
-
-
-PREDICCIÓN USADA:
-
-${ultima.ambos.join(" - ")}
-
-
-`);
-
-}
 //////////////////////////////////////////////////
 // MOSTRAR RESULTADO
 //////////////////////////////////////////////////
 
 function mostrar(texto){
-
 
 document.getElementById(
 "resultado"
@@ -1106,17 +704,114 @@ document.getElementById(
 
 
 //////////////////////////////////////////////////
-// GUARDAR BLOQUE 7 PROVINCIAS V41
+// GUARDAR MEMORIA IA
+//////////////////////////////////////////////////
+
+function guardarMemoriaIA(datos){
+
+return new Promise((resolve,reject)=>{
+
+
+let tx =
+db.transaction(
+STORE_MEMORIA,
+"readwrite"
+);
+
+
+
+let tabla =
+tx.objectStore(
+STORE_MEMORIA
+);
+
+
+
+tabla.add(datos);
+
+
+
+tx.oncomplete=function(){
+
+resolve(true);
+
+};
+
+
+
+tx.onerror=function(e){
+
+reject(e);
+
+};
+
+
+});
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// LEER MEMORIA IA
+//////////////////////////////////////////////////
+
+function leerMemoriaIA(){
+
+return new Promise((resolve,reject)=>{
+
+
+let tx =
+db.transaction(
+STORE_MEMORIA,
+"readonly"
+);
+
+
+
+let tabla =
+tx.objectStore(
+STORE_MEMORIA
+);
+
+
+
+let datos =
+tabla.getAll();
+
+
+
+datos.onsuccess=function(){
+
+resolve(datos.result);
+
+};
+
+
+
+datos.onerror=function(e){
+
+reject(e);
+
+};
+
+
+
+});
+
+
+ }
+ //////////////////////////////////////////////////
+// CARGA BLOQUE 7 PROVINCIAS V45
 //////////////////////////////////////////////////
 
 async function guardarBloqueIA(){
 
 
-ULTIMA_CARGA=[];
-
-
-
-let turno=
+let turno =
 document.getElementById(
 "turnoBloque"
 ).value;
@@ -1152,21 +847,12 @@ let cantidad=0;
 for(let provincia in provincias){
 
 
-let numero=
+let numero =
 provincias[provincia].trim();
 
 
 
 if(/^\d{4}$/.test(numero)){
-
-
-ULTIMA_CARGA.push({
-
-provincia,
-numero,
-turno
-
-});
 
 
 
@@ -1182,10 +868,9 @@ turno,
 
 numero,
 
-origen:"MANUAL_V41"
+origen:"MANUAL_V45"
 
 });
-
 
 
 cantidad++;
@@ -1198,7 +883,7 @@ cantidad++;
 
 
 
-let total=
+let total =
 (await leerBase()).length;
 
 
@@ -1211,7 +896,7 @@ document.getElementById(
 
 mostrar(`
 
-✅ BLOQUE GUARDADO V41
+✅ BLOQUE GUARDADO V45
 
 
 TURNO:
@@ -1224,103 +909,158 @@ PROVINCIAS:
 ${cantidad}
 
 
-TOTAL:
+TOTAL BASE:
 
 ${total}
 
 `);
 
 }
-  //////////////////////////////////////////////////
-// DETECTAR PROVINCIA OCR V42
+
+
+
+
+
+//////////////////////////////////////////////////
+// DETECTOR PROVINCIA OCR
 //////////////////////////////////////////////////
 
 function detectarProvinciaOCR(texto){
 
-texto = texto.toUpperCase();
 
-if(texto.includes("CORRIENTES")) return "CORRIENTES";
-if(texto.includes("CIUDAD")) return "CIUDAD";
-if(texto.includes("BONAERENSE")) return "BONAERENSE";
-if(texto.includes("SANTA FE")) return "SANTA FE";
-if(texto.includes("CORDOBA")) return "CORDOBA";
-if(texto.includes("CÓRDOBA")) return "CORDOBA";
-if(texto.includes("ENTRE RIOS")) return "ENTRE RIOS";
-if(texto.includes("ENTRE RÍOS")) return "ENTRE RIOS";
-if(texto.includes("CHACO")) return "CHACO";
+texto=texto.toUpperCase();
 
-return document.getElementById("provinciaOCR").value;
+
+
+if(texto.includes("CORRIENTES"))
+return "CORRIENTES";
+
+
+if(texto.includes("CIUDAD"))
+return "CIUDAD";
+
+
+if(texto.includes("BONAERENSE"))
+return "BONAERENSE";
+
+
+if(texto.includes("SANTA FE"))
+return "SANTA FE";
+
+
+if(texto.includes("CORDOBA") ||
+texto.includes("CÓRDOBA"))
+return "CORDOBA";
+
+
+if(texto.includes("ENTRE RIOS") ||
+texto.includes("ENTRE RÍOS"))
+return "ENTRE RIOS";
+
+
+if(texto.includes("CHACO"))
+return "CHACO";
+
+
+
+return document.getElementById(
+"provinciaOCR"
+).value;
+
 
 }
 
+
+
+
+
 //////////////////////////////////////////////////
-// DETECTAR TURNO OCR V42
+// DETECTOR TURNO OCR
 //////////////////////////////////////////////////
+
 function detectarTurnoOCR(texto){
 
-texto = texto.toUpperCase();
 
-if(
-texto.includes("NOCT") ||
-texto.includes("NOC")
-) return "NOCTURNA";
+texto=texto.toUpperCase();
 
 
-if(
-texto.includes("VES") ||
-texto.includes("VESPERT")
-) return "VESPERTINA";
+
+if(texto.includes("NOCT"))
+return "NOCTURNA";
 
 
-if(
-texto.includes("MAT") ||
-texto.includes("MATUT")
-) return "MATUTINA";
+if(texto.includes("VES"))
+return "VESPERTINA";
 
 
-if(
-texto.includes("PRIMER") ||
-texto.includes("1RA")
-) return "PRIMERA";
+if(texto.includes("MAT"))
+return "MATUTINA";
 
 
-if(
-texto.includes("PREV") ||
-texto.includes("PREVIA")
-) return "PREVIA";
+if(texto.includes("PRIMER"))
+return "PRIMERA";
+
+
+if(texto.includes("PREV"))
+return "PREVIA";
 
 
 return "SIN_TURNO";
 
+
 }
 
-  //////////////////////////////////////////////////
-// DETECTAR FECHA OCR V42
+
+
+
+
+//////////////////////////////////////////////////
+// DETECTOR FECHA OCR
 //////////////////////////////////////////////////
 
 function detectarFechaOCR(texto){
 
-texto = texto.toUpperCase();
 
-let m = texto.match(/\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/);
+let fecha =
+texto.match(
+/(\d{2})[\/\-](\d{2})[\/\-](\d{4})/
+);
 
-if(m){
 
-return `${m[3]}-${m[2]}-${m[1]}`;
+
+if(fecha){
+
+
+return fecha[3]+"-"+fecha[2]+"-"+fecha[1];
+
 
 }
 
-return new Date().toISOString().slice(0,10);
+
+
+return new Date()
+.toISOString()
+.slice(0,10);
+
 
 }
 
-  //////////////////////////////////////////////////
-// OCR HISTÓRICO V41
+
+
+
+
 //////////////////////////////////////////////////
-  async function iniciarOCR(){
+// OCR PDF HISTÓRICO V45
+//////////////////////////////////////////////////
+
+async function iniciarOCR(){
+
 
 let archivo =
-document.getElementById("archivoPDF").files[0];
+document.getElementById(
+"archivoPDF"
+).files[0];
+
 
 
 if(!archivo){
@@ -1332,25 +1072,38 @@ return;
 }
 
 
+
 try{
+
 
 pararOCR=false;
 
-document.getElementById("estadoOCR").innerText="PROCESANDO";
+
+
+document.getElementById(
+"estadoOCR"
+).innerText="PROCESANDO";
+
 
 
 let buffer =
 await archivo.arrayBuffer();
 
 
+
 let pdf =
-await pdfjsLib.getDocument({
+await pdfjsLib
+.getDocument({
 data:buffer
-}).promise;
+})
+.promise;
+
 
 
 let worker =
-await Tesseract.createWorker("spa");
+await Tesseract
+.createWorker("spa");
+
 
 
 for(
@@ -1360,11 +1113,15 @@ pagina++
 ){
 
 
-if(pararOCR) break;
+
+if(pararOCR)
+break;
+
 
 
 let page =
 await pdf.getPage(pagina);
+
 
 
 let viewport =
@@ -1373,19 +1130,28 @@ scale:3
 });
 
 
+
 let canvas =
-document.createElement("canvas");
+document.createElement(
+"canvas"
+);
 
 
-canvas.width =
+
+canvas.width=
 viewport.width;
 
-canvas.height =
+
+canvas.height=
 viewport.height;
 
 
+
 let ctx =
-canvas.getContext("2d");
+canvas.getContext(
+"2d"
+);
+
 
 
 await page.render({
@@ -1398,12 +1164,17 @@ viewport:viewport
 
 
 
+
 let lectura =
-await worker.recognize(canvas);
+await worker.recognize(
+canvas
+);
+
 
 
 let texto =
-lectura.data.text.toUpperCase();
+lectura.data.text
+.toUpperCase();
 
 
 
@@ -1416,8 +1187,10 @@ let provincia =
 detectarProvinciaOCR(texto);
 
 
+
 let turno =
 detectarTurnoOCR(texto);
+
 
 
 let fecha =
@@ -1425,31 +1198,37 @@ detectarFechaOCR(texto);
 
 
 
+
 for(let numero of numeros){
 
-    await guardarRegistro({
-        fecha,
-        provincia,
-        turno,
-        numero,
-        origen:"OCR_V42"
-    });
+
+await guardarRegistro({
+
+fecha,
+
+provincia,
+
+turno,
+
+numero,
+
+origen:"OCR_V45"
+
+});
+
 
 }
 
-document.getElementById("estadoOCR").innerText =
-"Página "+pagina+"/"+pdf.numPages;
 
 
+document.getElementById(
+"estadoOCR"
+).innerText=
 
-function detenerOCR(){
-
-pararOCR=true;
-
- }
-
-document.getElementById("estadoOCR").innerText =
-"Página "+pagina+"/"+pdf.numPages;
+"Página "+
+pagina+
+"/"+
+pdf.numPages;
 
 
 }
@@ -1464,18 +1243,25 @@ let total =
 (await leerBase()).length;
 
 
-document.getElementById("total").innerText=total;
+
+document.getElementById(
+"total"
+).innerText=total;
+
 
 
 mostrar(`
 
-✅ OCR TERMINADO
+✅ OCR FINALIZADO V45
+
 
 REGISTROS:
 
 ${total}
 
 `);
+
+
 
 
 }catch(e){
@@ -1489,24 +1275,43 @@ mostrar(
 }
 
 
-  }
+}
+
+
+
+
 
 //////////////////////////////////////////////////
-// CONTINUIDAD TURNO PROVINCIA V42
+// DETENER OCR
 //////////////////////////////////////////////////
 
-async function continuidadProvinciaTurnoV41(){
+function detenerOCR(){
 
-let datos = await leerBase();
+pararOCR=true;
 
 
-if(datos.length===0){
+document.getElementById(
+"estadoOCR"
+).innerText="DETENIDO";
 
-mostrar(`
 
-⚠️ NO HAY HISTORIAL
+ }
+ //////////////////////////////////////////////////
+// MOTOR IA V45
+// RANKING AMBOS → TERNO → CUATERNO
+//////////////////////////////////////////////////
 
-`);
+async function generarResultadoFinalV45(){
+
+
+let datos =
+await obtenerDatosIA();
+
+
+
+if(datos.length<7){
+
+mostrar("⚠️ Falta historial");
 
 return;
 
@@ -1537,540 +1342,63 @@ let destino=siguiente[turno];
 
 
 
-let matriz={};
+let ranking={};
 
 
 
 datos.forEach(origen=>{
 
 
-if(
-origen.origen==="OCR" ||
-origen.origen==="OCR_V41" ||
-origen.origen==="OCR_V42"
-){
+if(origen.turno!==turno)
 return;
-}
-
-
-
-if(
-origen.turno!==turno
-) return;
-
-
-
-let base =
-origen.numero.slice(-2);
-
-
-
-datos.forEach(siguienteRegistro=>{
-
-
-if(
-siguienteRegistro.origen==="MANUAL_V41"
-) return;
-
-
-
-if(
-siguienteRegistro.turno!==destino
-) return;
-
-
-
-if(
-origen.provincia===siguienteRegistro.provincia
-) return;
-
-
-
-let salida =
-siguienteRegistro.numero.slice(-2);
-
-
-
-let invertido =
-base[1]+base[0];
-
-
-
-let peso=1;
-
-
-
-if(salida===base){
-
-peso+=3;
-
-}
-
-
-
-if(salida===invertido){
-
-peso+=2;
-
-}
-
-
-
-let clave =
-origen.provincia+
-" → "+
-siguienteRegistro.provincia+
-" : "+
-salida;
-
-
-
-matriz[clave]=
-(matriz[clave]||0)+peso;
-
-
-
-});
-
-
-
-});
-
-
-
-let ranking=
-
-Object.keys(matriz)
-
-.sort((a,b)=>
-
-matriz[b]-matriz[a]
-
-);
-
-
-
-mostrar(`
-
-🔄 CONTINUIDAD V42
-
-
-${turno}
-
-⬇
-
-${destino}
-
-
-
-🌎 ARRASTRE PROVINCIAL
-
-
-1) ${ranking[0]||"--"}
-
-FUERZA:
-${matriz[ranking[0]]||0}
-
-
-
-2) ${ranking[1]||"--"}
-
-FUERZA:
-${matriz[ranking[1]]||0}
-
-
-
-3) ${ranking[2]||"--"}
-
-FUERZA:
-${matriz[ranking[2]]||0}
-
-
-
-📊 REGISTROS:
-
-${datos.length}
-
-
-🧠 MATRIZ:
-
-PROVINCIA → PROVINCIA
-
-`);
-
-}
-
-
-//////////////////////////////////////////////////
-// MATRIZ CRUZADA V41
-//////////////////////////////////////////////////
-
-async function matrizProvincialCruzadaV41(){
-
-
-let datos=
-await leerBase();
-
-
-
-let mapa={};
-
-
-
-datos.forEach(r=>{
-
-
-let a=
-r.numero.slice(-2);
-
-
-
-mapa[a]=(mapa[a]||0)+1;
-
-
-});
-
-
-
-let ranking=
-Object.keys(mapa)
-
-.sort((a,b)=>
-mapa[b]-mapa[a]
-);
-
-
-
-mostrar(`
-
-🌎 MATRIZ V41
-
-
-1) ${ranking[0]||"--"}
-
-2) ${ranking[1]||"--"}
-
-3) ${ranking[2]||"--"}
-
-
-REGISTROS:
-
-${datos.length}
-
-`);
-
-  }
-  //////////////////////////////////////////////////
-// MOTOR IA V43.1 - PUNTAJE MIXTO
-//////////////////////////////////////////////////
-
-function calcularPuntajeV43(origen,llegada){
-
-let puntos=0;
-
-
-let base=origen.numero.slice(-2);
-
-let ambos=llegada.numero.slice(-2);
-
-
-// 1) Ambos directo
-if(ambos===base){
-puntos+=60;
-}
-
-
-// 2) Ambos invertido
-if(ambos===base[1]+base[0]){
-puntos+=45;
-}
-
-
-// 3) Arrastre provincial
-if(origen.provincia!==llegada.provincia){
-puntos+=25;
-}
-else{
-puntos+=15;
-}
-
-
-// 4) Misma fecha
-if(origen.fecha===llegada.fecha){
-puntos+=20;
-}
-
-
-// 5) Continuidad exacta
-if(origen.numero===llegada.numero){
-puntos+=25;
-}
-
-
-// 6) Fuerza del último dígito
-if(base[1]===ambos[1]){
-puntos+=10;
-}
-
-
-// 7) Cambio controlado de ciclo
-if(base[0]===ambos[1]){
-puntos+=8;
-}
-
-
-// 8) Premio por registro reciente
-let hoy=new Date();
-let fecha=new Date(llegada.fecha);
-
-let dias=Math.floor(
-(hoy-fecha)/86400000
-);
-
-
-if(dias<=7){
-puntos+=20;
-}
-else if(dias<=30){
-puntos+=10;
-}
-
-
-// 9) Penalización por repetición exacta
-if(origen.numero===llegada.numero){
-puntos-=15;
-}
-
-
-return puntos;
-
-}
-
-  //////////////////////////////////////////////////
-// MEMORIA HISTÓRICA IA V43
-//////////////////////////////////////////////////
-
-function calcularFrecuenciaHistorica(datos){
-
-let frecuencia={};
-
-datos.forEach(r=>{
-
-if(!r.numero) return;
-
-let ambos=r.numero.slice(-2);
-
-frecuencia[ambos]=(frecuencia[ambos]||0)+1;
-
-});
-
-return frecuencia;
-
-}
-  function filtrarResultadosV43(ranking,puntaje){
-
-let usados = {};
-let resultado = [];
-
-for(let numero of ranking){
-
-let ambos = numero.slice(-2);
-
-if(usados[ambos]) continue;
-
-usados[ambos] = true;
-
-resultado.push(numero);
-
-if(resultado.length>=10) break;
-
-}
-
-return resultado;
-
-  }
-  //////////////////////////////////////////////////
-// RANKING INTELIGENTE IA V44
-//////////////////////////////////////////////////
-
-async function generarRankingAmbosV44(){
-
-let datos = await obtenerDatosIA();
-let turno =
-document.getElementById("turnoBloque").value;
-
-let siguiente = {
-
-"PREVIA":"PRIMERA",
-"PRIMERA":"MATUTINA",
-"MATUTINA":"VESPERTINA",
-"VESPERTINA":"NOCTURNA",
-"NOCTURNA":"PREVIA"
-
-};
-
-let destino = siguiente[turno];
-
-let ranking = {};
-
-datos.forEach(origen=>{
-
-    if(origen.turno!==turno) return;
-
-    datos.forEach(llegada=>{
-
-        if(llegada.turno!==destino) return;
-
-        if(origen.fecha!==llegada.fecha) return;
-
-        let ambos = llegada.numero.slice(-2);
-
-        let puntos = 0;
-
-        // mismo ambos
-        if(origen.numero.slice(-2)==ambos)
-            puntos+=50;
-
-        // invertido
-        if(origen.numero.slice(-2)==ambos[1]+ambos[0])
-            puntos+=35;
-
-        // cambio de provincia
-        if(origen.provincia!=llegada.provincia)
-            puntos+=20;
-
-        // misma provincia
-        else
-            puntos+=10;
-
-        // reciente
-        let dias = Math.floor(
-            (new Date()-new Date(llegada.fecha))/86400000
-        );
-
-        if(dias<=7)
-            puntos+=30;
-        else if(dias<=30)
-            puntos+=15;
-
-        ranking[ambos] =
-            (ranking[ambos]||0)+puntos;
-
-    });
-
-});
-
-return Object.keys(ranking)
-
-.sort((a,b)=>ranking[b]-ranking[a])
-
-.slice(0,3);
-
-         }
-  async function generarResultadoFinalV41(){
-
-let datos = await obtenerDatosIA();
-
-
-if(datos.length < 7){
-
-mostrar("⚠️ Falta historial para analizar");
-
-return;
-
-}
-
-
-let turno =
-document.getElementById("turnoBloque").value;
-
-
-let siguiente={
-
-"PREVIA":"PRIMERA",
-"PRIMERA":"MATUTINA",
-"MATUTINA":"VESPERTINA",
-"VESPERTINA":"NOCTURNA",
-"NOCTURNA":"PREVIA"
-
-};
-
-
-let destino=siguiente[turno];
-
-
-// =============================
-// RANKING DE AMBOS
-// =============================
-
-let puntajeAmbos={};
-
-
-datos.forEach(origen=>{
-
-
-if(origen.turno!==turno) return;
-
-
-let base=origen.numero.slice(-2);
 
 
 
 datos.forEach(llegada=>{
 
 
-if(llegada.turno!==destino) return;
+if(llegada.turno!==destino)
+return;
 
 
-let salida=llegada.numero.slice(-2);
+
+let a =
+origen.numero.slice(-2);
+
+
+
+let b =
+llegada.numero.slice(-2);
+
 
 
 let puntos=0;
 
 
-// ambos directo
 
-if(salida===base){
+if(a===b)
+puntos+=100;
 
+
+
+if(a[1]+a[0]===b)
 puntos+=60;
 
-}
 
 
-// invertido
-
-if(salida===base[1]+base[0]){
-
-puntos+=40;
-
-}
+if(origen.provincia!==llegada.provincia)
+puntos+=20;
 
 
-// arrastre provincia
 
-if(origen.provincia!==llegada.provincia){
-
-puntos+=25;
-
-}
+if(origen.fecha===llegada.fecha)
+puntos+=20;
 
 
-// mismo día
 
-if(origen.fecha===llegada.fecha){
+ranking[b]=
+(ranking[b]||0)+puntos;
 
-puntos+=15;
-
-}
-
-
-// frecuencia
-
-puntos+=5;
-
-
-puntajeAmbos[salida]=
-(puntajeAmbos[salida]||0)+puntos;
 
 
 });
@@ -2079,93 +1407,72 @@ puntajeAmbos[salida]=
 });
 
 
-// ordenar ambos
 
-let rankingAmbos=
+let ambos =
 
-Object.keys(puntajeAmbos)
+Object.keys(ranking)
 
 .sort((a,b)=>
-
-puntajeAmbos[b]-puntajeAmbos[a]
-
-);
-
-
-// evitar repetidos seguidos
-
-let ambosFinal =
-await generarRankingAmbosV44();
-
-
-for(let n of rankingAmbos){
-
-if(!ambosFinal.includes(n)){
-
-ambosFinal.push(n);
-
-}
-
-
-if(ambosFinal.length>=3) break;
-
-}
+ranking[b]-ranking[a]
+)
+.slice(0,3);
 
 
 
-// =============================
+
+
 // CREAR TERNOS
-// =============================
 
 let ternos=[];
 
 
-ambosFinal.forEach(a=>{
+for(let a of ambos){
 
 
-datos.forEach(r=>{
+for(let r of datos){
 
 
-let ultimos=r.numero.slice(-3);
+let t =
+r.numero.slice(-3);
+
 
 
 if(
-ultimos.slice(-2)===a
+t.slice(-2)===a
 ){
 
-if(!ternos.includes(ultimos)){
 
-ternos.push(ultimos);
+if(!ternos.includes(t))
+ternos.push(t);
+
 
 }
 
+
 }
 
 
-});
-
-
-});
+}
 
 
 
-// máximo 2
-
-ternos=ternos.slice(0,2);
-
+ternos=
+ternos.slice(0,2);
 
 
-// =============================
+
+
+
+
 // CREAR CUATERNOS
-// =============================
 
 let cuaternos=[];
 
 
-ambosFinal.forEach(a=>{
+for(let a of ambos){
 
 
-datos.forEach(r=>{
+for(let r of datos){
 
 
 if(
@@ -2173,359 +1480,115 @@ r.numero.slice(-2)===a
 ){
 
 
-if(!cuaternos.includes(r.numero)){
-
+if(!cuaternos.includes(r.numero))
 cuaternos.push(r.numero);
 
+
+}
+
+
 }
 
 
 }
 
 
-});
+
+cuaternos=
+cuaternos.slice(0,2);
 
 
-});
 
 
-// máximo 2
-
-cuaternos=cuaternos.slice(0,2);
-
-//////////////////////////////////////////////////
-// GUARDAR PREDICCIÓN EN MEMORIA IA V44
-//////////////////////////////////////////////////
 
 await guardarMemoriaIA({
 
-fecha:new Date().toISOString().slice(0,10),
+fecha:new Date()
+.toISOString()
+.slice(0,10),
 
-turno:turno,
+turno,
 
-destino:destino,
+destino,
 
-ambos:ambosFinal,
+ambos,
 
-ternos:ternos,
+ternos,
 
-cuaternos:cuaternos,
+cuaternos,
 
-origen:"IA_V44"
+origen:"V45"
 
 });
 
-// =============================
-// RESULTADO
-// =============================
+
+
 
 
 mostrar(`
 
-🚀 EMI TESLA PRO V41 IA
+🧠 EMI TESLA PRO V45
 
-TRANSICIÓN
+
+TURNO:
 
 ${turno}
 
-⬇️
+↓
 
 ${destino}
+
 
 
 🔥 RANKING AMBOS
 
-1) ${ambosFinal[0]||"--"}
 
-2) ${ambosFinal[1]||"--"}
+1) ${ambos[0]||"--"}
 
-3) ${ambosFinal[2]||"--"}
+2) ${ambos[1]||"--"}
 
-
-
-⚡ TERNOS
-
-1) ${ternos[0]||"--"}
-
-2) ${ternos[1]||"--"}
+3) ${ambos[2]||"--"}
 
 
 
-🎯 CUATERNOS
-
-1) ${cuaternos[0]||"--"}
-
-2) ${cuaternos[1]||"--"}
+🎯 TERNOS
 
 
-
-📊 HISTORIAL
-
-${datos.length}
+${ternos.join("\n")}
 
 
-🧠 MOTOR NUEVO
 
-AMBOS → TERNO → CUATERNO
+🏆 CUATERNOS
+
+
+${cuaternos.join("\n")}
+
+
+
+IA V45 ACTIVA
 
 `);
 
-  }
 
 
+ }
+ //////////////////////////////////////////////////
+// COMPARADOR EN VIVO V45
 //////////////////////////////////////////////////
-// ARRASTRE PROVINCIAL IA V42
-//////////////////////////////////////////////////
 
-async function analizarArrastreProvincialV41(){
-
-let datos =
-await leerBase();
-
-
-if(datos.length===0){
-
-mostrar(`
-
-⚠️ NO HAY DATOS HISTÓRICOS
-
-`);
-
-return;
-
-}
-
-
-
-let turno =
-document.getElementById(
-"turnoBloque"
-).value;
-
-
-
-let siguiente={
-
-"PREVIA":"PRIMERA",
-"PRIMERA":"MATUTINA",
-"MATUTINA":"VESPERTINA",
-"VESPERTINA":"NOCTURNA",
-"NOCTURNA":"PREVIA"
-
-};
-
-
-
-let destino =
-siguiente[turno];
-
-
-
-let matriz={};
-
-
-
-datos.forEach(origen=>{
-
-
-if(
-origen.origen==="MANUAL_V41"
-) return;
-
-
-
-if(
-origen.turno!==turno
-) return;
-
-
-
-let base =
-origen.numero.slice(-2);
-
-
-
-datos.forEach(llegada=>{
-
-
-if(
-llegada.origen==="MANUAL_V41"
-) return;
-
-
-
-if(
-llegada.turno!==destino
-) return;
-
-
-
-if(
-origen.provincia===llegada.provincia
-) return;
-
+async function compararResultadoIA(){
 
 
 let numero =
-llegada.numero.slice(-2);
-
-
-
-let peso=1;
-
-
-
-// mismo ambos
-
-if(numero===base){
-
-peso+=5;
-
-}
-
-
-
-// invertido
-
-if(
-numero===base[1]+base[0]
-){
-
-peso+=4;
-
-}
-
-
-
-// mismo día si existe fecha
-
-if(
-origen.fecha &&
-llegada.fecha &&
-origen.fecha===llegada.fecha
-){
-
-peso+=3;
-
-}
-
-
-
-let clave=
-
-origen.provincia+
-" ➜ "+
-llegada.provincia+
-" | "+
-base+
-" ➜ "+
-numero;
-
-
-
-matriz[clave]=
-(matriz[clave]||0)+peso;
-
-
-
-});
-
-
-});
-
-
-
-let ranking=
-
-Object.keys(matriz)
-
-.sort((a,b)=>
-
-matriz[b]-matriz[a]
-
+prompt(
+"Ingrese número ganador de 4 cifras:"
 );
 
 
 
-mostrar(`
+if(!numero || numero.length!==4){
 
-🌎 ARRASTRE PROVINCIAL IA V42
-
-
-TRANSICIÓN
-
-${turno}
-
-⬇
-
-${destino}
-
-
-
-🔥 MOVIMIENTOS DOMINANTES
-
-
-
-1) ${ranking[0]||"--"}
-
-FUERZA:
-${matriz[ranking[0]]||0}
-
-
-
-2) ${ranking[1]||"--"}
-
-FUERZA:
-${matriz[ranking[1]]||0}
-
-
-
-3) ${ranking[2]||"--"}
-
-FUERZA:
-${matriz[ranking[2]]||0}
-
-
-
-📊 HISTORIAL:
-
-${datos.length}
-
-
-
-🧠 ANALIZA:
-
-✔ Provincia
-
-✔ Turno
-
-✔ Directo
-
-✔ Invertido
-
-✔ Continuidad
-
-`);
-
-  }
-
-
-
-
-//////////////////////////////////////////////////
-// TESLA IA V42
-//////////////////////////////////////////////////
-
-async function generarTeslaIA(){
-
-
-let datos =
-await leerBase();
-
-
-if(datos.length===0){
-
-mostrar("⚠️ Sin registros");
+mostrar("⚠️ Número incorrecto");
 
 return;
 
@@ -2533,88 +1596,86 @@ return;
 
 
 
-let mapa={};
+let memoria =
+await leerMemoriaIA();
 
 
 
-datos.forEach(r=>{
+if(memoria.length===0){
 
+mostrar("⚠️ Sin predicción guardada");
 
-if(!r.numero)
 return;
+
+}
+
+
+
+let ultima =
+memoria[memoria.length-1];
 
 
 
 let ambos =
-r.numero.slice(-2);
+numero.slice(-2);
 
 
 
-mapa[ambos]=
-(mapa[ambos]||0)+1;
-
-
-
-});
-
-
-
-let ranking =
-
-Object.keys(mapa)
-
-.sort((a,b)=>
-
-mapa[b]-mapa[a]
-
-);
+let terno =
+numero.slice(-3);
 
 
 
 mostrar(`
 
-🚀 TESLA IA V42
+📈 PRUEBA IA V45
 
 
-🔥 NÚCLEOS DOMINANTES
+REAL:
 
-
-1) ${ranking[0]||"--"}
-
-FUERZA:
-${mapa[ranking[0]]||0}
+${numero}
 
 
 
-2) ${ranking[1]||"--"}
+AMBOS:
 
-FUERZA:
-${mapa[ranking[1]]||0}
+${ambos}
 
-
-
-3) ${ranking[2]||"--"}
-
-FUERZA:
-${mapa[ranking[2]]||0}
+${
+ultima.ambos.includes(ambos)
+?"✅ ACIERTO"
+:"❌"
+}
 
 
 
-📊 REGISTROS ANALIZADOS
+TERNO:
 
-${datos.length}
+${terno}
+
+${
+ultima.ternos.includes(terno)
+?"✅ ACIERTO"
+:"❌"
+}
 
 
 
-🧠 MÉTODO:
+CUATERNO:
 
-✔ Frecuencia
+${numero}
 
-✔ Continuidad
+${
+ultima.cuaternos.includes(numero)
+?"✅ ACIERTO"
+:"❌"
+}
 
-✔ Arrastre
 
-✔ Ambos
+
+PREDICCIÓN:
+
+${ultima.ambos.join(" - ")}
 
 `);
 
@@ -2625,82 +1686,44 @@ ${datos.length}
 
 
 //////////////////////////////////////////////////
-// AUDITORÍA V42.1
+// AUDITORÍA V45
 //////////////////////////////////////////////////
 
-async function auditoriaV41(){
+async function auditoriaV45(){
+
 
 let datos =
 await leerBase();
 
 
-let manual=0;
-let ocr=0;
-let otros=0;
+
+let memoria =
+await leerMemoriaIA();
 
 
-datos.forEach(r=>{
 
-
-if(r.origen==="MANUAL_V41"){
-manual++;
-}
-else if(
-r.origen==="OCR" ||
-r.origen==="OCR_V41" ||
-r.origen==="OCR_V42"
-){
-ocr++;
-}
-else{
-otros++;
-}
-
-
-});
-
-
-let turnos={};
-
-datos.forEach(r=>{
-    turnos[r.turno]=(turnos[r.turno]||0)+1;
-});
 mostrar(`
 
-🛡️ AUDITORÍA V42.1
+🛡️ AUDITORÍA V45
 
 
-REGISTROS TOTALES:
+REGISTROS:
 
 ${datos.length}
 
 
 
-MANUAL:
+MEMORIA IA:
 
-${manual}
-
-
-
-OCR:
-
-${ocr}
-
-
-
-OTROS:
-
-${otros}
+${memoria.length}
 
 
 
 BASE:
 
-ACTIVA
+${db?"ACTIVA":"ERROR"}
 
-TURNOS EN BASE:
 
-${JSON.stringify(turnos,null,2)}
 
 IA:
 
@@ -2708,96 +1731,44 @@ ACTIVA
 
 
 
-MATRIZ:
-
-PROVINCIA - PROVINCIA
-
-
-
 ESTADO:
 
 OK
 
+
 `);
 
- }
+}
+
 
 
 
 
 //////////////////////////////////////////////////
-// INICIO SISTEMA V42
+// INICIO SISTEMA
 //////////////////////////////////////////////////
 
-window.onload = async function(){
+window.onload=function(){
 
 
-await abrirBase();
+abrirBase()
+.then(async()=>{
 
 
-
-let datos =
-await leerBase();
+let total =
+(await leerBase()).length;
 
 
 
 document.getElementById(
 "total"
-).innerText = datos.length;
+).innerText=total;
 
 
+});
 
-document.getElementById(
-"estadoBase"
-).innerText = "ACTIVA";
-
-
-
-document.getElementById(
-"estadoOCR"
-).innerText = "LISTO";
-
-
-
-mostrar(`
-
-🚀 EMI TESLA PRO V42 IA
-
-
-✅ SISTEMA INICIADO
-
-
-🧠 Motor IA:
-
-ACTIVO
-
-
-🌎 Matriz Provincial:
-
-ACTIVA
-
-
-🔄 Continuidad:
-
-ACTIVA
-
-
-🎯 Arrastre Provincial:
-
-ACTIVO
-
-
-📊 Registros:
-
-${datos.length}
-
-
-`);
 
 };
-
-
-console.log("TESLA CARGADO OK");
 
 </script>
 

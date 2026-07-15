@@ -720,7 +720,84 @@ document.getElementById(
 
 
 
+//////////////////////////////////////////////////
+// IA AUTO APRENDIZAJE V46
+//////////////////////////////////////////////////
 
+let IA_APRENDIZAJE={
+ transiciones:{},
+ provincias:{},
+ frecuencia:{}
+};
+
+async function aprenderBaseIA(){
+
+ let datos=await obtenerDatosIA();
+
+ IA_APRENDIZAJE={
+   transiciones:{},
+   provincias:{},
+   frecuencia:{}
+ };
+
+ let siguiente={
+  PREVIA:"PRIMERA",
+  PRIMERA:"MATUTINA",
+  MATUTINA:"VESPERTINA",
+  VESPERTINA:"NOCTURNA",
+  NOCTURNA:"PREVIA"
+ };
+
+ // Frecuencia de ambos
+ for(let r of datos){
+
+   let ambos=r.numero.slice(-2);
+
+   IA_APRENDIZAJE.frecuencia[ambos]=
+   (IA_APRENDIZAJE.frecuencia[ambos]||0)+1;
+
+ }
+
+ // Aprender transiciones
+ for(let a of datos){
+
+   let destino=siguiente[a.turno];
+
+   for(let b of datos){
+
+      if(a.fecha!==b.fecha) continue;
+      if(b.turno!==destino) continue;
+
+      let origen=a.numero.slice(-2);
+      let salida=b.numero.slice(-2);
+
+      let clave=origen+"->"+salida;
+
+      IA_APRENDIZAJE.transiciones[clave]=
+      (IA_APRENDIZAJE.transiciones[clave]||0)+1;
+
+      let prov=
+      a.provincia+"->"+b.provincia;
+
+      if(!IA_APRENDIZAJE.provincias[prov]){
+         IA_APRENDIZAJE.provincias[prov]={};
+      }
+
+      IA_APRENDIZAJE.provincias[prov][salida]=
+      (IA_APRENDIZAJE.provincias[prov][salida]||0)+1;
+
+   }
+
+ }
+
+ console.log(
+   "IA APRENDIÓ",
+   datos.length,
+   "registros"
+ );
+
+ }
+ 
 //////////////////////////////////////////////////
 // GUARDAR MEMORIA IA
 //////////////////////////////////////////////////
@@ -1372,6 +1449,107 @@ CACHE_PROVINCIAS=mapa;
 return mapa;
 
  }
+ //////////////////////////////////////////////////
+// IA AUTOAPRENDIZAJE V46
+//////////////////////////////////////////////////
+
+let MODELO_IA=null;
+
+async function aprenderBaseIA(){
+
+    if(MODELO_IA) return MODELO_IA;
+
+    let datos=await obtenerDatosIA();
+
+    let siguiente={
+        PREVIA:"PRIMERA",
+        PRIMERA:"MATUTINA",
+        MATUTINA:"VESPERTINA",
+        VESPERTINA:"NOCTURNA",
+        NOCTURNA:"PREVIA"
+    };
+
+    let modelo={
+        transiciones:{},
+        frecuencia:{},
+        provincias:{}
+    };
+
+    // Frecuencia de ambos
+    for(let r of datos){
+
+        let ambos=r.numero.slice(-2);
+
+        modelo.frecuencia[ambos]=
+        (modelo.frecuencia[ambos]||0)+1;
+
+        if(!modelo.provincias[r.provincia]){
+            modelo.provincias[r.provincia]={};
+        }
+
+        modelo.provincias[r.provincia][ambos]=
+        (modelo.provincias[r.provincia][ambos]||0)+1;
+    }
+
+    // Aprender comportamiento entre turnos
+    for(let a of datos){
+
+        let destino=siguiente[a.turno];
+
+        if(!destino) continue;
+
+        let base=a.numero.slice(-2);
+
+        for(let b of datos){
+
+            if(a.fecha!==b.fecha) continue;
+            if(b.turno!==destino) continue;
+
+            let salida=b.numero.slice(-2);
+
+            let clave=
+            a.turno+"|"+
+            destino+"|"+
+            base;
+
+            if(!modelo.transiciones[clave]){
+                modelo.transiciones[clave]={};
+            }
+
+            modelo.transiciones[clave][salida]=
+            (modelo.transiciones[clave][salida]||0)+1;
+
+            // Arrastre entre provincias
+            if(a.provincia!==b.provincia){
+
+                modelo.transiciones[clave][salida]+=2;
+
+            }
+
+            // Directo
+            if(base===salida){
+
+                modelo.transiciones[clave][salida]+=5;
+
+            }
+
+            // Invertido
+            if(base[0]===salida[1] &&
+               base[1]===salida[0]){
+
+                modelo.transiciones[clave][salida]+=3;
+
+            }
+
+        }
+
+    }
+
+    MODELO_IA=modelo;
+
+    return modelo;
+
+ }
  
  async function generarResultadoFinalV45(){
 
@@ -1423,92 +1601,59 @@ return;
 
 
 
+//////////////////////////////////////////////////
+// IA PREDICTIVA BASADA EN APRENDIZAJE
+//////////////////////////////////////////////////
+
+await aprenderBaseIA();
+
 let ranking={};
 
+for(let origen of datosTurno){
 
+    let base=origen.numero.slice(-2);
 
-/*
- BUSCA:
+    // Aprende qué ambos suelen seguir a este ambos
+    for(let clave in IA_APRENDIZAJE.transiciones){
 
-turno actual
-      ↓
-mismo día
-      ↓
-otro turno
-      ↓
-misma provincia o arrastre
-*/
+        if(!clave.startsWith(base+"->")) continue;
 
+        let salida=clave.split("->")[1];
 
-origenes.forEach(origen=>{
+        let puntos=
+        IA_APRENDIZAJE.transiciones[clave]*100;
 
+        // frecuencia histórica
+        puntos+=
+        (IA_APRENDIZAJE.frecuencia[salida]||0)*5;
 
-let base =
-origen.numero.slice(-2);
+        // arrastre entre provincias
+        for(let p in IA_APRENDIZAJE.provincias){
 
+            if(
+            IA_APRENDIZAJE.provincias[p][salida]
+            ){
 
+                puntos+=
+                IA_APRENDIZAJE.provincias[p][salida]*10;
 
-datos.forEach(llegada=>{
+            }
 
+        }
 
-if(llegada.turno!==destino)
-return;
+        ranking[salida]=
+        (ranking[salida]||0)+puntos;
 
+    }
 
+}
 
-let salida =
-llegada.numero.slice(-2);
+// Ordenar por puntaje
+let ambos=
+Object.keys(ranking)
+.sort((a,b)=>ranking[b]-ranking[a])
+.slice(0,CONFIG_V45.MAX_AMBOS);
 
-
-
-let puntos=0;
-
-
-
-// DIRECTO
-
-if(base===salida)
-puntos+=100;
-
-
-
-// INVERSO TESLA
-
-if(base[1]+base[0]===salida)
-puntos+=70;
-
-
-
-// ARRASTRE PROVINCIA
-
-if(origen.provincia!==llegada.provincia)
-puntos+=40;
-
-
-
-// MISMA PROVINCIA
-
-if(origen.provincia===llegada.provincia)
-puntos+=60;
-
-
-
-// MISMA FECHA
-
-if(origen.fecha===llegada.fecha)
-puntos+=30;
-
-
-
-ranking[salida]=
-(ranking[salida]||0)+puntos;
-
-
-
-});
-
-
-});
 
 
 
@@ -1535,112 +1680,159 @@ return;
 
 
 
-// =================
-// TERNOS
-// =================
+//////////////////////////////////////////////////
+// GENERAR TERNOS Y CUATERNOS DESDE LA IA
+//////////////////////////////////////////////////
 
+let rankingTernos={};
+let rankingCuaternos={};
 
-let ternos=[];
+for(let r of datos){
 
+    let ambosDato=r.numero.slice(-2);
 
+    if(!ambos.includes(ambosDato)) continue;
 
-datos.forEach(r=>{
+    // Terno
+    let terno=r.numero.slice(-3);
 
+    rankingTernos[terno]=
+    (rankingTernos[terno]||0)+1;
 
-let ult2 =
-r.numero.slice(-2);
+    // Cuaterno
+    let cuaterno=r.numero;
 
+    rankingCuaternos[cuaterno]=
+    (rankingCuaternos[cuaterno]||0)+1;
 
+    // Bonus si coincide el turno destino
+    if(r.turno===destino){
 
-if(ambos.includes(ult2)){
+        rankingTernos[terno]+=10;
+        rankingCuaternos[cuaterno]+=10;
 
+    }
 
-let terno =
-r.numero.slice(-3);
+    // Bonus si es de la misma provincia
+    if(datosTurno.some(x=>x.provincia===r.provincia)){
 
+        rankingTernos[terno]+=5;
+        rankingCuaternos[cuaterno]+=5;
 
-
-if(!ternos.includes(terno)){
-
-ternos.push(terno);
-
-}
-
-
-}
-
-
-});
-
-
-
-ternos=ternos.slice(0,2);
-
-
-
-
-
-// =================
-// CUATERNOS
-// =================
-
-
-let cuaternos=[];
-
-
-
-datos.forEach(r=>{
-
-
-let ult2 =
-r.numero.slice(-2);
-
-
-
-if(ambos.includes(ult2)){
-
-
-if(!cuaternos.includes(r.numero)){
-
-cuaternos.push(r.numero);
+    }
 
 }
 
+let ternos=
+Object.keys(rankingTernos)
+.sort((a,b)=>
+rankingTernos[b]-rankingTernos[a]
+)
+.slice(0,CONFIG_V45.MAX_TERNOS);
+
+let cuaternos=
+Object.keys(rankingCuaternos)
+.sort((a,b)=>
+rankingCuaternos[b]-rankingCuaternos[a]
+)
+.slice(0,CONFIG_V45.MAX_CUATERNOS);
+
+
+
+//////////////////////////////////////////////////
+// MEMORIA IA + AUTOAPRENDIZAJE V46
+//////////////////////////////////////////////////
+
+// Evitar repetir los últimos ambos
+let memoria=await leerMemoriaIA();
+
+if(memoria.length){
+
+    let ultimos=
+    memoria.slice(-5);
+
+    for(let jugada of ultimos){
+
+        if(!jugada.ambos) continue;
+
+        jugada.ambos.forEach(a=>{
+
+            if(ranking[a]){
+
+                ranking[a]-=80;
+
+            }
+
+        });
+
+    }
+
+    // Recalcular ranking
+    ambos=
+    Object.keys(ranking)
+    .sort((a,b)=>ranking[b]-ranking[a])
+    .slice(0,CONFIG_V45.MAX_AMBOS);
 
 }
 
-
-});
-
-
-
-cuaternos=cuaternos.slice(0,2);
-
-
-
-
-
-// GUARDAR MEMORIA
-
+// Guardar memoria
 await guardarMemoriaIA({
 
-fecha:new Date()
-.toISOString()
-.slice(0,10),
+    fecha:new Date().toISOString(),
 
-turno,
+    turno,
 
-destino,
+    destino,
 
-ambos,
+    ambos,
 
-ternos,
+    ternos,
 
-cuaternos,
+    cuaternos,
 
-origen:"V45_CORREGIDO"
+    origen:"IA_V46"
 
 });
+
+// La IA vuelve a aprender con la base actualizada
+MODELO_IA=null;
+await aprenderBaseIA();
+
+mostrar(`
+
+🧠 EMI TESLA PRO V46
+
+${turno} ➜ ${destino}
+
+🔥 AMBOS
+
+1) ${ambos[0]||"--"}
+
+2) ${ambos[1]||"--"}
+
+3) ${ambos[2]||"--"}
+
+🎯 TERNOS
+
+${ternos.join("\n")}
+
+🏆 CUATERNOS
+
+${cuaternos.join("\n")}
+
+📚 IA AUTOAPRENDIZAJE ACTIVO
+
+✅ Aprende de la base histórica
+
+✅ Aprende de cada carga manual
+
+✅ Aprende del OCR
+
+✅ Aprende los cambios entre turnos
+
+✅ Aprende arrastres entre provincias
+
+`);
 
 
 

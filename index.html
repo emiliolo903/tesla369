@@ -1891,7 +1891,13 @@ return CACHE_TRANSICIONES;
 
 async function matrizTransicionesAvanzadaV45(){
 
-let datos = await leerBase();
+let cache=await obtenerTransicionesCache();
+
+let datos=cache.datos;
+
+let siguiente=cache.siguiente;
+
+let mapa=cache.mapa;
 
 
 if(datos.length===0){

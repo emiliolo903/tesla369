@@ -1537,32 +1537,25 @@ ranking[b]-ranking[a]
 
 let ternos=[];
 
+for(let a of ambos){
 
-for(let r of datos.filter(x=>x.turno===turno)){
-
-datos.forEach(r=>{
-
+for(let r of datos){
 
 let t=r.numero.slice(-3);
 
-
-if(t.slice(-2)===n){
+if(t.slice(-2)===a){
 
 if(!ternos.includes(t))
 ternos.push(t);
 
 }
 
-
-});
-
+}
 
 }
 
 
-
 ternos=ternos.slice(0,2);
-
 
 
 
@@ -1571,12 +1564,11 @@ ternos=ternos.slice(0,2);
 let cuaternos=[];
 
 
-for(let r of datos.filter(x=>x.turno===turno)){
+for(let a of ambos){
 
-datos.forEach(r=>{
+for(let r of datos){
 
-
-if(r.numero.slice(-2)===n){
+if(r.numero.slice(-2)===a){
 
 
 if(!cuaternos.includes(r.numero))
@@ -1585,15 +1577,12 @@ cuaternos.push(r.numero);
 
 }
 
-
-});
-
+}
 
 }
 
 
 cuaternos=cuaternos.slice(0,2);
-
 
 
 await guardarMemoriaIA({

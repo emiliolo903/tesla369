@@ -1269,25 +1269,38 @@ pdf.numPages;
 }
 
 
-
 await worker.terminate();
 
-
-
-let total =
-(await leerBase()).length;
-
-
-
-document.getElementById(
-"total"
-).innerText=total;
-
-MODELO_IA=null;
- 
 await aprenderBaseIA();
 
+let total=(await leerBase()).length;
+
+document.getElementById("total").innerText=total;
+
 mostrar(`
+
+✅ OCR FINALIZADO
+
+REGISTROS:
+
+${total}
+
+IA ACTUALIZADA
+
+`);
+
+}catch(e){
+
+console.error(e);
+
+mostrar(
+
+"ERROR OCR\n"+e
+
+);
+
+}
+
 
 ✅ OCR TABLA V45 TERMINADO
 
@@ -2758,7 +2771,64 @@ return lista.filter(n=>
 
 
 
+//////////////////////////////////////////////////
+// MATRIZ SIMPLE (REPARACIÓN V45.1)
+//////////////////////////////////////////////////
 
+async function generarMatrizTransiciones(){
+
+let datos=await leerBase();
+
+let siguiente={
+
+PREVIA:"PRIMERA",
+PRIMERA:"MATUTINA",
+MATUTINA:"VESPERTINA",
+VESPERTINA:"NOCTURNA",
+NOCTURNA:"PREVIA"
+
+};
+
+let matriz={};
+
+datos.forEach(a=>{
+
+datos.forEach(b=>{
+
+if(a.fecha!==b.fecha) return;
+
+if(b.turno!==siguiente[a.turno]) return;
+
+let clave=
+
+a.numero.slice(-2)+
+"|" +
+b.numero.slice(-2);
+
+if(!matriz[clave]){
+
+matriz[clave]={
+
+ambosOrigen:a.numero.slice(-2),
+
+ambosDestino:b.numero.slice(-2),
+
+veces:0
+
+};
+
+}
+
+matriz[clave].veces++;
+
+});
+
+});
+
+return matriz;
+
+ }
+ 
 //////////////////////////////////////////////////
 // RANKING COMBINADO V45 PLUS
 //////////////////////////////////////////////////

@@ -1538,7 +1538,7 @@ ranking[b]-ranking[a]
 let ternos=[];
 
 
-for(let n of ambos){
+for(let r of datos.filter(x=>x.turno===turno)){
 
 datos.forEach(r=>{
 
@@ -1571,7 +1571,7 @@ ternos=ternos.slice(0,2);
 let cuaternos=[];
 
 
-for(let n of ambos){
+for(let r of datos.filter(x=>x.turno===turno)){
 
 datos.forEach(r=>{
 
@@ -1614,7 +1614,25 @@ origen:"V45.1"
 
 });
 
+// eliminar números ya usados en última jugada
 
+let memoriaAnterior =
+await leerMemoriaIA();
+
+
+if(memoriaAnterior.length){
+
+let ultima =
+memoriaAnterior[memoriaAnterior.length-1];
+
+
+ambos =
+ambos.filter(
+n=>!ultima.ambos.includes(n)
+);
+
+
+}
 
 mostrar(`
 

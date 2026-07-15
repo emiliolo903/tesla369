@@ -1049,10 +1049,45 @@ return new Date()
 
 
 //////////////////////////////////////////////////
-// OCR HISTÓRICO V45 SEPARADO POR TURNOS
+// OCR TABLA LOTERÍA V45 CORREGIDO
 //////////////////////////////////////////////////
 
+function detectarTurnoTabla(texto){
+
+texto=texto.toUpperCase();
+
+
+if(texto.includes("PREVIA"))
+return "PREVIA";
+
+
+if(
+texto.includes("PRIMERA") ||
+texto.includes("DE LA MAÑANA")
+)
+return "PRIMERA";
+
+
+if(texto.includes("MATUTINA"))
+return "MATUTINA";
+
+
+if(texto.includes("VESPERTINA"))
+return "VESPERTINA";
+
+
+if(texto.includes("NOCTURNA"))
+return "NOCTURNA";
+
+
+return "SIN_TURNO";
+
+}
+
+
+
 async function iniciarOCR(){
+
 
 let archivo =
 document.getElementById("archivoPDF").files[0];
@@ -1072,7 +1107,10 @@ try{
 
 pararOCR=false;
 
-document.getElementById("estadoOCR").innerText="PROCESANDO";
+
+document.getElementById(
+"estadoOCR"
+).innerText="PROCESANDO";
 
 
 
@@ -1082,14 +1120,17 @@ await archivo.arrayBuffer();
 
 
 let pdf =
-await pdfjsLib.getDocument({
+await pdfjsLib
+.getDocument({
 data:buffer
-}).promise;
+})
+.promise;
 
 
 
 let worker =
-await Tesseract.createWorker("spa");
+await Tesseract
+.createWorker("spa");
 
 
 
@@ -1119,10 +1160,13 @@ scale:3
 let canvas =
 document.createElement("canvas");
 
-canvas.width=
+
+
+canvas.width =
 viewport.width;
 
-canvas.height=
+
+canvas.height =
 viewport.height;
 
 
@@ -1152,8 +1196,8 @@ lectura.data.text.toUpperCase();
 
 
 
-let provincia =
-detectarProvinciaOCR(texto);
+let turno =
+detectarTurnoTabla(texto);
 
 
 
@@ -1162,69 +1206,9 @@ detectarFechaOCR(texto);
 
 
 
-// BUSCAR CADA TURNO
-
-let bloques=[
-
-{
-nombre:"PREVIA",
-clave:["PREVIA","PREV"]
-},
-
-{
-nombre:"PRIMERA",
-clave:["PRIMERA","1RA"]
-},
-
-{
-nombre:"MATUTINA",
-clave:["MATUTINA","MAT"]
-},
-
-{
-nombre:"VESPERTINA",
-clave:["VESPERTINA","VES"]
-},
-
-{
-nombre:"NOCTURNA",
-clave:["NOCTURNA","NOCT"]
-}
-
-];
-
-
-
-for(let bloque of bloques){
-
-
-
-let inicio=-1;
-
-
-
-for(let palabra of bloque.clave){
-
-inicio=
-texto.indexOf(palabra);
-
-if(inicio>=0) break;
-
-}
-
-
-
-if(inicio<0) continue;
-
-
-
-let zona =
-texto.substring(inicio,inicio+1500);
-
-
-
 let numeros =
-zona.match(/\d{4}/g)||[];
+texto.match(/\b\d{4}\b/g)||[];
+
 
 
 
@@ -1236,14 +1220,14 @@ await guardarRegistro({
 
 fecha,
 
-provincia,
+turno,
 
-turno:
-bloque.nombre,
+provincia:"AUTO",
 
 numero,
 
-origen:"OCR_V45_TURNO"
+origen:"OCR_TABLA_V45"
+
 
 });
 
@@ -1252,11 +1236,10 @@ origen:"OCR_V45_TURNO"
 
 
 
-}
 
-
-
-document.getElementById("estadoOCR").innerText=
+document.getElementById(
+"estadoOCR"
+).innerText=
 
 "Página "+
 pagina+
@@ -1278,18 +1261,15 @@ let total =
 
 
 
-document.getElementById("total").innerText=total;
+document.getElementById(
+"total"
+).innerText=total;
 
 
 
 mostrar(`
 
-✅ OCR V45 COMPLETO
-
-
-PÁGINAS PROCESADAS
-
-${pdf.numPages}
+✅ OCR TABLA V45 TERMINADO
 
 
 REGISTROS:
@@ -1297,17 +1277,10 @@ REGISTROS:
 ${total}
 
 
-TURNOS SEPARADOS:
+TURNO DETECTADO:
 
-✔ PREVIA
+OK
 
-✔ PRIMERA
-
-✔ MATUTINA
-
-✔ VESPERTINA
-
-✔ NOCTURNA
 
 `);
 
@@ -1326,9 +1299,6 @@ mostrar(
 
 
 }
-
-
-
 
 
 

@@ -2749,6 +2749,173 @@ return ambos;
 
 
  }
+ //////////////////////////////////////////////////
+// TESLA IA V45
+//////////////////////////////////////////////////
+
+async function generarTeslaIA(){
+
+let datos = await obtenerDatosIA();
+
+
+if(datos.length===0){
+
+mostrar("⚠️ Sin historial para Tesla IA");
+
+return;
+
+}
+
+
+let ranking={};
+
+
+datos.forEach(r=>{
+
+
+let n=r.numero.slice(-2);
+
+
+ranking[n]=(ranking[n]||0)+1;
+
+
+});
+
+
+
+let top=
+
+Object.keys(ranking)
+
+.sort((a,b)=>
+ranking[b]-ranking[a]
+)
+
+.slice(0,5);
+
+
+
+mostrar(`
+
+🚀 TESLA IA V45
+
+
+NÚCLEO DOMINANTE
+
+
+${top.join(" - ")}
+
+
+
+FRECUENCIA:
+
+${top.map(n=>ranking[n]).join(" - ")}
+
+
+
+IA ACTIVA
+
+
+`);
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// ESTADO COMPLETO SISTEMA V45
+//////////////////////////////////////////////////
+
+async function estadoSistemaV45(){
+
+
+let datos=
+await leerBase();
+
+
+let memoria=
+await leerMemoriaIA();
+
+
+
+mostrar(`
+
+📊 ESTADO SISTEMA V45
+
+
+REGISTROS:
+
+${datos.length}
+
+
+
+MEMORIA IA:
+
+${memoria.length}
+
+
+
+CACHE:
+
+${CACHE_LISTO?"ACTIVA":"VACÍA"}
+
+
+
+BASE:
+
+${db?"CONECTADA":"ERROR"}
+
+
+
+MATRIZ:
+
+LISTA
+
+
+
+SISTEMA OK
+
+`);
+
+}
+
+
+
+//////////////////////////////////////////////////
+// LIMPIAR CACHE MANUAL
+//////////////////////////////////////////////////
+
+function limpiarCacheV45(){
+
+
+CACHE_IA=[];
+
+CACHE_TRANSICIONES={};
+
+CACHE_PROVINCIAS={};
+
+CACHE_AMBOS={};
+
+CACHE_LISTO=false;
+
+
+
+mostrar(`
+
+♻️ CACHE V45 LIMPIADA
+
+
+Sistema preparado para nuevo análisis
+
+`);
+
+}
+
+
+//////////////////////////////////////////////////
+// FIN MOTOR V45
+//////////////////////////////////////////////////
  
 </script>
 

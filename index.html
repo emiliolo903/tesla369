@@ -1840,6 +1840,51 @@ document.getElementById(
 
 
 };
+ async function obtenerTransicionesCache(){
+
+if(Object.keys(CACHE_TRANSICIONES).length>0){
+
+return CACHE_TRANSICIONES;
+
+}
+
+let datos=await obtenerDatosIA();
+
+let siguiente={
+
+PREVIA:"PRIMERA",
+PRIMERA:"MATUTINA",
+MATUTINA:"VESPERTINA",
+VESPERTINA:"NOCTURNA",
+NOCTURNA:"PREVIA"
+
+};
+
+let mapa={};
+
+for(let r of datos){
+
+let clave=r.fecha+"|"+r.turno;
+
+if(!mapa[clave]){
+
+mapa[clave]=[];
+
+}
+
+mapa[clave].push(r);
+
+}
+
+CACHE_TRANSICIONES={
+datos,
+siguiente,
+mapa
+};
+
+return CACHE_TRANSICIONES;
+
+ }
 //////////////////////////////////////////////////
 // MATRIZ TRANSICIONES AVANZADA V45 PLUS
 //////////////////////////////////////////////////

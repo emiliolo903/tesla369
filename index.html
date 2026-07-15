@@ -605,7 +605,7 @@ STORE_NAME
 tabla.add(datos);
 
 
-tx.oncomplete=function(){
+tx.oncomplete=async function(){
 
 CACHE_IA=[];
 
@@ -620,14 +620,6 @@ CACHE_LISTO=false;
 resolve(true);
 
 };
-
-tx.onerror=function(e){
-    reject(e);
-};
-
-});
-     }
-
 
 //////////////////////////////////////////////////
 // LEER BASE HISTÓRICA
@@ -3177,7 +3169,54 @@ Sistema preparado para nuevo análisis
 //////////////////////////////////////////////////
 // FIN MOTOR V45
 //////////////////////////////////////////////////
- 
+ //////////////////////////////////////////////////
+// CAPTURA DE ERRORES V45.1
+//////////////////////////////////////////////////
+
+window.onerror=function(
+
+mensaje,
+
+archivo,
+
+linea,
+
+columna,
+
+error
+
+){
+
+console.error(
+
+mensaje,
+
+archivo,
+
+linea,
+
+columna,
+
+error
+
+);
+
+mostrar(
+
+"⚠ ERROR\n\n"+
+
+mensaje+
+
+"\n\nLínea: "+
+
+linea
+
+);
+
+return true;
+
+};
+
 </script>
 
 

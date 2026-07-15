@@ -1705,19 +1705,40 @@ ${ultima.ambos.join(" - ")}
 
 
 //////////////////////////////////////////////////
-// AUDITORÍA V45
+// AUDITORÍA V45 TURNOS
 //////////////////////////////////////////////////
 
 async function auditoriaV45(){
-
 
 let datos =
 await leerBase();
 
 
-
 let memoria =
 await leerMemoriaIA();
+
+
+let conteo={
+
+PREVIA:0,
+PRIMERA:0,
+MATUTINA:0,
+VESPERTINA:0,
+NOCTURNA:0
+
+};
+
+
+
+datos.forEach(r=>{
+
+if(conteo[r.turno]!==undefined){
+
+conteo[r.turno]++;
+
+}
+
+});
 
 
 
@@ -1726,13 +1747,37 @@ mostrar(`
 🛡️ AUDITORÍA V45
 
 
-REGISTROS:
+REGISTROS TOTALES:
 
 ${datos.length}
 
 
 
-MEMORIA IA:
+📄 PDF OCR SEPARADO
+
+
+PREVIA:
+${conteo.PREVIA}
+
+
+PRIMERA:
+${conteo.PRIMERA}
+
+
+MATUTINA:
+${conteo.MATUTINA}
+
+
+VESPERTINA:
+${conteo.VESPERTINA}
+
+
+NOCTURNA:
+${conteo.NOCTURNA}
+
+
+
+🧠 MEMORIA IA:
 
 ${memoria.length}
 
@@ -1740,13 +1785,7 @@ ${memoria.length}
 
 BASE:
 
-${db?"ACTIVA":"ERROR"}
-
-
-
-IA:
-
-ACTIVA
+${db ? "ACTIVA":"ERROR"}
 
 
 
@@ -1754,10 +1793,10 @@ ESTADO:
 
 OK
 
-
 `);
 
-}
+  }
+
 
 
 

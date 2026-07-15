@@ -2335,6 +2335,231 @@ mapa[b]-mapa[a]
 
 
  }
+ //////////////////////////////////////////////////
+// FILTRO ANTI REPETICIÓN AMBOS V45 PLUS
+//////////////////////////////////////////////////
+
+async function filtrarAmbosRepetidosV45(lista){
+
+
+let datos =
+await leerBase();
+
+
+
+let ultimos=[];
+
+
+
+datos
+.slice(-30)
+.forEach(r=>{
+
+
+ultimos.push(
+r.numero.slice(-2)
+);
+
+
+});
+
+
+
+return lista.filter(n=>
+
+!ultimos.includes(n)
+
+);
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// RANKING COMBINADO V45 PLUS
+//////////////////////////////////////////////////
+
+async function rankingCombinadoV45(){
+
+
+let datos =
+await leerBase();
+
+
+
+let puntaje={};
+
+
+
+datos.forEach(r=>{
+
+
+let ambos =
+r.numero.slice(-2);
+
+
+
+if(!puntaje[ambos]){
+
+
+puntaje[ambos]=0;
+
+
+}
+
+
+// FRECUENCIA HISTÓRICA
+
+puntaje[ambos]+=10;
+
+
+
+});
+
+
+
+
+
+// ACOMPAÑANTE
+
+let acomp =
+await obtenerAcompanantesV45();
+
+
+
+acomp
+.slice(0,20)
+.forEach((n,i)=>{
+
+
+puntaje[n]=
+(puntaje[n]||0)+
+(30-i);
+
+
+
+});
+
+
+
+
+
+// MATRIZ TRANSICIÓN SIMPLE
+
+let trans =
+await generarMatrizTransiciones();
+
+
+
+Object.values(trans)
+
+.forEach(t=>{
+
+
+let n =
+t.ambosDestino;
+
+
+
+if(n){
+
+
+puntaje[n]=
+(puntaje[n]||0)+
+t.veces;
+
+
+}
+
+
+
+});
+
+
+
+
+
+let ranking =
+
+Object.keys(puntaje)
+
+.sort((a,b)=>
+
+puntaje[b]-puntaje[a]
+
+);
+
+
+
+
+// FILTRO NO REPETIDOS
+
+ranking =
+await filtrarAmbosRepetidosV45(ranking);
+
+
+
+
+return ranking.slice(0,3);
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// MOTOR FINAL V45 PLUS
+//////////////////////////////////////////////////
+
+async function generarRankingFinalV45(){
+
+
+let ambos =
+await rankingCombinadoV45();
+
+
+
+mostrar(`
+
+🧠 RANKING FINAL V45 PLUS
+
+
+🔥 AMBOS SELECCIONADOS
+
+
+1) ${ambos[0]||"--"}
+
+2) ${ambos[1]||"--"}
+
+3) ${ambos[2]||"--"}
+
+
+
+MOTOR:
+
+✅ TRANSICIÓN
+
+✅ PROVINCIA
+
+✅ ACOMPAÑANTE
+
+✅ FILTRO REPETIDOS
+
+
+`);
+
+
+
+return ambos;
+
+
+ }
+ 
 </script>
 
 

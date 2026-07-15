@@ -1369,16 +1369,12 @@ return mapa;
 
  }
  
- //////////////////////////////////////////////////
-// MOTOR IA V45.1 RÁPIDO MATRIZ PROVINCIAL
-//////////////////////////////////////////////////
+ async function generarResultadoFinalV45(){
 
-async function generarResultadoFinalV45(){
-
-let datos=await obtenerDatosIA();
+let datos = await obtenerDatosIA();
 
 
-if(datos.length<7){
+if(datos.length < 7){
 
 mostrar("⚠️ Falta historial");
 
@@ -1387,66 +1383,64 @@ return;
 }
 
 
-let turno=document.getElementById("turnoBloque").value;
+let turno =
+document.getElementById("turnoBloque").value;
+
 
 
 let siguiente={
+
 "PREVIA":"PRIMERA",
 "PRIMERA":"MATUTINA",
 "MATUTINA":"VESPERTINA",
 "VESPERTINA":"NOCTURNA",
 "NOCTURNA":"PREVIA"
+
 };
 
 
+
 let destino=siguiente[turno];
-// VALIDAR QUE EXISTA EL TURNO ORIGEN
-
-let datosTurno = datos.filter(
-r=>r.turno===turno
-);
 
 
-if(datosTurno.length===0){
 
-mostrar(
-"⚠️ Primero cargá la PREVIA del turno seleccionado"
-);
+let origenes =
+datos.filter(x=>x.turno===turno);
+
+
+
+if(origenes.length===0){
+
+mostrar("⚠️ No hay datos del turno cargado");
 
 return;
 
-              }
+}
+
+
 
 let ranking={};
 
 
-// MAPA PROVINCIAL
 
-let mapa={};
+/*
+ BUSCA:
 
-
-datos.forEach(r=>{
-
-let clave=
-r.turno+"|"+r.provincia+"|"+r.numero.slice(-2);
-
-
-mapa[clave]=(mapa[clave]||0)+1;
-
-});
+turno actual
+      ↓
+mismo día
+      ↓
+otro turno
+      ↓
+misma provincia o arrastre
+*/
 
 
-
-// ANALISIS
-
-datos.forEach(origen=>{
+origenes.forEach(origen=>{
 
 
-if(origen.turno!==turno)
-return;
-
-
-let base=origen.numero.slice(-2);
+let base =
+origen.numero.slice(-2);
 
 
 
@@ -1458,7 +1452,7 @@ return;
 
 
 
-let salida=
+let salida =
 llegada.numero.slice(-2);
 
 
@@ -1473,41 +1467,37 @@ if(base===salida)
 puntos+=100;
 
 
-// INVERTIDO
+
+// INVERSO TESLA
 
 if(base[1]+base[0]===salida)
-puntos+=60;
+puntos+=70;
 
 
 
-// ARRASTRE ENTRE PROVINCIAS
+// ARRASTRE PROVINCIA
 
 if(origen.provincia!==llegada.provincia)
 puntos+=40;
 
 
 
-// MISMO DIA
+// MISMA PROVINCIA
+
+if(origen.provincia===llegada.provincia)
+puntos+=60;
+
+
+
+// MISMA FECHA
 
 if(origen.fecha===llegada.fecha)
-puntos+=20;
+puntos+=30;
 
 
 
-// FRECUENCIA PROVINCIA
-
-let clave=
-destino+"|"+
-llegada.provincia+"|"+
-salida;
-
-
-if(mapa[clave])
-puntos+=mapa[clave]*3;
-
-
-
-ranking[salida]=(ranking[salida]||0)+puntos;
+ranking[salida]=
+(ranking[salida]||0)+puntos;
 
 
 
@@ -1518,76 +1508,121 @@ ranking[salida]=(ranking[salida]||0)+puntos;
 
 
 
-// ORDENAR
 
-let ambos=
+// ORDENAR AMBOS
 
+let ambos =
 Object.keys(ranking)
-
-.sort((a,b)=>
-ranking[b]-ranking[a]
-)
-
+.sort((a,b)=>ranking[b]-ranking[a])
 .slice(0,3);
 
 
 
 
+// SI NO HAY RESULTADO
+
+if(ambos.length===0){
+
+mostrar("⚠️ Sin coincidencias históricas");
+
+return;
+
+}
+
+
+
+// =================
 // TERNOS
+// =================
+
 
 let ternos=[];
 
-for(let a of ambos){
 
-for(let r of datos){
 
-let t=r.numero.slice(-3);
+datos.forEach(r=>{
 
-if(t.slice(-2)===a){
 
-if(!ternos.includes(t))
-ternos.push(t);
+let ult2 =
+r.numero.slice(-2);
+
+
+
+if(ambos.includes(ult2)){
+
+
+let terno =
+r.numero.slice(-3);
+
+
+
+if(!ternos.includes(terno)){
+
+ternos.push(terno);
 
 }
 
-}
 
 }
+
+
+});
+
 
 
 ternos=ternos.slice(0,2);
 
 
 
+
+
+// =================
 // CUATERNOS
+// =================
+
 
 let cuaternos=[];
 
 
-for(let a of ambos){
 
-for(let r of datos){
-
-if(r.numero.slice(-2)===a){
+datos.forEach(r=>{
 
 
-if(!cuaternos.includes(r.numero))
+let ult2 =
+r.numero.slice(-2);
+
+
+
+if(ambos.includes(ult2)){
+
+
+if(!cuaternos.includes(r.numero)){
+
 cuaternos.push(r.numero);
 
+}
+
 
 }
 
-}
 
-}
+});
+
 
 
 cuaternos=cuaternos.slice(0,2);
 
 
+
+
+
+// GUARDAR MEMORIA
+
 await guardarMemoriaIA({
 
-fecha:new Date().toISOString().slice(0,10),
+fecha:new Date()
+.toISOString()
+.slice(0,10),
 
 turno,
 
@@ -1599,36 +1634,21 @@ ternos,
 
 cuaternos,
 
-origen:"V45.1"
+origen:"V45_CORREGIDO"
 
 });
 
-// eliminar números ya usados en última jugada
-
-let memoriaAnterior =
-await leerMemoriaIA();
 
 
-if(memoriaAnterior.length){
 
-let ultima =
-memoriaAnterior[memoriaAnterior.length-1];
-
-
-ambos =
-ambos.filter(
-n=>!ultima.ambos.includes(n)
-);
-
-
-}
 
 mostrar(`
 
-🧠 EMI TESLA PRO V45.1
+🧠 EMI TESLA PRO V45 CORREGIDO
 
 
 ${turno} ➜ ${destino}
+
 
 
 🔥 AMBOS
@@ -1643,21 +1663,21 @@ ${turno} ➜ ${destino}
 
 🎯 TERNOS
 
-${ternos.join("\n")}
+${ternos.join("\n")||"--"}
 
 
 
 🏆 CUATERNOS
 
-${cuaternos.join("\n")}
+${cuaternos.join("\n")||"--"}
 
 
-IA MATRIZ PROVINCIAL ACTIVA
+
+✅ MATRIZ PROVINCIA + ARRASTRE ACTIVA
 
 `);
 
-}
- 
+ }
  //////////////////////////////////////////////////
 // COMPARADOR EN VIVO V45
 //////////////////////////////////////////////////

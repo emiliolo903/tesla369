@@ -1306,37 +1306,6 @@ mostrar(
 }
 
 
-✅ OCR TABLA V45 TERMINADO
-
-
-REGISTROS:
-
-${total}
-
-
-TURNO DETECTADO:
-
-OK
-
-
-`);
-
-
-
-
-}catch(e){
-
-
-mostrar(
-"ERROR OCR\n"+e
- 
- 
-);
-
-await aprenderBaseIA();
- 
-}
-
 
 }
 
@@ -1529,7 +1498,7 @@ let destino=siguiente[turno];
 
 let origenes =
 datos.filter(x=>x.turno===turno);
-
+let datosTurno = datos.filter(x=>x.turno===turno);
 
 
 if(origenes.length===0){

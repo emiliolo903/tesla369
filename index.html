@@ -1400,7 +1400,22 @@ let siguiente={
 
 
 let destino=siguiente[turno];
+// VALIDAR QUE EXISTA EL TURNO ORIGEN
 
+let datosTurno = datos.filter(
+r=>r.turno===turno
+);
+
+
+if(datosTurno.length===0){
+
+mostrar(
+"⚠️ Primero cargá la PREVIA del turno seleccionado"
+);
+
+return;
+
+              }
 
 let ranking={};
 

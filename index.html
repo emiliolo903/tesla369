@@ -1769,7 +1769,572 @@ document.getElementById(
 
 
 };
+//////////////////////////////////////////////////
+// MATRIZ TRANSICIONES AVANZADA V45 PLUS
+//////////////////////////////////////////////////
 
+async function matrizTransicionesAvanzadaV45(){
+
+let datos = await leerBase();
+
+
+if(datos.length===0){
+
+mostrar("⚠️ No hay datos históricos");
+
+return;
+
+}
+
+
+let siguiente={
+
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
+
+};
+
+
+let matriz={};
+
+
+
+datos.forEach(origen=>{
+
+
+let destino =
+siguiente[origen.turno];
+
+
+if(!destino) return;
+
+
+
+datos.forEach(llegada=>{
+
+
+if(llegada.turno!==destino)
+return;
+
+
+if(origen.fecha!==llegada.fecha)
+return;
+
+
+
+let base =
+origen.numero.slice(-2);
+
+
+let salida =
+llegada.numero.slice(-2);
+
+
+
+let peso=0;
+
+
+
+// AMBOS DIRECTO
+
+if(base===salida){
+
+peso+=100;
+
+}
+
+
+// INVERTIDO
+
+if(base[1]+base[0]===salida){
+
+peso+=60;
+
+}
+
+
+// MISMA PROVINCIA
+
+if(
+origen.provincia===
+llegada.provincia
+){
+
+peso+=20;
+
+}
+else{
+
+// ARRRASTRE PROVINCIAL
+
+peso+=30;
+
+}
+
+
+
+// FECHA
+
+peso+=10;
+
+
+
+let clave=
+
+origen.turno+
+" → "+
+destino+
+" | "+
+origen.provincia+
+" → "+
+llegada.provincia+
+" | "+
+salida;
+
+
+
+matriz[clave]=
+(matriz[clave]||0)+peso;
+
+
+
+});
+
+
+});
+
+
+
+let ranking=
+
+Object.keys(matriz)
+
+.sort((a,b)=>
+matriz[b]-matriz[a]
+);
+
+
+
+let texto=
+
+"🔄 MATRIZ TRANSICIONES AVANZADA V45\n\n";
+
+
+
+for(
+let i=0;
+i<10 && i<ranking.length;
+i++
+){
+
+
+texto+=
+
+(i+1)+") "+
+ranking[i]+
+
+"\nFUERZA: "+
+matriz[ranking[i]]
+
++"\n\n";
+
+
+}
+
+
+
+mostrar(texto);
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// MATRIZ PROVINCIA PROVINCIA V45 PLUS
+//////////////////////////////////////////////////
+
+async function matrizProvinciaProvinciaV45(){
+
+
+let datos =
+await leerBase();
+
+
+let matriz={};
+
+
+
+datos.forEach(a=>{
+
+
+datos.forEach(b=>{
+
+
+if(a.fecha!==b.fecha)
+return;
+
+
+if(a.provincia===b.provincia)
+return;
+
+
+
+let ambos =
+b.numero.slice(-2);
+
+
+
+let clave=
+
+a.provincia+
+" → "+
+b.provincia+
+" : "+
+ambos;
+
+
+
+matriz[clave]=
+(matriz[clave]||0)+1;
+
+
+
+});
+
+
+});
+
+
+
+let ranking=
+
+Object.keys(matriz)
+
+.sort((a,b)=>
+matriz[b]-matriz[a]
+);
+
+
+
+let txt=
+
+"🌎 MATRIZ PROVINCIA PROVINCIA V45\n\n";
+
+
+
+for(
+let i=0;
+i<10 && i<ranking.length;
+i++
+){
+
+
+txt+=
+
+(i+1)+") "+
+ranking[i]+
+
+"\nVeces: "+
+matriz[ranking[i]]
+
++"\n\n";
+
+
+}
+
+
+
+mostrar(txt);
+
+
+ }
+ //////////////////////////////////////////////////
+// ACOMPAÑANTE AVANZADO V45 PLUS
+//////////////////////////////////////////////////
+
+async function analizarAcompananteV45(){
+
+
+let datos =
+await leerBase();
+
+
+
+if(datos.length===0){
+
+mostrar("⚠️ Sin historial");
+
+return;
+
+}
+
+
+
+let ranking={};
+
+
+
+datos.forEach(origen=>{
+
+
+let base =
+origen.numero.slice(-2);
+
+
+
+datos.forEach(destino=>{
+
+
+if(origen.fecha!==destino.fecha)
+return;
+
+
+
+let salida =
+destino.numero.slice(-2);
+
+
+
+let peso=0;
+
+
+
+//////////////////////////////////////////////////
+// DIRECTO
+//////////////////////////////////////////////////
+
+if(salida===base){
+
+peso+=100;
+
+}
+
+
+
+//////////////////////////////////////////////////
+// INVERTIDO
+//////////////////////////////////////////////////
+
+if(
+salida===base[1]+base[0]
+){
+
+peso+=70;
+
+}
+
+
+
+//////////////////////////////////////////////////
+// CORRIMIENTO
+//////////////////////////////////////////////////
+
+let corrida =
+String(
+(Number(base)+1)
+).padStart(2,"0");
+
+
+
+if(salida===corrida){
+
+peso+=50;
+
+}
+
+
+
+//////////////////////////////////////////////////
+// ABSORCIÓN
+//////////////////////////////////////////////////
+
+if(
+salida===base[1]+base[0]
+){
+
+peso+=40;
+
+}
+
+
+
+//////////////////////////////////////////////////
+// DESCENSO
+//////////////////////////////////////////////////
+
+let descenso =
+String(
+(Number(base)-1+100)%100
+)
+.padStart(2,"0");
+
+
+
+if(salida===descenso){
+
+peso+=45;
+
+}
+
+
+
+if(peso>0){
+
+
+let clave =
+base+
+" → "+
+salida;
+
+
+
+ranking[clave]=
+(ranking[clave]||0)+peso;
+
+
+}
+
+
+
+});
+
+
+});
+
+
+
+
+
+let lista=
+
+Object.keys(ranking)
+
+.sort((a,b)=>
+
+ranking[b]-ranking[a]
+
+);
+
+
+
+
+
+let texto=
+
+"🎯 ACOMPAÑANTE AVANZADO V45\n\n";
+
+
+
+for(
+let i=0;
+i<15 && i<lista.length;
+i++
+){
+
+
+texto+=
+
+(i+1)+") "+
+lista[i]+
+
+"\nFUERZA: "+
+ranking[lista[i]]
+
++"\n\n";
+
+
+}
+
+
+
+mostrar(texto);
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// OBTENER ACOMPAÑANTES PARA MOTOR IA
+//////////////////////////////////////////////////
+
+async function obtenerAcompanantesV45(){
+
+
+let datos =
+await leerBase();
+
+
+
+let mapa={};
+
+
+
+datos.forEach(r=>{
+
+
+let n =
+r.numero.slice(-2);
+
+
+
+let invertido =
+n[1]+n[0];
+
+
+
+let corrimiento =
+String(
+(Number(n)+1)
+).padStart(2,"0");
+
+
+
+let descenso =
+String(
+(Number(n)-1+100)%100
+)
+.padStart(2,"0");
+
+
+
+[
+invertido,
+corrimiento,
+descenso
+
+].forEach(a=>{
+
+
+mapa[a]=
+(mapa[a]||0)+1;
+
+
+});
+
+
+});
+
+
+
+return Object.keys(mapa)
+
+.sort((a,b)=>
+
+mapa[b]-mapa[a]
+
+);
+
+
+ }
 </script>
 
 

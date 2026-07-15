@@ -932,7 +932,8 @@ TOTAL BASE:
 ${total}
 
 `);
-
+await aprenderBaseIA();
+ 
 }
 
 
@@ -1310,9 +1311,12 @@ OK
 
 mostrar(
 "ERROR OCR\n"+e
+ 
+ 
 );
 
-
+await aprenderBaseIA();
+ 
 }
 
 
@@ -1887,7 +1891,79 @@ OK
 
 
 
+//////////////////////////////////////////////////
+// MOTOR DE APRENDIZAJE IA V46
+//////////////////////////////////////////////////
 
+let MODELO_IA={
+
+transiciones:{},
+provincia:{},
+ambos:{},
+ternos:{},
+cuaternos:{}
+
+};
+
+async function aprenderBaseIA(){
+
+let datos=await obtenerDatosIA();
+
+MODELO_IA={
+
+transiciones:{},
+provincia:{},
+ambos:{},
+ternos:{},
+cuaternos:{}
+
+};
+
+const siguiente={
+
+PREVIA:"PRIMERA",
+PRIMERA:"MATUTINA",
+MATUTINA:"VESPERTINA",
+VESPERTINA:"NOCTURNA",
+NOCTURNA:"PREVIA"
+
+};
+
+for(let a of datos){
+
+let ambosA=a.numero.slice(-2);
+
+let ternoA=a.numero.slice(-3);
+
+MODELO_IA.ambos[ambosA]=(MODELO_IA.ambos[ambosA]||0)+1;
+
+MODELO_IA.ternos[ternoA]=(MODELO_IA.ternos[ternoA]||0)+1;
+
+MODELO_IA.cuaternos[a.numero]=(MODELO_IA.cuaternos[a.numero]||0)+1;
+
+for(let b of datos){
+
+if(a.fecha!==b.fecha) continue;
+
+if(b.turno!==siguiente[a.turno]) continue;
+
+let ambosB=b.numero.slice(-2);
+
+let clave1=a.turno+"|"+ambosA+"|"+ambosB;
+
+MODELO_IA.transiciones[clave1]=(MODELO_IA.transiciones[clave1]||0)+1;
+
+let clave2=a.provincia+"|"+b.provincia+"|"+ambosA+"|"+ambosB;
+
+MODELO_IA.provincia[clave2]=(MODELO_IA.provincia[clave2]||0)+1;
+
+}
+
+}
+
+console.log("MODELO IA ACTUALIZADO");
+ 
+}
 
 //////////////////////////////////////////////////
 // INICIO SISTEMA
@@ -1908,7 +1984,8 @@ let total =
 document.getElementById(
 "total"
 ).innerText=total;
-
+ 
+await aprenderBaseIA();
 
 });
 

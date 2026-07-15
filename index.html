@@ -1330,6 +1330,39 @@ document.getElementById(
 
 
  }
+ async function generarMapaProvincial(){
+
+if(Object.keys(CACHE_PROVINCIAS).length>0){
+
+return CACHE_PROVINCIAS;
+
+}
+
+let datos=await obtenerDatosIA();
+
+let mapa={};
+
+datos.forEach(r=>{
+
+let ambos=r.numero.slice(-2);
+
+let clave=r.provincia+"|"+r.turno;
+
+if(!mapa[clave]){
+
+mapa[clave]={};
+
+}
+
+mapa[clave][ambos]=(mapa[clave][ambos]||0)+1;
+
+});
+
+CACHE_PROVINCIAS=mapa;
+
+return mapa;
+
+ }
  //////////////////////////////////////////////////
 // MOTOR IA V45
 // RANKING AMBOS → TERNO → CUATERNO
@@ -1373,7 +1406,8 @@ let siguiente={
 
 
 let destino=siguiente[turno];
-
+let mapaProvincia=
+await generarMapaProvincial();
 
 
 let ranking={};
@@ -1437,7 +1471,21 @@ puntos+=pesoReciente;
 // Frecuencia
 puntos+=pesoFrecuencia;
 
+ranking[b]=
+(ranking[b]||0)+puntos;
+ let claveMapa=
+origen.provincia+"|"+destino;
 
+if(
+mapaProvincia[claveMapa] &&
+mapaProvincia[claveMapa][b]
+){
+
+ranking[b]+=
+mapaProvincia[claveMapa][b]*4;
+
+}
+ 
 });
 
 

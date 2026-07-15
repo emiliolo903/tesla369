@@ -1418,38 +1418,51 @@ llegada.numero.slice(-2);
 
 let puntos=0;
 
-
-
+// Ambos directo
 if(a===b)
-puntos+=100;
+puntos+=pesoTurno;
 
-
-
+// Ambos invertido
 if(a[1]+a[0]===b)
-puntos+=60;
+puntos+=pesoInvertido;
 
-
-
+// Arrastre entre provincias
 if(origen.provincia!==llegada.provincia)
-puntos+=20;
+puntos+=pesoProvincia;
 
-
-
+// Misma fecha
 if(origen.fecha===llegada.fecha)
-puntos+=20;
+puntos+=pesoReciente;
 
-
-ranking[b]=
-(ranking[b]||0)+puntos;
-
-
-});
+// Frecuencia
+puntos+=pesoFrecuencia;
 
 
 });
 
 
+});
 
+
+// Penalizar ambos repetidos
+
+let memoria=await leerMemoriaIA();
+
+if(memoria.length){
+
+let ultima=memoria[memoria.length-1];
+
+ultima.ambos.forEach(n=>{
+
+if(ranking[n]){
+
+ranking[n]-=35;
+
+}
+
+});
+
+}
 // RANKING COMBINADO V45 PLUS
 
 let ambos =

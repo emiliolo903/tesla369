@@ -1368,17 +1368,14 @@ CACHE_PROVINCIAS=mapa;
 return mapa;
 
  }
+ 
  //////////////////////////////////////////////////
-// MOTOR IA V45
-// RANKING AMBOS → TERNO → CUATERNO
+// MOTOR IA V45.1 RÁPIDO MATRIZ PROVINCIAL
 //////////////////////////////////////////////////
 
 async function generarResultadoFinalV45(){
 
-
-let datos =
-await obtenerDatosIA();
-
+let datos=await obtenerDatosIA();
 
 
 if(datos.length<7){
@@ -1390,50 +1387,51 @@ return;
 }
 
 
-
-let turno =
-document.getElementById(
-"turnoBloque"
-).value;
-
+let turno=document.getElementById("turnoBloque").value;
 
 
 let siguiente={
-
 "PREVIA":"PRIMERA",
 "PRIMERA":"MATUTINA",
 "MATUTINA":"VESPERTINA",
 "VESPERTINA":"NOCTURNA",
 "NOCTURNA":"PREVIA"
-
 };
 
 
-
 let destino=siguiente[turno];
-let mapaProvincia=
-await generarMapaProvincial();
 
 
 let ranking={};
 
-let pesoReciente=40;
 
-let pesoProvincia=35;
+// MAPA PROVINCIAL
 
-let pesoTurno=60;
-
-let pesoInvertido=45;
-
-let pesoFrecuencia=10;
+let mapa={};
 
 
+datos.forEach(r=>{
+
+let clave=
+r.turno+"|"+r.provincia+"|"+r.numero.slice(-2);
+
+
+mapa[clave]=(mapa[clave]||0)+1;
+
+});
+
+
+
+// ANALISIS
 
 datos.forEach(origen=>{
 
 
 if(origen.turno!==turno)
 return;
+
+
+let base=origen.numero.slice(-2);
 
 
 
@@ -1445,80 +1443,69 @@ return;
 
 
 
-let a =
-origen.numero.slice(-2);
-
-
-
-let b =
+let salida=
 llegada.numero.slice(-2);
 
 
 
 let puntos=0;
 
-// Ambos directo
-if(a===b)
-puntos+=pesoTurno;
 
-// Ambos invertido
-if(a[1]+a[0]===b)
-puntos+=pesoInvertido;
 
-// Arrastre entre provincias
+// DIRECTO
+
+if(base===salida)
+puntos+=100;
+
+
+// INVERTIDO
+
+if(base[1]+base[0]===salida)
+puntos+=60;
+
+
+
+// ARRASTRE ENTRE PROVINCIAS
+
 if(origen.provincia!==llegada.provincia)
-puntos+=pesoProvincia;
+puntos+=40;
 
-// Misma fecha
+
+
+// MISMO DIA
+
 if(origen.fecha===llegada.fecha)
-puntos+=pesoReciente;
+puntos+=20;
 
-// Frecuencia
-puntos+=pesoFrecuencia;
 
-ranking[b]=
-(ranking[b]||0)+puntos;
- let claveMapa=
-origen.provincia+"|"+destino;
 
-if(
-mapaProvincia[claveMapa] &&
-mapaProvincia[claveMapa][b]
-){
+// FRECUENCIA PROVINCIA
 
-ranking[b]+=
-mapaProvincia[claveMapa][b]*4;
+let clave=
+destino+"|"+
+llegada.provincia+"|"+
+salida;
 
-}
- 
-});
+
+if(mapa[clave])
+puntos+=mapa[clave]*3;
+
+
+
+ranking[salida]=(ranking[salida]||0)+puntos;
+
 
 
 });
 
 
-// Penalizar ambos repetidos
-
-let memoria=await leerMemoriaIA();
-
-if(memoria.length){
-
-let ultima=memoria[memoria.length-1];
-
-ultima.ambos.forEach(n=>{
-
-if(ranking[n]){
-
-ranking[n]-=35;
-
-}
-
 });
 
-}
-// RANKING COMBINADO V45 PLUS
 
-let ambos =
+
+// ORDENAR
+
+let ambos=
 
 Object.keys(ranking)
 
@@ -1529,63 +1516,52 @@ ranking[b]-ranking[a]
 .slice(0,3);
 
 
-// CREAR TERNOS
+
+
+// TERNOS
 
 let ternos=[];
 
 
-for(let a of ambos){
+for(let n of ambos){
+
+datos.forEach(r=>{
 
 
-for(let r of datos){
+let t=r.numero.slice(-3);
 
 
-let t =
-r.numero.slice(-3);
-
-
-
-if(
-t.slice(-2)===a
-){
-
+if(t.slice(-2)===n){
 
 if(!ternos.includes(t))
 ternos.push(t);
 
+}
+
+
+});
+
 
 }
 
 
-}
 
-
-}
-
-
-
-ternos=
-ternos.slice(0,2);
+ternos=ternos.slice(0,2);
 
 
 
 
-
-
-// CREAR CUATERNOS
+// CUATERNOS
 
 let cuaternos=[];
 
 
-for(let a of ambos){
+for(let n of ambos){
+
+datos.forEach(r=>{
 
 
-for(let r of datos){
-
-
-if(
-r.numero.slice(-2)===a
-){
+if(r.numero.slice(-2)===n){
 
 
 if(!cuaternos.includes(r.numero))
@@ -1595,25 +1571,19 @@ cuaternos.push(r.numero);
 }
 
 
-}
+});
 
 
 }
 
 
-
-cuaternos=
-cuaternos.slice(0,2);
-
-
+cuaternos=cuaternos.slice(0,2);
 
 
 
 await guardarMemoriaIA({
 
-fecha:new Date()
-.toISOString()
-.slice(0,10),
+fecha:new Date().toISOString().slice(0,10),
 
 turno,
 
@@ -1625,31 +1595,21 @@ ternos,
 
 cuaternos,
 
-origen:"V45"
+origen:"V45.1"
 
 });
 
 
 
-
-
 mostrar(`
 
-🧠 EMI TESLA PRO V45
+🧠 EMI TESLA PRO V45.1
 
 
-TURNO:
-
-${turno}
-
-↓
-
-${destino}
+${turno} ➜ ${destino}
 
 
-
-🔥 RANKING AMBOS
-
+🔥 AMBOS
 
 1) ${ambos[0]||"--"}
 
@@ -1661,25 +1621,21 @@ ${destino}
 
 🎯 TERNOS
 
-
 ${ternos.join("\n")}
 
 
 
 🏆 CUATERNOS
 
-
 ${cuaternos.join("\n")}
 
 
-
-IA V45 ACTIVA
+IA MATRIZ PROVINCIAL ACTIVA
 
 `);
 
-
-
- }
+}
+ 
  //////////////////////////////////////////////////
 // COMPARADOR EN VIVO V45
 //////////////////////////////////////////////////

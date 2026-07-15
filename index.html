@@ -607,29 +607,21 @@ STORE_NAME
 tabla.add(datos);
 
 
-
 tx.oncomplete=function(){
 
 CACHE_IA=[];
 
+CACHE_TRANSICIONES={};
+
+CACHE_PROVINCIAS={};
+
+CACHE_AMBOS={};
+
+CACHE_LISTO=false;
+
 resolve(true);
 
 };
-
-
-
-tx.onerror=function(e){
-
-reject(e);
-
-};
-
-
-});
-
-
-}
-
 
 
 
@@ -693,19 +685,15 @@ reject(e);
 
 async function obtenerDatosIA(){
 
+if(!CACHE_LISTO){
 
-if(
-CACHE_IA.length===0
-){
+CACHE_IA=await leerBase();
 
-CACHE_IA =
-await leerBase();
+CACHE_LISTO=true;
 
 }
 
-
 return CACHE_IA;
-
 
 }
 

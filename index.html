@@ -604,7 +604,6 @@ STORE_NAME
 
 tabla.add(datos);
 
-
 tx.oncomplete=async function(){
 
 CACHE_IA=[];
@@ -620,6 +619,19 @@ CACHE_LISTO=false;
 resolve(true);
 
 };
+
+tx.onerror=function(e){
+
+reject(e);
+
+};
+
+
+});
+
+});
+
+ }
 
 //////////////////////////////////////////////////
 // LEER BASE HISTÓRICA

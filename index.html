@@ -396,7 +396,7 @@ EMI TESLA PRO V45 INICIADO...
 
 const DB_NAME="EMI_TESLA_PRO_V45";
 
-const DB_VERSION=1;
+ const DB_VERSION=2;
 
 
 const STORE_NAME="historico";
@@ -485,7 +485,29 @@ tabla.createIndex(
 unique:false
 }
 );
+tabla.createIndex(
+"fecha",
+"fecha",
+{
+unique:false
+}
+);
 
+tabla.createIndex(
+"numero",
+"numero",
+{
+unique:false
+}
+);
+
+tabla.createIndex(
+"origen",
+"origen",
+{
+unique:false
+}
+);
 
 }
 

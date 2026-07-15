@@ -1408,16 +1408,17 @@ ranking[b]=
 
 
 
-let ambos =
 
-Object.keys(ranking)
-
-.sort((a,b)=>
 ranking[b]-ranking[a]
 )
 .slice(0,3);
+ 
+//////////////////////////////////////////////////
+// RANKING COMBINADO V45 PLUS
+//////////////////////////////////////////////////
 
-
+let ambos =
+await generarRankingFinalV45();
 
 
 

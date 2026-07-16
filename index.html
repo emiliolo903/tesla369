@@ -1159,9 +1159,11 @@ return null;
 function extraerNumeros(texto){
 
 
-let lista=
+let numeros = texto.match(/\b\d{1,4}\b/g)||[];
 
-texto.match(/\b\d{4}\b/g);
+numeros = numeros
+.map(n=>n.padStart(4,"0"))
+.filter(n=>n.length===4);
 
 
 

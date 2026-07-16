@@ -2156,145 +2156,266 @@ mostrar(
 
 
   }
-//////////////////////////////////////////////////
-// RANKING INTELIGENTE IA V45.1
+  //////////////////////////////////////////////////
+// RANKING INTELIGENTE IA V45.2
 //////////////////////////////////////////////////
 
 async function rankingInteligenteV45(){
 
-let datos = await leerBase();
+    let datos = await leerBase();
 
-let turnoOrigen =
-document.getElementById("turnoBloque").value;
+    if(datos.length===0){
 
-const SIGUIENTE={
+        mostrar("⚠️ Sin datos históricos.");
 
-PREVIA:"PRIMERA",
-PRIMERA:"MATUTINA",
-MATUTINA:"VESPERTINA",
-VESPERTINA:"NOCTURNA",
-NOCTURNA:"PREVIA"
+        return;
 
-};
+    }
 
-let turnoDestino=
-SIGUIENTE[turnoOrigen];
+    let turnoOrigen =
+    document.getElementById("turnoBloque").value;
+
+    const SIGUIENTE={
+
+        PREVIA:"PRIMERA",
+        PRIMERA:"MATUTINA",
+        MATUTINA:"VESPERTINA",
+        VESPERTINA:"NOCTURNA",
+        NOCTURNA:"PREVIA"
+
+    };
+
+    let turnoDestino=
+    SIGUIENTE[turnoOrigen];
+
+    let origen=
+    datos.filter(r=>r.turno===turnoOrigen);
+
+    let destino=
+    datos.filter(r=>r.turno===turnoDestino);
+
+    if(origen.length===0){
+
+        mostrar("⚠️ No hay datos del turno "+turnoOrigen);
+
+        return;
+
+    }
+
+    let ranking={};
+
+    for(let o of origen){
+
+        let ambosOrigen=
+        o.numero.slice(-2);
+
+        for(let d of destino){
+
+            let ambosDestino=
+            d.numero.slice(-2);
+
+            if(o.fecha!==d.fecha) continue;
+
+            ranking[ambosDestino]=
+            (ranking[ambosDestino]||0)+100;
+
+            if(ambosOrigen===ambosDestino){
+
+                ranking[ambosDestino]+=40;
+
+            }
+
+            if(
+                ambosOrigen[0]===ambosDestino[1] &&
+                ambosOrigen[1]===ambosDestino[0]
+            ){
+
+                ranking[ambosDestino]+=20;
+
+            }
+
+        }
+
+    }
+      //////////////////////////////////////////////////
+    // FRECUENCIA HISTÓRICA
+    //////////////////////////////////////////////////
+
+    let frecuencia={};
+
+    for(let r of datos){
+
+        let ambos=r.numero.slice(-2);
+
+        frecuencia[ambos]=(frecuencia[ambos]||0)+1;
+
+        ranking[ambos]=
+        (ranking[ambos]||0)+frecuencia[ambos];
+
+    }
 
 
-// SOLO DATOS DEL TURNO ELEGIDO
+    //////////////////////////////////////////////////
+    // ARRASTRE ENTRE PROVINCIAS
+    //////////////////////////////////////////////////
 
-let datosOrigen=
+    let provincias={};
 
-datos.filter(r=>
+    for(let r of datos){
 
-r.turno===turnoOrigen
+        if(!provincias[r.provincia]){
 
-);
+            provincias[r.provincia]={};
 
-let datosDestino=
+        }
 
-datos.filter(r=>
+        let ambos=r.numero.slice(-2);
 
-r.turno===turnoDestino
+        provincias[r.provincia][ambos]=
+        (provincias[r.provincia][ambos]||0)+1;
 
-);
-
-if(datosOrigen.length===0){
-
-mostrar(
-
-"⚠️ No existen registros del turno "+turnoOrigen
-
-);
-
-return;
-
-  }
-
-if(datos.length===0){
-
-mostrar("⚠️ Sin datos históricos");
-
-return;
-
-}
+    }
 
 
+    for(let provincia in provincias){
 
-let puntos={};
+        for(let ambos in provincias[provincia]){
 
-let MODELO_IA = await aprenderBaseIA();
+            ranking[ambos]=
+            (ranking[ambos]||0)+
+            (provincias[provincia][ambos]*5);
+
+        }
+
+    }
+
+
+    //////////////////////////////////////////////////
+    // MEMORIA IA (EVITAR REPETIR)
+    //////////////////////////////////////////////////
+
+    let memoria=await leerMemoriaIA();
+
+    if(memoria.length){
+
+        let ultima=memoria[memoria.length-1];
+
+        if(ultima.ambos){
+
+            ultima.ambos.forEach(n=>{
+
+                if(ranking[n]){
+
+                    ranking[n]-=35;
+
+                }
+
+            });
+
+        }
+
+    }
+
+
+    //////////////////////////////////////////////////
+    // ORDENAR RANKING
+    //////////////////////////////////////////////////
+
+    let ambos=
+    Object.keys(ranking)
+    .sort((a,b)=>ranking[b]-ranking[a])
+    .slice(0,3);
   
-if(!MODELO_IA || !MODELO_IA.frecuencia){
+        //////////////////////////////////////////////////
+    // GENERAR TERNOS Y CUATERNOS
+    //////////////////////////////////////////////////
 
-    mostrar("⚠️ La IA todavía no terminó de aprender la base.");
+    let rankingTernos={};
+    let rankingCuaternos={};
 
-    return;
+    for(let r of datos){
 
-}  
+        let nro=r.numero;
 
+        let ambosDato=nro.slice(-2);
 
-// 1) Frecuencia histórica
-for(let ambos in MODELO_IA.frecuencia){
+        if(!ambos.includes(ambosDato)) continue;
 
-    puntos[ambos]=(puntos[ambos]||0);
+        let terno=nro.slice(-3);
 
-    puntos[ambos]+=MODELO_IA.frecuencia[ambos]*10;
+        let cuaterno=nro.slice(-4);
 
-}
+        rankingTernos[terno]=
+        (rankingTernos[terno]||0)+1;
 
+        rankingCuaternos[cuaterno]=
+        (rankingCuaternos[cuaterno]||0)+1;
 
-// 2) Aprendizaje del turno elegido
+        if(r.turno===turnoDestino){
 
-if(MODELO_TURNO[turnoOrigen]){
+            rankingTernos[terno]+=20;
+            rankingCuaternos[cuaterno]+=20;
 
-    for(let ambos in MODELO_TURNO[turnoOrigen]){
+        }
 
-        puntos[ambos]=(puntos[ambos]||0);
+        if(r.turno===turnoOrigen){
 
-        puntos[ambos]+=MODELO_TURNO[turnoOrigen][ambos]*100;
+            rankingTernos[terno]+=10;
+            rankingCuaternos[cuaterno]+=10;
 
-    }
-
-}
-
-
-// 3) Arrastre provincial
-
-for(let provincia in MODELO_PROVINCIA){
-
-    if(provincia==="ARRASTRES") continue;
-
-    for(let ambos in MODELO_PROVINCIA[provincia]){
-
-        puntos[ambos]=(puntos[ambos]||0);
-
-        puntos[ambos]+=MODELO_PROVINCIA[provincia][ambos]*20;
+        }
 
     }
 
-}
+
+    let ternos=
+    Object.keys(rankingTernos)
+    .sort((a,b)=>
+        rankingTernos[b]-rankingTernos[a]
+    )
+    .slice(0,2);
 
 
-// 4) Acompañantes
-
-for(let ambos in MODELO_ACOMPANANTES){
-
-    puntos[ambos]=(puntos[ambos]||0);
-
-    puntos[ambos]+=Object.keys(MODELO_ACOMPANANTES[ambos].ternos).length*15;
-
-    puntos[ambos]+=Object.keys(MODELO_ACOMPANANTES[ambos].cuaternos).length*15;
-
-}
+    let cuaternos=
+    Object.keys(rankingCuaternos)
+    .sort((a,b)=>
+        rankingCuaternos[b]-rankingCuaternos[a]
+    )
+    .slice(0,2);
 
 
+    //////////////////////////////////////////////////
+    // GUARDAR MEMORIA IA
+    //////////////////////////////////////////////////
 
-mostrar(`
+    await guardarMemoriaIA({
+
+        fecha:new Date().toISOString(),
+
+        turno:turnoOrigen,
+
+        destino:turnoDestino,
+
+        ambos:ambos,
+
+        ternos:ternos,
+
+        cuaternos:cuaternos,
+
+        origen:"RANKING_V45_2"
+
+    });
+      //////////////////////////////////////////////////
+    // MOSTRAR RESULTADO
+    //////////////////////////////////////////////////
+
+    mostrar(`
 
 🧠 RANKING IA V45.2
 
 ${turnoOrigen} ➜ ${turnoDestino}
+
+======================
 
 🔥 AMBOS
 
@@ -2304,7 +2425,7 @@ ${turnoOrigen} ➜ ${turnoDestino}
 
 3) ${ambos[2]||"--"}
 
-
+======================
 
 🎯 TERNOS
 
@@ -2312,7 +2433,7 @@ ${turnoOrigen} ➜ ${turnoDestino}
 
 2) ${ternos[1]||"--"}
 
-
+======================
 
 🏆 CUATERNOS
 
@@ -2320,26 +2441,27 @@ ${turnoOrigen} ➜ ${turnoDestino}
 
 2) ${cuaternos[1]||"--"}
 
+======================
 
+📊 BASE ANALIZADA
 
-✅ IA APRENDIENDO
+Registros: ${datos.length}
 
-- PDF
+Turno origen: ${origen.length}
 
-- MANUAL
+Turno destino: ${destino.length}
 
-- TURNOS
+✅ Frecuencia histórica
 
-- PROVINCIAS
+✅ Transición entre turnos
 
-- ACOMPAÑANTES
+✅ Arrastre entre provincias
 
+✅ Memoria IA activa
 
 `);
 
-
-
-  }
+}
   //////////////////////////////////////////////////
 // RECUPERAR BASE AL INICIAR V45.1
 //////////////////////////////////////////////////

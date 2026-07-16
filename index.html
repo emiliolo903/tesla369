@@ -1263,120 +1263,181 @@ resumenOCR[turno]++;
 
 
 
-
 async function iniciarOCR(){
 
-
-
-let archivo=
-
-document.getElementById(
-"archivoPDF"
-).files[0];
-
+let archivo =
+document.getElementById("archivoPDF").files[0];
 
 
 if(!archivo){
 
-mostrar(
-
-"⚠️ Seleccione un PDF"
-
-);
+mostrar("⚠️ Seleccione PDF");
 
 return;
 
 }
 
 
+try{
 
-OCR_ACTIVO=true;
+pararOCR=false;
 
 
+let buffer =
+await archivo.arrayBuffer();
 
-let pdf=
 
+let pdf =
 await pdfjsLib
-.getDocument(
-await archivo.arrayBuffer()
-)
+.getDocument({
+data:buffer
+})
 .promise;
 
 
 
-let totalPaginas=
-
-pdf.numPages;
-
+let worker =
+await Tesseract.createWorker("spa");
 
 
-for(let pagina=1;
-pagina<=totalPaginas;
-pagina++){
+let totalRegistros=0;
 
 
+let conteoTurnos={
 
-if(!OCR_ACTIVO)
+PREVIA:0,
+PRIMERA:0,
+MATUTINA:0,
+VESPERTINA:0,
+NOCTURNA:0,
+SIN_TURNO:0
 
-break;
-
-
-
-let progreso=
-
-document.getElementById(
-"progresoOCR"
-);
+};
 
 
 
-progreso.innerText=
-
-`
-
-📄 OCR HISTÓRICO
+for(let pagina=1; pagina<=pdf.numPages; pagina++){
 
 
-Página:
-
-${pagina}/${totalPaginas}
-
-
-Procesando...
-
-
-`;
+if(pararOCR) break;
 
 
 
-let page=
+mostrar(`
 
+📄 OCR HISTÓRICO V45.1
+
+Procesando página:
+
+${pagina} / ${pdf.numPages}
+
+
+Registros encontrados:
+
+${totalRegistros}
+
+`);
+
+
+
+
+let page =
 await pdf.getPage(pagina);
 
 
 
-let texto="";
+let viewport =
+page.getViewport({
+scale:3
+});
 
 
 
-let contenido=
-
-await page.getTextContent();
-
+let canvas =
+document.createElement("canvas");
 
 
-contenido.items.forEach(i=>{
+canvas.width =
+viewport.width;
 
-texto+=i.str+" ";
+
+canvas.height =
+viewport.height;
+
+
+
+let ctx =
+canvas.getContext("2d");
+
+
+
+await page.render({
+
+canvasContext:ctx,
+
+viewport
+
+}).promise;
+
+
+
+let lectura =
+await worker.recognize(canvas);
+
+
+
+let texto =
+lectura.data.text.toUpperCase();
+
+
+
+let turno =
+detectarTurnoOCR(texto);
+
+
+
+if(conteoTurnos[turno]!==undefined){
+
+conteoTurnos[turno]++;
+
+}
+
+
+
+let fecha =
+detectarFechaOCR(texto);
+
+
+
+let numeros =
+texto.match(/\b\d{4}\b/g)||[];
+
+
+
+
+for(let numero of numeros){
+
+
+await guardarRegistro({
+
+fecha:fecha,
+
+turno:turno,
+
+provincia:"AUTO",
+
+numero:numero,
+
+origen:"OCR_CORREGIDO_V45_3"
 
 });
 
 
 
-await procesarPaginaOCR(
-texto,
-pagina
-);
+totalRegistros++;
+
+
+}
 
 
 
@@ -1384,7 +1445,16 @@ pagina
 
 
 
-await actualizarTotal();
+await worker.terminate();
+
+
+
+let total =
+(await leerBase()).length;
+
+
+
+document.getElementById("total").innerText=total;
 
 
 
@@ -1393,39 +1463,37 @@ mostrar(`
 ✅ PDF FINALIZADO
 
 
-PÁGINAS:
+Páginas:
 
-${totalPaginas}
+${pdf.numPages}
 
+
+Registros nuevos:
+
+${totalRegistros}
+
+
+BASE TOTAL:
+
+${total}
+
+
+📊 TURNOS
 
 PREVIA:
-
-${resumenOCR.PREVIA}
-
+${conteoTurnos.PREVIA}
 
 PRIMERA:
-
-${resumenOCR.PRIMERA}
-
+${conteoTurnos.PRIMERA}
 
 MATUTINA:
-
-${resumenOCR.MATUTINA}
-
+${conteoTurnos.MATUTINA}
 
 VESPERTINA:
-
-${resumenOCR.VESPERTINA}
-
+${conteoTurnos.VESPERTINA}
 
 NOCTURNA:
-
-${resumenOCR.NOCTURNA}
-
-
-TOTAL BASE:
-
-${(await leerDatos(STORES.historico)).length}
+${conteoTurnos.NOCTURNA}
 
 
 `);
@@ -1433,27 +1501,21 @@ ${(await leerDatos(STORES.historico)).length}
 
 
 
-}
-
-
-
-
-
-function detenerOCR(){
-
-
-OCR_ACTIVO=false;
-
+}catch(e){
 
 
 mostrar(
-
-"⛔ OCR DETENIDO"
-
+"❌ ERROR OCR\n"+e
 );
 
 
 }
+
+
+}
+
+
+
   //////////////////////////////////////////////////
 // BLOQUE 5/8
 // MOTOR APRENDIZAJE IA INDEX 32

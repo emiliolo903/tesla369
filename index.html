@@ -583,17 +583,6 @@ unique:false
 //////////////////////////////////////////////////
 
 let MODELO_IA=null;
-
-
-async function aprenderBaseIA(){
-
-
-let datos=await leerBase();
-
-//////////////////////////////////////////////////
-// APRENDIZAJE POR TURNO V45.2
-//////////////////////////////////////////////////
-
 MODELO_TURNO={
 PREVIA:{},
 PRIMERA:{},
@@ -607,6 +596,19 @@ MODELO_PROVINCIA={};
 
 
 MODELO_ACOMPANANTES={};
+
+async function aprenderBaseIA(){
+
+
+let datos=await leerBase();
+
+//////////////////////////////////////////////////
+// APRENDIZAJE POR TURNO V45.2
+//////////////////////////////////////////////////
+
+
+
+
 
 
 

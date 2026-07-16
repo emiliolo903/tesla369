@@ -2164,6 +2164,52 @@ async function rankingInteligenteV45(){
 
 let datos = await leerBase();
 
+let turnoOrigen =
+document.getElementById("turnoBloque").value;
+
+const SIGUIENTE={
+
+PREVIA:"PRIMERA",
+PRIMERA:"MATUTINA",
+MATUTINA:"VESPERTINA",
+VESPERTINA:"NOCTURNA",
+NOCTURNA:"PREVIA"
+
+};
+
+let turnoDestino=
+SIGUIENTE[turnoOrigen];
+
+
+// SOLO DATOS DEL TURNO ELEGIDO
+
+let datosOrigen=
+
+datos.filter(r=>
+
+r.turno===turnoOrigen
+
+);
+
+let datosDestino=
+
+datos.filter(r=>
+
+r.turno===turnoDestino
+
+);
+
+if(datosOrigen.length===0){
+
+mostrar(
+
+"⚠️ No existen registros del turno "+turnoOrigen
+
+);
+
+return;
+
+  }
 
 if(datos.length===0){
 
@@ -2179,8 +2225,7 @@ let puntos={};
 
 
 
-for(let r of datos){
-
+for(let r of datosOrigen){
 
 let ambos=r.numero.slice(-2);
 
@@ -2209,7 +2254,7 @@ puntos[terno]=
 
 let acomp=[];
 
-for(let r of datos){
+for(let r of datosDestino){
 
 let ambos=r.numero.slice(-2);
 
@@ -2296,8 +2341,9 @@ cuaternos.push(n);
 
 mostrar(`
 
-🧠 RANKING IA V45.1
+🧠 RANKING IA V45.2
 
+${turnoOrigen} ➜ ${turnoDestino}
 
 🔥 AMBOS
 

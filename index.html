@@ -817,6 +817,64 @@ console.log(
 MODELO_TURNO,
 MODELO_PROVINCIA
 );
+//////////////////////////////////////////////////
+// ARRASTRE PROVINCIA → PROVINCIA V45.2
+//////////////////////////////////////////////////
+
+let ARRASTRE_PROVINCIAS={};
+
+
+for(let a of datos){
+
+    let ambosOrigen=a.numero.slice(-2);
+
+    for(let b of datos){
+
+        if(a===b) continue;
+
+        if(a.fecha!==b.fecha) continue;
+
+        let ambosDestino=b.numero.slice(-2);
+
+        let clave=
+
+        a.provincia+
+        "→"+
+        b.provincia;
+
+        if(!ARRASTRE_PROVINCIAS[clave]){
+
+            ARRASTRE_PROVINCIAS[clave]={};
+
+        }
+
+        let relacion=
+
+        ambosOrigen+
+        "→"+
+        ambosDestino;
+
+        ARRASTRE_PROVINCIAS[clave][relacion]=
+
+        (ARRASTRE_PROVINCIAS[clave][relacion]||0)+1;
+
+    }
+
+}
+
+
+MODELO_PROVINCIA.ARRASTRES=
+
+ARRASTRE_PROVINCIAS;
+
+
+console.log(
+
+"ARRASTRES PROVINCIA V45.2",
+
+ARRASTRE_PROVINCIAS
+
+);
   
 let modelo={
 

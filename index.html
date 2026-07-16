@@ -1171,7 +1171,8 @@ try{
 
 
 await abrirBase();
-
+  
+await actualizarEstadoBase();
 
 }catch(e){
 
@@ -1885,6 +1886,45 @@ mostrar(`
 `);
 
 
+
+  }
+  //////////////////////////////////////////////////
+// RECUPERAR BASE AL INICIAR V45.1
+//////////////////////////////////////////////////
+
+async function actualizarEstadoBase(){
+
+
+let datos=
+
+await leerBase();
+
+
+
+document.getElementById(
+"total"
+).innerText=
+
+datos.length;
+
+
+
+mostrar(`
+
+✅ SISTEMA CARGADO
+
+
+REGISTROS HISTÓRICOS:
+
+${datos.length}
+
+
+BASE CONSERVADA
+
+IA LISTA PARA APRENDER
+
+
+`);
 
   }
 

@@ -1840,6 +1840,10 @@ return new Date()
 
 
 
+//////////////////////////////////////////////////
+// OCR HISTÓRICO INTELIGENTE V45.2
+//////////////////////////////////////////////////
+
 async function iniciarOCR(){
 
 
@@ -1894,36 +1898,19 @@ await Tesseract
 let totalRegistros=0;
 
 
-// CONTADORES OCR EN TIEMPO REAL
-
 let conteoTurnos={
 
-    PREVIA:0,
-    PRIMERA:0,
-    MATUTINA:0,
-    VESPERTINA:0,
-    NOCTURNA:0,
-    SIN_TURNO:0
+PREVIA:0,
+PRIMERA:0,
+MATUTINA:0,
+VESPERTINA:0,
+NOCTURNA:0,
+SIN_TURNO:0
 
 };
 
 
 let ultimoTurno="INICIANDO";
-
-  
-
-mostrar(`
-
-📄 OCR LISTO
-
-PDF cargado:
-
-${pdf.numPages} páginas
-
-Iniciando procesamiento...
-
-`);
-
 
 
 
@@ -1932,6 +1919,206 @@ let pagina=1;
 pagina<=pdf.numPages;
 pagina++
 ){
+
+
+if(pararOCR)
+break;
+
+
+
+mostrar(`
+
+📄 OCR HISTÓRICO V45.2
+
+
+PÁGINA:
+
+${pagina}
+
+DE
+
+${pdf.numPages}
+
+
+📚 REGISTROS:
+
+${totalRegistros}
+
+
+🔄 TURNO:
+
+${ultimoTurno}
+
+`);
+
+
+
+
+let page=
+
+await pdf.getPage(pagina);
+
+
+
+let viewport=
+
+page.getViewport({
+scale:3
+});
+
+
+
+let canvas=
+
+document.createElement(
+"canvas"
+);
+
+
+
+canvas.width=
+viewport.width;
+
+
+canvas.height=
+viewport.height;
+
+
+
+let ctx=
+
+canvas.getContext(
+"2d"
+);
+
+
+
+await page.render({
+
+canvasContext:ctx,
+
+viewport
+
+}).promise;
+
+
+
+let lectura=
+
+await worker.recognize(
+canvas
+);
+
+
+
+let texto=
+
+lectura.data.text
+.toUpperCase();
+
+
+
+let turno=
+
+detectarTurnoOCR(
+texto
+);
+
+
+
+ultimoTurno=turno;
+
+
+if(conteoTurnos[turno]!==undefined){
+
+conteoTurnos[turno]++;
+
+}
+
+
+
+let fecha=
+
+detectarFechaOCR(
+texto
+);
+
+
+
+let numeros=
+
+texto.match(
+/\b\d{4}\b/g
+)||[];
+
+
+
+
+for(let numero of numeros){
+
+
+await guardarRegistro({
+
+fecha,
+
+turno,
+
+provincia:"AUTO",
+
+numero,
+
+origen:"OCR_HISTORICO_V45_2"
+
+});
+
+
+totalRegistros++;
+
+
+}
+
+
+
+mostrar(`
+
+📄 OCR PROCESANDO
+
+
+PÁGINA:
+
+${pagina}
+
+DE
+
+${pdf.numPages}
+
+
+📚 REGISTROS NUEVOS:
+
+${totalRegistros}
+
+
+🔄 ÚLTIMO TURNO:
+
+${ultimoTurno}
+
+
+📊 TURNOS:
+
+PREVIA: ${conteoTurnos.PREVIA}
+
+PRIMERA: ${conteoTurnos.PRIMERA}
+
+MATUTINA: ${conteoTurnos.MATUTINA}
+
+VESPERTINA: ${conteoTurnos.VESPERTINA}
+
+NOCTURNA: ${conteoTurnos.NOCTURNA}
+
+
+`);
+
+}
 
 
 
@@ -1956,17 +2143,17 @@ mostrar(`
 🎯 OCR FINALIZADO
 
 
-Páginas:
+PÁGINAS:
 
 ${pdf.numPages}
 
 
-Registros nuevos:
+REGISTROS NUEVOS:
 
 ${totalRegistros}
 
 
-Base total:
+BASE TOTAL:
 
 ${total}
 
@@ -1991,8 +2178,7 @@ mostrar(
 }
 
 
-
-}
+  }
 
 
 

@@ -721,26 +721,90 @@ ${total}
 
   }
 //////////////////////////////////////////////////
-// OCR PDF V45.1 ESTABLE
+// OCR HISTÓRICO AVANZADO V45.1
 //////////////////////////////////////////////////
 
 let pararOCR=false;
+
+
+function detectarTurnoOCR(texto){
+
+texto=texto.toUpperCase();
+
+
+if(texto.includes("PREVIA"))
+return "PREVIA";
+
+
+if(texto.includes("PRIMERA"))
+return "PRIMERA";
+
+
+if(texto.includes("MATUTINA"))
+return "MATUTINA";
+
+
+if(texto.includes("VESPERTINA"))
+return "VESPERTINA";
+
+
+if(texto.includes("NOCTURNA"))
+return "NOCTURNA";
+
+
+return "SIN_TURNO";
+
+}
+
+
+
+function detectarFechaOCR(texto){
+
+
+let fecha=
+
+texto.match(
+/\d{2}[\/\-]\d{2}[\/\-]\d{4}/
+);
+
+
+
+if(fecha){
+
+return fecha[0];
+
+}
+
+
+return new Date()
+.toISOString()
+.slice(0,10);
+
+}
+
+
 
 
 async function iniciarOCR(){
 
 
 let archivo=
-document.getElementById("archivoPDF").files[0];
+
+document.getElementById(
+"archivoPDF"
+).files[0];
 
 
 if(!archivo){
 
-mostrar("⚠️ Seleccione PDF");
+mostrar(
+"⚠️ Seleccione PDF"
+);
 
 return;
 
 }
+
 
 
 try{
@@ -749,14 +813,14 @@ try{
 pararOCR=false;
 
 
-mostrar("📄 Iniciando OCR...");
-
-
 let buffer=
+
 await archivo.arrayBuffer();
 
 
+
 let pdf=
+
 await pdfjsLib
 .getDocument({
 data:buffer
@@ -766,11 +830,14 @@ data:buffer
 
 
 let worker=
-await Tesseract.createWorker("spa");
+
+await Tesseract
+.createWorker("spa");
 
 
 
-let cantidad=0;
+let totalRegistros=0;
+
 
 
 for(
@@ -780,35 +847,51 @@ pagina++
 ){
 
 
-if(pararOCR) break;
+if(pararOCR)
+break;
 
 
 
-mostrar(
+mostrar(`
 
-"📄 Procesando página "+
-pagina+
-"/"+
-pdf.numPages
+📄 OCR HISTÓRICO
 
-);
+Página:
+
+${pagina}
+
+de
+
+${pdf.numPages}
+
+
+Leyendo...
+
+`);
+
 
 
 
 let page=
+
 await pdf.getPage(pagina);
 
 
 
 let viewport=
+
 page.getViewport({
-scale:2
+scale:3
 });
 
 
 
 let canvas=
-document.createElement("canvas");
+
+document.createElement(
+"canvas"
+);
+
 
 
 canvas.width=
@@ -821,7 +904,10 @@ viewport.height;
 
 
 let ctx=
-canvas.getContext("2d");
+
+canvas.getContext(
+"2d"
+);
 
 
 
@@ -836,17 +922,42 @@ viewport
 
 
 let lectura=
-await worker.recognize(canvas);
+
+await worker.recognize(
+canvas
+);
 
 
 
 let texto=
-lectura.data.text;
+
+lectura.data.text
+.toUpperCase();
+
+
+
+let turno=
+
+detectarTurnoOCR(
+texto
+);
+
+
+
+let fecha=
+
+detectarFechaOCR(
+texto
+);
+
 
 
 
 let numeros=
-texto.match(/\b\d{4}\b/g)||[];
+
+texto.match(
+/\b\d{4}\b/g
+)||[];
 
 
 
@@ -854,28 +965,60 @@ texto.match(/\b\d{4}\b/g)||[];
 for(let numero of numeros){
 
 
+
 await guardarRegistro({
 
-fecha:
-new Date()
-.toISOString()
-.slice(0,10),
+fecha,
 
-turno:"SIN_TURNO",
+turno,
 
 provincia:"AUTO",
 
 numero,
 
-origen:"OCR_V45_1"
+origen:"OCR_HISTORICO_V45_1"
+
 
 });
 
 
-cantidad++;
+
+totalRegistros++;
 
 
 }
+
+
+
+mostrar(`
+
+✅ OCR HISTÓRICO
+
+Página:
+
+${pagina}
+
+de
+
+${pdf.numPages}
+
+
+Turno detectado:
+
+${turno}
+
+
+Números encontrados:
+
+${numeros.length}
+
+
+Registros nuevos:
+
+${totalRegistros}
+
+`);
+
 
 
 
@@ -886,8 +1029,11 @@ cantidad++;
 await worker.terminate();
 
 
+
 let total=
+
 (await leerBase()).length;
+
 
 
 document.getElementById(
@@ -895,19 +1041,28 @@ document.getElementById(
 ).innerText=total;
 
 
+
 mostrar(`
 
-✅ OCR TERMINADO
+🎯 OCR FINALIZADO
 
-Páginas procesadas
+
+Páginas:
+
+${pdf.numPages}
+
 
 Registros nuevos:
 
-${cantidad}
+${totalRegistros}
 
-Total base:
+
+Base total:
 
 ${total}
+
+
+✅ HISTÓRICO CARGADO
 
 `);
 
@@ -916,31 +1071,38 @@ ${total}
 
 }catch(e){
 
+
 mostrar(
+
 "ERROR OCR\n"+e
+
 );
 
-}
-
-
 
 }
 
+
+
+}
 
 
 
 function detenerOCR(){
 
+
 pararOCR=true;
 
 
 mostrar(
+
 "⛔ OCR DETENIDO"
+
 );
 
 
-}
-  
+  }
+
+
 </script>
 
 

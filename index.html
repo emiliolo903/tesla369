@@ -2507,265 +2507,350 @@ mostrar(
 
   }
   //////////////////////////////////////////////////
-// RANKING INTELIGENTE IA V45.2
+// RANKING INTELIGENTE IA V45.3
+// APRENDIZAJE REAL
 //////////////////////////////////////////////////
 
 async function rankingInteligenteV45(){
 
-    let datos = await leerBase();
 
-    if(datos.length===0){
+let datos=
 
-        mostrar("⚠️ Sin datos históricos.");
+await leerBase();
 
-        return;
 
-    }
 
-    let turnoOrigen =
-    document.getElementById("turnoBloque").value;
+if(datos.length===0){
 
-    const SIGUIENTE={
+mostrar(
+"⚠️ Sin datos históricos"
+);
 
-        PREVIA:"PRIMERA",
-        PRIMERA:"MATUTINA",
-        MATUTINA:"VESPERTINA",
-        VESPERTINA:"NOCTURNA",
-        NOCTURNA:"PREVIA"
+return;
 
-    };
+}
 
-    let turnoDestino=
-    SIGUIENTE[turnoOrigen];
 
-    let origen=
-    datos.filter(r=>r.turno===turnoOrigen);
 
-    let destino=
-    datos.filter(r=>r.turno===turnoDestino);
+let turnoOrigen=
 
-    if(origen.length===0){
+document.getElementById(
+"turnoBloque"
+).value;
 
-        mostrar("⚠️ No hay datos del turno "+turnoOrigen);
 
-        return;
 
-    }
+const SIGUIENTE={
 
-    let ranking={};
+PREVIA:"PRIMERA",
+PRIMERA:"MATUTINA",
+MATUTINA:"VESPERTINA",
+VESPERTINA:"NOCTURNA",
+NOCTURNA:"PREVIA"
 
-    for(let o of origen){
+};
 
-        let ambosOrigen=
-        o.numero.slice(-2);
 
-        for(let d of destino){
 
-            let ambosDestino=
-            d.numero.slice(-2);
+let turnoDestino=
 
-            if(o.fecha!==d.fecha) continue;
+SIGUIENTE[turnoOrigen];
 
-            ranking[ambosDestino]=
-            (ranking[ambosDestino]||0)+100;
 
-            if(ambosOrigen===ambosDestino){
 
-                ranking[ambosDestino]+=40;
+let ranking={};
 
-            }
 
-            if(
-                ambosOrigen[0]===ambosDestino[1] &&
-                ambosOrigen[1]===ambosDestino[0]
-            ){
 
-                ranking[ambosDestino]+=20;
+//////////////////////////////////////////////////
+// 1 - TRANSICIÓN ENTRE TURNOS
+//////////////////////////////////////////////////
 
-            }
+let origen=
 
-        }
+datos.filter(
+r=>r.turno===turnoOrigen
+);
 
-    }
-      //////////////////////////////////////////////////
-    // FRECUENCIA HISTÓRICA
-    //////////////////////////////////////////////////
 
-    let frecuencia={};
 
-    for(let r of datos){
+let destino=
 
-        let ambos=r.numero.slice(-2);
+datos.filter(
+r=>r.turno===turnoDestino
+);
 
-        frecuencia[ambos]=(frecuencia[ambos]||0)+1;
 
-        ranking[ambos]=
-        (ranking[ambos]||0)+frecuencia[ambos];
 
-    }
+for(let o of origen){
 
 
-    //////////////////////////////////////////////////
-    // ARRASTRE ENTRE PROVINCIAS
-    //////////////////////////////////////////////////
+let ambosOrigen=
 
-    let provincias={};
+o.numero.slice(-2);
 
-    for(let r of datos){
 
-        if(!provincias[r.provincia]){
 
-            provincias[r.provincia]={};
+for(let d of destino){
 
-        }
 
-        let ambos=r.numero.slice(-2);
+if(o.fecha!==d.fecha)
+continue;
 
-        provincias[r.provincia][ambos]=
-        (provincias[r.provincia][ambos]||0)+1;
 
-    }
 
+let ambosDestino=
 
-    for(let provincia in provincias){
+d.numero.slice(-2);
 
-        for(let ambos in provincias[provincia]){
 
-            ranking[ambos]=
-            (ranking[ambos]||0)+
-            (provincias[provincia][ambos]*5);
 
-        }
+ranking[ambosDestino]=
 
-    }
+(ranking[ambosDestino]||0)+20;
 
 
-    //////////////////////////////////////////////////
-    // MEMORIA IA (EVITAR REPETIR)
-    //////////////////////////////////////////////////
 
-    let memoria=await leerMemoriaIA();
+if(ambosOrigen===ambosDestino){
 
-    if(memoria.length){
+ranking[ambosDestino]+=40;
 
-        let ultima=memoria[memoria.length-1];
+}
 
-        if(ultima.ambos){
 
-            ultima.ambos.forEach(n=>{
 
-                if(ranking[n]){
+if(
+ambosOrigen[0]===ambosDestino[1] &&
+ambosOrigen[1]===ambosDestino[0]
+){
 
-                    ranking[n]-=35;
+ranking[ambosDestino]+=20;
 
-                }
+}
 
-            });
 
-        }
+}
 
-    }
+}
 
 
-    //////////////////////////////////////////////////
-    // ORDENAR RANKING
-    //////////////////////////////////////////////////
 
-    let ambos=
-    Object.keys(ranking)
-    .sort((a,b)=>ranking[b]-ranking[a])
-    .slice(0,3);
-  
-        //////////////////////////////////////////////////
-    // GENERAR TERNOS Y CUATERNOS
-    //////////////////////////////////////////////////
 
-    let rankingTernos={};
-    let rankingCuaternos={};
 
-    for(let r of datos){
+//////////////////////////////////////////////////
+// 2 - FRECUENCIA HISTÓRICA
+//////////////////////////////////////////////////
 
-        let nro=r.numero;
+for(let r of datos){
 
-        let ambosDato=nro.slice(-2);
 
-        if(!ambos.includes(ambosDato)) continue;
+let ambos=
 
-        let terno=nro.slice(-3);
+r.numero.slice(-2);
 
-        let cuaterno=nro.slice(-4);
 
-        rankingTernos[terno]=
-        (rankingTernos[terno]||0)+1;
 
-        rankingCuaternos[cuaterno]=
-        (rankingCuaternos[cuaterno]||0)+1;
+ranking[ambos]=
 
-        if(r.turno===turnoDestino){
+(ranking[ambos]||0)+2;
 
-            rankingTernos[terno]+=20;
-            rankingCuaternos[cuaterno]+=20;
 
-        }
+}
 
-        if(r.turno===turnoOrigen){
 
-            rankingTernos[terno]+=10;
-            rankingCuaternos[cuaterno]+=10;
 
-        }
 
-    }
+//////////////////////////////////////////////////
+// 3 - APRENDIZAJE IA
+//////////////////////////////////////////////////
 
+let aprendizaje=
 
-    let ternos=
-    Object.keys(rankingTernos)
-    .sort((a,b)=>
-        rankingTernos[b]-rankingTernos[a]
-    )
-    .slice(0,2);
+await leerAprendizajeIA();
 
 
-    let cuaternos=
-    Object.keys(rankingCuaternos)
-    .sort((a,b)=>
-        rankingCuaternos[b]-rankingCuaternos[a]
-    )
-    .slice(0,2);
 
+for(let a of aprendizaje){
 
-    //////////////////////////////////////////////////
-    // GUARDAR MEMORIA IA
-    //////////////////////////////////////////////////
 
-    await guardarMemoriaIA({
 
-        fecha:new Date().toISOString(),
+if(a.turno!==turnoDestino)
+continue;
 
-        turno:turnoOrigen,
 
-        destino:turnoDestino,
 
-        ambos:ambos,
+if(a.aciertos.includes("AMBOS")){
 
-        ternos:ternos,
+ranking[a.numero.slice(-2)]+=10;
 
-        cuaternos:cuaternos,
+}
 
-        origen:"RANKING_V45_2"
 
-    });
-      //////////////////////////////////////////////////
-    // MOSTRAR RESULTADO
-    //////////////////////////////////////////////////
 
-    mostrar(`
+if(a.aciertos.includes("TERNO")){
 
-🧠 RANKING IA V45.2
+ranking[a.numero.slice(-2)]+=20;
+
+}
+
+
+
+if(a.aciertos.includes("CUATERNO")){
+
+ranking[a.numero.slice(-2)]+=40;
+
+}
+
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// 4 - EVITAR REPETIR ÚLTIMO RESULTADO
+//////////////////////////////////////////////////
+
+let memoria=
+
+await leerMemoriaIA();
+
+
+
+if(memoria.length){
+
+
+let ultima=
+
+memoria[memoria.length-1];
+
+
+
+if(ultima.ambos){
+
+
+
+ultima.ambos.forEach(n=>{
+
+
+if(ranking[n]){
+
+ranking[n]-=25;
+
+}
+
+
+
+});
+
+
+
+}
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// ORDEN FINAL
+//////////////////////////////////////////////////
+
+let ambos=
+
+Object.keys(ranking)
+.sort(
+(a,b)=>ranking[b]-ranking[a]
+)
+.slice(0,3);
+
+
+
+
+
+let ternos=[];
+
+let cuaternos=[];
+
+
+
+for(let n of ambos){
+
+
+ternos.push(
+n+
+n[0]
+);
+
+
+
+cuaternos.push(
+n+
+n
+);
+
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// GUARDAR PREDICCIÓN
+//////////////////////////////////////////////////
+
+await guardarPrediccion({
+
+fecha:new Date().toISOString(),
+
+turnoOrigen,
+
+turnoDestino,
+
+ambos,
+
+ternos,
+
+cuaternos,
+
+origen:"RANKING_IA_V45_3"
+
+});
+
+
+
+
+
+await guardarMemoriaIA({
+
+fecha:new Date().toISOString(),
+
+turno:turnoOrigen,
+
+destino:turnoDestino,
+
+ambos,
+
+origen:"RANKING_V45_3"
+
+});
+
+
+
+
+
+mostrar(`
+
+🧠 RANKING IA V45.3
 
 ${turnoOrigen} ➜ ${turnoDestino}
 
-======================
+
+================
 
 🔥 AMBOS
 
@@ -2775,7 +2860,8 @@ ${turnoOrigen} ➜ ${turnoDestino}
 
 3) ${ambos[2]||"--"}
 
-======================
+
+================
 
 🎯 TERNOS
 
@@ -2783,7 +2869,8 @@ ${turnoOrigen} ➜ ${turnoDestino}
 
 2) ${ternos[1]||"--"}
 
-======================
+
+================
 
 🏆 CUATERNOS
 
@@ -2791,27 +2878,24 @@ ${turnoOrigen} ➜ ${turnoDestino}
 
 2) ${cuaternos[1]||"--"}
 
-======================
 
-📊 BASE ANALIZADA
+================
 
-Registros: ${datos.length}
+🧠 APRENDIZAJE ACTIVO
 
-Turno origen: ${origen.length}
+Base:
+${datos.length}
 
-Turno destino: ${destino.length}
+Predicciones guardadas:
+${(await leerPredicciones()).length}
 
-✅ Frecuencia histórica
+Resultados aprendidos:
+${aprendizaje.length}
 
-✅ Transición entre turnos
-
-✅ Arrastre entre provincias
-
-✅ Memoria IA activa
 
 `);
 
-}
+  } 
   //////////////////////////////////////////////////
 // RECUPERAR BASE AL INICIAR V45.1
 //////////////////////////////////////////////////

@@ -503,7 +503,230 @@ reject(e);
 
 
 }
+//////////////////////////////////////////////////
+// IA APRENDIZAJE HISTÓRICO V45.1
+//////////////////////////////////////////////////
 
+let MODELO_IA=null;
+
+
+async function aprenderBaseIA(){
+
+
+let datos=await leerBase();
+
+
+let modelo={
+
+frecuencia:{},
+
+transiciones:{},
+
+provincia:{}
+
+};
+
+
+
+let orden={
+
+"PREVIA":"PRIMERA",
+
+"PRIMERA":"MATUTINA",
+
+"MATUTINA":"VESPERTINA",
+
+"VESPERTINA":"NOCTURNA",
+
+"NOCTURNA":"PREVIA"
+
+};
+
+
+
+// FRECUENCIA DE AMBOS
+
+for(let r of datos){
+
+
+let ambos=r.numero.slice(-2);
+
+
+
+modelo.frecuencia[ambos]=
+
+(modelo.frecuencia[ambos]||0)+1;
+
+
+
+let claveProvincia=
+
+r.provincia;
+
+
+
+if(!modelo.provincia[claveProvincia]){
+
+modelo.provincia[claveProvincia]={};
+
+}
+
+
+
+modelo.provincia[claveProvincia][ambos]=
+
+(modelo.provincia[claveProvincia][ambos]||0)+1;
+
+
+}
+
+
+
+
+// APRENDER PASO ENTRE TURNOS
+
+for(let a of datos){
+
+
+let siguiente=
+
+orden[a.turno];
+
+
+
+if(!siguiente)
+continue;
+
+
+
+for(let b of datos){
+
+
+if(a.fecha!==b.fecha)
+continue;
+
+
+if(b.turno!==siguiente)
+continue;
+
+
+
+let origen=
+
+a.numero.slice(-2);
+
+
+
+let destino=
+
+b.numero.slice(-2);
+
+
+
+let clave=
+
+origen+"->"+destino;
+
+
+
+modelo.transiciones[clave]=
+
+(modelo.transiciones[clave]||0)+1;
+
+
+
+}
+
+
+
+}
+
+
+
+MODELO_IA=modelo;
+
+
+return modelo;
+
+
+}
+
+
+
+//////////////////////////////////////////////////
+// RANKING DE AMBOS
+//////////////////////////////////////////////////
+
+async function generarAmbosIA(turno){
+
+
+let modelo=
+
+await aprenderBaseIA();
+
+
+
+let ranking={};
+
+
+
+for(let clave in modelo.transiciones){
+
+
+let partes=
+
+clave.split("->");
+
+
+
+let salida=
+
+partes[1];
+
+
+
+ranking[salida]=
+
+(ranking[salida]||0)+
+
+modelo.transiciones[clave]*10;
+
+
+
+}
+
+
+
+// sumar frecuencia
+
+for(let n in modelo.frecuencia){
+
+
+ranking[n]=
+
+(ranking[n]||0)+
+
+modelo.frecuencia[n];
+
+
+}
+
+
+
+
+return Object.keys(ranking)
+
+.sort((a,b)=>
+
+ranking[b]-ranking[a]
+
+)
+
+.slice(0,3);
+
+
+  }
+  
 //////////////////////////////////////////////////
 // MOSTRAR
 //////////////////////////////////////////////////

@@ -2223,7 +2223,15 @@ return;
 
 let puntos={};
 
-await aprenderBaseIA();
+let MODELO_IA = await aprenderBaseIA();
+  
+if(!MODELO_IA || !MODELO_IA.frecuencia){
+
+    mostrar("⚠️ La IA todavía no terminó de aprender la base.");
+
+    return;
+
+}  
 
 
 // 1) Frecuencia histórica

@@ -274,6 +274,11 @@ accept=".pdf">
 🧠 RANKING IA FINAL
 
   </button>
+  <button onclick="auditoriaV45()">
+
+🛡️ AUDITORÍA SISTEMA
+
+  </button>
   
 </div>
 
@@ -1937,7 +1942,121 @@ IA LISTA PARA APRENDER
 `);
 
   }
+//////////////////////////////////////////////////
+// AUDITORÍA SISTEMA V45.1
+//////////////////////////////////////////////////
 
+async function auditoriaV45(){
+
+
+let datos=
+
+await leerBase();
+
+
+
+let manual=
+
+datos.filter(
+x=>x.origen &&
+x.origen.includes("MANUAL")
+).length;
+
+
+
+let ocr=
+
+datos.filter(
+x=>x.origen &&
+x.origen.includes("OCR")
+).length;
+
+
+
+let provincias=[];
+
+let turnos=[];
+
+
+
+datos.forEach(r=>{
+
+
+if(!provincias.includes(r.provincia))
+provincias.push(r.provincia);
+
+
+
+if(!turnos.includes(r.turno))
+turnos.push(r.turno);
+
+
+
+});
+
+
+
+mostrar(`
+
+
+🛡️ AUDITORÍA EMI TESLA PRO V45.1
+
+
+====================
+
+
+📚 REGISTROS TOTALES:
+
+${datos.length}
+
+
+
+✍️ CARGA MANUAL:
+
+${manual}
+
+
+
+📄 OCR:
+
+${ocr}
+
+
+
+🌎 PROVINCIAS ACTIVAS:
+
+${provincias.length}
+
+
+
+🔄 TURNOS:
+
+${turnos.join(", ")}
+
+
+
+💾 BASE:
+
+ACTIVA
+
+
+
+🧠 IA:
+
+APRENDIZAJE ACTIVO
+
+
+
+====================
+
+
+✅ SISTEMA OK
+
+
+`);
+
+  }
+  
 </script>
 
 

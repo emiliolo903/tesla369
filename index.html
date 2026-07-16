@@ -257,7 +257,12 @@ accept=".pdf">
 🧹 LIMPIAR
 
 </button>
+<button onclick="generarResultadoIA()">
 
+🧠 GENERAR IA
+
+</button>
+  
 
 </div>
 
@@ -651,7 +656,188 @@ return modelo;
 
 }
 
+//////////////////////////////////////////////////
+// GENERADOR FINAL IA V45.1
+//////////////////////////////////////////////////
 
+async function generarResultadoIA(){
+
+
+let datos=await leerBase();
+
+
+if(datos.length<5){
+
+mostrar(
+"⚠️ Falta historial para aprender"
+);
+
+return;
+
+}
+
+
+
+// Generar ambos
+
+let ambos=
+
+await generarAmbosIA();
+
+
+
+if(ambos.length===0){
+
+mostrar(
+"⚠️ No hay coincidencias"
+);
+
+return;
+
+}
+
+
+
+// Ranking de ternos y cuaternos
+
+let rankingTerno={};
+
+let rankingCuaterno={};
+
+
+
+for(let r of datos){
+
+
+let nro=r.numero;
+
+
+
+let ultimoDos=
+
+nro.slice(-2);
+
+
+
+if(!ambos.includes(ultimoDos))
+continue;
+
+
+
+// Terno
+
+let terno=
+
+nro.slice(-3);
+
+
+
+rankingTerno[terno]=
+
+(rankingTerno[terno]||0)+1;
+
+
+
+// Cuaterno
+
+rankingCuaterno[nro]=
+
+(rankingCuaterno[nro]||0)+1;
+
+
+
+}
+
+
+
+
+let ternos=
+
+Object.keys(rankingTerno)
+
+.sort((a,b)=>
+
+rankingTerno[b]-
+rankingTerno[a]
+
+)
+
+.slice(0,2);
+
+
+
+
+
+let cuaternos=
+
+Object.keys(rankingCuaterno)
+
+.sort((a,b)=>
+
+rankingCuaterno[b]-
+rankingCuaterno[a]
+
+)
+
+.slice(0,2);
+
+
+
+
+
+
+mostrar(`
+
+
+🧠 EMI TESLA PRO IA
+
+
+====================
+
+
+🔥 AMBOS FUERTES
+
+
+1) ${ambos[0]||"--"}
+
+2) ${ambos[1]||"--"}
+
+3) ${ambos[2]||"--"}
+
+
+
+🎯 TERNOS
+
+
+1) ${ternos[0]||"--"}
+
+2) ${ternos[1]||"--"}
+
+
+
+🏆 CUATERNOS
+
+
+1) ${cuaternos[0]||"--"}
+
+2) ${cuaternos[1]||"--"}
+
+
+
+📚 APRENDIZAJE ACTIVO
+
+
+✅ PDF histórico
+
+✅ Carga manual
+
+✅ Transición entre turnos
+
+✅ Frecuencia
+
+`);
+
+  }
 
 //////////////////////////////////////////////////
 // RANKING DE AMBOS

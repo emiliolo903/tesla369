@@ -1419,19 +1419,22 @@ texto.match(/\b\d{4}\b/g)||[];
 for(let numero of numeros){
 
 
-await guardarRegistro({
+await guardarHistorico({
 
-fecha:fecha,
+fecha,
 
-turno:turno,
+turno,
 
 provincia:"AUTO",
 
-numero:numero,
+numero,
 
-origen:"OCR_CORREGIDO_V45_3"
+origen:"OCR_HISTORICO_V45_2",
+
+pagina:pagina
 
 });
+
 
 
 
@@ -1451,13 +1454,10 @@ await worker.terminate();
 
 
 let total =
-(await leerBase()).length;
+(await leerDatos(STORES.historico)).length;
 
 
-
-document.getElementById("total").innerText=total;
-
-
+document.getElementById("totalRegistros").innerText=total;
 
 mostrar(`
 

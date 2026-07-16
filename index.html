@@ -364,7 +364,20 @@ request.onupgradeneeded=function(e){
 
 let base=e.target.result;
 
+request.onsuccess=function(e){
 
+db=e.target.result;
+
+resolve(true);
+
+};
+
+
+request.onerror=function(e){
+
+reject(e);
+
+};
 
 //////////////////////////////////////////////////
 // HISTORICO PRINCIPAL

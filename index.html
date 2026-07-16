@@ -186,7 +186,29 @@ INICIANDO
 <h2>
 ✍️ CARGA MANUAL 7 PROVINCIAS
 </h2>
+<div class="card">
 
+<h2>
+📄 OCR PDF HISTÓRICO
+</h2>
+
+<input 
+type="file"
+id="archivoPDF"
+accept=".pdf">
+
+
+<button onclick="iniciarOCR()">
+📥 PROCESAR PDF
+</button>
+
+
+<button onclick="detenerOCR()">
+⛔ DETENER OCR
+</button>
+
+
+</div>
 
 <select id="turnoBloque">
 
@@ -259,7 +281,9 @@ EMI TESLA PRO V45.1 INICIANDO...
 </div>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 
 <script>
@@ -696,7 +720,227 @@ ${total}
 `);
 
   }
+//////////////////////////////////////////////////
+// OCR PDF V45.1 ESTABLE
+//////////////////////////////////////////////////
 
+let pararOCR=false;
+
+
+async function iniciarOCR(){
+
+
+let archivo=
+document.getElementById("archivoPDF").files[0];
+
+
+if(!archivo){
+
+mostrar("⚠️ Seleccione PDF");
+
+return;
+
+}
+
+
+try{
+
+
+pararOCR=false;
+
+
+mostrar("📄 Iniciando OCR...");
+
+
+let buffer=
+await archivo.arrayBuffer();
+
+
+let pdf=
+await pdfjsLib
+.getDocument({
+data:buffer
+})
+.promise;
+
+
+
+let worker=
+await Tesseract.createWorker("spa");
+
+
+
+let cantidad=0;
+
+
+for(
+let pagina=1;
+pagina<=pdf.numPages;
+pagina++
+){
+
+
+if(pararOCR) break;
+
+
+
+mostrar(
+
+"📄 Procesando página "+
+pagina+
+"/"+
+pdf.numPages
+
+);
+
+
+
+let page=
+await pdf.getPage(pagina);
+
+
+
+let viewport=
+page.getViewport({
+scale:2
+});
+
+
+
+let canvas=
+document.createElement("canvas");
+
+
+canvas.width=
+viewport.width;
+
+
+canvas.height=
+viewport.height;
+
+
+
+let ctx=
+canvas.getContext("2d");
+
+
+
+await page.render({
+
+canvasContext:ctx,
+
+viewport
+
+}).promise;
+
+
+
+let lectura=
+await worker.recognize(canvas);
+
+
+
+let texto=
+lectura.data.text;
+
+
+
+let numeros=
+texto.match(/\b\d{4}\b/g)||[];
+
+
+
+
+for(let numero of numeros){
+
+
+await guardarRegistro({
+
+fecha:
+new Date()
+.toISOString()
+.slice(0,10),
+
+turno:"SIN_TURNO",
+
+provincia:"AUTO",
+
+numero,
+
+origen:"OCR_V45_1"
+
+});
+
+
+cantidad++;
+
+
+}
+
+
+
+}
+
+
+
+await worker.terminate();
+
+
+let total=
+(await leerBase()).length;
+
+
+document.getElementById(
+"total"
+).innerText=total;
+
+
+mostrar(`
+
+✅ OCR TERMINADO
+
+Páginas procesadas
+
+Registros nuevos:
+
+${cantidad}
+
+Total base:
+
+${total}
+
+`);
+
+
+
+
+}catch(e){
+
+mostrar(
+"ERROR OCR\n"+e
+);
+
+}
+
+
+
+}
+
+
+
+
+function detenerOCR(){
+
+pararOCR=true;
+
+
+mostrar(
+"⛔ OCR DETENIDO"
+);
+
+
+}
+  
 </script>
 
 

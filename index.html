@@ -1158,20 +1158,23 @@ return null;
 
 function extraerNumeros(texto){
 
+let numeros =
+texto.match(/\b\d{1,4}\b/g)||[];
 
-let numeros = texto.match(/\b\d{1,4}\b/g)||[];
 
-numeros = numeros
+numeros =
+numeros
 .map(n=>n.padStart(4,"0"))
 .filter(n=>n.length===4);
 
 
-
-return lista || [];
-
-
+return numeros;
 
 }
+
+
+
+
 
 
 
@@ -1392,9 +1395,8 @@ let texto =
 lectura.data.text.toUpperCase();
 
 
-
 let turno =
-detectarTurnoOCR(texto);
+detectarTurno(texto);
 
 
 if(conteoTurnos[turno]!==undefined){

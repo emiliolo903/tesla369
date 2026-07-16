@@ -317,7 +317,7 @@ EMI TESLA PRO V45.1 INICIANDO...
 
 const DB_NAME="EMI_TESLA_PRO_V45_1";
 
-const DB_VERSION=3;
+const DB_VERSION=4;
 
 const STORE_NAME="historico";
 
@@ -328,6 +328,10 @@ const STORE_MEMORIA="memoriaIA";
 //////////////////////////////////////////////////
 
 const STORE_PREDICCIONES="prediccionesIA";
+ 
+const STORE_APRENDIZAJE="aprendizajeIA";
+
+const STORE_ESTADISTICAS="estadisticasIA";
   
 let db=null;
 
@@ -352,12 +356,19 @@ DB_VERSION
 
 
 
-request.onupgradeneeded=function(e){
+//////////////////////////////////////////////////
+// ACTUALIZACIÓN BASE DATOS V45.3
+//////////////////////////////////////////////////
 
+request.onupgradeneeded=function(e){
 
 let base=e.target.result;
 
 
+
+//////////////////////////////////////////////////
+// HISTORICO PRINCIPAL
+//////////////////////////////////////////////////
 
 if(!base.objectStoreNames.contains(STORE_NAME)){
 
@@ -405,12 +416,17 @@ unique:false
 
 }
 
+
+
+//////////////////////////////////////////////////
 // MEMORIA IA
+//////////////////////////////////////////////////
 
 if(!base.objectStoreNames.contains(STORE_MEMORIA)){
 
 
-let memoria =
+let memoria=
+
 base.createObjectStore(
 STORE_MEMORIA,
 {
@@ -418,6 +434,7 @@ keyPath:"id",
 autoIncrement:true
 }
 );
+
 
 
 memoria.createIndex(
@@ -429,211 +446,137 @@ unique:false
 );
 
 
-  }
-
-};
-
-
-
-request.onsuccess=function(e){
-
-
-db=e.target.result;
-
-
-document.getElementById(
-"estadoBase"
-).innerText="ACTIVA";
-
-
-mostrar(
-
-"✅ BASE V45.1 CARGADA"
-
-);
-
-
-resolve(db);
-
-
-};
-
-
-
-request.onerror=function(e){
-
-mostrar(
-"ERROR BASE"
-);
-
-reject(e);
-
-};
-
-
-
-});
-
-
-}
-
-
-function guardarRegistro(datos){
-
-return new Promise((resolve,reject)=>{
-
-
-let tx=db.transaction(
-STORE_NAME,
-"readwrite"
-);
-
-
-let tabla=tx.objectStore(
-STORE_NAME
-);
-
-
-tabla.add(datos);
-
-
-tx.oncomplete=function(){
-
-resolve(true);
-
-};
-
-
-tx.onerror=function(e){
-
-reject(e);
-
-};
-
-
-});
-
-
 }
 
 
 
-function leerBase(){
-
-return new Promise((resolve,reject)=>{
-
-
-let tx=db.transaction(
-STORE_NAME,
-"readonly"
-);
-
-
-let tabla=tx.objectStore(
-STORE_NAME
-);
-
-
-let datos=tabla.getAll();
-
-
-datos.onsuccess=function(){
-
-resolve(datos.result);
-
-};
-
-
-datos.onerror=function(e){
-
-reject(e);
-
-};
-
-
-});
-
-
-}
-  //////////////////////////////////////////////////
-// MEMORIA IA V45.1
+//////////////////////////////////////////////////
+// PREDICCIONES IA V45.3
 //////////////////////////////////////////////////
 
-function guardarMemoriaIA(datos){
-
-return new Promise((resolve,reject)=>{
+if(!base.objectStoreNames.contains(STORE_PREDICCIONES)){
 
 
-let tx=db.transaction(
-STORE_MEMORIA,
-"readwrite"
+let pred=
+
+base.createObjectStore(
+STORE_PREDICCIONES,
+{
+keyPath:"id",
+autoIncrement:true
+}
 );
 
 
-let tabla=tx.objectStore(
-STORE_MEMORIA
+
+pred.createIndex(
+"fecha",
+"fecha",
+{
+unique:false
+}
 );
 
 
-tabla.add(datos);
+
+pred.createIndex(
+"turnoOrigen",
+"turnoOrigen",
+{
+unique:false
+}
+);
 
 
-tx.oncomplete=function(){
 
-resolve(true);
+pred.createIndex(
+"turnoDestino",
+"turnoDestino",
+{
+unique:false
+}
+);
 
-};
-
-
-tx.onerror=function(e){
-
-reject(e);
-
-};
-
-
-});
 
 }
 
 
 
-function leerMemoriaIA(){
+//////////////////////////////////////////////////
+// APRENDIZAJE IA V45.3
+//////////////////////////////////////////////////
 
-return new Promise((resolve,reject)=>{
+if(!base.objectStoreNames.contains(STORE_APRENDIZAJE)){
 
 
-let tx=db.transaction(
-STORE_MEMORIA,
-"readonly"
+let aprendizaje=
+
+base.createObjectStore(
+STORE_APRENDIZAJE,
+{
+keyPath:"id",
+autoIncrement:true
+}
 );
 
 
-let tabla=tx.objectStore(
-STORE_MEMORIA
+
+aprendizaje.createIndex(
+"fecha",
+"fecha",
+{
+unique:false
+}
 );
 
 
-let datos=tabla.getAll();
 
+aprendizaje.createIndex(
+"turno",
+"turno",
+{
+unique:false
+}
+);
 
-datos.onsuccess=function(){
-
-resolve(datos.result);
-
-};
-
-
-datos.onerror=function(e){
-
-reject(e);
-
-};
-
-
-});
 
 }
+
+
+
+//////////////////////////////////////////////////
+// ESTADISTICAS IA V45.3
+//////////////////////////////////////////////////
+
+if(!base.objectStoreNames.contains(STORE_ESTADISTICAS)){
+
+
+let estadistica=
+
+base.createObjectStore(
+STORE_ESTADISTICAS,
+{
+keyPath:"id",
+autoIncrement:true
+}
+);
+
+
+
+estadistica.createIndex(
+"fecha",
+"fecha",
+{
+unique:false
+}
+);
+
+
+}
+
+
+};
+
   
 //////////////////////////////////////////////////
 // IA APRENDIZAJE HISTÓRICO V45.1

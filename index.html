@@ -718,7 +718,100 @@ MODELO_PROVINCIA[prov][ambos]=
 
 MODELO_TURNO_LISTO=true;
 
+//////////////////////////////////////////////////
+// TRANSICIONES ENTRE TURNOS V45.2
+//////////////////////////////////////////////////
 
+let ORDEN_TURNOS_V45_2={
+
+"PREVIA":"PRIMERA",
+"PRIMERA":"MATUTINA",
+"MATUTINA":"VESPERTINA",
+"VESPERTINA":"NOCTURNA",
+"NOCTURNA":"PREVIA"
+
+};
+
+
+
+let TRANSICIONES_TURNO={};
+
+
+
+for(let a of datos){
+
+
+let siguiente=
+
+ORDEN_TURNOS_V45_2[a.turno];
+
+
+
+if(!siguiente) continue;
+
+
+
+let ambosOrigen=
+
+a.numero.slice(-2);
+
+
+
+for(let b of datos){
+
+
+if(a.fecha!==b.fecha)
+continue;
+
+
+
+if(b.turno!==siguiente)
+continue;
+
+
+
+let ambosDestino=
+
+b.numero.slice(-2);
+
+
+
+let clave=
+
+a.turno+
+"→"+
+siguiente+
+"|"+
+ambosOrigen;
+
+
+
+if(!TRANSICIONES_TURNO[clave]){
+
+TRANSICIONES_TURNO[clave]={};
+
+}
+
+
+
+TRANSICIONES_TURNO[clave][ambosDestino]=
+
+(TRANSICIONES_TURNO[clave][ambosDestino]||0)+1;
+
+
+
+}
+
+
+}
+
+
+
+console.log(
+"TRANSICIONES TURNO V45.2",
+TRANSICIONES_TURNO
+);
+  
 console.log(
 "APRENDIZAJE V45.2 CARGADO",
 MODELO_TURNO,

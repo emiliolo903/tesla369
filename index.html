@@ -1762,9 +1762,19 @@ puntos[terno]=
 
 // sumar acompañantes
 
-let acomp=
-await obtenerAcompanantesV45();
+let acomp=[];
 
+for(let r of datos){
+
+let ambos=r.numero.slice(-2);
+
+if(!acomp.includes(ambos)){
+
+acomp.push(ambos);
+
+}
+
+  }
 
 
 acomp.slice(0,20)

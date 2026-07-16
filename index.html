@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
-EMI TESLA PRO V45.1 ESTABLE
+EMI TESLA PRO V45.1 - INDEX 32 CORREGIDO
 </title>
 
 
@@ -23,7 +23,7 @@ body{
 
 margin:0;
 padding:15px;
-background:#101010;
+background:#0d0d0d;
 color:white;
 font-family:Arial,sans-serif;
 
@@ -38,10 +38,19 @@ color:#00ff99;
 }
 
 
+h2{
+
+color:#00ff99;
+font-size:20px;
+
+}
+
+
+
 .card{
 
-background:#202020;
-border:1px solid #444;
+background:#1b1b1b;
+border:1px solid #333;
 border-radius:12px;
 padding:15px;
 margin-bottom:15px;
@@ -49,46 +58,45 @@ margin-bottom:15px;
 }
 
 
-h2{
 
-color:#00ff99;
-
-}
-
-
-button,
-input,
-select{
+button{
 
 width:100%;
 padding:12px;
-margin-top:10px;
+margin-top:8px;
+border:0;
 border-radius:8px;
-border:none;
+background:#008f5a;
+color:white;
+font-weight:bold;
 font-size:16px;
 
 }
 
 
-button{
+button:active{
 
-background:#00aa66;
+transform:scale(.98);
+
+}
+
+
+
+input,
+select,
+textarea{
+
+
+width:100%;
+padding:10px;
+margin-top:8px;
+background:#111;
 color:white;
-font-weight:bold;
-cursor:pointer;
+border:1px solid #555;
+border-radius:8px;
 
 }
 
-
-.resultado{
-
-background:#000;
-padding:15px;
-border-radius:10px;
-min-height:220px;
-white-space:pre-wrap;
-
-}
 
 
 .grid{
@@ -100,16 +108,52 @@ gap:10px;
 }
 
 
-.box{
 
-background:#303030;
+.estado{
+
+background:#111;
 padding:10px;
 border-radius:8px;
-text-align:center;
 
 }
 
+
+
+.resultado{
+
+background:#000;
+padding:15px;
+border-radius:10px;
+white-space:pre-wrap;
+min-height:200px;
+
+}
+
+
+
+.progreso{
+
+background:#111;
+border-radius:8px;
+padding:10px;
+min-height:120px;
+
+}
+
+
+
+.badge{
+
+display:inline-block;
+background:#006644;
+padding:6px 10px;
+border-radius:20px;
+
+}
+
+
 </style>
+
 
 </head>
 
@@ -117,18 +161,22 @@ text-align:center;
 <body>
 
 
+
 <h1>
 
-🚀 EMI TESLA PRO V45.1
+🚀 EMI TESLA PRO
 
 <br>
 
-🧠 BASE ESTABLE
+🧠 INDEX 32 CORREGIDO
 
 </h1>
 
 
 
+
+
+<!-- ESTADO SISTEMA -->
 
 <div class="card">
 
@@ -139,60 +187,92 @@ text-align:center;
 
 <div class="grid">
 
-<div class="box">
+
+<div class="estado">
 
 REGISTROS
 
 <br>
 
-<span id="total">
+<span id="totalRegistros">
 0
 </span>
+
 
 </div>
 
 
-<div class="box">
+
+<div class="estado">
 
 BASE
 
 <br>
 
 <span id="estadoBase">
+
 INICIANDO
+
 </span>
 
-</div>
-
-
-</div>
 
 </div>
 
 
 
+<div class="estado">
 
+IA
+
+<br>
+
+<span id="estadoIA">
+
+OFF
+
+</span>
+
+
+</div>
+
+
+
+<div class="estado">
+
+MATRIZ
+
+<br>
+
+<span id="estadoMatriz">
+
+OFF
+
+</span>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+<!-- CONTROL PRINCIPAL -->
 
 
 <div class="card">
 
+
 <h2>
-🛠️ CONTROL SISTEMA
+🎯 CONTROL PRINCIPAL
 </h2>
 
-
-<button onclick="probarSistema()">
-
-✅ PROBAR BOTÓN
-
-</button>
-
-
-<button onclick="limpiarResultado()">
-
-🧹 LIMPIAR
-
-</button>
 
 
 <button onclick="generarResultadoIA()">
@@ -202,72 +282,33 @@ INICIANDO
 </button>
 
 
+<button onclick="generarTesla()">
+
+⚡ TESLA
+
+</button>
+
+
+<button onclick="mostrarRankingIA()">
+
+🏆 RANKING IA
+
+</button>
+
+
 <button onclick="mostrarMatrizIA()">
 
-🔄 VER MATRIZ IA
+🔄 MATRIZ IA
 
 </button>
 
 
-<button onclick="rankingInteligenteV45()">
+<button onclick="auditoriaSistema()">
 
-🧠 RANKING IA FINAL
-
-</button>
-
-
-<button onclick="auditoriaV45()">
-
-🛡️ AUDITORÍA SISTEMA
+🛡️ AUDITORÍA
 
 </button>
 
-
-</div>
-
-
-
-
-
-
-<div class="card">
-
-<h2>
-✍️ CARGA MANUAL 7 PROVINCIAS
-</h2>
-
-
-<select id="turnoBloque">
-
-<option>PREVIA</option>
-<option>PRIMERA</option>
-<option>MATUTINA</option>
-<option>VESPERTINA</option>
-<option>NOCTURNA</option>
-
-</select>
-
-
-<input id="corrientesBloque" placeholder="Corrientes 4 cifras">
-
-<input id="ciudadBloque" placeholder="Ciudad 4 cifras">
-
-<input id="bonaerenseBloque" placeholder="Bonaerense 4 cifras">
-
-<input id="santafeBloque" placeholder="Santa Fe 4 cifras">
-
-<input id="cordobaBloque" placeholder="Córdoba 4 cifras">
-
-<input id="entreriosBloque" placeholder="Entre Ríos 4 cifras">
-
-<input id="chacoBloque" placeholder="Chaco 4 cifras">
-
-
-<button onclick="guardarBloqueIA()">
-
-💾 GUARDAR BLOQUE
-
-</button>
 
 
 </div>
@@ -278,11 +319,18 @@ INICIANDO
 
 
 
+<!-- PDF OCR -->
+
+
 <div class="card">
 
+
 <h2>
+
 📄 OCR PDF HISTÓRICO
+
 </h2>
+
 
 
 <input 
@@ -291,11 +339,13 @@ id="archivoPDF"
 accept=".pdf">
 
 
+
 <button onclick="iniciarOCR()">
 
-📥 PROCESAR PDF
+📥 CARGAR PDF
 
 </button>
+
 
 
 <button onclick="detenerOCR()">
@@ -305,29 +355,159 @@ accept=".pdf">
 </button>
 
 
+
+
+<div class="progreso"
+id="progresoOCR">
+
+Esperando PDF...
+
+</div>
+
+
 </div>
 
 
 
 
 
+
+
+<!-- CARGA MANUAL -->
 
 
 <div class="card">
 
+
 <h2>
-📌 RESULTADO
+
+✍️ CARGA MANUAL 7 PROVINCIAS
+
 </h2>
 
 
-<div id="resultado" class="resultado">
 
-EMI TESLA PRO V45.1 INICIANDO...
+<select id="turnoCarga">
+
+
+<option>PREVIA</option>
+
+<option>PRIMERA</option>
+
+<option>MATUTINA</option>
+
+<option>VESPERTINA</option>
+
+<option>NOCTURNA</option>
+
+
+</select>
+
+
+
+<input id="corrientes"
+placeholder="Corrientes 4 cifras">
+
+
+<input id="ciudad"
+placeholder="Ciudad 4 cifras">
+
+
+<input id="bonaerense"
+placeholder="Bonaerense 4 cifras">
+
+
+<input id="santaFe"
+placeholder="Santa Fe 4 cifras">
+
+
+<input id="cordoba"
+placeholder="Córdoba 4 cifras">
+
+
+<input id="entreRios"
+placeholder="Entre Ríos 4 cifras">
+
+
+<input id="chaco"
+placeholder="Chaco 4 cifras">
+
+
+
+<button onclick="guardarCargaManual()">
+
+💾 GUARDAR BLOQUE
+
+</button>
+
+
 
 </div>
 
 
+
+
+
+
+
+<!-- RESULTADOS -->
+
+
+<div class="card">
+
+
+<h2>
+
+📌 RESULTADOS
+
+</h2>
+
+
+
+<div 
+id="resultado"
+class="resultado">
+
+EMI TESLA PRO LISTO...
+
 </div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- AUDITORÍA -->
+
+
+<div class="card">
+
+
+<h2>
+
+🛡️ AUDITORÍA DETALLE
+
+</h2>
+
+
+<div id="auditoria"
+class="resultado">
+
+Sin auditoría todavía
+
+</div>
+
+
+
+</div>
+
+
 
 
 
@@ -335,70 +515,52 @@ EMI TESLA PRO V45.1 INICIANDO...
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
+
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
-</script>
-
 //////////////////////////////////////////////////
-// BLOQUE 2A/5
-// BASE + MEMORIA IA + APRENDIZAJE
-// EMI TESLA PRO V45.1 CORREGIDO
+// BLOQUE 2/8
+// BASE PERMANENTE INDEX 32 CORREGIDO
 //////////////////////////////////////////////////
 
 
-const DB_NAME="EMI_TESLA_PRO_V45_1";
+const DB_NAME="EMI_TESLA_INDEX32";
 
-const DB_VERSION=4;
+const DB_VERSION=1;
 
 
-const STORE_NAME="historico";
+const STORES={
 
-const STORE_MEMORIA="memoriaIA";
+historico:"historico",
 
-const STORE_PREDICCIONES="prediccionesIA";
+memoria:"memoriaIA",
 
-const STORE_APRENDIZAJE="aprendizajeIA";
+predicciones:"prediccionesIA",
 
-const STORE_ESTADISTICAS="estadisticasIA";
+aprendizaje:"aprendizajeIA",
+
+estadisticas:"estadisticasIA"
+
+};
+
 
 
 let db=null;
 
 
-// MODELOS GLOBALES
-let MODELO_IA=null;
-
-let MODELO_TURNO={
-
-PREVIA:{},
-PRIMERA:{},
-MATUTINA:{},
-VESPERTINA:{},
-NOCTURNA:{}
-
-};
-
-
-let MODELO_PROVINCIA={};
-
-
-let MODELO_ACOMPANANTES={};
-
-
-let MODELO_TURNO_LISTO=false;
-
-
 
 //////////////////////////////////////////////////
-// ABRIR BASE INDEXEDDB
+// ABRIR BASE
 //////////////////////////////////////////////////
 
 function abrirBase(){
 
+
 return new Promise((resolve,reject)=>{
 
 
-let request=indexedDB.open(
+let request=
+
+indexedDB.open(
 DB_NAME,
 DB_VERSION
 );
@@ -412,55 +574,15 @@ let base=e.target.result;
 
 
 
-if(!base.objectStoreNames.contains(STORE_NAME)){
+Object.values(STORES)
+.forEach(nombre=>{
 
 
-let tabla=base.createObjectStore(
-STORE_NAME,
-{
-keyPath:"id",
-autoIncrement:true
-}
-);
-
-
-tabla.createIndex(
-"fecha",
-"fecha",
-{
-unique:false
-}
-);
-
-
-tabla.createIndex(
-"turno",
-"turno",
-{
-unique:false
-}
-);
-
-
-tabla.createIndex(
-"provincia",
-"provincia",
-{
-unique:false
-}
-);
-
-
-}
-
-
-
-
-if(!base.objectStoreNames.contains(STORE_MEMORIA)){
+if(!base.objectStoreNames.contains(nombre)){
 
 
 base.createObjectStore(
-STORE_MEMORIA,
+nombre,
 {
 keyPath:"id",
 autoIncrement:true
@@ -472,51 +594,8 @@ autoIncrement:true
 
 
 
-if(!base.objectStoreNames.contains(STORE_PREDICCIONES)){
+});
 
-
-base.createObjectStore(
-STORE_PREDICCIONES,
-{
-keyPath:"id",
-autoIncrement:true
-}
-);
-
-
-}
-
-
-
-if(!base.objectStoreNames.contains(STORE_APRENDIZAJE)){
-
-
-base.createObjectStore(
-STORE_APRENDIZAJE,
-{
-keyPath:"id",
-autoIncrement:true
-}
-);
-
-
-}
-
-
-
-if(!base.objectStoreNames.contains(STORE_ESTADISTICAS)){
-
-
-base.createObjectStore(
-STORE_ESTADISTICAS,
-{
-keyPath:"id",
-autoIncrement:true
-}
-);
-
-
-}
 
 
 };
@@ -529,9 +608,13 @@ request.onsuccess=function(e){
 db=e.target.result;
 
 
-let estado=document.getElementById(
+
+let estado=
+
+document.getElementById(
 "estadoBase"
 );
+
 
 
 if(estado){
@@ -541,7 +624,9 @@ estado.innerText="ACTIVA";
 }
 
 
+
 resolve(true);
+
 
 
 };
@@ -560,31 +645,35 @@ reject(e);
 
 });
 
-
 }
 
 
 
 
+
 //////////////////////////////////////////////////
-// GUARDAR REGISTRO HISTÓRICO
+// GUARDAR DATOS
 //////////////////////////////////////////////////
 
-function guardarRegistro(datos){
+function guardarDato(store,datos){
 
 
 return new Promise((resolve,reject)=>{
 
 
-let tx=db.transaction(
-STORE_NAME,
+let tx=
+
+db.transaction(
+store,
 "readwrite"
 );
 
 
-let tabla=tx.objectStore(
-STORE_NAME
-);
+
+let tabla=
+
+tx.objectStore(store);
+
 
 
 tabla.add(datos);
@@ -617,43 +706,53 @@ reject(e);
 
 
 //////////////////////////////////////////////////
-// LEER BASE
+// LEER DATOS
 //////////////////////////////////////////////////
 
-function leerBase(){
+function leerDatos(store){
 
 
 return new Promise((resolve,reject)=>{
 
 
-let tx=db.transaction(
-STORE_NAME,
+let tx=
+
+db.transaction(
+store,
 "readonly"
 );
 
 
 
-let tabla=tx.objectStore(
-STORE_NAME
+let tabla=
+
+tx.objectStore(store);
+
+
+
+let consulta=
+
+tabla.getAll();
+
+
+
+consulta.onsuccess=function(){
+
+
+resolve(
+consulta.result
 );
 
-
-
-let datos=tabla.getAll();
-
-
-
-datos.onsuccess=function(){
-
-resolve(datos.result);
 
 };
 
 
 
-datos.onerror=function(e){
+consulta.onerror=function(e){
+
 
 reject(e);
+
 
 };
 
@@ -669,194 +768,19 @@ reject(e);
 
 
 //////////////////////////////////////////////////
-// MEMORIA IA
+// GUARDAR HISTÓRICO
 //////////////////////////////////////////////////
 
-function guardarMemoriaIA(datos){
+function guardarHistorico(registro){
 
 
-return new Promise((resolve,reject)=>{
+return guardarDato(
 
+STORES.historico,
 
-let tx=db.transaction(
-STORE_MEMORIA,
-"readwrite"
+registro
+
 );
-
-
-
-let tabla=tx.objectStore(
-STORE_MEMORIA
-);
-
-
-
-tabla.add(datos);
-
-
-
-tx.oncomplete=function(){
-
-resolve(true);
-
-};
-
-
-
-tx.onerror=function(e){
-
-reject(e);
-
-};
-
-
-});
-
-
-}
-
-
-
-
-
-function leerMemoriaIA(){
-
-
-return new Promise((resolve,reject)=>{
-
-
-let tx=db.transaction(
-STORE_MEMORIA,
-"readonly"
-);
-
-
-
-let tabla=tx.objectStore(
-STORE_MEMORIA
-);
-
-
-
-let datos=tabla.getAll();
-
-
-
-datos.onsuccess=function(){
-
-resolve(datos.result);
-
-};
-
-
-
-datos.onerror=function(e){
-
-reject(e);
-
-};
-
-
-
-});
-
-
-}
-
-
-
-
-//////////////////////////////////////////////////
-// PREDICCIONES IA
-//////////////////////////////////////////////////
-
-function guardarPrediccion(datos){
-
-
-return new Promise((resolve,reject)=>{
-
-
-let tx=db.transaction(
-STORE_PREDICCIONES,
-"readwrite"
-);
-
-
-
-let tabla=tx.objectStore(
-STORE_PREDICCIONES
-);
-
-
-
-tabla.add(datos);
-
-
-
-tx.oncomplete=function(){
-
-resolve(true);
-
-};
-
-
-
-tx.onerror=function(e){
-
-reject(e);
-
-};
-
-
-});
-
-
-}
-
-
-
-
-
-function leerPredicciones(){
-
-
-return new Promise((resolve,reject)=>{
-
-
-let tx=db.transaction(
-STORE_PREDICCIONES,
-"readonly"
-);
-
-
-
-let tabla=tx.objectStore(
-STORE_PREDICCIONES
-);
-
-
-
-let datos=tabla.getAll();
-
-
-
-datos.onsuccess=function(){
-
-resolve(datos.result);
-
-};
-
-
-
-datos.onerror=function(e){
-
-reject(e);
-
-};
-
-
-
-});
 
 
 }
@@ -866,208 +790,895 @@ reject(e);
 
 
 //////////////////////////////////////////////////
-// APRENDIZAJE IA
+// CONTADOR GENERAL
 //////////////////////////////////////////////////
 
-function guardarAprendizajeIA(datos){
-
-
-return new Promise((resolve,reject)=>{
-
-
-let tx=db.transaction(
-STORE_APRENDIZAJE,
-"readwrite"
-);
-
-
-
-let tabla=tx.objectStore(
-STORE_APRENDIZAJE
-);
-
-
-
-tabla.add(datos);
-
-
-
-tx.oncomplete=function(){
-
-resolve(true);
-
-};
-
-
-
-tx.onerror=function(e){
-
-reject(e);
-
-};
-
-
-});
-
-
-}
-
-
-
-
-function leerAprendizajeIA(){
-
-
-return new Promise((resolve,reject)=>{
-
-
-let tx=db.transaction(
-STORE_APRENDIZAJE,
-"readonly"
-);
-
-
-
-let tabla=tx.objectStore(
-STORE_APRENDIZAJE
-);
-
-
-
-let datos=tabla.getAll();
-
-
-
-datos.onsuccess=function(){
-
-resolve(datos.result);
-
-};
-
-
-
-datos.onerror=function(e){
-
-reject(e);
-
-};
-
-
-
-});
-
-
-}
-//////////////////////////////////////////////////
-// BLOQUE 2B/5
-// APRENDIZAJE IA + TRANSICIONES + ARRASTRE
-// EMI TESLA PRO V45.1 CORREGIDO
-//////////////////////////////////////////////////
-
-
-const ORDEN_TURNOS_V45_2=[
-
-"PREVIA",
-"PRIMERA",
-"MATUTINA",
-"VESPERTINA",
-"NOCTURNA"
-
-];
-
-
-
-const CONFIG_IA_V45_2={
-
-PESO_TURNO:100,
-
-PESO_PROVINCIA:50,
-
-PESO_ACOMPANANTE:30
-
-};
-
-
-
-
-//////////////////////////////////////////////////
-// APRENDER BASE IA
-//////////////////////////////////////////////////
-
-async function aprenderBaseIA(){
+async function actualizarTotal(){
 
 
 let datos=
 
-await leerBase();
+await leerDatos(
+STORES.historico
+);
 
 
 
-MODELO_TURNO={
+let total=
 
-PREVIA:{},
-PRIMERA:{},
-MATUTINA:{},
-VESPERTINA:{},
-NOCTURNA:{}
+document.getElementById(
+"totalRegistros"
+);
+
+
+
+if(total){
+
+total.innerText=
+datos.length;
+
+}
+
+
+
+}
+  //////////////////////////////////////////////////
+// BLOQUE 3/8
+// CARGA MANUAL 7 PROVINCIAS
+//////////////////////////////////////////////////
+
+
+
+function obtenerNumero(valor){
+
+
+if(!valor)
+
+return null;
+
+
+
+let limpio=
+
+valor.replace(/\D/g,"");
+
+
+
+if(limpio.length!==4)
+
+return null;
+
+
+
+return limpio;
+
+
+}
+
+
+
+
+
+async function guardarCargaManual(){
+
+
+
+let turno=
+
+document.getElementById(
+"turnoCarga"
+).value;
+
+
+
+let provincias={
+
+
+CORRIENTES:
+
+document.getElementById(
+"corrientes"
+).value,
+
+
+CIUDAD:
+
+document.getElementById(
+"ciudad"
+).value,
+
+
+BONAERENSE:
+
+document.getElementById(
+"bonaerense"
+).value,
+
+
+"SANTA FE":
+
+document.getElementById(
+"santaFe"
+).value,
+
+
+CORDOBA:
+
+document.getElementById(
+"cordoba"
+).value,
+
+
+"ENTRE RIOS":
+
+document.getElementById(
+"entreRios"
+).value,
+
+
+CHACO:
+
+document.getElementById(
+"chaco"
+).value
+
 
 };
 
 
-MODELO_PROVINCIA={};
 
-MODELO_ACOMPANANTES={};
+
+let cantidad=0;
+
+
+
+for(let provincia in provincias){
+
+
+
+let numero=
+
+obtenerNumero(
+provincias[provincia]
+);
+
+
+
+if(numero){
+
+
+
+await guardarHistorico({
+
+fecha:
+
+new Date()
+.toISOString()
+.slice(0,10),
+
+
+provincia:
+
+
+provincia,
+
+
+turno:
+
+
+turno,
+
+
+numero:
+
+
+numero,
+
+
+origen:
+
+"MANUAL"
+
+
+});
+
+
+
+cantidad++;
+
+
+}
+
+
+
+}
+
+
+
+
+await actualizarTotal();
+
+
+
+mostrar(`
+
+✅ CARGA MANUAL COMPLETADA
+
+
+TURN0:
+
+${turno}
+
+
+REGISTROS:
+
+${cantidad}
+
+
+BASE ACTUALIZADA
+
+
+`);
+
+
+
+
+}
+  //////////////////////////////////////////////////
+// BLOQUE 4/8
+// OCR PDF HISTÓRICO INDEX 32
+//////////////////////////////////////////////////
+
+
+let OCR_ACTIVO=false;
+
+
+
+let resumenOCR={
+
+PREVIA:0,
+
+PRIMERA:0,
+
+MATUTINA:0,
+
+VESPERTINA:0,
+
+NOCTURNA:0
+
+};
+
+
+
+
+
+function detectarProvincia(texto){
+
+
+texto=
+
+texto.toUpperCase();
+
+
+
+if(texto.includes("CORRIENTES"))
+
+return "CORRIENTES";
+
+
+if(texto.includes("CIUDAD"))
+
+return "CIUDAD";
+
+
+if(texto.includes("BONAERENSE"))
+
+return "BONAERENSE";
+
+
+if(texto.includes("SANTA FE"))
+
+return "SANTA FE";
+
+
+if(texto.includes("CORDOBA") ||
+texto.includes("CÓRDOBA"))
+
+return "CORDOBA";
+
+
+if(texto.includes("ENTRE RIOS") ||
+texto.includes("ENTRE RÍOS"))
+
+return "ENTRE RIOS";
+
+
+if(texto.includes("CHACO"))
+
+return "CHACO";
+
+
+
+return "DESCONOCIDA";
+
+
+}
+
+
+
+
+
+function detectarTurno(texto){
+
+
+texto=
+
+texto.toUpperCase();
+
+
+
+if(texto.includes("PREVIA"))
+
+return "PREVIA";
+
+
+if(texto.includes("PRIMERA"))
+
+return "PRIMERA";
+
+
+if(texto.includes("MATUTINA"))
+
+return "MATUTINA";
+
+
+if(texto.includes("VESPERTINA"))
+
+return "VESPERTINA";
+
+
+if(texto.includes("NOCTURNA"))
+
+return "NOCTURNA";
+
+
+return null;
+
+
+}
+
+
+
+
+
+
+function extraerNumeros(texto){
+
+
+let lista=
+
+texto.match(/\b\d{4}\b/g);
+
+
+
+return lista || [];
+
+
+
+}
+
+
+
+
+
+
+async function procesarPaginaOCR(texto,pagina){
+
+
+
+let provincia=
+
+detectarProvincia(texto);
+
+
+
+let turno=
+
+detectarTurno(texto);
+
+
+
+let numeros=
+
+extraerNumeros(texto);
+
+
+
+for(let numero of numeros){
+
+
+
+await guardarHistorico({
+
+fecha:
+
+new Date()
+.toISOString()
+.slice(0,10),
+
+
+pagina:
+
+
+pagina,
+
+
+provincia:
+
+
+provincia,
+
+
+turno:
+
+
+turno || "SIN_TURNO",
+
+
+numero:
+
+
+numero,
+
+
+origen:
+
+
+"OCR_PDF"
+
+
+});
+
+
+
+if(turno){
+
+resumenOCR[turno]++;
+
+}
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+async function iniciarOCR(){
+
+
+
+let archivo=
+
+document.getElementById(
+"archivoPDF"
+).files[0];
+
+
+
+if(!archivo){
+
+mostrar(
+
+"⚠️ Seleccione un PDF"
+
+);
+
+return;
+
+}
+
+
+
+OCR_ACTIVO=true;
+
+
+
+let pdf=
+
+await pdfjsLib
+.getDocument(
+await archivo.arrayBuffer()
+)
+.promise;
+
+
+
+let totalPaginas=
+
+pdf.numPages;
+
+
+
+for(let pagina=1;
+pagina<=totalPaginas;
+pagina++){
+
+
+
+if(!OCR_ACTIVO)
+
+break;
+
+
+
+let progreso=
+
+document.getElementById(
+"progresoOCR"
+);
+
+
+
+progreso.innerText=
+
+`
+
+📄 OCR HISTÓRICO
+
+
+Página:
+
+${pagina}/${totalPaginas}
+
+
+Procesando...
+
+
+`;
+
+
+
+let page=
+
+await pdf.getPage(pagina);
+
+
+
+let texto="";
+
+
+
+let contenido=
+
+await page.getTextContent();
+
+
+
+contenido.items.forEach(i=>{
+
+texto+=i.str+" ";
+
+});
+
+
+
+await procesarPaginaOCR(
+texto,
+pagina
+);
+
+
+
+}
+
+
+
+await actualizarTotal();
+
+
+
+mostrar(`
+
+✅ PDF FINALIZADO
+
+
+PÁGINAS:
+
+${totalPaginas}
+
+
+PREVIA:
+
+${resumenOCR.PREVIA}
+
+
+PRIMERA:
+
+${resumenOCR.PRIMERA}
+
+
+MATUTINA:
+
+${resumenOCR.MATUTINA}
+
+
+VESPERTINA:
+
+${resumenOCR.VESPERTINA}
+
+
+NOCTURNA:
+
+${resumenOCR.NOCTURNA}
+
+
+TOTAL BASE:
+
+${(await leerDatos(STORES.historico)).length}
+
+
+`);
+
+
+
+
+}
+
+
+
+
+
+function detenerOCR(){
+
+
+OCR_ACTIVO=false;
+
+
+
+mostrar(
+
+"⛔ OCR DETENIDO"
+
+);
+
+
+}
+  //////////////////////////////////////////////////
+// BLOQUE 5/8
+// MOTOR APRENDIZAJE IA INDEX 32
+//////////////////////////////////////////////////
+
+
+let MODELO_IA={};
+
+
+
+let MATRIZ_TURNOS={};
+
+
+
+let MATRIZ_PROVINCIAS={};
+
+
+
+let ACOMPANANTES={};
+
+
+
+
+
+
+async function aprenderIA(){
+
+
+
+let datos=
+
+await leerDatos(
+STORES.historico
+);
+
+
+
+MODELO_IA={};
+
+
+
+MATRIZ_TURNOS={};
+
+
+
+MATRIZ_PROVINCIAS={};
+
+
+
+ACOMPANANTES={};
+
+
 
 
 
 for(let item of datos){
 
 
-let turno=item.turno || "SIN_TURNO";
 
-let provincia=item.provincia || "SIN_PROVINCIA";
+let ambos=
 
-let numero=item.numero || "";
+String(item.numero)
+.slice(-2);
 
 
 
-if(!MODELO_TURNO[turno]){
+let turno=
 
-MODELO_TURNO[turno]={};
+item.turno;
+
+
+
+let provincia=
+
+item.provincia;
+
+
+
+
+// TURNO
+
+
+if(!MODELO_IA[turno])
+
+MODELO_IA[turno]={};
+
+
+
+MODELO_IA[turno][ambos]=
+
+(MODELO_IA[turno][ambos]||0)+1;
+
+
+
+
+
+// PROVINCIA
+
+
+if(!MATRIZ_PROVINCIAS[provincia])
+
+MATRIZ_PROVINCIAS[provincia]={};
+
+
+
+MATRIZ_PROVINCIAS[provincia][ambos]=
+
+(MATRIZ_PROVINCIAS[provincia][ambos]||0)+1;
+
+
+
+
+
+
+// ACOMPAÑANTES
+
+
+let invertido=
+
+ambos[1]+ambos[0];
+
+
+
+if(!ACOMPANANTES[ambos])
+
+ACOMPANANTES[ambos]={};
+
+
+
+ACOMPANANTES[ambos][invertido]=
+
+(ACOMPANANTES[ambos][invertido]||0)+1;
+
+
 
 }
+
+
+
+
+await guardarDato(
+
+STORES.aprendizaje,
+
+{
+
+fecha:new Date()
+.toISOString(),
+
+estado:"APRENDIZAJE_COMPLETO",
+
+registros:datos.length
+
+}
+
+);
+
+
+
+document.getElementById(
+"estadoIA"
+).innerText="ACTIVA";
+
+
+
+return true;
+
+
+
+}
+
+
+
+
+
+async function construirContinuidad(){
+
+
+
+let datos=
+
+await leerDatos(
+STORES.historico
+);
+
+
+
+for(let i=0;
+i<datos.length-1;
+i++){
+
+
+
+let actual=
+
+datos[i];
+
+
+
+let siguiente=
+
+datos[i+1];
+
+
+
+let clave=
+
+actual.turno+
+" → "+
+siguiente.turno;
+
+
+
+if(!MATRIZ_TURNOS[clave])
+
+MATRIZ_TURNOS[clave]={};
 
 
 
 let ambos=
 
-numero.slice(-2);
+String(siguiente.numero)
+.slice(-2);
 
 
 
-if(ambos){
+MATRIZ_TURNOS[clave][ambos]=
 
-
-MODELO_TURNO[turno][ambos]=
-
-(MODELO_TURNO[turno][ambos]||0)+1;
-
-
-}
-
-
-
-if(!MODELO_PROVINCIA[provincia]){
-
-MODELO_PROVINCIA[provincia]={};
-
-}
-
-
-
-MODELO_PROVINCIA[provincia][ambos]=
-
-(MODELO_PROVINCIA[provincia][ambos]||0)+1;
+(MATRIZ_TURNOS[clave][ambos]||0)+1;
 
 
 
@@ -1075,20 +1686,17 @@ MODELO_PROVINCIA[provincia][ambos]=
 
 
 
-
-MODELO_TURNO_LISTO=true;
-
+}
 
 
-await guardarAprendizajeIA({
 
-fecha:new Date().toISOString(),
+async function cargarTodoIA(){
 
-tipo:"BASE_IA",
 
-registros:datos.length
+await aprenderIA();
 
-});
+
+await construirContinuidad();
 
 
 
@@ -1096,285 +1704,36 @@ return true;
 
 
 }
-
-
-
-
-
-//////////////////////////////////////////////////
-// TRANSICIONES ENTRE TURNOS
-//////////////////////////////////////////////////
-
-async function construirTransicionesTurno(){
-
-
-let datos=
-
-await leerBase();
-
-
-
-let transiciones={};
-
-
-
-for(let i=0;i<datos.length-1;i++){
-
-
-let actual=datos[i];
-
-let siguiente=datos[i+1];
-
-
-
-if(!actual.turno || !siguiente.turno){
-
-continue;
-
-}
-
-
-
-let clave=
-
-actual.turno+
-"->"+
-siguiente.turno;
-
-
-
-if(!transiciones[clave]){
-
-transiciones[clave]={};
-
-}
-
-
-
-let ambos=
-
-siguiente.numero.slice(-2);
-
-
-
-transiciones[clave][ambos]=
-
-(transiciones[clave][ambos]||0)+1;
-
-
-
-}
-
-
-
-return transiciones;
-
-
-}
-
-
-
-
-//////////////////////////////////////////////////
-// ARRASTRE PROVINCIA PROVINCIA
-//////////////////////////////////////////////////
-
-async function construirArrastreProvincia(){
-
-
-let datos=
-
-await leerBase();
-
-
-
-let matriz={};
-
-
-
-for(let i=0;i<datos.length-1;i++){
-
-
-let actual=datos[i];
-
-let siguiente=datos[i+1];
-
-
-
-if(actual.provincia===siguiente.provincia){
-
-continue;
-
-}
-
-
-
-let clave=
-
-actual.provincia+
-"->"+
-siguiente.provincia;
-
-
-
-if(!matriz[clave]){
-
-matriz[clave]={};
-
-}
-
-
-
-let ambos=
-
-siguiente.numero.slice(-2);
-
-
-
-matriz[clave][ambos]=
-
-(matriz[clave][ambos]||0)+1;
-
-
-
-}
-
-
-
-return matriz;
-
-
-}
-
-
-
-
-
-//////////////////////////////////////////////////
-// ACOMPAÑANTES IA
-//////////////////////////////////////////////////
-
-async function construirAcompanantesIA(){
-
-
-let datos=
-
-await leerBase();
-
-
-
-let acomp={};
-
-
-
-for(let item of datos){
-
-
-let ambos=
-
-item.numero.slice(-2);
-
-
-
-if(!ambos){
-
-continue;
-
-}
-
-
-
-if(!acomp[ambos]){
-
-acomp[ambos]={};
-
-}
-
-
-
-let inverso=
-
-ambos[1]+ambos[0];
-
-
-
-acomp[ambos][inverso]=
-
-(acomp[ambos][inverso]||0)+1;
-
-
-
-}
-
-
-
-MODELO_ACOMPANANTES=acomp;
-
-
-
-return acomp;
-
-
-}
-
-
-
-
-
-//////////////////////////////////////////////////
-// CARGA COMPLETA DEL MODELO
-//////////////////////////////////////////////////
-
-async function cargarModeloIA(){
-
-
-await aprenderBaseIA();
-
-
-await construirTransicionesTurno();
-
-
-await construirArrastreProvincia();
-
-
-await construirAcompanantesIA();
-
-
-
-MODELO_IA={
-
-estado:"ACTIVO",
-
-fecha:new Date().toISOString()
-
-};
-
-
-
-return MODELO_IA;
-
-
-}
   //////////////////////////////////////////////////
-// BLOQUE 3/5
-// MOTOR TESLA + GENERADORES IA
-// EMI TESLA PRO V45.1 CORREGIDO
+// BLOQUE 6/8
+// MOTOR TESLA 3-6-9 INDEX 32
 //////////////////////////////////////////////////
 
 
 
-const TESLA_MAP_V45={
+const TESLA_MAP={
+
 
 0:["0","0"],
+
 1:["0","0"],
+
 2:["5","7"],
+
 3:["8","0"],
+
 4:["6","9"],
+
 5:["2","7"],
+
 6:["4","9"],
+
 7:["5","2"],
+
 8:["3","0"],
+
 9:["3","4"]
+
 
 };
 
@@ -1382,23 +1741,23 @@ const TESLA_MAP_V45={
 
 
 
-//////////////////////////////////////////////////
-// APLICAR TESLA
-//////////////////////////////////////////////////
 
-function aplicarTeslaV45(numero){
+function aplicarTesla(numero){
+
 
 
 let salida="";
 
 
-for(let d of numero){
+
+for(let digito of numero){
 
 
-if(TESLA_MAP_V45[d]){
+
+if(TESLA_MAP[digito]){
 
 
-salida+=TESLA_MAP_V45[d][0];
+salida+=TESLA_MAP[digito][0];
 
 
 }
@@ -1406,6 +1765,7 @@ salida+=TESLA_MAP_V45[d][0];
 
 
 }
+
 
 
 return salida;
@@ -1417,16 +1777,17 @@ return salida;
 
 
 
-//////////////////////////////////////////////////
-// FRECUENCIA AMBOS
-//////////////////////////////////////////////////
 
-async function calcularFrecuenciaAmbos(){
+
+async function rankingAmbos(){
+
 
 
 let datos=
 
-await leerBase();
+await leerDatos(
+STORES.historico
+);
 
 
 
@@ -1449,113 +1810,78 @@ numero.slice(-2);
 
 
 
-if(ambos.length===2){
-
-
 ranking[ambos]=
 
 (ranking[ambos]||0)+1;
 
 
-}
-
-
 
 }
 
 
 
-return ranking;
-
-
-}
-
-
-
-
-
-//////////////////////////////////////////////////
-// GENERADOR AMBOS IA
-//////////////////////////////////////////////////
-
-async function generarAmbosIA(){
-
-
-let frecuencia=
-
-await calcularFrecuenciaAmbos();
-
-
-
-let lista=
-
-Object.keys(frecuencia)
+return Object.keys(ranking)
 
 .sort(
 
 (a,b)=>
 
-frecuencia[b]-frecuencia[a]
+ranking[b]-ranking[a]
 
 );
 
-
-
-let resultado=[];
-
-
-
-for(let n of lista){
-
-
-if(!resultado.includes(n)){
-
-
-resultado.push(n);
 
 
 }
 
 
 
-if(resultado.length>=5){
+
+
+
+
+async function generarAmbosIA(){
+
+
+
+let ranking=
+
+await rankingAmbos();
+
+
+
+let salida=[];
+
+
+
+for(let n of ranking){
+
+
+
+if(!salida.includes(n)){
+
+
+
+salida.push(n);
+
+
+
+}
+
+
+
+if(salida.length>=5)
 
 break;
 
-}
 
 
 }
 
 
 
+return salida;
 
-// respaldo Tesla si no hay base
-
-if(resultado.length===0){
-
-
-let base="4826";
-
-
-let tesla=
-
-aplicarTeslaV45(base);
-
-
-
-resultado.push(
-
-tesla.slice(-2)
-
-);
-
-
-}
-
-
-
-return resultado;
 
 
 }
@@ -1566,11 +1892,9 @@ return resultado;
 
 
 
-//////////////////////////////////////////////////
-// GENERAR TERNOS
-//////////////////////////////////////////////////
 
-function generarTernosV45(ambos){
+function generarTernos(ambos){
+
 
 
 let salida=[];
@@ -1578,6 +1902,7 @@ let salida=[];
 
 
 for(let n of ambos){
+
 
 
 salida.push(
@@ -1587,6 +1912,7 @@ n+n[0]
 );
 
 
+
 }
 
 
@@ -1594,17 +1920,18 @@ n+n[0]
 return salida;
 
 
+
 }
 
 
 
 
 
-//////////////////////////////////////////////////
-// GENERAR CUATERNOS
-//////////////////////////////////////////////////
 
-function generarCuaternosV45(ambos){
+
+
+function generarCuaternos(ambos){
+
 
 
 let salida=[];
@@ -1614,11 +1941,13 @@ let salida=[];
 for(let n of ambos){
 
 
+
 salida.push(
 
 n+n
 
 );
+
 
 
 }
@@ -1628,20 +1957,20 @@ n+n
 return salida;
 
 
+
 }
 
 
 
 
 
-//////////////////////////////////////////////////
-// GENERADOR PRINCIPAL IA
-//////////////////////////////////////////////////
+
 
 async function generarResultadoIA(){
 
 
-await cargarModeloIA();
+
+await cargarTodoIA();
 
 
 
@@ -1653,23 +1982,24 @@ await generarAmbosIA();
 
 let ternos=
 
-generarTernosV45(ambos);
+generarTernos(ambos);
 
 
 
 let cuaternos=
 
-generarCuaternosV45(ambos);
+generarCuaternos(ambos);
+
 
 
 
 
 mostrar(`
 
-🧠 EMI TESLA PRO V45.1
+🧠 EMI TESLA PRO
 
 
-====================
+================
 
 
 🔥 AMBOS IA
@@ -1686,22 +2016,18 @@ mostrar(`
 🎯 TERNOS
 
 
-1) ${ternos[0]||"--"}
-
-2) ${ternos[1]||"--"}
+${ternos.join("\n")}
 
 
 
 🏆 CUATERNOS
 
 
-1) ${cuaternos[0]||"--"}
-
-2) ${cuaternos[1]||"--"}
+${cuaternos.join("\n")}
 
 
 
-🟢 MODELO IA ACTIVO
+🟢 IA ACTIVA
 
 
 `);
@@ -1709,213 +2035,105 @@ mostrar(`
 
 
 
-
 }
-
-
-
-
-
-//////////////////////////////////////////////////
-// RANKING IA V45
+  //////////////////////////////////////////////////
+// BLOQUE 7/8
+// RANKING + MATRIZ + AUDITORÍA
 //////////////////////////////////////////////////
 
-async function rankingInteligenteV45(){
+
+
+
+
+async function mostrarRankingIA(){
+
 
 
 let ranking=
 
-await calcularFrecuenciaAmbos();
-
-
-
-let lista=
-
-Object.keys(ranking)
-
-.sort(
-
-(a,b)=>
-
-ranking[b]-ranking[a]
-
-);
+await rankingAmbos();
 
 
 
 mostrar(`
 
-🧠 RANKING IA V45.1
+🏆 RANKING IA
 
 
 TOP AMBOS
 
 
-1) ${lista[0]||"--"}
+1) ${ranking[0]||"--"}
 
-2) ${lista[1]||"--"}
+2) ${ranking[1]||"--"}
 
-3) ${lista[2]||"--"}
+3) ${ranking[2]||"--"}
 
-4) ${lista[3]||"--"}
+4) ${ranking[3]||"--"}
 
-5) ${lista[4]||"--"}
-
-
-
-REGISTROS:
-
-${(await leerBase()).length}
+5) ${ranking[4]||"--"}
 
 
 
 `);
 
+
+
+
+
 }
 
 
 
 
-//////////////////////////////////////////////////
-// MATRIZ IA
-//////////////////////////////////////////////////
+
+
+
 
 async function mostrarMatrizIA(){
 
 
-let datos=
 
-await leerBase();
-
-
-
-let matriz={};
+await cargarTodoIA();
 
 
 
-for(let item of datos){
-
-
-let turno=item.turno||"SIN";
-
-
-matriz[turno]=
-
-(matriz[turno]||0)+1;
-
-
-
-}
+document.getElementById(
+"estadoMatriz"
+).innerText="ACTIVA";
 
 
 
 mostrar(`
 
-🔄 MATRIZ IA V45.1
+🔄 MATRIZ IA
+
+
+POR TURNOS:
 
 
 ${JSON.stringify(
-matriz,
+MATRIZ_TURNOS,
 null,
 2
 )}
 
 
+
+POR PROVINCIA:
+
+
+${JSON.stringify(
+MATRIZ_PROVINCIAS,
+null,
+2
+)}
+
+
+
 `);
 
-}
-  //////////////////////////////////////////////////
-// BLOQUE 4/5
-// OCR PDF + CARGA HISTÓRICA
-// EMI TESLA PRO V45.1 CORREGIDO
-//////////////////////////////////////////////////
 
-
-let OCR_ACTIVO=false;
-
-
-
-//////////////////////////////////////////////////
-// DETECTAR PROVINCIA
-//////////////////////////////////////////////////
-
-function detectarProvinciaOCR(texto){
-
-
-texto=texto.toUpperCase();
-
-
-
-if(texto.includes("CORRIENTES"))
-return "CORRIENTES";
-
-
-if(texto.includes("CIUDAD"))
-return "CIUDAD";
-
-
-if(texto.includes("BONAERENSE"))
-return "BONAERENSE";
-
-
-if(texto.includes("SANTA FE"))
-return "SANTA FE";
-
-
-if(texto.includes("CORDOBA") ||
-texto.includes("CÓRDOBA"))
-return "CORDOBA";
-
-
-if(texto.includes("ENTRE RIOS") ||
-texto.includes("ENTRE RÍOS"))
-return "ENTRE RIOS";
-
-
-if(texto.includes("CHACO"))
-return "CHACO";
-
-
-return "DESCONOCIDA";
-
-
-}
-
-
-
-
-//////////////////////////////////////////////////
-// DETECTAR TURNO
-//////////////////////////////////////////////////
-
-function detectarTurnoOCR(texto){
-
-
-texto=texto.toUpperCase();
-
-
-
-if(texto.includes("PREVIA"))
-return "PREVIA";
-
-
-if(texto.includes("PRIMERA"))
-return "PRIMERA";
-
-
-if(texto.includes("MATUTINA"))
-return "MATUTINA";
-
-
-if(texto.includes("VESPERTINA"))
-return "VESPERTINA";
-
-
-if(texto.includes("NOCTURNA"))
-return "NOCTURNA";
-
-
-return "SIN_TURNO";
 
 
 }
@@ -1924,25 +2142,41 @@ return "SIN_TURNO";
 
 
 
-//////////////////////////////////////////////////
-// EXTRAER NÚMEROS 4 CIFRAS
-//////////////////////////////////////////////////
-
-function extraerNumerosOCR(texto){
-
-
-let encontrados=
-
-texto.match(/\b\d{4}\b/g);
 
 
 
-if(!encontrados)
-
-return [];
+async function auditoriaSistema(){
 
 
-return encontrados;
+
+let datos=
+
+await leerDatos(
+STORES.historico
+);
+
+
+
+let manual=0;
+
+let ocr=0;
+
+
+
+for(let d of datos){
+
+
+
+if(d.origen==="MANUAL")
+
+manual++;
+
+
+
+if(d.origen==="OCR_PDF")
+
+ocr++;
+
 
 
 }
@@ -1950,318 +2184,138 @@ return encontrados;
 
 
 
+
+
+let memoria=
+
+await leerDatos(
+STORES.aprendizaje
+);
+
+
+
+
+
+let aud=
+
+`
+
+🛡️ AUDITORÍA INDEX 32
+
+
+====================
+
+
+REGISTROS TOTALES:
+
+${datos.length}
+
+
+
+CARGA MANUAL:
+
+${manual}
+
+
+
+OCR PDF:
+
+${ocr}
+
+
+
+BASE:
+
+ACTIVA
+
+
+
+IA:
+
+${Object.keys(MODELO_IA).length>0?
+"ACTIVA":
+"PENDIENTE"}
+
+
+
+MEMORIA:
+
+${memoria.length>0?
+"OK":
+"VACÍA"}
+
+
+
+MATRIZ PROVINCIA-PROVINCIA:
+
+OK
+
+
+
+====================
+
+
+`;
+
+
+
+
+
+document.getElementById(
+"auditoria"
+).innerText=aud;
+
+
+
+}
+
+
+
+
+
 //////////////////////////////////////////////////
-// PROCESAR TEXTO OCR
+// ARRANQUE AUTOMÁTICO
 //////////////////////////////////////////////////
 
-async function procesarTextoOCR(texto){
+window.addEventListener(
+"load",
+async()=>{
+
+
+await abrirBase();
+
+
+await actualizarTotal();
+
+
+await cargarTodoIA();
 
 
 
-let provincia=
+document.getElementById(
+"estadoIA"
+).innerText="ACTIVA";
 
-detectarProvinciaOCR(texto);
-
-
-
-let turno=
-
-detectarTurnoOCR(texto);
-
-
-
-let numeros=
-
-extraerNumerosOCR(texto);
-
-
-
-let guardados=0;
-
-
-
-for(let numero of numeros){
-
-
-await guardarRegistro({
-
-fecha:new Date()
-.toISOString()
-.slice(0,10),
-
-
-provincia:provincia,
-
-
-turno:turno,
-
-
-numero:numero,
-
-
-origen:"OCR_PDF_V45_1"
 
 
 });
-
-
-
-guardados++;
-
-
-}
-
-
-
-
-return guardados;
-
-
-}
-
-
-
-
-
-//////////////////////////////////////////////////
-// INICIAR OCR PDF
-//////////////////////////////////////////////////
-
-async function iniciarOCR(){
-
-
-let archivo=
-
-document.getElementById(
-"archivoPDF"
-).files[0];
-
-
-
-if(!archivo){
-
-
-mostrar(
-"⚠️ Seleccioná un PDF primero"
-);
-
-
-return;
-
-
-}
-
-
-
-OCR_ACTIVO=true;
-
-
-
-mostrar(`
-
-📄 OCR INICIADO
-
-
-Procesando:
-
-${archivo.name}
-
-
-`);
-
-
-
-
-try{
-
-
-let arrayBuffer=
-
-await archivo.arrayBuffer();
-
-
-
-let pdf=
-
-await pdfjsLib.getDocument(
-{
-data:arrayBuffer
-}
-).promise;
-
-
-
-let totalGuardado=0;
-
-
-
-for(let pagina=1;
-pagina<=pdf.numPages;
-pagina++){
-
-
-
-if(!OCR_ACTIVO)
-
-break;
-
-
-
-let page=
-
-await pdf.getPage(pagina);
-
-
-
-let contenido=
-
-await page.getTextContent();
-
-
-
-let texto="";
-
-
-
-for(let item of contenido.items){
-
-
-texto+=item.str+" ";
-
-
-}
-
-
-
-if(texto.length<20){
-
-
-continue;
-
-
-}
-
-
-
-let cantidad=
-
-await procesarTextoOCR(texto);
-
-
-
-totalGuardado+=cantidad;
-
-
-
-mostrar(`
-
-📄 OCR página:
-
-${pagina}/${pdf.numPages}
-
-
-Guardados:
-
-${totalGuardado}
-
-
-`);
-
-
-
-
-}
-
-
-
-
-let total=
-
-(await leerBase()).length;
-
-
-
-document.getElementById(
-"total"
-).innerText=total;
-
-
-
-mostrar(`
-
-✅ OCR FINALIZADO
-
-
-NUEVOS REGISTROS:
-
-${totalGuardado}
-
-
-TOTAL BASE:
-
-${total}
-
-
-`);
-
-
-
-
-}catch(error){
-
-
-mostrar(
-
-"❌ ERROR OCR:\n"+
-error
-
-);
-
-
-}
-
-
-
-}
-
-
-
-
-//////////////////////////////////////////////////
-// DETENER OCR
-//////////////////////////////////////////////////
-
-function detenerOCR(){
-
-
-OCR_ACTIVO=false;
-
-
-
-mostrar(
-
-"⛔ OCR DETENIDO"
-
-);
-
-
-}
   //////////////////////////////////////////////////
-// BLOQUE 5/5
-// CIERRE SISTEMA + AUDITORÍA
-// EMI TESLA PRO V45.1 CORREGIDO
+// BLOQUE 8/8
+// CIERRE FINAL INDEX 32 CORREGIDO
 //////////////////////////////////////////////////
 
 
 
 //////////////////////////////////////////////////
-// MOSTRAR RESULTADO
+// MOSTRAR RESULTADOS
 //////////////////////////////////////////////////
 
 function mostrar(texto){
 
 
-let zona=document.getElementById(
+let zona=
+
+document.getElementById(
 "resultado"
 );
 
@@ -2274,7 +2328,6 @@ zona.innerText=texto;
 }
 
 
-
 }
 
 
@@ -2282,45 +2335,7 @@ zona.innerText=texto;
 
 
 //////////////////////////////////////////////////
-// BOTÓN PRUEBA
-//////////////////////////////////////////////////
-
-function probarSistema(){
-
-
-mostrar(`
-
-✅ SISTEMA FUNCIONANDO
-
-
-🚀 EMI TESLA PRO V45.1
-
-
-BOTONES:
-
-OK
-
-
-BASE:
-
-OK
-
-
-IA:
-
-PREPARADA
-
-
-`);
-
-}
-
-
-
-
-
-//////////////////////////////////////////////////
-// LIMPIAR RESULTADO
+// LIMPIAR PANTALLA
 //////////////////////////////////////////////////
 
 function limpiarResultado(){
@@ -2328,7 +2343,7 @@ function limpiarResultado(){
 
 mostrar(`
 
-EMI TESLA PRO V45.1
+🚀 EMI TESLA PRO
 
 
 LISTO PARA TRABAJAR
@@ -2342,79 +2357,104 @@ LISTO PARA TRABAJAR
 
 
 //////////////////////////////////////////////////
-// AUDITORÍA
+// GENERAR TESLA MANUAL
 //////////////////////////////////////////////////
 
-async function auditoriaV45(){
-
-
-try{
+async function generarTesla(){
 
 
 let datos=
 
-await leerBase();
+await generarAmbosIA();
 
 
 
-let memoria=
-
-await leerMemoriaIA();
+let tesla=[];
 
 
 
-let pred=
+for(let n of datos){
 
-await leerPredicciones();
+
+tesla.push(
+aplicarTesla(n)
+);
+
+
+}
 
 
 
 mostrar(`
 
-🛡️ AUDITORÍA EMI TESLA PRO V45.1
+⚡ TESLA 3-6-9
 
 
-======================
+AMBOS BASE:
 
 
-REGISTROS:
-
-${datos.length}
-
-
-
-MEMORIA IA:
-
-${memoria.length}
+${datos.join("\n")}
 
 
 
-PREDICCIONES:
+TRANSFORMADO TESLA:
 
-${pred.length}
 
+${tesla.join("\n")}
+
+
+
+`);
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// VERIFICACIÓN DEL SISTEMA
+//////////////////////////////////////////////////
+
+async function verificarSistema(){
+
+
+
+try{
+
+
+let base=
+
+await leerDatos(
+STORES.historico
+);
+
+
+
+mostrar(`
+
+✅ SISTEMA OK
 
 
 BASE:
 
+${base.length}
+REGISTROS
+
+
+IA:
+
 ACTIVA
 
 
+BOTONES:
 
-MODELO:
-
-${MODELO_TURNO_LISTO
-?"ACTIVO"
-:"PENDIENTE"}
+FUNCIONANDO
 
 
+INDEX 32:
 
-ESTADO:
+CORREGIDO
 
-OK
-
-
-======================
 
 `);
 
@@ -2426,7 +2466,7 @@ OK
 
 mostrar(
 
-"ERROR AUDITORÍA:\n"+
+"ERROR SISTEMA:\n"+
 error
 
 );
@@ -2435,7 +2475,6 @@ error
 }
 
 
-
 }
 
 
@@ -2443,45 +2482,70 @@ error
 
 
 //////////////////////////////////////////////////
-// ACTUALIZAR CONTADOR
+// EXPORTAR RESPALDO
 //////////////////////////////////////////////////
 
-async function actualizarEstadoBase(){
+async function exportarBase(){
 
-
-try{
 
 
 let datos=
 
-await leerBase();
-
-
-
-let total=
-
-document.getElementById(
-"total"
+await leerDatos(
+STORES.historico
 );
 
 
 
-if(total){
+let archivo=
 
-total.innerText=
-datos.length;
+new Blob(
 
+[
+JSON.stringify(
+datos,
+null,
+2
+)
+],
+
+{
+type:"application/json"
 }
 
+);
 
 
-}catch(e){
+
+let url=
+
+URL.createObjectURL(
+archivo
+);
 
 
-console.log(e);
+
+let a=
+
+document.createElement(
+"a"
+);
 
 
-}
+
+a.href=url;
+
+
+a.download=
+"EMI_TESLA_BACKUP.json";
+
+
+a.click();
+
+
+
+URL.revokeObjectURL(url);
+
 
 
 }
@@ -2491,12 +2555,84 @@ console.log(e);
 
 
 //////////////////////////////////////////////////
-// INICIO ÚNICO DEL SISTEMA
+// RECUPERAR ESTADO AL ABRIR
+//////////////////////////////////////////////////
+
+async function recuperarEstado(){
+
+
+await actualizarTotal();
+
+
+await cargarTodoIA();
+
+
+
+document.getElementById(
+"estadoBase"
+).innerText=
+"ACTIVA";
+
+
+
+document.getElementById(
+"estadoIA"
+).innerText=
+"ACTIVA";
+
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// CONTROL DE ERRORES GLOBAL
+//////////////////////////////////////////////////
+
+window.onerror=function(
+mensaje,
+archivo,
+linea
+){
+
+
+
+mostrar(`
+
+⚠️ ERROR DETECTADO
+
+
+${mensaje}
+
+
+Línea:
+
+${linea}
+
+
+
+`);
+
+
+
+
+
+};
+
+
+
+
+
+//////////////////////////////////////////////////
+// ARRANQUE FINAL
 //////////////////////////////////////////////////
 
 window.addEventListener(
 "load",
-async function(){
+async()=>{
 
 
 try{
@@ -2506,26 +2642,23 @@ await abrirBase();
 
 
 
-await actualizarEstadoBase();
-
-
-
-await cargarModeloIA();
+await recuperarEstado();
 
 
 
 mostrar(`
 
-🚀 EMI TESLA PRO V45.1
+🚀 EMI TESLA PRO
 
 
-SISTEMA INICIADO
+INDEX 32 CORREGIDO
 
 
 🟢 BASE ACTIVA
 
+🟢 IA ACTIVA
 
-🟢 IA CARGADA
+🟢 SISTEMA LISTO
 
 
 `);
@@ -2533,13 +2666,13 @@ SISTEMA INICIADO
 
 
 
-}catch(error){
+}catch(e){
 
 
 mostrar(
 
 "ERROR DE INICIO:\n"+
-error
+e
 
 );
 
@@ -2549,9 +2682,6 @@ error
 
 
 });
-  
-</script>
-
 
 </body>
 

@@ -1894,16 +1894,25 @@ await Tesseract
 let totalRegistros=0;
 
 
+// CONTADORES OCR EN TIEMPO REAL
 
-for(
-let pagina=1;
-pagina<=pdf.numPages;
-pagina++
-){
+let conteoTurnos={
+
+    PREVIA:0,
+    PRIMERA:0,
+    MATUTINA:0,
+    VESPERTINA:0,
+    NOCTURNA:0,
+    SIN_TURNO:0
+
+};
 
 
-if(pararOCR)
-break;
+let ultimoTurno="INICIANDO";
+
+
+
+
 
 
 
@@ -1996,7 +2005,15 @@ let turno=
 detectarTurnoOCR(
 texto
 );
+  
+ultimoTurno=turno;
 
+
+if(conteoTurnos[turno]!==undefined){
+
+    conteoTurnos[turno]++;
+
+  }
 
 
 let fecha=
@@ -2047,7 +2064,7 @@ totalRegistros++;
 
 mostrar(`
 
-✅ OCR HISTÓRICO
+📄 OCR HISTÓRICO INTELIGENTE V45.2
 
 Página:
 
@@ -2058,26 +2075,42 @@ de
 ${pdf.numPages}
 
 
-Turno detectado:
-
-${turno}
-
-
-Números encontrados:
-
-${numeros.length}
-
-
-Registros nuevos:
+📚 REGISTROS NUEVOS:
 
 ${totalRegistros}
+
+
+🔄 ÚLTIMO TURNO LEÍDO:
+
+${ultimoTurno}
+
+
+📊 CONTEO ACTUAL:
+
+PREVIA:
+${conteoTurnos.PREVIA}
+
+PRIMERA:
+${conteoTurnos.PRIMERA}
+
+MATUTINA:
+${conteoTurnos.MATUTINA}
+
+VESPERTINA:
+${conteoTurnos.VESPERTINA}
+
+NOCTURNA:
+${conteoTurnos.NOCTURNA}
+
+
+💾 BASE TOTAL:
+
+${(await leerBase()).length}
 
 `);
 
 
 
-
-}
 
 
 

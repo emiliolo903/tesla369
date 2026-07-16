@@ -2223,119 +2223,62 @@ return;
 
 let puntos={};
 
+await aprenderBaseIA();
 
 
-for(let r of datosOrigen){
+// 1) Frecuencia histórica
+for(let ambos in MODELO_IA.frecuencia){
 
-let ambos=r.numero.slice(-2);
+    puntos[ambos]=(puntos[ambos]||0);
 
-
-// frecuencia
-
-puntos[ambos]=
-(puntos[ambos]||0)+10;
-
-
-
-// terno fuerte
-
-let terno=r.numero.slice(-3);
-
-puntos[terno]=
-(puntos[terno]||0)+2;
-
-
+    puntos[ambos]+=MODELO_IA.frecuencia[ambos]*10;
 
 }
 
 
+// 2) Aprendizaje del turno elegido
 
-// sumar acompañantes
+if(MODELO_TURNO[turnoOrigen]){
 
-let acomp=[];
+    for(let ambos in MODELO_TURNO[turnoOrigen]){
 
-for(let r of datosDestino){
+        puntos[ambos]=(puntos[ambos]||0);
 
-let ambos=r.numero.slice(-2);
+        puntos[ambos]+=MODELO_TURNO[turnoOrigen][ambos]*100;
 
-if(!acomp.includes(ambos)){
-
-acomp.push(ambos);
-
-}
-
-  }
-
-
-acomp.slice(0,20)
-.forEach((n,i)=>{
-
-
-puntos[n]=
-(puntos[n]||0)+
-(40-i);
-
-
-});
-
-
-
-
-// ordenar ambos solamente
-
-let ambos=
-
-Object.keys(puntos)
-
-.filter(n=>n.length===2)
-
-.sort((a,b)=>
-
-puntos[b]-puntos[a]
-
-)
-
-.slice(0,3);
-
-
-
-
-
-// generar ternos
-
-let ternos=[];
-
-let cuaternos=[];
-
-
-
-for(let r of datos){
-
-
-let n=r.numero;
-
-
-if(ambos.includes(n.slice(-2))){
-
-
-
-if(!ternos.includes(n.slice(-3)))
-
-ternos.push(n.slice(-3));
-
-
-
-if(!cuaternos.includes(n))
-
-cuaternos.push(n);
-
-
+    }
 
 }
 
 
+// 3) Arrastre provincial
+
+for(let provincia in MODELO_PROVINCIA){
+
+    if(provincia==="ARRASTRES") continue;
+
+    for(let ambos in MODELO_PROVINCIA[provincia]){
+
+        puntos[ambos]=(puntos[ambos]||0);
+
+        puntos[ambos]+=MODELO_PROVINCIA[provincia][ambos]*20;
+
+    }
+
 }
 
+
+// 4) Acompañantes
+
+for(let ambos in MODELO_ACOMPANANTES){
+
+    puntos[ambos]=(puntos[ambos]||0);
+
+    puntos[ambos]+=Object.keys(MODELO_ACOMPANANTES[ambos].ternos).length*15;
+
+    puntos[ambos]+=Object.keys(MODELO_ACOMPANANTES[ambos].cuaternos).length*15;
+
+}
 
 
 

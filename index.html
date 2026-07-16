@@ -1912,53 +1912,19 @@ let ultimoTurno="INICIANDO";
 
   
 
-
 mostrar(`
 
-📄 OCR HISTÓRICO INTELIGENTE V45.2
+📄 OCR LISTO
 
-Página:
+PDF cargado:
 
-${pagina}
+${pdf.numPages} páginas
 
-de
-
-${pdf.numPages}
-
-
-📚 REGISTROS NUEVOS:
-
-${totalRegistros}
-
-
-🔄 ÚLTIMO TURNO LEÍDO:
-
-${ultimoTurno}
-
-
-📊 CONTEO ACTUAL:
-
-PREVIA:
-${conteoTurnos.PREVIA}
-
-PRIMERA:
-${conteoTurnos.PRIMERA}
-
-MATUTINA:
-${conteoTurnos.MATUTINA}
-
-VESPERTINA:
-${conteoTurnos.VESPERTINA}
-
-NOCTURNA:
-${conteoTurnos.NOCTURNA}
-
-
-💾 BASE TOTAL:
-
-${(await leerBase()).length}
+Iniciando procesamiento...
 
 `);
+
+
 
 
 for(

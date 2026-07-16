@@ -263,6 +263,11 @@ accept=".pdf">
 
 </button>
   
+<button onclick="mostrarMatrizIA()">
+
+🔄 VER MATRIZ IA
+
+  </button>
 
 </div>
 
@@ -838,7 +843,196 @@ mostrar(`
 `);
 
   }
+//////////////////////////////////////////////////
+// MATRIZ IA TURNO + PROVINCIA V45.1
+//////////////////////////////////////////////////
 
+let MATRIZ_IA={};
+
+
+
+async function construirMatrizIA(){
+
+
+let datos=
+
+await leerBase();
+
+
+
+let matriz={
+
+turnos:{},
+
+provincias:{}
+
+};
+
+
+
+let siguiente={
+
+"PREVIA":"PRIMERA",
+
+"PRIMERA":"MATUTINA",
+
+"MATUTINA":"VESPERTINA",
+
+"VESPERTINA":"NOCTURNA",
+
+"NOCTURNA":"PREVIA"
+
+};
+
+
+
+// MATRIZ ENTRE TURNOS
+
+for(let a of datos){
+
+
+let destino=
+
+siguiente[a.turno];
+
+
+
+if(!destino)
+continue;
+
+
+
+for(let b of datos){
+
+
+if(a.fecha!==b.fecha)
+continue;
+
+
+if(b.turno!==destino)
+continue;
+
+
+
+let origen=
+
+a.numero.slice(-2);
+
+
+
+let salida=
+
+b.numero.slice(-2);
+
+
+
+let clave=
+
+a.turno+
+"→"+
+destino+
+" "+
+origen;
+
+
+
+if(!matriz.turnos[clave]){
+
+matriz.turnos[clave]={};
+
+}
+
+
+
+matriz.turnos[clave][salida]=
+
+(matriz.turnos[clave][salida]||0)+1;
+
+
+
+}
+
+
+
+}
+
+
+
+
+// MATRIZ PROVINCIAL
+
+for(let r of datos){
+
+
+let provincia=r.provincia;
+
+
+let ambos=r.numero.slice(-2);
+
+
+
+if(!matriz.provincias[provincia]){
+
+matriz.provincias[provincia]={};
+
+}
+
+
+
+matriz.provincias[provincia][ambos]=
+
+(matriz.provincias[provincia][ambos]||0)+1;
+
+
+
+}
+
+
+
+MATRIZ_IA=matriz;
+
+
+return matriz;
+
+
+}
+
+
+
+
+async function mostrarMatrizIA(){
+
+
+let matriz=
+
+await construirMatrizIA();
+
+
+
+mostrar(`
+
+🔄 MATRIZ IA V45.1
+
+
+TURNOS APRENDIDOS:
+
+${Object.keys(matriz.turnos).length}
+
+
+PROVINCIAS:
+
+${Object.keys(matriz.provincias).length}
+
+
+✅ Arrastre entre turnos activo
+
+✅ Comportamiento provincial activo
+
+
+`);
+
+  }
+  
 //////////////////////////////////////////////////
 // RANKING DE AMBOS
 //////////////////////////////////////////////////

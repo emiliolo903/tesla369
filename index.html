@@ -269,6 +269,12 @@ accept=".pdf">
 
   </button>
 
+  <button onclick="rankingInteligenteV45()">
+
+🧠 RANKING IA FINAL
+
+  </button>
+  
 </div>
 
 
@@ -1704,7 +1710,183 @@ mostrar(
 
 
   }
+//////////////////////////////////////////////////
+// RANKING INTELIGENTE IA V45.1
+//////////////////////////////////////////////////
 
+async function rankingInteligenteV45(){
+
+let datos = await leerBase();
+
+
+if(datos.length===0){
+
+mostrar("⚠️ Sin datos históricos");
+
+return;
+
+}
+
+
+
+let puntos={};
+
+
+
+for(let r of datos){
+
+
+let ambos=r.numero.slice(-2);
+
+
+// frecuencia
+
+puntos[ambos]=
+(puntos[ambos]||0)+10;
+
+
+
+// terno fuerte
+
+let terno=r.numero.slice(-3);
+
+puntos[terno]=
+(puntos[terno]||0)+2;
+
+
+
+}
+
+
+
+// sumar acompañantes
+
+let acomp=
+await obtenerAcompanantesV45();
+
+
+
+acomp.slice(0,20)
+.forEach((n,i)=>{
+
+
+puntos[n]=
+(puntos[n]||0)+
+(40-i);
+
+
+});
+
+
+
+
+// ordenar ambos solamente
+
+let ambos=
+
+Object.keys(puntos)
+
+.filter(n=>n.length===2)
+
+.sort((a,b)=>
+
+puntos[b]-puntos[a]
+
+)
+
+.slice(0,3);
+
+
+
+
+
+// generar ternos
+
+let ternos=[];
+
+let cuaternos=[];
+
+
+
+for(let r of datos){
+
+
+let n=r.numero;
+
+
+if(ambos.includes(n.slice(-2))){
+
+
+
+if(!ternos.includes(n.slice(-3)))
+
+ternos.push(n.slice(-3));
+
+
+
+if(!cuaternos.includes(n))
+
+cuaternos.push(n);
+
+
+
+}
+
+
+}
+
+
+
+
+mostrar(`
+
+🧠 RANKING IA V45.1
+
+
+🔥 AMBOS
+
+1) ${ambos[0]||"--"}
+
+2) ${ambos[1]||"--"}
+
+3) ${ambos[2]||"--"}
+
+
+
+🎯 TERNOS
+
+1) ${ternos[0]||"--"}
+
+2) ${ternos[1]||"--"}
+
+
+
+🏆 CUATERNOS
+
+1) ${cuaternos[0]||"--"}
+
+2) ${cuaternos[1]||"--"}
+
+
+
+✅ IA APRENDIENDO
+
+- PDF
+
+- MANUAL
+
+- TURNOS
+
+- PROVINCIAS
+
+- ACOMPAÑANTES
+
+
+`);
+
+
+
+  }
 
 </script>
 

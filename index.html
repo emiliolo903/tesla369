@@ -181,7 +181,48 @@ INICIANDO
 🛠️ PRUEBA SISTEMA
 </h2>
 
+<div class="card">
 
+<h2>
+✍️ CARGA MANUAL 7 PROVINCIAS
+</h2>
+
+
+<select id="turnoBloque">
+
+<option>PREVIA</option>
+<option>PRIMERA</option>
+<option>MATUTINA</option>
+<option>VESPERTINA</option>
+<option>NOCTURNA</option>
+
+</select>
+
+
+<input id="corrientesBloque" placeholder="Corrientes 4 cifras">
+
+<input id="ciudadBloque" placeholder="Ciudad 4 cifras">
+
+<input id="bonaerenseBloque" placeholder="Bonaerense 4 cifras">
+
+<input id="santafeBloque" placeholder="Santa Fe 4 cifras">
+
+<input id="cordobaBloque" placeholder="Córdoba 4 cifras">
+
+<input id="entreriosBloque" placeholder="Entre Ríos 4 cifras">
+
+<input id="chacoBloque" placeholder="Chaco 4 cifras">
+
+
+<button onclick="guardarBloqueIA()">
+
+💾 GUARDAR BLOQUE
+
+</button>
+
+
+</div>
+  
 <button onclick="probarSistema()">
 
 ✅ PROBAR BOTÓN
@@ -361,7 +402,83 @@ reject(e);
 }
 
 
+function guardarRegistro(datos){
 
+return new Promise((resolve,reject)=>{
+
+
+let tx=db.transaction(
+STORE_NAME,
+"readwrite"
+);
+
+
+let tabla=tx.objectStore(
+STORE_NAME
+);
+
+
+tabla.add(datos);
+
+
+tx.oncomplete=function(){
+
+resolve(true);
+
+};
+
+
+tx.onerror=function(e){
+
+reject(e);
+
+};
+
+
+});
+
+
+}
+
+
+
+function leerBase(){
+
+return new Promise((resolve,reject)=>{
+
+
+let tx=db.transaction(
+STORE_NAME,
+"readonly"
+);
+
+
+let tabla=tx.objectStore(
+STORE_NAME
+);
+
+
+let datos=tabla.getAll();
+
+
+datos.onsuccess=function(){
+
+resolve(datos.result);
+
+};
+
+
+datos.onerror=function(e){
+
+reject(e);
+
+};
+
+
+});
+
+
+}
 
 //////////////////////////////////////////////////
 // MOSTRAR
@@ -436,7 +553,149 @@ mostrar(
 
 
 };
+//////////////////////////////////////////////////
+// CARGA MANUAL 7 PROVINCIAS V45.1
+//////////////////////////////////////////////////
 
+async function guardarBloqueIA(){
+
+
+let turno=
+
+document.getElementById(
+"turnoBloque"
+).value;
+
+
+
+let provincias={
+
+
+"CORRIENTES":
+document.getElementById("corrientesBloque").value,
+
+
+"CIUDAD":
+document.getElementById("ciudadBloque").value,
+
+
+"BONAERENSE":
+document.getElementById("bonaerenseBloque").value,
+
+
+"SANTA FE":
+document.getElementById("santafeBloque").value,
+
+
+"CORDOBA":
+document.getElementById("cordobaBloque").value,
+
+
+"ENTRE RIOS":
+document.getElementById("entreriosBloque").value,
+
+
+"CHACO":
+document.getElementById("chacoBloque").value
+
+
+};
+
+
+
+let cantidad=0;
+
+
+for(let provincia in provincias){
+
+
+let numero=
+
+provincias[provincia].trim();
+
+
+
+if(numero==="") continue;
+
+
+
+if(!/^\d{4}$/.test(numero)){
+
+
+mostrar(
+
+"⚠️ Error en "+
+provincia+
+" debe tener 4 cifras"
+
+);
+
+
+return;
+
+}
+
+
+
+await guardarRegistro({
+
+fecha:new Date()
+.toISOString()
+.slice(0,10),
+
+turno,
+
+provincia,
+
+numero,
+
+origen:"MANUAL_V45_1"
+
+});
+
+
+
+cantidad++;
+
+
+}
+
+
+
+let total=
+
+(await leerBase()).length;
+
+
+
+document.getElementById(
+"total"
+).innerText=total;
+
+
+
+mostrar(`
+
+✅ BLOQUE GUARDADO
+
+Turno:
+
+${turno}
+
+
+Provincias:
+
+${cantidad}
+
+
+TOTAL REGISTROS:
+
+${total}
+
+
+`);
+
+  }
 
 </script>
 

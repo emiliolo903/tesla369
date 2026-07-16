@@ -399,7 +399,31 @@ unique:false
 
 }
 
+// MEMORIA IA
 
+if(!base.objectStoreNames.contains(STORE_MEMORIA)){
+
+
+let memoria =
+base.createObjectStore(
+STORE_MEMORIA,
+{
+keyPath:"id",
+autoIncrement:true
+}
+);
+
+
+memoria.createIndex(
+"fecha",
+"fecha",
+{
+unique:false
+}
+);
+
+
+  }
 
 };
 

@@ -641,7 +641,90 @@ async function aprenderBaseIA(){
 
 let datos=await leerBase();
 
+//////////////////////////////////////////////////
+// APRENDIZAJE POR TURNO V45.2
+//////////////////////////////////////////////////
 
+MODELO_TURNO={
+PREVIA:{},
+PRIMERA:{},
+MATUTINA:{},
+VESPERTINA:{},
+NOCTURNA:{}
+};
+
+
+MODELO_PROVINCIA={};
+
+
+MODELO_ACOMPANANTES={};
+
+
+
+for(let r of datos){
+
+
+let turno=r.turno;
+
+let ambos=r.numero.slice(-2);
+
+
+
+//
+// MEMORIA SEPARADA POR TURNO
+//
+
+if(MODELO_TURNO[turno]){
+
+
+if(!MODELO_TURNO[turno][ambos]){
+
+MODELO_TURNO[turno][ambos]=0;
+
+}
+
+
+MODELO_TURNO[turno][ambos]++;
+
+
+}
+
+
+
+//
+// MEMORIA PROVINCIA
+//
+
+let prov=r.provincia;
+
+
+if(!MODELO_PROVINCIA[prov]){
+
+MODELO_PROVINCIA[prov]={};
+
+}
+
+
+
+MODELO_PROVINCIA[prov][ambos]=
+
+(MODELO_PROVINCIA[prov][ambos]||0)+1;
+
+
+
+}
+
+
+
+MODELO_TURNO_LISTO=true;
+
+
+console.log(
+"APRENDIZAJE V45.2 CARGADO",
+MODELO_TURNO,
+MODELO_PROVINCIA
+);
+  
 let modelo={
 
 frecuencia:{},

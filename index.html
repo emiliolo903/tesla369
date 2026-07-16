@@ -875,6 +875,55 @@ console.log(
 ARRASTRE_PROVINCIAS
 
 );
+  //////////////////////////////////////////////////
+// APRENDER ACOMPAÑANTES V45.2
+//////////////////////////////////////////////////
+
+MODELO_ACOMPANANTES={};
+
+
+for(let r of datos){
+
+    let numero=r.numero;
+
+    let ambos=numero.slice(-2);
+
+    let terno=numero.slice(-3);
+
+    let cuaterno=numero;
+
+    if(!MODELO_ACOMPANANTES[ambos]){
+
+        MODELO_ACOMPANANTES[ambos]={
+
+            ternos:{},
+
+            cuaternos:{}
+
+        };
+
+    }
+
+
+    MODELO_ACOMPANANTES[ambos].ternos[terno]=
+
+    (MODELO_ACOMPANANTES[ambos].ternos[terno]||0)+1;
+
+
+    MODELO_ACOMPANANTES[ambos].cuaternos[cuaterno]=
+
+    (MODELO_ACOMPANANTES[ambos].cuaternos[cuaterno]||0)+1;
+
+}
+
+
+console.log(
+
+"ACOMPAÑANTES V45.2",
+
+MODELO_ACOMPANANTES
+
+);
   
 let modelo={
 

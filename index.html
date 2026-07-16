@@ -666,63 +666,365 @@ MODELO_PROVINCIA[prov][ambos]=
 
 
 MODELO_TURNO_LISTO=true;
-
-  //////////////////////////////////////////////////
-// GUARDAR PREDICCION
 //////////////////////////////////////////////////
+// APRENDIZAJE PREDICCIONES IA V45.3
+//////////////////////////////////////////////////
+
 
 function guardarPrediccion(datos){
 
 return new Promise((resolve,reject)=>{
 
-let tx=db.transaction(
+
+let tx=
+
+db.transaction(
 STORE_PREDICCIONES,
 "readwrite"
 );
 
+
 let tabla=
+
 tx.objectStore(
 STORE_PREDICCIONES
 );
 
+
 tabla.add(datos);
 
-tx.oncomplete=()=>resolve(true);
 
-tx.onerror=e=>reject(e);
+
+tx.oncomplete=function(){
+
+resolve(true);
+
+};
+
+
+
+tx.onerror=function(e){
+
+reject(e);
+
+};
+
 
 });
+
 
 }
 
 
 
-//////////////////////////////////////////////////
-// LEER PREDICCIONES
-//////////////////////////////////////////////////
+
 
 function leerPredicciones(){
 
 return new Promise((resolve,reject)=>{
 
-let tx=db.transaction(
+
+let tx=
+
+db.transaction(
 STORE_PREDICCIONES,
 "readonly"
 );
 
+
+
 let tabla=
+
 tx.objectStore(
 STORE_PREDICCIONES
 );
 
-let req=
+
+
+let datos=
+
 tabla.getAll();
 
-req.onsuccess=()=>resolve(req.result);
 
-req.onerror=e=>reject(e);
+
+datos.onsuccess=function(){
+
+resolve(datos.result);
+
+};
+
+
+
+datos.onerror=function(e){
+
+reject(e);
+
+};
+
+
 
 });
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// EVALUAR RESULTADO REAL
+//////////////////////////////////////////////////
+
+
+async function evaluarPrediccionIA(turno,numero){
+
+
+let predicciones=
+
+await leerPredicciones();
+
+
+
+if(predicciones.length===0){
+
+return;
+
+}
+
+
+
+let ultima=
+
+predicciones[predicciones.length-1];
+
+
+
+if(!ultima.turnoDestino){
+
+return;
+
+}
+
+
+
+if(ultima.turnoDestino!==turno){
+
+return;
+
+}
+
+
+
+let ambosReal=
+
+numero.slice(-2);
+
+
+
+let ternoReal=
+
+numero.slice(-3);
+
+
+
+let cuaternoReal=
+
+numero;
+
+
+
+let puntos=0;
+
+
+
+let aciertos=[];
+
+
+
+// AMBOS
+
+if(
+ultima.ambos &&
+ultima.ambos.includes(ambosReal)
+){
+
+puntos+=10;
+
+aciertos.push(
+"AMBOS"
+);
+
+}
+
+
+
+// TERNO
+
+if(
+ultima.ternos &&
+ultima.ternos.includes(ternoReal)
+){
+
+puntos+=30;
+
+aciertos.push(
+"TERNO"
+);
+
+}
+
+
+
+// CUATERNO
+
+if(
+ultima.cuaternos &&
+ultima.cuaternos.includes(cuaternoReal)
+){
+
+puntos+=60;
+
+aciertos.push(
+"CUATERNO"
+);
+
+}
+
+
+
+
+await guardarAprendizajeIA({
+
+fecha:new Date().toISOString(),
+
+turno,
+
+numero,
+
+puntos,
+
+aciertos,
+
+origen:"EVALUACION_V45_3"
+
+});
+
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// GUARDAR APRENDIZAJE
+//////////////////////////////////////////////////
+
+
+function guardarAprendizajeIA(datos){
+
+return new Promise((resolve,reject)=>{
+
+
+let tx=
+
+db.transaction(
+STORE_APRENDIZAJE,
+"readwrite"
+);
+
+
+
+let tabla=
+
+tx.objectStore(
+STORE_APRENDIZAJE
+);
+
+
+
+tabla.add(datos);
+
+
+
+tx.oncomplete=function(){
+
+resolve(true);
+
+};
+
+
+
+tx.onerror=function(e){
+
+reject(e);
+
+};
+
+
+
+});
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// LEER APRENDIZAJE
+//////////////////////////////////////////////////
+
+
+function leerAprendizajeIA(){
+
+return new Promise((resolve,reject)=>{
+
+
+let tx=
+
+db.transaction(
+STORE_APRENDIZAJE,
+"readonly"
+);
+
+
+
+let tabla=
+
+tx.objectStore(
+STORE_APRENDIZAJE
+);
+
+
+
+let datos=
+
+tabla.getAll();
+
+
+
+datos.onsuccess=function(){
+
+resolve(datos.result);
+
+};
+
+
+
+datos.onerror=function(e){
+
+reject(e);
+
+};
+
+
+
+});
+
 
 }
   

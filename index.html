@@ -903,7 +903,21 @@ rankingCuaterno[a]
 .slice(0,2);
 
 
+// GUARDAR JUGADA EN MEMORIA IA
 
+await guardarMemoriaIA({
+
+fecha:new Date().toISOString(),
+
+ambos:ambos,
+
+ternos:ternos,
+
+cuaternos:cuaternos,
+
+origen:"GENERACION_IA_V45_1"
+
+});
 
 
 

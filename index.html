@@ -2502,119 +2502,170 @@ IA LISTA PARA APRENDER
 
   }
 //////////////////////////////////////////////////
-// AUDITORÍA SISTEMA V45.1
+// AUDITORÍA AVANZADA V45.2
+// CONTEO POR TURNO Y PROVINCIA
 //////////////////////////////////////////////////
 
 async function auditoriaV45(){
 
-
-let datos=
-
-await leerBase();
+    let datos = await leerBase();
 
 
+    if(datos.length===0){
 
-let manual=
+        mostrar("⚠️ No hay registros en la base");
 
-datos.filter(
-x=>x.origen &&
-x.origen.includes("MANUAL")
-).length;
+        return;
 
-
-
-let ocr=
-
-datos.filter(
-x=>x.origen &&
-x.origen.includes("OCR")
-).length;
+    }
 
 
-
-let provincias=[];
-
-let turnos=[];
+    let resumen={};
 
 
+    let turnos=[
+        "PREVIA",
+        "PRIMERA",
+        "MATUTINA",
+        "VESPERTINA",
+        "NOCTURNA"
+    ];
 
-datos.forEach(r=>{
 
-
-if(!provincias.includes(r.provincia))
-provincias.push(r.provincia);
+    let provincias=[
+        "CORRIENTES",
+        "CIUDAD",
+        "BONAERENSE",
+        "SANTA FE",
+        "CORDOBA",
+        "ENTRE RIOS",
+        "CHACO",
+        "AUTO"
+    ];
 
 
 
-if(!turnos.includes(r.turno))
-turnos.push(r.turno);
+    // Crear estructura
+
+    turnos.forEach(t=>{
+
+        resumen[t]={};
+
+        provincias.forEach(p=>{
+
+            resumen[t][p]=0;
+
+        });
+
+    });
 
 
 
-});
+    // Contar registros
+
+    for(let r of datos){
+
+
+        let turno=r.turno || "SIN_TURNO";
+
+        let provincia=r.provincia || "SIN_PROVINCIA";
+
+
+        if(!resumen[turno]){
+
+            resumen[turno]={};
+
+        }
+
+
+        if(resumen[turno][provincia]===undefined){
+
+            resumen[turno][provincia]=0;
+
+        }
+
+
+        resumen[turno][provincia]++;
+
+
+    }
 
 
 
-mostrar(`
+    let texto=`
 
+🛡️ AUDITORÍA IA V45.2
 
-🛡️ AUDITORÍA EMI TESLA PRO V45.1
-
-
-====================
-
+======================
 
 📚 REGISTROS TOTALES:
 
 ${datos.length}
 
 
+======================
 
-✍️ CARGA MANUAL:
+📊 CONTEO POR TURNO Y PROVINCIA
 
-${manual}
-
-
-
-📄 OCR:
-
-${ocr}
+`;
 
 
 
-🌎 PROVINCIAS ACTIVAS:
-
-${provincias.length}
+    for(let turno in resumen){
 
 
+        texto+=`
 
-🔄 TURNOS:
+🔹 ${turno}
 
-${turnos.join(", ")}
+`;
+
+        for(let provincia in resumen[turno]){
 
 
+            if(resumen[turno][provincia]>0){
+
+
+                texto+=
+                provincia+
+                ": "+
+                resumen[turno][provincia]+
+                "\n";
+
+
+            }
+
+        }
+
+    }
+
+
+
+    texto+=`
+
+======================
 
 💾 BASE:
-
 ACTIVA
 
 
-
 🧠 IA:
-
 APRENDIZAJE ACTIVO
 
 
+✅ AUDITORÍA COMPLETA
 
-====================
-
-
-✅ SISTEMA OK
+`;
 
 
-`);
 
-  }
+    mostrar(texto);
+
+
+}
+
+
+
   
 </script>
 

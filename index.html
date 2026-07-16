@@ -323,6 +323,12 @@ const STORE_NAME="historico";
 
 const STORE_MEMORIA="memoriaIA";
   
+//////////////////////////////////////////////////
+// MEMORIA DE PREDICCIONES
+//////////////////////////////////////////////////
+
+const STORE_PREDICCIONES="prediccionesIA";
+  
 let db=null;
 
 
@@ -718,6 +724,65 @@ MODELO_PROVINCIA[prov][ambos]=
 
 MODELO_TURNO_LISTO=true;
 
+  //////////////////////////////////////////////////
+// GUARDAR PREDICCION
+//////////////////////////////////////////////////
+
+function guardarPrediccion(datos){
+
+return new Promise((resolve,reject)=>{
+
+let tx=db.transaction(
+STORE_PREDICCIONES,
+"readwrite"
+);
+
+let tabla=
+tx.objectStore(
+STORE_PREDICCIONES
+);
+
+tabla.add(datos);
+
+tx.oncomplete=()=>resolve(true);
+
+tx.onerror=e=>reject(e);
+
+});
+
+}
+
+
+
+//////////////////////////////////////////////////
+// LEER PREDICCIONES
+//////////////////////////////////////////////////
+
+function leerPredicciones(){
+
+return new Promise((resolve,reject)=>{
+
+let tx=db.transaction(
+STORE_PREDICCIONES,
+"readonly"
+);
+
+let tabla=
+tx.objectStore(
+STORE_PREDICCIONES
+);
+
+let req=
+tabla.getAll();
+
+req.onsuccess=()=>resolve(req.result);
+
+req.onerror=e=>reject(e);
+
+});
+
+}
+  
 //////////////////////////////////////////////////
 // TRANSICIONES ENTRE TURNOS V45.2
 //////////////////////////////////////////////////

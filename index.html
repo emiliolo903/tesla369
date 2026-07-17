@@ -1442,17 +1442,13 @@ detectarFechaOCR(texto);
 
 
 
-let numeros =
-texto.match(/\b\d{4}\b/g)||[];
+let bloquesProvincia = separarPorProvincia(texto);
 
 
+for(let bloque of bloquesProvincia){
 
 
-for(let numero of numeros){
-
-
-let provincia =
-detectarProvincia(texto);
+for(let numero of bloque.numeros){
 
 
 await guardarHistorico({
@@ -1461,23 +1457,112 @@ fecha,
 
 turno,
 
-provincia,
+provincia:
+bloque.provincia,
 
 numero,
 
-origen:"OCR_HISTORICO_V45_2",
+origen:
+"OCR_PROVINCIA",
 
 pagina:pagina
 
 });
 
 
-
-
 totalRegistros++;
 
 
 }
+
+
+}
+
+
+function separarPorProvincia(texto){
+
+let resultado=[];
+
+
+let provincias=[
+
+"CORRIENTES",
+"CIUDAD",
+"BONAERENSE",
+"SANTA FE",
+"CORDOBA",
+"ENTRE RIOS",
+"CHACO"
+
+];
+
+
+for(let i=0;i<provincias.length;i++){
+
+
+let actual=provincias[i];
+
+
+let inicio=
+texto.indexOf(actual);
+
+
+
+if(inicio===-1)
+continue;
+
+
+
+let fin=texto.length;
+
+
+for(let j=i+1;j<provincias.length;j++){
+
+
+let siguiente=
+texto.indexOf(provincias[j]);
+
+
+if(siguiente>inicio){
+
+fin=siguiente;
+break;
+
+}
+
+
+}
+
+
+
+let bloqueTexto=
+texto.substring(inicio,fin);
+
+
+
+let numeros=
+bloqueTexto.match(/\b\d{4}\b/g)||[];
+
+
+
+resultado.push({
+
+provincia:actual,
+
+numeros:numeros
+
+
+});
+
+
+}
+
+
+return resultado;
+
+
+  }
+
 
 
 

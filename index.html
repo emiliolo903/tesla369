@@ -1571,105 +1571,178 @@ ${salida.join("\n")}
 `);
 
 }
-  //////////////////////////////////////////////////
-// V46 BLOQUE 6
-// ACOMPAÑANTE IA
+  
+
+//////////////////////////////////////////////////
+// V46 ACOMPAÑANTE IA MATRIZ PROVINCIA x TURNO
 //////////////////////////////////////////////////
 
 
-
-async function buscarAcompananteV46(){
-
-
-await construirMatrizV46();
+async function buscarAcompananteMatrizV46(turnoObjetivo){
 
 
-
-let ranking=
-
-await analizarIA_V46();
-
-
-
-let candidatos=[];
-
-
-
-for(let n of ranking){
-
-
-let peso=
-
-RANKING_V46[n];
-
-
-
-let continuidad=0;
-
-
-
-if(MATRIZ_V46[n]){
-
-
-let valores=
-
-Object.values(
-MATRIZ_V46[n]
+let datos = await leerV46(
+STORES_V46.historico
 );
 
 
+let fuerza = {};
 
-continuidad=
 
-valores.reduce(
-(a,b)=>a+b,
-0
-);
+// analizar movimientos
+
+for(let i=0;i<datos.length-1;i++){
+
+
+let actual = datos[i];
+
+let siguiente = datos[i+1];
+
+
+// mismo turno objetivo
+
+if(
+siguiente.turno !== turnoObjetivo
+)
+continue;
+
+
+
+let base =
+String(actual.numero)
+.slice(-2);
+
+
+
+let salida =
+String(siguiente.numero)
+.slice(-2);
+
+
+
+let provincia =
+siguiente.provincia;
+
+
+
+let clave =
+salida;
+
+
+
+if(!fuerza[clave]){
+
+fuerza[clave]={
+
+total:0,
+
+provincia:0,
+
+continuidad:0,
+
+inverso:0
+
+};
+
+}
+
+
+
+// frecuencia general
+
+fuerza[clave].total++;
+
+
+
+// misma provincia
+
+if(
+actual.provincia===provincia
+){
+
+fuerza[clave].provincia++;
+
+}
+
+
+
+// continuidad
+
+if(
+base===salida
+){
+
+fuerza[clave].continuidad++;
+
+}
+
+
+
+// inversión
+
+if(
+base[0]===salida[1] &&
+base[1]===salida[0]
+){
+
+fuerza[clave].inverso++;
+
+}
 
 
 }
 
 
 
-let fuerza=
+// calcular peso final
 
-peso+continuidad;
+let ranking=[];
 
 
 
-candidatos.push({
+for(let n in fuerza){
+
+
+let peso =
+
+(fuerza[n].total*1)+
+
+(fuerza[n].provincia*3)+
+
+(fuerza[n].continuidad*5)+
+
+(fuerza[n].inverso*2);
+
+
+
+ranking.push({
 
 numero:n,
 
-fuerza:fuerza
+peso:peso
 
 });
 
 
-
 }
 
 
 
-candidatos.sort(
+ranking.sort(
 
 (a,b)=>
-b.fuerza-a.fuerza
+b.peso-a.peso
 
 );
 
 
 
-
-return candidatos
+return ranking
 .slice(0,3)
-.map(
-(x)=>x.numero
-);
+.map(x=>x.numero);
 
 
 }
-
 
 
 
@@ -1679,9 +1752,43 @@ return candidatos
 async function botonAcompanante(){
 
 
-let ambos=
 
-await buscarAcompananteV46();
+let turno =
+
+document.getElementById(
+"turnoCarga"
+).value;
+
+
+
+let siguiente;
+
+
+
+if(turno==="PREVIA")
+siguiente="PRIMERA";
+
+if(turno==="PRIMERA")
+siguiente="MATUTINA";
+
+if(turno==="MATUTINA")
+siguiente="VESPERTINA";
+
+if(turno==="VESPERTINA")
+siguiente="NOCTURNA";
+
+if(turno==="NOCTURNA")
+siguiente="PREVIA";
+
+
+
+
+
+let ambos =
+
+await buscarAcompananteMatrizV46(
+siguiente
+);
 
 
 
@@ -1691,29 +1798,34 @@ let cuaternos=[];
 
 
 
-for(let a of ambos){
+for(let n of ambos){
 
 
 ternos.push(
-a+a[0]
+n+n[0]
 );
-
 
 
 cuaternos.push(
-a+a
+n+n
 );
-
 
 
 }
 
 
 
+
+
 mostrarV46(`
 
 
-🤖 ACOMPAÑANTE IA V46
+🤖 ACOMPAÑANTE IA MATRIZ V46
+
+
+PRÓXIMO TURNO:
+
+${siguiente}
 
 
 
@@ -1728,23 +1840,35 @@ mostrarV46(`
 
 
 
-🎯 2 TERNOS
+🎯 TERNOS
 
 
 ${ternos.slice(0,2).join("\n")}
 
 
 
-🏆 2 CUATERNOS
+🏆 CUATERNOS
 
 
 ${cuaternos.slice(0,2).join("\n")}
 
 
 
+ANÁLISIS:
+
+Provincia × Turno
+
+Continuidad
+
+Inversión
+
+Histórico
+
+
 `);
 
-}
+    }
+
   //////////////////////////////////////////////////
 // V46 BLOQUE 7
 // AUDITORÍA INTELIGENTE

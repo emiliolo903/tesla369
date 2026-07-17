@@ -2778,6 +2778,381 @@ e
 
 
 });
+  //////////////////////////////////////////////////
+// BLOQUE 9/10
+// MOTOR APRENDIZAJE MOVIMIENTO
+// INDEX 32 / V45.1 COMPATIBLE
+//////////////////////////////////////////////////
+
+
+let MATRIZ_MOVIMIENTO={};
+
+let MATRIZ_PROVINCIA_TURNO={};
+
+
+
+
+
+//////////////////////////////////////////////////
+// CONSTRUIR MOVIMIENTOS HISTÓRICOS
+//////////////////////////////////////////////////
+
+async function aprenderMovimiento(){
+
+
+let datos=
+
+await leerDatos(
+STORES.historico
+);
+
+
+
+MATRIZ_MOVIMIENTO={};
+
+MATRIZ_PROVINCIA_TURNO={};
+
+
+
+for(let i=0;i<datos.length-1;i++){
+
+
+
+let actual=
+
+datos[i];
+
+
+
+let siguiente=
+
+datos[i+1];
+
+
+
+let ambosActual=
+
+String(actual.numero)
+.slice(-2);
+
+
+
+let ambosSiguiente=
+
+String(siguiente.numero)
+.slice(-2);
+
+
+
+
+
+// MOVIMIENTO GENERAL
+
+
+if(!MATRIZ_MOVIMIENTO[ambosActual]){
+
+
+MATRIZ_MOVIMIENTO[ambosActual]={};
+
+
+}
+
+
+
+MATRIZ_MOVIMIENTO[ambosActual][ambosSiguiente]=
+
+
+(MATRIZ_MOVIMIENTO[ambosActual][ambosSiguiente]||0)+1;
+
+
+
+
+
+
+
+// MOVIMIENTO POR PROVINCIA Y TURNO
+
+
+let clave=
+
+actual.provincia+
+"_"+
+actual.turno;
+
+
+
+
+
+if(!MATRIZ_PROVINCIA_TURNO[clave]){
+
+
+MATRIZ_PROVINCIA_TURNO[clave]={};
+
+
+}
+
+
+
+
+
+MATRIZ_PROVINCIA_TURNO[clave][ambosSiguiente]=
+
+
+(MATRIZ_PROVINCIA_TURNO[clave][ambosSiguiente]||0)+1;
+
+
+
+}
+
+
+
+
+return true;
+
+
+}
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// BUSCAR ACOMPAÑANTES FUERTES
+//////////////////////////////////////////////////
+
+function buscarMovimiento(ambos){
+
+
+let resultado=[];
+
+
+
+let datos=
+
+MATRIZ_MOVIMIENTO[ambos];
+
+
+
+if(!datos)
+
+return [];
+
+
+
+
+resultado=
+
+Object.keys(datos)
+
+.sort(
+
+(a,b)=>
+
+datos[b]-datos[a]
+
+);
+
+
+
+return resultado.slice(0,5);
+
+
+}
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// BUSCAR ACOMPAÑANTE POR PROVINCIA
+//////////////////////////////////////////////////
+
+function buscarMovimientoProvincia(
+provincia,
+turno,
+ambos
+){
+
+
+
+let clave=
+
+provincia+
+"_"+
+turno;
+
+
+
+let datos=
+
+MATRIZ_PROVINCIA_TURNO[clave];
+
+
+
+if(!datos)
+
+return [];
+
+
+
+
+return Object.keys(datos)
+
+.sort(
+
+(a,b)=>
+
+datos[b]-datos[a]
+
+)
+
+.slice(0,5);
+
+
+
+}
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// ANALISIS COMPLETO DE UN AMBOS
+//////////////////////////////////////////////////
+
+async function analizarAmbos(ambos){
+
+
+
+await aprenderMovimiento();
+
+
+
+let general=
+
+buscarMovimiento(ambos);
+
+
+
+return {
+
+
+base:ambos,
+
+
+acompanantes:general,
+
+
+fuerza:
+
+general.length?
+
+
+
+100-(general.indexOf(general[0])*10)
+
+:
+
+0
+
+
+
+};
+
+
+
+}
+
+
+
+
+
+
+
+//////////////////////////////////////////////////
+// MOSTRAR APRENDIZAJE
+//////////////////////////////////////////////////
+
+async function mostrarMovimientoIA(){
+
+
+
+await aprenderMovimiento();
+
+
+
+mostrar(`
+
+
+🧠 APRENDIZAJE MOVIMIENTO IA
+
+
+TOTAL MOVIMIENTOS:
+
+${Object.keys(MATRIZ_MOVIMIENTO).length}
+
+
+
+EJEMPLOS:
+
+
+12 →
+
+${buscarMovimiento("12").join(" - ")}
+
+
+
+34 →
+
+${buscarMovimiento("34").join(" - ")}
+
+
+
+56 →
+
+${buscarMovimiento("56").join(" - ")}
+
+
+
+78 →
+
+${buscarMovimiento("78").join(" - ")}
+
+
+
+`);
+
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// INTEGRACIÓN CON IA PRINCIPAL
+//////////////////////////////////////////////////
+
+async function cargarMotorMovimiento(){
+
+
+await aprenderMovimiento();
+
+
+return true;
+
+
+  }
+  
 </script>
 </body>
 

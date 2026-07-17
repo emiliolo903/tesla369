@@ -313,7 +313,13 @@ OFF
 🔥 ACOMPAÑANTE IA
   
 </button>
+  
+<button onclick="botonAcompanante()">
 
+🤖 ACOMPAÑANTE IA
+
+</button>
+  
 </div>
 
 
@@ -3358,6 +3364,215 @@ cuaternos
 
 
 }
+//////////////////////////////////////////////////
+// BLOQUE 12/12
+// MOTOR ACOMPAÑANTE FINAL IA
+//////////////////////////////////////////////////
+
+
+async function analizarAcompanantesFinal(){
+
+
+let datos = await leerDatos(
+STORES.historico
+);
+
+
+let ambosBase={};
+
+
+let acompanantes={};
+
+
+
+for(let item of datos){
+
+
+let nro=String(item.numero);
+
+
+if(nro.length>=2){
+
+
+let ambos=nro.slice(-2);
+
+
+
+ambosBase[ambos]=
+(ambosBase[ambos]||0)+1;
+
+
+
+}
+
+}
+
+
+
+
+
+let rankingAmbos=
+
+Object.keys(ambosBase)
+.sort(
+(a,b)=>
+ambosBase[b]-ambosBase[a]
+);
+
+
+
+let principales=
+
+rankingAmbos.slice(0,3);
+
+
+
+
+
+
+for(let base of principales){
+
+
+acompanantes[base]={};
+
+
+
+for(let item of datos){
+
+
+let nro=String(item.numero);
+
+
+let ambos=nro.slice(-2);
+
+
+
+if(ambos===base){
+
+
+
+let pos=item.numero;
+
+
+
+let acomp=pos.slice(0,2);
+
+
+
+acompanantes[base][acomp]=
+(acompanantes[base][acomp]||0)+1;
+
+
+
+}
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+let salida=`
+
+🧠 EMI TESLA PRO
+MOTOR ACOMPAÑANTE IA
+
+
+====================
+
+
+🔥 AMBOS BASE
+
+
+1) ${principales[0]||"--"}
+
+2) ${principales[1]||"--"}
+
+3) ${principales[2]||"--"}
+
+
+
+====================
+
+
+🎯 ACOMPAÑANTES RECOMENDADOS
+
+
+
+`;
+
+
+
+
+for(let base of principales){
+
+
+let lista=
+
+Object.keys(
+acompanantes[base]
+||{}
+)
+.sort(
+(a,b)=>
+acompanantes[base][b]-
+acompanantes[base][a]
+);
+
+
+
+salida+=`
+
+BASE ${base}
+
+
+TERNOS:
+
+${lista.slice(0,2).join(" - ")}
+
+
+CUATERNOS:
+
+${base}${lista[0]||""}
+
+${base}${lista[1]||""}
+
+
+`;
+
+
+
+}
+
+
+
+mostrar(salida);
+
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// BOTÓN NUEVO
+//////////////////////////////////////////////////
+
+function botonAcompanante(){
+
+
+analizarAcompanantesFinal();
+
+
+  }
   
 </script>
 </body>

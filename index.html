@@ -2493,7 +2493,8 @@ await cargarTodoIA();
 
 await construirMatrizProvinciaTurno();
   
-
+await construirContinuidadDia();
+  
 document.getElementById(
 "estadoIA"
 ).innerText="ACTIVA";
@@ -6983,7 +6984,245 @@ URL.revokeObjectURL(url);
 
 
 
-///////////////////////////
+//////////////////////////////////////////////////
+// V46 BLOQUE 1
+// MEMORIA HISTÓRICA POR DÍA
+//////////////////////////////////////////////////
+
+let MEMORIA_DIA={};
+
+
+
+async function construirMemoriaDia(){
+
+    let datos=await leerDatos(STORES.historico);
+
+    MEMORIA_DIA={};
+
+
+
+    for(let registro of datos){
+
+        if(!registro.fecha) continue;
+
+        if(!registro.turno) continue;
+
+        if(!registro.provincia) continue;
+
+        if(!registro.numero) continue;
+
+
+
+        if(!MEMORIA_DIA[registro.fecha]){
+
+            MEMORIA_DIA[registro.fecha]={};
+
+        }
+
+
+
+        if(!MEMORIA_DIA[registro.fecha][registro.turno]){
+
+            MEMORIA_DIA[registro.fecha][registro.turno]={};
+
+        }
+
+
+
+        if(!MEMORIA_DIA[registro.fecha][registro.turno][registro.provincia]){
+
+            MEMORIA_DIA[registro.fecha][registro.turno][registro.provincia]=[];
+
+        }
+
+
+
+        MEMORIA_DIA[registro.fecha][registro.turno][registro.provincia].push(
+
+            String(registro.numero).padStart(4,"0")
+
+        );
+
+
+
+    }
+
+
+
+    return MEMORIA_DIA;
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// AUDITORÍA MEMORIA HISTÓRICA
+//////////////////////////////////////////////////
+
+async function auditoriaMemoriaDia(){
+
+    await construirMemoriaDia();
+
+
+
+    let dias=
+
+    Object.keys(MEMORIA_DIA);
+
+
+
+    let texto=`
+
+🧠 MEMORIA HISTÓRICA V46
+
+========================
+
+DÍAS APRENDIDOS:
+
+${dias.length}
+
+
+
+`;
+
+
+
+    for(let fecha of dias.slice(-10)){
+
+
+        texto+=`
+
+📅 ${fecha}
+
+`;
+
+
+
+        let turnos=
+
+        Object.keys(
+            MEMORIA_DIA[fecha]
+        );
+
+
+
+        for(let turno of turnos){
+
+            texto+=`
+
+   ${turno}
+
+`;
+
+
+
+            let provincias=
+
+            Object.keys(
+                MEMORIA_DIA[fecha][turno]
+            );
+
+
+
+            for(let provincia of provincias){
+
+                texto+=
+
+                "      "+provincia+
+
+                " ("+
+
+                MEMORIA_DIA[fecha][turno][provincia].length+
+
+                ")\n";
+
+            }
+
+        }
+
+    }
+
+
+
+    document.getElementById("auditoria").innerText=texto;
+
+}
+  //////////////////////////////////////////////////
+// V46 BLOQUE 2
+// MATRIZ CONTINUIDAD POR DÍA
+//////////////////////////////////////////////////
+
+let MATRIZ_CONTINUIDAD = {};
+
+const ORDEN_TURNOS = [
+    "PREVIA",
+    "PRIMERA",
+    "MATUTINA",
+    "VESPERTINA",
+    "NOCTURNA"
+];
+
+async function construirContinuidadDia(){
+
+    await construirMemoriaDia();
+
+    MATRIZ_CONTINUIDAD = {};
+
+    for(let fecha in MEMORIA_DIA){
+
+        let dia = MEMORIA_DIA[fecha];
+
+        for(let i=0;i<ORDEN_TURNOS.length-1;i++){
+
+            let turnoActual = ORDEN_TURNOS[i];
+            let turnoSiguiente = ORDEN_TURNOS[i+1];
+
+            if(!dia[turnoActual]) continue;
+            if(!dia[turnoSiguiente]) continue;
+
+            for(let provincia in dia[turnoActual]){
+
+                if(!dia[turnoSiguiente][provincia]) continue;
+
+                let actual =
+                dia[turnoActual][provincia];
+
+                let siguiente =
+                dia[turnoSiguiente][provincia];
+
+                for(let a of actual){
+
+                    let ambosA = a.slice(-2);
+
+                    if(!MATRIZ_CONTINUIDAD[ambosA]){
+
+                        MATRIZ_CONTINUIDAD[ambosA]={};
+
+                    }
+
+                    for(let b of siguiente){
+
+                        let ambosB = b.slice(-2);
+
+                        MATRIZ_CONTINUIDAD[ambosA][ambosB]=
+
+                        (MATRIZ_CONTINUIDAD[ambosA][ambosB]||0)+1;
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return MATRIZ_CONTINUIDAD;
+
+  }
+  
 </script>
 </body>
 

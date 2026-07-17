@@ -3676,118 +3676,555 @@ const SIGUIENTE_TURNO = {
   "NOCTURNA":"PREVIA"
 };
 
+//////////////////////////////////////////////////
+// BLOQUE 3/4
+// MOTOR ACOMPAÑANTE IA V46
+//////////////////////////////////////////////////
+
 async function buscarAcompanantes(){
+
+    if(Object.keys(MEMORIA_MOVIMIENTO).length===0){
+
+        await construirMemoriaMovimiento();
+
+    }
+
 
     let datos = await leerDatos(STORES.historico);
 
-    if(datos.length < 20) return [];
 
-    const SIGUIENTE={
+    if(datos.length===0){
+
+        return [];
+
+    }
+
+
+
+    let ultimo = datos[datos.length-1];
+
+
+    let siguiente={
+
         PREVIA:"PRIMERA",
         PRIMERA:"MATUTINA",
         MATUTINA:"VESPERTINA",
         VESPERTINA:"NOCTURNA",
         NOCTURNA:"PREVIA"
+
     };
 
-    let ultimo=datos[datos.length-1];
 
-    let turnoActual=ultimo.turno;
-    let provinciaActual=ultimo.provincia;
 
-    let turnoSiguiente=SIGUIENTE[turnoActual];
+    let ruta =
 
-    let puntos={};
+    ultimo.turno+
+    "→"+
+    siguiente[ultimo.turno];
 
-    for(let i=0;i<datos.length-1;i++){
 
-        let actual=datos[i];
-        let siguiente=datos[i+1];
 
-        if(actual.turno!==turnoActual) continue;
-        if(siguiente.turno!==turnoSiguiente) continue;
+    let memoria =
 
-        let ambos=String(siguiente.numero).slice(-2);
+    MEMORIA_MOVIMIENTO[ruta];
 
-        if(!puntos[ambos]) puntos[ambos]=0;
 
-        // continuidad del turno
-        puntos[ambos]+=5;
 
-        // misma provincia
-        if(actual.provincia===provinciaActual)
-            puntos[ambos]+=4;
+    if(!memoria){
 
-        // si los dos últimos dígitos coinciden con el último cargado
-        let ultAmbos=String(ultimo.numero).slice(-2);
-
-        if(ambos[0]===ultAmbos[0])
-            puntos[ambos]+=2;
-
-        if(ambos[1]===ultAmbos[1])
-            puntos[ambos]+=2;
-
-        // más peso a registros recientes
-        puntos[ambos]+=i/datos.length;
+        return [];
 
     }
 
-    return Object.keys(puntos)
-        .sort((a,b)=>puntos[b]-puntos[a])
-        .slice(0,3);
 
-  }
+
+    let ranking =
+
+    Object.keys(memoria)
+    .sort(
+
+        (a,b)=>
+
+        memoria[b]-
+        memoria[a]
+
+    );
+
+
+
+    return ranking.slice(0,3);
+
+
+}
+
+
+
+
+async function actualizarAuditoriaIA(){
+
+    await construirMemoriaMovimiento();
+
+
+    let datos=
+
+    await leerDatos(
+        STORES.historico
+    );
+
+
+    document.getElementById(
+        "auditoria"
+    ).innerText=
+
+`
+🧠 AUDITORÍA IA V46
+
+==================
+
+REGISTROS:
+${datos.length}
+
+
+MEMORIA MOVIMIENTO:
+ACTIVA
+
+
+RUTAS APRENDIDAS:
+
+${Object.keys(MEMORIA_MOVIMIENTO).length}
+
+
+ÚLTIMO TURNO:
+
+${datos.length?
+datos[datos.length-1].turno:
+"--"}
+
+
+PRÓXIMO ANÁLISIS:
+
+ACOMPAÑANTE IA LISTO
+
+==================
+`;
+
+}
+
+
+//////////////////////////////////////////////////
+// BLOQUE 4/4
+// SALIDA ACOMPAÑANTE IA V46
+//////////////////////////////////////////////////
 
 async function botonAcompanante(){
 
     let ambos = await buscarAcompanantes();
 
-    if(ambos.length===0){
 
-        mostrar("⚠️ No hay suficiente historial.");
+    if(!ambos || ambos.length===0){
+
+        mostrar(`
+
+⚠️ ACOMPAÑANTE IA
+
+No hay suficiente memoria histórica.
+
+Cargue más sorteos.
+
+`);
 
         return;
 
     }
 
-    // TERNOS
-    let terno1 = ambos[0] + ambos[1][0];
-    let terno2 = ambos[1] + ambos[2][1];
 
-    // CUATERNOS
-    let cuaterno1 = ambos[0] + ambos[0];
-    let cuaterno2 = ambos[1] + ambos[1];
+
+    // completar hasta 3 posiciones
+
+    while(ambos.length<3){
+
+        ambos.push("--");
+
+    }
+
+
+
+    let ternos=[];
+
+    let cuaternos=[];
+
+    let tesla=[];
+
+
+
+    for(let n of ambos){
+
+
+        if(n!=="--"){
+
+
+            // ternos
+
+            ternos.push(
+                n+n[0]
+            );
+
+
+            // cuaternos
+
+            cuaternos.push(
+                n+n
+            );
+
+
+            // Tesla
+
+            tesla.push(
+                aplicarTesla(n)
+            );
+
+
+        }
+
+
+    }
+
+
+
 
     mostrar(`
 
-🤖 ACOMPAÑANTE IA
+🤖 ACOMPAÑANTE IA V46
 
-======================
+=====================
 
-🥇 AMBOS
 
-1) ${ambos[0]}
-2) ${ambos[1]}
-3) ${ambos[2]}
+🔮 PREDICCIÓN PRÓXIMO TURNO
+
+
+AMBOS
+
+🥇 ${ambos[0]}
+
+🥈 ${ambos[1]}
+
+🥉 ${ambos[2]}
+
+
 
 🎯 TERNOS
 
-1) ${terno1}
+${ternos[0] || "--"}
 
-2) ${terno2}
+${ternos[1] || "--"}
+
+
 
 🏆 CUATERNOS
 
-1) ${cuaterno1}
+${cuaternos[0] || "--"}
 
-2) ${cuaterno2}
+${cuaternos[1] || "--"}
 
-🧠 PREDICCIÓN GENERADA
-CON HISTORIAL + IA
+
+
+⚡ TESLA
+
+${tesla.join("\n")}
+
+
+
+🧠 MOTOR:
+
+MEMORIA HISTÓRICA
+
+CONTINUIDAD ENTRE TURNOS
+
 
 `);
 
+
+
+
+await actualizarAuditoriaIA();
+
+
+  }
+  
+  //////////////////////////////////////////////////
+// BLOQUE 1/4
+// AUDITORÍA IA HISTÓRICA V46
+//////////////////////////////////////////////////
+
+async function auditoriaIAEnVivo(){
+
+    let datos = await leerDatos(STORES.historico);
+
+    let turnos = {
+        PREVIA:0,
+        PRIMERA:0,
+        MATUTINA:0,
+        VESPERTINA:0,
+        NOCTURNA:0,
+        SIN_TURNO:0
+    };
+
+
+    let provincias = {};
+
+
+    for(let d of datos){
+
+        let turno = d.turno || "SIN_TURNO";
+
+        if(turnos[turno]!==undefined){
+            turnos[turno]++;
+        }
+
+
+        let prov = d.provincia || "DESCONOCIDA";
+
+        provincias[prov]=(provincias[prov]||0)+1;
+
     }
+
+
+
+    let texto=`
+
+🛡️ AUDITORÍA IA HISTÓRICA V46
+
+==========================
+
+REGISTROS TOTALES:
+
+${datos.length}
+
+
+📊 TURNOS APRENDIDOS
+
+PREVIA:
+${turnos.PREVIA}
+
+PRIMERA:
+${turnos.PRIMERA}
+
+MATUTINA:
+${turnos.MATUTINA}
+
+VESPERTINA:
+${turnos.VESPERTINA}
+
+NOCTURNA:
+${turnos.NOCTURNA}
+
+
+
+📍 PROVINCIAS
+
+`;
+
+
+
+    for(let p in provincias){
+
+        texto+=`
+
+${p}:
+${provincias[p]}`;
+
+    }
+
+
+
+    texto+=`
+
+
+
+
+🧠 MEMORIA IA:
+
+ACTIVA
+
+
+🔄 MATRIZ HISTÓRICA:
+
+ACTUALIZADA
+
+==========================
+
+`;
+
+
+
+    document.getElementById("auditoria").innerText=texto;
+
+
+}
+  //////////////////////////////////////////////////
+// BLOQUE 2/4
+// MEMORIA MOVIMIENTO ENTRE TURNOS V46
+//////////////////////////////////////////////////
+
+let MEMORIA_MOVIMIENTO={};
+
+
+async function construirMemoriaMovimiento(){
+
+    let datos = await leerDatos(STORES.historico);
+
+
+    MEMORIA_MOVIMIENTO={};
+
+
+
+    const SIGUIENTE={
+
+        PREVIA:"PRIMERA",
+        PRIMERA:"MATUTINA",
+        MATUTINA:"VESPERTINA",
+        VESPERTINA:"NOCTURNA",
+        NOCTURNA:"PREVIA"
+
+    };
+
+
+
+    for(let i=0;i<datos.length-1;i++){
+
+
+        let actual=datos[i];
+
+        let siguiente=datos[i+1];
+
+
+
+        if(!actual.turno || !siguiente.turno)
+            continue;
+
+
+
+        let clave=
+
+        actual.turno+
+        "→"+
+        siguiente.turno;
+
+
+
+        if(!MEMORIA_MOVIMIENTO[clave]){
+
+            MEMORIA_MOVIMIENTO[clave]={};
+
+        }
+
+
+
+        let ambos=
+
+        String(siguiente.numero)
+        .slice(-2);
+
+
+
+        MEMORIA_MOVIMIENTO[clave][ambos]=
+
+        (MEMORIA_MOVIMIENTO[clave][ambos]||0)+1;
+
+
+
+    }
+
+
+
+    await guardarDato(
+
+        STORES.memoria,
+
+        {
+
+        fecha:new Date()
+        .toISOString(),
+
+        tipo:
+        "MOVIMIENTO_TURNOS",
+
+        registros:
+        datos.length
+
+        }
+
+    );
+
+
+
+    return MEMORIA_MOVIMIENTO;
+
+}
+
+
+
+
+function mostrarMemoriaMovimiento(){
+
+
+let texto=`
+
+🔄 MEMORIA MOVIMIENTO IA
+
+====================
+
+`;
+
+
+
+for(let ruta in MEMORIA_MOVIMIENTO){
+
+
+    texto+=`
+
+${ruta}
+
+`;
+
+
+
+    let lista=
+
+    Object.keys(
+        MEMORIA_MOVIMIENTO[ruta]
+    )
+    .sort(
+        (a,b)=>
+        MEMORIA_MOVIMIENTO[ruta][b]-
+        MEMORIA_MOVIMIENTO[ruta][a]
+    )
+    .slice(0,5);
+
+
+
+    for(let n of lista){
+
+        texto+=
+        n+
+        "  ("+
+        MEMORIA_MOVIMIENTO[ruta][n]+
+        ")\
+";
+
+    }
+
+
+}
+
+
+
+document.getElementById(
+"auditoria"
+).innerText=texto;
+
+
+  }
   
 </script>
 </body>

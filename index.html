@@ -926,216 +926,231 @@ await guardarHistoricoV46({
 
 
 
-
+//////////////////////////////////////////////////
+// V46 BLOQUE 3A
+// MOTOR OCR NUEVO
+//////////////////////////////////////////////////
 
 async function iniciarOCR(){
 
-
-let archivo=
-
-document.getElementById(
-"archivoPDF"
-).files[0];
-
-
+const archivo=document.getElementById("archivoPDF").files[0];
 
 if(!archivo){
 
-mostrarV46("Seleccione PDF");
+mostrarV46("Seleccione un PDF.");
 
 return;
 
 }
 
-
-
 DETENER_OCR_V46=false;
 
-
-
-let buffer=
-
-await archivo.arrayBuffer();
-
-
-
-let pdf=
-
-await pdfjsLib
-.getDocument({
-data:buffer
-})
-.promise;
-
-
-
-let worker=
-
-await Tesseract.createWorker("spa");
-
-
-
-let total=0;
-
-
-
-for(
-let pagina=1;
-pagina<=pdf.numPages;
-pagina++
-){
-
-
-if(DETENER_OCR_V46)
-break;
-
-
-
-document.getElementById(
-"progresoOCR"
-).innerText=
-
-"Procesando página "+
-pagina+
-" / "+
-pdf.numPages;
+AUDITORIA_V46.paginas=0;
+AUDITORIA_V46.registros=0;
+AUDITORIA_V46.PREVIA=0;
+AUDITORIA_V46.PRIMERA=0;
+AUDITORIA_V46.MATUTINA=0;
+AUDITORIA_V46.VESPERTINA=0;
+AUDITORIA_V46.NOCTURNA=0;
+AUDITORIA_V46.provincias={};
 
 actualizarAuditoriaV46();
 
-let page=
+const buffer=await archivo.arrayBuffer();
 
-await pdf.getPage(pagina);
+const pdf=await pdfjsLib.getDocument({
+data:buffer
+}).promise;
 
+const worker=await Tesseract.createWorker("spa");
 
+document.getElementById("progresoOCR").innerHTML=
+"Preparando OCR...";
 
-let viewport=
+for(let pagina=1;pagina<=pdf.numPages;pagina++){
 
-page.getViewport({
-scale:3
-});
+if(DETENER_OCR_V46)break;
 
+AUDITORIA_V46.paginas=pagina;
 
+document.getElementById("progresoOCR").innerHTML=
 
-let canvas=
+"📄 Página "+pagina+
+" de "+pdf.numPages;
 
-document.createElement(
-"canvas"
-);
+actualizarAuditoriaV46();
 
+//////////////////////////////////////////////////
+// V46 BLOQUE 3C
+// RECORTE INTELIGENTE DEL PDF
+//////////////////////////////////////////////////
 
+const canvas=document.createElement("canvas");
 
-canvas.width=
-viewport.width;
+canvas.width=viewport.width;
 
+// recortar aproximadamente el 18% superior
+// y el 10% inferior
 
-canvas.height=
-viewport.height;
+const altoOriginal=viewport.height;
 
+const inicioY=Math.floor(altoOriginal*0.18);
 
+const finY=Math.floor(altoOriginal*0.90);
 
-let ctx=
+const altoRecorte=finY-inicioY;
 
-canvas.getContext("2d");
+canvas.height=altoRecorte;
 
+const renderCanvas=document.createElement("canvas");
 
+renderCanvas.width=viewport.width;
+renderCanvas.height=altoOriginal;
+
+const renderCtx=renderCanvas.getContext("2d");
 
 await page.render({
 
-canvasContext:ctx,
+canvasContext:renderCtx,
 
 viewport
 
 }).promise;
 
+const ctx=canvas.getContext("2d");
 
+ctx.drawImage(
 
-let lectura=
+renderCanvas,
 
-await worker.recognize(canvas);
+0,
+inicioY,
+viewport.width,
+altoRecorte,
 
+0,
+0,
+viewport.width,
+altoRecorte
 
+);
 
-let texto=
+const lectura=await worker.recognize(canvas);
 
-lectura.data.text.toUpperCase();
+const texto=lectura.data.text.toUpperCase();
 
+document.getElementById("progresoOCR").innerHTML=
 
+"📄 Página "+pagina+
+" / "+pdf.numPages+
 
-let fecha=
+"<br>🧠 Analizando tabla...";
+    
+//////////////////////////////////////////////////
+// V46 BLOQUE 3B
+// ANALIZAR TODA LA PÁGINA
+//////////////////////////////////////////////////
 
-detectarFechaV46(texto);
+const lineas = texto
+.split("\n")
+.map(x=>x.trim())
+.filter(x=>x!="");
 
+let fechaActual="SIN_FECHA";
+let turnoActual="";
+let provinciaActual="";
 
+for(let linea of lineas){
 
-let turno=
+    if(/\d{2}[\/\-]\d{2}[\/\-]\d{4}/.test(linea)){
+        fechaActual=detectarFechaV46(linea);
+    }
 
-detectarTurnoV46(texto);
+    if(linea.includes("PREVIA"))
+        turnoActual="PREVIA";
 
+    if(linea.includes("PRIMERA"))
+        turnoActual="PRIMERA";
 
+    if(linea.includes("MATUTINA"))
+        turnoActual="MATUTINA";
 
-let provincia=
+    if(linea.includes("VESPERTINA"))
+        turnoActual="VESPERTINA";
 
-detectarProvinciaV46(texto);
+    if(linea.includes("NOCTURNA"))
+        turnoActual="NOCTURNA";
 
+    if(linea.includes("CORRIENTES"))
+        provinciaActual="CORRIENTES";
 
+    if(linea.includes("CIUDAD"))
+        provinciaActual="CIUDAD";
 
-let numero=
+    if(linea.includes("BONAERENSE"))
+        provinciaActual="BONAERENSE";
 
-extraerPrimerPremioV46(texto);
+    if(linea.includes("SANTA FE"))
+        provinciaActual="SANTA FE";
 
-if(
-numero &&
-fecha!=="SIN_FECHA"
-){
+    if(linea.includes("CORDOBA"))
+        provinciaActual="CORDOBA";
 
+    if(linea.includes("ENTRE RIOS"))
+        provinciaActual="ENTRE RIOS";
 
-await guardarPremioV46({
+    if(linea.includes("CHACO"))
+        provinciaActual="CHACO";
 
-fecha,
-turno,
-provincia,
-numero,
-pagina
+    let buscarNumero=linea.match(/\b\d{4}\b/);
 
-});
+    if(
+        buscarNumero &&
+        provinciaActual!="" &&
+        turnoActual!=""
+    ){
 
+        //////////////////////////////////////////////////
+// V46 BLOQUE 3D
+// GUARDAR TODOS LOS PREMIOS DETECTADOS
+//////////////////////////////////////////////////
 
-total++;
+async function guardarPremioV46(listaPremios){
 
+    for(const item of listaPremios){
 
-// ACTUALIZAR AUDITORÍA EN VIVO
+        await guardarHistoricoV46({
 
-AUDITORIA_V46.registros++;
+            fecha:item.fecha,
+            turno:item.turno,
+            provincia:item.provincia,
+            numero:item.numero,
+            premio:item.premio,
+            pagina:item.pagina,
+            origen:"OCR_V46"
 
+        });
 
-if(AUDITORIA_V46[turno]!==undefined){
+        AUDITORIA_V46.registros++;
 
-AUDITORIA_V46[turno]++;
+        AUDITORIA_V46.paginas=item.pagina;
+
+        if(AUDITORIA_V46[item.turno]!==undefined){
+            AUDITORIA_V46[item.turno]++;
+        }
+
+        if(!AUDITORIA_V46.provincias[item.provincia]){
+            AUDITORIA_V46.provincias[item.provincia]=0;
+        }
+
+        AUDITORIA_V46.provincias[item.provincia]++;
+
+    }
+
+    actualizarAuditoriaV46();
+    await actualizarTotalV46();
 
 }
-
-
-if(!AUDITORIA_V46.provincias[provincia]){
-
-AUDITORIA_V46.provincias[provincia]=0;
-
-}
-
-
-AUDITORIA_V46.provincias[provincia]++;
-
-
-// cantidad de páginas
-
-AUDITORIA_V46.paginas=pagina;
-
-
-actualizarAuditoriaV46();
-
-
-}
-
-
 
 }
 
@@ -1174,6 +1189,130 @@ mostrarV46(
 );
 
 }
+    //////////////////////////////////////////////////
+// V46 BLOQUE 3E
+// EXTRAER 7 PROVINCIAS DE LA PÁGINA
+//////////////////////////////////////////////////
+
+function extraerPremiosPaginaV46(texto, pagina){
+
+    texto = texto.toUpperCase();
+
+    const provincias = [
+        "CORRIENTES",
+        "CIUDAD",
+        "BONAERENSE",
+        "SANTA FE",
+        "CORDOBA",
+        "ENTRE RIOS",
+        "CHACO"
+    ];
+
+    const turno = detectarTurnoV46(texto);
+    const fecha = detectarFechaV46(texto);
+
+    let resultados = [];
+
+    for(const provincia of provincias){
+
+        let indice = texto.indexOf(provincia);
+
+        if(indice === -1) continue;
+
+        // Leer solamente un bloque cercano a esa provincia
+        let bloque = texto.substring(indice, indice + 500);
+
+        // Buscar todos los números de 4 cifras
+        let numeros = bloque.match(/\b\d{4}\b/g);
+
+        
+        let registros = extraerTodosLosRegistrosV46(texto,pagina);
+
+if(registros.length>0){
+
+    await guardarPremioV46(registros);
+
+}
+
+    return resultados;
+
+}
+    //////////////////////////////////////////////////
+// V46 BLOQUE 3F
+// EXTRAER TODOS LOS TURNOS DE LA PÁGINA
+//////////////////////////////////////////////////
+
+function extraerTodosLosRegistrosV46(texto,pagina){
+
+    texto = texto.toUpperCase();
+
+    const turnos = [
+        "PREVIA",
+        "PRIMERA",
+        "MATUTINA",
+        "VESPERTINA",
+        "NOCTURNA"
+    ];
+
+    const provincias = [
+        "CORRIENTES",
+        "CIUDAD",
+        "BONAERENSE",
+        "SANTA FE",
+        "CORDOBA",
+        "ENTRE RIOS",
+        "CHACO"
+    ];
+
+    const fecha = detectarFechaV46(texto);
+
+    let registros = [];
+
+    for(const turno of turnos){
+
+        let posTurno = texto.indexOf(turno);
+
+        if(posTurno==-1) continue;
+
+        // Analizar un bloque completo del turno
+        let bloqueTurno = texto.substring(posTurno,posTurno+5000);
+
+        for(const provincia of provincias){
+
+            let posProvincia = bloqueTurno.indexOf(provincia);
+
+            if(posProvincia==-1) continue;
+
+            let bloqueProvincia =
+                bloqueTurno.substring(
+                    posProvincia,
+                    posProvincia+400
+                );
+
+            let numeros =
+                bloqueProvincia.match(/\b\d{4}\b/g);
+
+            if(!numeros) continue;
+
+            registros.push({
+
+                fecha:fecha,
+                turno:turno,
+                provincia:provincia,
+                premio:1,
+                numero:numeros[0],
+                pagina:pagina
+
+            });
+
+        }
+
+    }
+
+    return registros;
+
+    }
+    
   //////////////////////////////////////////////////
 // V46 BLOQUE 4
 // MEMORIA HISTÓRICA

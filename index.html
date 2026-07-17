@@ -1451,13 +1451,17 @@ texto.match(/\b\d{4}\b/g)||[];
 for(let numero of numeros){
 
 
+let provincia =
+detectarProvincia(texto);
+
+
 await guardarHistorico({
 
 fecha,
 
 turno,
 
-provincia:"AUTO",
+provincia,
 
 numero,
 
@@ -2277,8 +2281,10 @@ if(d.origen==="MANUAL")
 manual++;
 
 
-
-if(d.origen==="OCR_PDF")
+if(
+d.origen &&
+d.origen.includes("OCR")
+)
 
 ocr++;
 

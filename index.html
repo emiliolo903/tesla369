@@ -309,7 +309,10 @@ OFF
 
 </button>
 
-
+<button onclick="generarTernoCuaternoIA()">
+🔥 ACOMPAÑANTE IA
+  
+</button>
 
 </div>
 
@@ -3152,6 +3155,209 @@ return true;
 
 
   }
+  //////////////////////////////////////////////////
+// BLOQUE 10/10
+// MOTOR ACOMPAÑANTE IA + TERNO + CUATERNO
+//////////////////////////////////////////////////
+
+
+async function buscarAcompanantesIA(ambosBase){
+
+
+let datos = await leerDatos(
+STORES.historico
+);
+
+
+let ranking={};
+
+
+
+for(let item of datos){
+
+
+let numero =
+String(item.numero);
+
+
+let ambos =
+numero.slice(-2);
+
+
+
+if(ambosBase.includes(ambos)){
+
+
+let anterior =
+numero.slice(0,2);
+
+
+
+if(anterior!==ambos){
+
+
+ranking[anterior]=
+(ranking[anterior]||0)+1;
+
+
+}
+
+
+}
+
+
+
+}
+
+
+
+return Object.keys(ranking)
+.sort(
+(a,b)=>ranking[b]-ranking[a]
+);
+
+
+
+}
+
+
+
+
+
+async function generarTernoCuaternoIA(){
+
+
+
+let ambos =
+await generarAmbosIA();
+
+
+
+let candidatos=[];
+
+
+
+for(let base of ambos.slice(0,3)){
+
+
+let acomp =
+await buscarAcompanantesIA([base]);
+
+
+
+if(acomp.length){
+
+
+candidatos.push({
+
+base:base,
+
+acompanante:acomp[0],
+
+fuerza:acomp.length
+
+});
+
+
+}
+
+
+
+}
+
+
+
+let ternos=[];
+
+let cuaternos=[];
+
+
+
+for(let item of candidatos){
+
+
+
+let terno =
+item.base+
+item.acompanante.charAt(0);
+
+
+
+let cuaterno =
+item.base+
+item.acompanante;
+
+
+
+ternos.push(terno);
+
+cuaternos.push(cuaterno);
+
+
+
+}
+
+
+
+
+
+mostrar(`
+
+🧠 EMI TESLA PRO
+MOTOR ACOMPAÑANTE IA
+
+
+====================
+
+
+🔥 AMBOS BASE
+
+
+${ambos.slice(0,3).join("\n")}
+
+
+
+🎯 TERNOS IA
+
+
+1) ${ternos[0]||"--"}
+
+2) ${ternos[1]||"--"}
+
+
+
+🏆 CUATERNOS IA
+
+
+1) ${cuaternos[0]||"--"}
+
+2) ${cuaternos[1]||"--"}
+
+
+
+📊 SISTEMA:
+
+ACOMPAÑANTE HISTÓRICO ACTIVO
+
+
+`);
+
+
+
+
+return {
+
+ambos,
+
+ternos,
+
+cuaternos
+
+};
+
+
+
+}
   
 </script>
 </body>

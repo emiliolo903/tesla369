@@ -3664,6 +3664,101 @@ analizarAcompanantesFinal();
 
 
   }
+  //////////////////////////////////////////////////
+// NUEVO MOTOR ACOMPAÑANTE IA V45.2
+//////////////////////////////////////////////////
+
+const SIGUIENTE_TURNO = {
+  "PREVIA":"PRIMERA",
+  "PRIMERA":"MATUTINA",
+  "MATUTINA":"VESPERTINA",
+  "VESPERTINA":"NOCTURNA",
+  "NOCTURNA":"PREVIA"
+};
+
+async function buscarAcompanantes(){
+
+    let datos = await leerDatos(STORES.historico);
+
+    if(datos.length < 2){
+        return [];
+    }
+
+    // último registro cargado
+    let ultimo = datos[datos.length-1];
+
+    let turnoActual = ultimo.turno;
+    let turnoBuscado = SIGUIENTE_TURNO[turnoActual];
+
+    let contador = {};
+
+    for(let i=0;i<datos.length-1;i++){
+
+        if(
+            datos[i].turno===turnoActual &&
+            datos[i+1].turno===turnoBuscado
+        ){
+
+            let ambos = String(datos[i+1].numero).slice(-2);
+
+            contador[ambos]=(contador[ambos]||0)+1;
+
+        }
+
+    }
+
+    return Object.keys(contador)
+    .sort((a,b)=>contador[b]-contador[a])
+    .slice(0,3);
+
+}
+
+
+
+async function botonAcompanante(){
+
+    let ambos = await buscarAcompanantes();
+
+    if(ambos.length===0){
+
+        mostrar("No hay suficiente historial.");
+
+        return;
+    }
+
+    let ternos = [
+        ambos[0]+"4",
+        ambos[1]+"1"
+    ];
+
+    let cuaternos = [
+        ambos[0]+ambos[0],
+        ambos[1]+ambos[1]
+    ];
+
+    mostrar(`
+
+🤖 ACOMPAÑANTE IA
+
+AMBOS
+
+1) ${ambos[0]}
+2) ${ambos[1]}
+3) ${ambos[2]}
+
+TERNOS
+
+${ternos[0]}
+${ternos[1]}
+
+CUATERNOS
+
+${cuaternos[0]}
+${cuaternos[1]}
+
+`);
+
+}
   
 </script>
 </body>

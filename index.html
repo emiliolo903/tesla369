@@ -1083,8 +1083,6 @@ let numero=
 
 extraerPrimerPremioV46(texto);
 
-
-
 if(
 numero &&
 fecha!=="SIN_FECHA"
@@ -1094,13 +1092,9 @@ fecha!=="SIN_FECHA"
 await guardarPremioV46({
 
 fecha,
-
 turno,
-
 provincia,
-
 numero,
-
 pagina
 
 });
@@ -1109,7 +1103,38 @@ pagina
 total++;
 
 
+// ACTUALIZAR AUDITORÍA EN VIVO
+
+AUDITORIA_V46.registros++;
+
+
+if(AUDITORIA_V46[turno]!==undefined){
+
+AUDITORIA_V46[turno]++;
+
 }
+
+
+if(!AUDITORIA_V46.provincias[provincia]){
+
+AUDITORIA_V46.provincias[provincia]=0;
+
+}
+
+
+AUDITORIA_V46.provincias[provincia]++;
+
+
+// cantidad de páginas
+
+AUDITORIA_V46.paginas=pagina;
+
+
+actualizarAuditoriaV46();
+
+
+}
+
 
 
 }

@@ -1452,30 +1452,25 @@ let bloquesProvincia = separarPorProvincia(texto);
 for(let bloque of bloquesProvincia){
 
 
-for(let numero of bloque.numeros){
+// Solo guardar el 1° premio
 
+if(bloque.numeros.length>0){
 
-await guardarHistorico({
+    let numero = bloque.numeros[0];
 
-fecha,
+    await guardarHistorico({
 
-turno,
+        fecha:fecha,
+        turno:turno,
+        provincia:bloque.provincia,
+        numero:numero,
+        premio:1,
+        origen:"OCR_PROVINCIA",
+        pagina:pagina
 
-provincia:
-bloque.provincia,
+    });
 
-numero,
-
-origen:
-"OCR_PROVINCIA",
-
-pagina:pagina
-
-});
-
-
-totalRegistros++;
-
+    totalRegistros++;
 
 }
 
@@ -5221,7 +5216,7 @@ numero:
 
 numero,
 
-
+premio:1,
 origen:
 
 "MANUAL"

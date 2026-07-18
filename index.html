@@ -2026,124 +2026,166 @@ function obtenerPreviaActual(){
 
 
 //////////////////////////////////////////////////
-// EMI TESLA PRO V47.1
-// BLOQUE 9 - GENERADOR IA CORREGIDO
+// EMI TESLA PRO V48
+// MOTOR IA - 7 PROVINCIAS
 //////////////////////////////////////////////////
 
-async function generarResultadoIA(){
+function obtenerBases7Provincias(){
 
-    let previa = obtenerPreviaActual();
+    const ids=[
+        "corrientes",
+        "ciudad",
+        "bonaerense",
+        "santaFe",
+        "cordoba",
+        "entreRios",
+        "chaco"
+    ];
 
-let candidatos = [];
+    let bases=[];
 
-if(previa){
+    for(const id of ids){
 
-    candidatos.push(previa);
+        const valor=document.getElementById(id).value.trim();
 
-    let acomp = await buscarAcompananteV47(previa);
+        if(valor.length===4){
 
-    candidatos.push(...acomp);
+            bases.push(valor.slice(-2));
 
-}else{
-
-    let nucleo = await analizarNucleoV47();
-
-    if(nucleo.dominante) candidatos.push(nucleo.dominante);
-    if(nucleo.segundo) candidatos.push(nucleo.segundo);
-    if(nucleo.sobreviviente) candidatos.push(nucleo.sobreviviente);
-
-}
-
-    let candidatos=[];
-
-    if(nucleo.dominante) candidatos.push(nucleo.dominante);
-    if(nucleo.segundo) candidatos.push(nucleo.segundo);
-    if(nucleo.sobreviviente) candidatos.push(nucleo.sobreviviente);
-
-    for(let n of [...candidatos]){
-        let acomp = await buscarAcompananteV47(n);
-        if(acomp.length) candidatos.push(...acomp);
-    }
-
-    for(let n of [...candidatos]){
-        let tesla = aplicarTeslaV47(n);
-        if(tesla && tesla.length===2){
-            candidatos.push(tesla);
         }
+
     }
 
-    candidatos=[...new Set(candidatos)];
+    return [...new Set(bases)];
 
-let finales = await quitarRepetidosV47(candidatos);
-
-// Si quedaron menos de 3 candidatos,
-// usar los originales.
-if(finales.length < 3){
-    finales = [...new Set(candidatos)];
 }
+    async function analizar7Provincias(){
 
-let ambos = finales.slice(0,3);
+    let bases=obtenerBases7Provincias();
 
-let principal = ambos[0];
+    let datos=await leerV47(STORES_V47.historico);
 
-if(!principal){
-    mostrarV47("No hay suficientes datos para generar IA.");
-    return;
+    let ranking={};
+
+    for(let base of bases){
+
+        for(let i=0;i<datos.length-1;i++){
+
+            if(!datos[i].numero || !datos[i+1].numero) continue;
+
+            let actual=String(datos[i].numero).slice(-2);
+            let siguiente=String(datos[i+1].numero).slice(-2);
+
+            if(actual!==base) continue;
+
+            if(!ranking[siguiente]) ranking[siguiente]=0;
+
+            ranking[siguiente]+=10;
+
+            if(actual===siguiente)
+                ranking[siguiente]+=5;
+
+            if(
+                actual[0]===siguiente[1] &&
+                actual[1]===siguiente[0]
+            ){
+                ranking[siguiente]+=3;
+            }
+
+        }
+
     }
 
-    principal=String(principal).padStart(2,"0").slice(-2);
+    return ranking;
 
-    // Generar ternos
-let ternos = [
-    principal + principal.charAt(0),
-    principal + principal.charAt(1)
-];
+    }
+    
+    //async function obtenerCandidatos7(){
 
-// Generar cuaternos
-let cuaternos = [
-    principal + principal.charAt(0) + principal.charAt(1),
-    principal + principal.charAt(1) + principal.charAt(0)
-];
+    let ranking=await analizar7Provincias();
 
-    mostrarV47(
-`🧠 EMI TESLA PRO V47
-
-🔥 AMBOS IA
-
-1) ${ambos[0]||"--"}
-2) ${ambos[1]||"--"}
-3) ${ambos[2]||"--"}
-
-⭐ AMBOS PRINCIPAL
-
-${principal}
-
-🎯 TERNOS
-
-${ternos.join("\n")}
-
-🏆 CUATERNOS
-
-${cuaternos.join("\n")}
-
-🔥 NÚCLEO DOMINANTE
-${nucleo.dominante||"--"}
-
-⭐ SEGUNDO NÚCLEO
-${nucleo.segundo||"--"}
-
-🛡 SOBREVIVIENTE
-${nucleo.sobreviviente||"--"}
-
-✔ PDF
-✔ MATRIZ
-✔ PROVINCIAS
-✔ ACOMPAÑANTES
-✔ TESLA 3-6-9`
+    let lista=Object.keys(ranking).sort(
+        (a,b)=>ranking[b]-ranking[a]
     );
 
-}
-    //////////////////////////////////////////////////
+    if(lista.length<10){
+
+        let nucleo=await analizarNucleoV47();
+
+        if(nucleo.dominante)
+            lista.push(nucleo.dominante);
+
+        if(nucleo.segundo)
+            lista.push(nucleo.segundo);
+
+        if(nucleo.sobreviviente)
+            lista.push(nucleo.sobreviviente);
+
+    }
+
+    lista=[...new Set(lista)];
+
+    return lista;
+
+    }
+    async function generarResultadoIA(){
+
+    let candidatos=await obtenerCandidatos7();
+
+    if(candidatos.length===0){
+
+        mostrarV47("SIN DATOS SUFICIENTES");
+
+        return;
+
+    }
+
+    let ambos=candidatos.slice(0,3);
+
+    while(ambos.length<3){
+
+        ambos.push("--");
+
+    }
+
+    let terno1=ambos[0]+ambos[1][0];
+    let terno2=ambos[1]+ambos[2][0];
+
+    let cuaterno1=ambos[0]+ambos[1];
+    let cuaterno2=ambos[1]+ambos[2];
+
+    mostrarV47(
+
+`🧠 EMI TESLA PRO V48
+
+ANÁLISIS COMPLETO
+7 PROVINCIAS
+
+AMBOS
+
+1) ${ambos[0]}
+2) ${ambos[1]}
+3) ${ambos[2]}
+
+TERNOS
+
+${terno1}
+${terno2}
+
+CUATERNOS
+
+${cuaterno1}
+${cuaterno2}
+
+CANDIDATOS
+
+${candidatos.join(" - ")}
+
+`);
+
+    }
+    
+    ////////////////////////////////////////////////
 // EMI TESLA PRO V47
 // BLOQUE 10 - CIERRE FINAL
 //////////////////////////////////////////////////

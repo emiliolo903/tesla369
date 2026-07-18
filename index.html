@@ -2444,17 +2444,33 @@ async function inicializarV48(){
 
 }
 
+window.addEventListener("load", async ()=>{
+
+    try{
+
+        await iniciarMemoriaV47();
+
+        await construirMemoriaV47();
+
+        await construirMatrizTurnosV47();
+
+        document.getElementById("estadoMemoria").innerText="LISTA";
+
+        document.getElementById("estadoMatriz").innerText="ACTIVA";
+
+    }
+    catch(e){
+
+        console.log("ERROR INICIO:",e);
+
+    }
+
+});
 
 
 
-window.addEventListener(
-"load",
-()=>{
 
-    inicializarV48();
 
-}
-);
     
     
 </script>

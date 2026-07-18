@@ -2619,7 +2619,126 @@ inicializarV47();
 );
 
 
+//////////////////////////////////////////////////
+// CARGA MANUAL 7 PROVINCIAS
+//////////////////////////////////////////////////
 
+async function guardarCargaManual(){
+
+
+let turno =
+
+document.getElementById(
+"turnoCarga"
+).value;
+
+
+
+let provincias={
+
+
+"CORRIENTES":
+document.getElementById("corrientes").value,
+
+
+"CIUDAD":
+document.getElementById("ciudad").value,
+
+
+"BONAERENSE":
+document.getElementById("bonaerense").value,
+
+
+"SANTA FE":
+document.getElementById("santaFe").value,
+
+
+"CORDOBA":
+document.getElementById("cordoba").value,
+
+
+"ENTRE RIOS":
+document.getElementById("entreRios").value,
+
+
+"CHACO":
+document.getElementById("chaco").value
+
+
+};
+
+
+
+
+
+for(let provincia in provincias){
+
+
+
+let numero=provincias[provincia];
+
+
+
+if(numero && numero.length>=4){
+
+
+
+await guardarHistoricoV46({
+
+fecha:new Date()
+.toISOString()
+.slice(0,10),
+
+
+turno:turno,
+
+
+provincia:provincia,
+
+
+numero:numero,
+
+
+premio:1,
+
+
+origen:"MANUAL"
+
+
+});
+
+
+
+}
+
+
+
+}
+
+
+
+
+await actualizarTotalV46();
+
+
+await construirMemoriaDiaV46();
+
+
+await construirMatrizV46();
+
+
+
+mostrarV46(
+
+"✅ BLOQUE MANUAL GUARDADO\n\n"+
+"Turno: "+turno+
+"\n\nMatriz actualizada"
+
+);
+
+
+
+    }
 
 </script>
 

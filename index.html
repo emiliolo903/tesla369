@@ -2025,16 +2025,17 @@ function obtenerPreviaActual(){
 }
 
 
-//////////////////////////////////////////////////
-// EMI TESLA PRO V48
-// MOTOR IA - 7 PROVINCIAS
-//////////////////////////////////////////////////
 
-            
+
+//////////////////////////////////////////////////
+// EMI TESLA PRO V47.2
+// MOTOR FINAL 7 PROVINCIAS
+//////////////////////////////////////////////////
     
-    function obtenerBases7Provincias(){
 
-    const ids=[
+function obtenerBases7Provincias(){
+
+    let ids=[
         "corrientes",
         "ciudad",
         "bonaerense",
@@ -2044,7 +2045,7 @@ function obtenerPreviaActual(){
         "chaco"
     ];
 
-    let bases=[];
+    let numeros=[];
 
     for(let id of ids){
 
@@ -2052,26 +2053,62 @@ function obtenerPreviaActual(){
 
         if(valor.length===4){
 
-            bases.push(valor.slice(-2));
+            numeros.push(valor);
 
         }
 
     }
 
-    return bases;
+    return numeros;
 
 }
 
 
 
+function generarCombinaciones7Provincias(lista){
+
+    let salida=[];
+
+
+    for(let n of lista){
+
+        let base=n.slice(-2);
+
+        salida.push(base);
+
+        salida.push(base[1]+base[0]);
+
+        salida.push(aplicarTeslaV47(base));
+
+    }
+
+
+    return salida;
+
+}
+
+
+
+
+function limpiarDuplicados(lista){
+
+    return [...new Set(lista)];
+
+}
+
+
+
+
 async function generarResultadoIA(){
 
-    let bases=obtenerBases7Provincias();
 
-    if(bases.length<7){
+    let provincias=obtenerBases7Provincias();
+
+
+    if(provincias.length<7){
 
         mostrarV47(
-        "⚠️ CARGÁ LAS 7 PROVINCIAS COMPLETAS"
+        "⚠️ CARGAR LAS 7 PROVINCIAS COMPLETAS"
         );
 
         return;
@@ -2079,51 +2116,111 @@ async function generarResultadoIA(){
     }
 
 
-    let candidatos=[];
+
+    let candidatos=
+    generarCombinaciones7Provincias(provincias);
 
 
-    for(let base of bases){
 
-        candidatos.push(base);
+    candidatos=
+    limpiarDuplicados(candidatos);
 
-        let acomp=
-        await buscarAcompananteV47(base);
 
-        candidatos.push(...acomp);
+
+    // SACAR AMBOS
+
+    let ambos=[];
+
+    for(let n of candidatos){
+
+        if(n.length===2 &&
+        !ambos.includes(n)){
+
+            ambos.push(n);
+
+        }
+
+        if(ambos.length===3)
+        break;
 
     }
 
 
-    candidatos=[
-        ...new Set(candidatos)
-    ];
 
 
-    let salida="🧠 IA 7 PROVINCIAS\n\n";
+    // SACAR TERNOS
+
+    let ternos=[];
+
+    for(let i=0;i<ambos.length;i++){
+
+        for(let j=i+1;j<ambos.length;j++){
+
+            let t=
+            ambos[i]+ambos[j][1];
+
+            ternos.push(t);
 
 
-    salida+="AMBOS:\n";
+        }
 
-    salida+=candidatos.slice(0,3).join(" - ");
-
-
-    salida+="\n\nTERNO:\n";
-
-    salida+=candidatos.slice(0,2)
-    .map(n=>n+"X")
-    .join(" - ");
+    }
 
 
-    salida+="\n\nCUATERNO:\n";
-
-    salida+=candidatos.slice(0,2)
-    .map(n=>n+"XX")
-    .join(" - ");
+    ternos=
+    limpiarDuplicados(ternos)
+    .slice(0,2);
 
 
 
-    mostrarV47(salida);
 
+    // SACAR CUATERNOS
+
+    let cuaternos=[];
+
+
+    for(let t of ternos){
+
+        for(let a of ambos){
+
+            cuaternos.push(
+            t+a[1]
+            );
+
+        }
+
+    }
+
+
+    cuaternos=
+    limpiarDuplicados(cuaternos)
+    .slice(0,2);
+
+
+
+mostrarV47(
+
+"🧠 IA 7 PROVINCIAS\n\n"+
+
+"AMBOS:\n"+
+ambos.join(" - ")+
+
+"\n\nTERNO:\n"+
+ternos.join(" - ")+
+
+"\n\nCUATERNO:\n"+
+cuaternos.join(" - ")
+
+);
+
+
+
+                }
+            
+    
+    
+
+    
 }
 
 

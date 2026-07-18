@@ -1004,71 +1004,69 @@ return "DESCONOCIDA";
 
 
 //////////////////////////////////////////////////
-// EXTRACTOR REAL PDF
+// EMI TESLA PRO V47.1
+// BLOQUE 3 - EXTRACTOR REAL PDF 7 PROVINCIAS
 //////////////////////////////////////////////////
-
 
 function extraerRegistrosPDFV47(texto,pagina){
 
+    texto = texto.toUpperCase();
 
+    let fecha = detectarFechaV47(texto);
+    let turno = detectarTurnoV47(texto);
 
-texto=texto.toUpperCase();
+    const provincias = [
+        "CORRIENTES",
+        "CIUDAD",
+        "BONAERENSE",
+        "SANTA FE",
+        "CORDOBA",
+        "ENTRE RIOS",
+        "CHACO"
+    ];
 
+    let registros = [];
 
+    for(let provincia of provincias){
 
-let fecha=
-detectarFechaV47(texto);
+        let pos = texto.indexOf(provincia);
 
+        if(pos===-1) continue;
 
+        let bloque = texto.substring(pos,pos+250);
 
-let turno=
-detectarTurnoV47(texto);
+        let numeros = bloque.match(/\b\d{4}\b/g);
 
+        if(!numeros) continue;
 
+        for(let numero of numeros){
 
-let numeros =
-texto.match(/\b\d{4}\b/g)||[];
+            registros.push({
 
+                fecha:fecha,
+                turno:turno,
+                provincia:provincia,
+                numero:numero,
+                pagina:pagina,
+                premio:1,
+                origen:"PDF_OCR_V47"
 
+            });
 
+        }
 
-let registros=[];
+    }
 
-
-
-
-for(let numero of numeros){
-
-
-
-registros.push({
-
-fecha:fecha,
-
-turno:turno,
-
-provincia:
-detectarProvinciaV47(texto),
-
-numero:numero,
-
-pagina:pagina,
-
-origen:"PDF_OCR_V47"
-
-});
-
-
+    return registros;
 
 }
 
 
 
 
-return registros;
 
 
-    }
+
     //////////////////////////////////////////////////
 // EMI TESLA PRO V47
 // BLOQUE 3 - PROCESAR PDF
@@ -1426,264 +1424,103 @@ mostrarV47(
 
 
 }
-    
+    //////////////////////////////////////////////////
+// EMI TESLA PRO V47.1
+// BLOQUE 5 - MEMORIA Y MATRIZ TURNOS CORREGIDO
 //////////////////////////////////////////////////
-// EMI TESLA PRO V47
-// BLOQUE 5 - MEMORIA Y MATRIZ TURNOS
-//////////////////////////////////////////////////
 
-
-
-let MEMORIA_V47={};
-
-
+let MEMORIA_V47 = {};
+let MATRIZ_TURNOS_V47 = {};
 
 async function construirMemoriaV47(){
 
+    let datos = await leerV47(STORES_V47.historico);
 
+    MEMORIA_V47 = {};
 
-let datos =
-await leerV47(
-STORES_V47.historico
-);
+    for(let d of datos){
 
+        if(!d.fecha || !d.turno || !d.provincia || !d.numero) continue;
 
+        if(!MEMORIA_V47[d.fecha])
+            MEMORIA_V47[d.fecha]={};
 
-MEMORIA_V47={};
+        if(!MEMORIA_V47[d.fecha][d.turno])
+            MEMORIA_V47[d.fecha][d.turno]={};
 
+        if(!MEMORIA_V47[d.fecha][d.turno][d.provincia])
+            MEMORIA_V47[d.fecha][d.turno][d.provincia]=[];
 
+        MEMORIA_V47[d.fecha][d.turno][d.provincia].push(String(d.numero));
 
+    }
 
-
-for(let d of datos){
-
-
-
-if(!MEMORIA_V47[d.fecha])
-
-MEMORIA_V47[d.fecha]={};
-
-
-
-
-
-if(!MEMORIA_V47[d.fecha][d.turno])
-
-MEMORIA_V47[d.fecha][d.turno]={};
-
-
-
-
-
-if(!MEMORIA_V47[d.fecha][d.turno][d.provincia])
-
-MEMORIA_V47[d.fecha][d.turno][d.provincia]=[];
-
-
-
-
-
-if(d.numero){
-
-
-MEMORIA_V47[d.fecha][d.turno][d.provincia]
-.push(d.numero);
-
-
+    return MEMORIA_V47;
 
 }
-
-
-
-}
-
-
-
-return MEMORIA_V47;
-
-
-}
-
-
-
-
-
-
-
-let MATRIZ_TURNOS_V47={};
-
-
-
-
 
 async function construirMatrizTurnosV47(){
 
+    await construirMemoriaV47();
 
+    MATRIZ_TURNOS_V47={};
 
-await construirMemoriaV47();
+    const orden=[
+        "PREVIA",
+        "PRIMERA",
+        "MATUTINA",
+        "VESPERTINA",
+        "NOCTURNA"
+    ];
 
+    for(let fecha in MEMORIA_V47){
 
+        let dia=MEMORIA_V47[fecha];
 
-MATRIZ_TURNOS_V47={};
+        for(let i=0;i<orden.length;i++){
 
+            let origen=orden[i];
+            let destino=(i===4)?"PREVIA":orden[i+1];
 
+            if(!dia[origen] || !dia[destino]) continue;
 
-let orden=[
+            for(let provincia in dia[origen]){
 
+                if(!dia[destino][provincia]) continue;
 
-"PREVIA",
+                if(
+                    !Array.isArray(dia[origen][provincia]) ||
+                    !Array.isArray(dia[destino][provincia])
+                ) continue;
 
-"PRIMERA",
+                if(
+                    dia[origen][provincia].length===0 ||
+                    dia[destino][provincia].length===0
+                ) continue;
 
-"MATUTINA",
+                let base=String(dia[origen][provincia][0]).slice(-2);
+                let salida=String(dia[destino][provincia][0]).slice(-2);
 
-"VESPERTINA",
+                if(!MATRIZ_TURNOS_V47[base])
+                    MATRIZ_TURNOS_V47[base]={};
 
-"NOCTURNA"
+                if(!MATRIZ_TURNOS_V47[base][salida])
+                    MATRIZ_TURNOS_V47[base][salida]=0;
 
+                MATRIZ_TURNOS_V47[base][salida]++;
 
-];
+            }
 
+        }
 
+    }
 
+    document.getElementById("estadoMatriz").innerText="ACTIVA";
 
-
-for(let fecha in MEMORIA_V47){
-
-
-
-let dia =
-MEMORIA_V47[fecha];
-
-
-
-
-
-for(let i=0;i<orden.length;i++){
-
-
-
-let origen =
-orden[i];
-
-
-
-let destino =
-(i===4)
-?
-"PREVIA"
-:
-orden[i+1];
-
-
-
-
-
-if(
-!dia[origen] ||
-!dia[destino]
-)
-
-continue;
-
-
-
-
-
-
-for(let provincia in dia[origen]){
-
-
-
-let base =
-String(
-dia[origen][provincia][0]
-)
-.slice(-2);
-
-
-
-
-let salida =
-String(
-dia[destino][provincia][0]
-)
-.slice(-2);
-
-
-
-
-
-if(!MATRIZ_TURNOS_V47[base])
-
-MATRIZ_TURNOS_V47[base]={};
-
-
-
-
-
-if(!MATRIZ_TURNOS_V47[base][salida])
-
-MATRIZ_TURNOS_V47[base][salida]=0;
-
-
-
-
-MATRIZ_TURNOS_V47[base][salida]++;
-
-
+    return MATRIZ_TURNOS_V47;
 
 }
-
-
-
-}
-
-
-
-}
-
-
-
-
-
-await guardarV47(
-
-STORES_V47.matrizTurnos,
-
-{
-
-fecha:new Date(),
-
-matriz:MATRIZ_TURNOS_V47
-
-
-}
-
-);
-
-
-
-
-
-let estado =
-document.getElementById(
-"estadoMatriz"
-);
-
-
-
-if(estado)
-
-estado.innerText="ACTIVA";
-
-
-
-
-return MATRIZ_TURNOS_V47;
-
-
-}
+    
    //////////////////////////////////////////////////
 // EMI TESLA PRO V47
 // BLOQUE 6 - MATRIZ PROVINCIAS
@@ -2256,211 +2093,91 @@ return lista.filter(x=>!usados[x]);
 
 
 
+//////////////////////////////////////////////////
+// EMI TESLA PRO V47.1
+// BLOQUE 9 - GENERADOR IA CORREGIDO
+//////////////////////////////////////////////////
+
 async function generarResultadoIA(){
 
+    let nucleo = await analizarNucleoV47();
 
+    let candidatos=[];
 
-let nucleo=
+    if(nucleo.dominante) candidatos.push(nucleo.dominante);
+    if(nucleo.segundo) candidatos.push(nucleo.segundo);
+    if(nucleo.sobreviviente) candidatos.push(nucleo.sobreviviente);
 
-await analizarNucleoV47();
+    for(let n of [...candidatos]){
+        let acomp = await buscarAcompananteV47(n);
+        if(acomp.length) candidatos.push(...acomp);
+    }
 
+    for(let n of [...candidatos]){
+        let tesla = aplicarTeslaV47(n);
+        if(tesla && tesla.length===2){
+            candidatos.push(tesla);
+        }
+    }
 
+    candidatos=[...new Set(candidatos)];
 
+    let finales=await quitarRepetidosV47(candidatos);
 
-let candidatos=[];
+    let ambos=finales.slice(0,3);
 
+    let principal=(ambos.length>0)?ambos[0]:"00";
 
+    principal=String(principal).padStart(2,"0").slice(-2);
 
+    let ternos=[
+        principal+principal[0],
+        principal+principal[1]
+    ];
 
-if(nucleo.dominante)
+    let cuaternos=[
+        principal+principal[0]+principal[1],
+        principal+principal[1]+principal[0]
+    ];
 
-candidatos.push(nucleo.dominante);
-
-
-
-if(nucleo.segundo)
-
-candidatos.push(nucleo.segundo);
-
-
-
-if(nucleo.sobreviviente)
-
-candidatos.push(nucleo.sobreviviente);
-
-
-
-
-
-
-for(let n of [...candidatos]){
-
-
-let acomp=
-
-await buscarAcompananteV47(n);
-
-
-
-candidatos.push(...acomp);
-
-
-
-}
-
-
-
-
-
-for(let n of [...candidatos]){
-
-
-let tesla=
-
-aplicarTeslaV47(n);
-
-
-
-if(tesla)
-
-candidatos.push(tesla);
-
-
-}
-
-
-
-
-
-candidatos=[...new Set(candidatos)];
-
-
-
-
-let finales=
-
-await quitarRepetidosV47(
-candidatos
-);
-
-
-
-
-
-let ambos=
-
-finales.slice(0,3);
-
-
-
-
-let principal=
-
-ambos[0] || "--";
-
-
-
-
-
-let ternos=[
-
-principal+
-principal[0],
-
-principal+
-principal[1]
-
-];
-
-
-
-
-
-
-let cuaternos=[
-
-
-principal+
-principal[0]+
-principal[1],
-
-
-principal+
-principal[1]+
-principal[0]
-
-
-];
-
-
-
-
-
-
-
-mostrarV47(`
-
-🧠 EMI TESLA PRO V47
+    mostrarV47(
+`🧠 EMI TESLA PRO V47
 
 🔥 AMBOS IA
 
 1) ${ambos[0]||"--"}
-
 2) ${ambos[1]||"--"}
-
 3) ${ambos[2]||"--"}
-
-
 
 ⭐ AMBOS PRINCIPAL
 
 ${principal}
 
-
-
 🎯 TERNOS
 
 ${ternos.join("\n")}
-
-
 
 🏆 CUATERNOS
 
 ${cuaternos.join("\n")}
 
-
-
 🔥 NÚCLEO DOMINANTE
-
-${nucleo.dominante}
-
-
+${nucleo.dominante||"--"}
 
 ⭐ SEGUNDO NÚCLEO
-
-${nucleo.segundo}
-
-
+${nucleo.segundo||"--"}
 
 🛡 SOBREVIVIENTE
-
-${nucleo.sobreviviente}
-
-
+${nucleo.sobreviviente||"--"}
 
 ✔ PDF
-
 ✔ MATRIZ
-
 ✔ PROVINCIAS
-
 ✔ ACOMPAÑANTES
+✔ TESLA 3-6-9`
+    );
 
-✔ TESLA 3-6-9
-
-`);
-
-    }
+}
     //////////////////////////////////////////////////
 // EMI TESLA PRO V47
 // BLOQUE 10 - CIERRE FINAL

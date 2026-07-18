@@ -320,9 +320,145 @@ OFF
 
 
 
+<!-- CARGA PDF HISTÓRICO -->
+
+<div class="card">
+
+<h2>
+📄 OCR PDF HISTÓRICO
+</h2>
+
+
+<input 
+type="file"
+id="archivoPDF"
+accept=".pdf">
 
 
 
+<button onclick="iniciarOCR()">
+📥 CARGAR PDF
+</button>
+
+
+
+<button onclick="detenerOCR()">
+⛔ DETENER OCR
+</button>
+
+
+
+<div 
+id="progresoOCR"
+class="progreso">
+
+Esperando PDF...
+
+</div>
+
+
+</div>
+
+<!-- CARGA MANUAL 7 PROVINCIAS -->
+
+
+<div class="card">
+
+
+<h2>
+✍️ CARGA MANUAL EN VIVO
+</h2>
+
+
+
+<select id="turnoCarga">
+
+
+<option>
+PREVIA
+</option>
+
+
+<option>
+PRIMERA
+</option>
+
+
+<option>
+MATUTINA
+</option>
+
+
+<option>
+VESPERTINA
+</option>
+
+
+<option>
+NOCTURNA
+</option>
+
+
+
+</select>
+
+
+
+
+<input 
+id="corrientes"
+placeholder="Corrientes 4 cifras">
+
+
+
+<input 
+id="ciudad"
+placeholder="Ciudad 4 cifras">
+
+
+
+<input 
+id="bonaerense"
+placeholder="Bonaerense 4 cifras">
+
+
+
+<input 
+id="santaFe"
+placeholder="Santa Fe 4 cifras">
+
+
+
+<input 
+id="cordoba"
+placeholder="Córdoba 4 cifras">
+
+
+
+<input 
+id="entreRios"
+placeholder="Entre Ríos 4 cifras">
+
+
+
+<input 
+id="chaco"
+placeholder="Chaco 4 cifras">
+
+
+
+
+
+<button onclick="guardarCargaManualV47()">
+
+💾 GUARDAR BLOQUE
+
+</button>
+
+
+</div>
+
+    
 <!-- RESULTADO -->
 
 

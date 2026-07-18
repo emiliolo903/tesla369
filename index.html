@@ -2030,7 +2030,9 @@ function obtenerPreviaActual(){
 // MOTOR IA - 7 PROVINCIAS
 //////////////////////////////////////////////////
 
-function obtenerBases7Provincias(){
+            
+    
+    function obtenerBases7Provincias(){
 
     const ids=[
         "corrientes",
@@ -2044,9 +2046,9 @@ function obtenerBases7Provincias(){
 
     let bases=[];
 
-    for(const id of ids){
+    for(let id of ids){
 
-        const valor=document.getElementById(id).value.trim();
+        let valor=document.getElementById(id).value.trim();
 
         if(valor.length===4){
 
@@ -2056,134 +2058,125 @@ function obtenerBases7Provincias(){
 
     }
 
-    return [...new Set(bases)];
+    return bases;
 
 }
-    async function analizar7Provincias(){
+
+
+
+async function generarResultadoIA(){
 
     let bases=obtenerBases7Provincias();
 
-    let datos=await leerV47(STORES_V47.historico);
+    if(bases.length<7){
 
-    let ranking={};
-
-    for(let base of bases){
-
-        for(let i=0;i<datos.length-1;i++){
-
-            if(!datos[i].numero || !datos[i+1].numero) continue;
-
-            let actual=String(datos[i].numero).slice(-2);
-            let siguiente=String(datos[i+1].numero).slice(-2);
-
-            if(actual!==base) continue;
-
-            if(!ranking[siguiente]) ranking[siguiente]=0;
-
-            ranking[siguiente]+=10;
-
-            if(actual===siguiente)
-                ranking[siguiente]+=5;
-
-            if(
-                actual[0]===siguiente[1] &&
-                actual[1]===siguiente[0]
-            ){
-                ranking[siguiente]+=3;
-            }
-
-        }
-
-    }
-
-    return ranking;
-
-    }
-    
-    //async function obtenerCandidatos7(){
-
-    let ranking=await analizar7Provincias();
-
-    let lista=Object.keys(ranking).sort(
-        (a,b)=>ranking[b]-ranking[a]
-    );
-
-    if(lista.length<10){
-
-        let nucleo=await analizarNucleoV47();
-
-        if(nucleo.dominante)
-            lista.push(nucleo.dominante);
-
-        if(nucleo.segundo)
-            lista.push(nucleo.segundo);
-
-        if(nucleo.sobreviviente)
-            lista.push(nucleo.sobreviviente);
-
-    }
-
-    lista=[...new Set(lista)];
-
-    return lista;
-
-    }
-    async function generarResultadoIA(){
-
-    let candidatos=await obtenerCandidatos7();
-
-    if(candidatos.length===0){
-
-        mostrarV47("SIN DATOS SUFICIENTES");
+        mostrarV47(
+        "⚠️ CARGÁ LAS 7 PROVINCIAS COMPLETAS"
+        );
 
         return;
 
     }
 
-    let ambos=candidatos.slice(0,3);
 
-    while(ambos.length<3){
+    let candidatos=[];
 
-        ambos.push("--");
+
+    for(let base of bases){
+
+        candidatos.push(base);
+
+        let acomp=
+        await buscarAcompananteV47(base);
+
+        candidatos.push(...acomp);
 
     }
 
-    let terno1=ambos[0]+ambos[1][0];
-    let terno2=ambos[1]+ambos[2][0];
 
-    let cuaterno1=ambos[0]+ambos[1];
-    let cuaterno2=ambos[1]+ambos[2];
+    candidatos=[
+        ...new Set(candidatos)
+    ];
+
+
+    let salida="🧠 IA 7 PROVINCIAS\n\n";
+
+
+    salida+="AMBOS:\n";
+
+    salida+=candidatos.slice(0,3).join(" - ");
+
+
+    salida+="\n\nTERNO:\n";
+
+    salida+=candidatos.slice(0,2)
+    .map(n=>n+"X")
+    .join(" - ");
+
+
+    salida+="\n\nCUATERNO:\n";
+
+    salida+=candidatos.slice(0,2)
+    .map(n=>n+"XX")
+    .join(" - ");
+
+
+
+    mostrarV47(salida);
+
+}
+
+
+
+
+function generarTesla(){
+
+    let bases=obtenerBases7Provincias();
+
+    let salida="⚡ TESLA 3-6-9\n\n";
+
+
+    for(let n of bases){
+
+        salida+=n+
+        " → "+
+        aplicarTeslaV47(n)+
+        "\n";
+
+    }
+
+
+    mostrarV47(salida);
+
+}
+
+
+
+
+function mostrarMatrizIA(){
 
     mostrarV47(
+    JSON.stringify(MATRIZ_TURNOS_V47,null,2)
+    );
 
-`🧠 EMI TESLA PRO V48
+}
 
-ANÁLISIS COMPLETO
-7 PROVINCIAS
 
-AMBOS
 
-1) ${ambos[0]}
-2) ${ambos[1]}
-3) ${ambos[2]}
+function auditoriaSistema(){
 
-TERNOS
+    document.getElementById("auditoria").innerText=
+    "✅ SISTEMA V47 ACTIVO";
 
-${terno1}
-${terno2}
+}
 
-CUATERNOS
 
-${cuaterno1}
-${cuaterno2}
 
-CANDIDATOS
+window.onload=function(){
 
-${candidatos.join(" - ")}
+    iniciarMemoriaV47();
 
-`);
-
-    }
+};
     
     ////////////////////////////////////////////////
 // EMI TESLA PRO V47

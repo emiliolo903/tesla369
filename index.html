@@ -2012,17 +2012,6 @@ return lista.filter(x=>!usados[x]);
 
 
 
-function obtenerPreviaActual(){
-
-    let n = document.getElementById("corrientes").value.trim();
-
-    if(n.length===4){
-        return n.slice(-2);
-    }
-
-    return null;
-
-}
 
 
 
@@ -2042,7 +2031,11 @@ function obtenerBases7Provincias(){
 
     for(let id of ids){
 
-        let valor=document.getElementById(id).value.trim();
+        let elemento=document.getElementById(id);
+
+        if(!elemento) continue;
+
+        let valor=elemento.value.trim();
 
         if(valor.length===4){
 
@@ -2053,6 +2046,8 @@ function obtenerBases7Provincias(){
     }
 
     return numeros;
+
+    
 
 }
 
@@ -2285,59 +2280,73 @@ window.onload=function(){
 
 };
     
-    ////////////////////////////////////////////////
-// EMI TESLA PRO V47
-// BLOQUE 10 - CIERRE FINAL
+    //////////////////////////////////////////////////
+// EMI TESLA PRO V48
+// BLOQUE 10 - CIERRE SISTEMA LIMPIO
 //////////////////////////////////////////////////
-
 
 
 async function mostrarMatrizIA(){
 
+    try{
+
+        await construirMatrizTurnosV47();
+
+        let salida=document.getElementById("resultado");
+
+        if(!salida) return;
 
 
-await construirMatrizTurnosV47();
+        let texto="🔄 MATRIZ IA TURNOS\n\n";
 
 
-
-await construirMatrizProvinciasV47();
-
+        let contador=0;
 
 
+        for(let base in MATRIZ_TURNOS_V47){
 
-mostrarV47(`
-
-🔄 MATRIZ IA V47
-
-
-TURNOS:
-
-${JSON.stringify(
-MATRIZ_TURNOS_V47,
-null,
-2
-)}
+            texto+="BASE "+base+"\n";
 
 
+            for(let salidaN in MATRIZ_TURNOS_V47[base]){
 
-PROVINCIAS:
+                texto+=" → "+salidaN+
+                " = "+
+                MATRIZ_TURNOS_V47[base][salidaN]+"\n";
 
-${JSON.stringify(
-MATRIZ_PROV_V47,
-null,
-2
-)}
-
+            }
 
 
-`);
+            texto+="\n";
 
 
+            contador++;
 
+
+            if(contador>20)
+            break;
+
+        }
+
+
+        salida.innerText=texto;
+
+
+        document.getElementById(
+            "estadoMatriz"
+        ).innerText="ACTIVA";
+
+
+    }
+    catch(e){
+
+        mostrarV47(
+            "❌ ERROR MATRIZ\n"+e
+        );
+
+    }
 
 }
-
-
 
 
 
@@ -2346,88 +2355,62 @@ null,
 async function auditoriaSistema(){
 
 
-
-let nucleo=
-
-await analizarNucleoV47();
+    try{
 
 
-
-let datos=
-
-await leerV47(
-STORES_V47.historico
-);
+        let datos =
+        await leerV47(
+            STORES_V47.historico
+        );
 
 
 
-
-let salida=
-
-document.getElementById(
-"auditoria"
-);
+        let salida =
+        document.getElementById(
+            "auditoria"
+        );
 
 
 
-if(salida){
+        if(!salida) return;
 
 
 
-salida.innerText=
-
-`
-
-🛡 AUDITORÍA EMI TESLA PRO V47
-
-
-REGISTROS:
-
-${datos.length}
+        let nucleo =
+        await analizarNucleoV47();
 
 
 
-🔥 NÚCLEO DOMINANTE
+        salida.innerText =
 
-${nucleo.dominante}
+        "🛡 AUDITORÍA TESLA PRO V48\n\n"+
 
+        "REGISTROS: "+
+        datos.length+
 
+        "\n\nNÚCLEO DOMINANTE: "+
+        (nucleo.dominante || "SIN DATOS")+
 
-⭐ SEGUNDO NÚCLEO
+        "\nSEGUNDO NÚCLEO: "+
+        (nucleo.segundo || "SIN DATOS")+
 
-${nucleo.segundo}
-
-
-
-🛡 SOBREVIVIENTE
-
-${nucleo.sobreviviente}
-
-
-
-MOTOR:
-
-✔ MEMORIA PDF
-
-✔ CARGA MANUAL
-
-✔ MATRIZ TURNOS
-
-✔ MATRIZ PROVINCIAS
-
-✔ INVERTIDOS
-
-✔ ACOMPAÑANTES
-
-✔ TESLA
-
-
-`;
+        "\nSOBREVIVIENTE: "+
+        (nucleo.sobreviviente || "SIN DATOS");
 
 
 
-}
+    }
+    catch(e){
 
+
+        document.getElementById(
+            "auditoria"
+        ).innerText=
+
+        "❌ ERROR AUDITORÍA\n"+e;
+
+
+    }
 
 
 }
@@ -2437,125 +2420,60 @@ MOTOR:
 
 
 
-function generarTesla(){
+
+async function inicializarV48(){
 
 
-let salida=
-
-document.getElementById(
-"resultado"
-);
+    try{
 
 
-
-if(salida){
-
-
-salida.innerText=
-
-`
-
-⚡ TESLA 3-6-9 ACTIVO
+        await iniciarMemoriaV47();
 
 
-Cargue datos históricos
-para generar análisis IA.
+        await construirMemoriaV47();
 
 
-`;
-
-}
+        await construirMatrizTurnosV47();
 
 
 
-}
+        document.getElementById(
+            "estadoMemoria"
+        ).innerText="LISTA";
 
 
 
+        document.getElementById(
+            "estadoMatriz"
+        ).innerText="ACTIVA";
 
 
 
+    }
+    catch(e){
 
-async function inicializarV47(){
+        console.log(
+            "ERROR INICIO V48",
+            e
+        );
 
-
-
-try{
-
-
-
-await iniciarMemoriaV47();
-
-
-
-await construirMemoriaV47();
-
-
-
-await construirMatrizTurnosV47();
-
-
-
-await construirMatrizProvinciasV47();
-
-
-
-await analizarNucleoV47();
-
-
-
-
-mostrarV47(
-
-"✅ EMI TESLA PRO V47 LISTO\n\n"+
-"PDF + IA + MATRIZ ACTIVOS"
-
-);
-
+    }
 
 
 }
-
-catch(e){
-
-
-
-mostrarV47(
-
-"ERROR V47:\n"+
-e
-
-);
-
-
-
-}
-
-
-
-}
-
 
 
 
 
 window.addEventListener(
-
 "load",
-
 ()=>{
 
+    inicializarV48();
 
-inicializarV47();
-
-
-});
-
- window.onload=function(){
-
-    iniciarMemoriaV47();
-
-};
+}
+);
+    
     
 </script>
 

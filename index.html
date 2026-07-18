@@ -816,37 +816,45 @@ datos.length;
 
 async function iniciarMemoriaV47(){
 
+    try{
 
-await abrirBaseV47();
+        await abrirBaseV47();
 
+        await actualizarRegistrosV47();
 
+        SISTEMA_V47.memoria=true;
 
-await actualizarRegistrosV47();
+        let estado=document.getElementById(
+            "estadoMemoria"
+        );
 
+        if(estado){
+            estado.innerText="LISTA";
+        }
 
+        return true;
 
-SISTEMA_V47.memoria=true;
+    }
+    catch(error){
 
+        console.log(
+            "ERROR MEMORIA V47:",
+            error
+        );
 
+        let estado=document.getElementById(
+            "estadoMemoria"
+        );
 
-let estado=document.getElementById(
-"estadoMemoria"
-);
+        if(estado){
+            estado.innerText="ERROR";
+        }
 
+        return false;
 
-
-if(estado){
-
-estado.innerText="LISTA";
+    }
 
 }
-
-
-
-}
-
-
-
 
 //////////////////////////////////////////////////
 // MENSAJE SISTEMA

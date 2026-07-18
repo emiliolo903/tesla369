@@ -320,7 +320,9 @@ OFF
 
 
 
-<!-- CARGA PDF HISTÓRICO -->
+<!-- =============================== -->
+<!-- PDF + OCR HISTÓRICO -->
+<!-- =============================== -->
 
 <div class="card">
 
@@ -348,9 +350,7 @@ accept=".pdf">
 
 
 
-<div 
-id="progresoOCR"
-class="progreso">
+<div id="progresoOCR" class="progreso">
 
 Esperando PDF...
 
@@ -359,14 +359,17 @@ Esperando PDF...
 
 </div>
 
-<!-- CARGA MANUAL 7 PROVINCIAS -->
 
+
+<!-- =============================== -->
+<!-- CARGA MANUAL EN VIVO -->
+<!-- =============================== -->
 
 <div class="card">
 
 
 <h2>
-✍️ CARGA MANUAL EN VIVO
+✍️ CARGA MANUAL 7 PROVINCIAS
 </h2>
 
 
@@ -374,30 +377,15 @@ Esperando PDF...
 <select id="turnoCarga">
 
 
-<option>
-PREVIA
-</option>
+<option>PREVIA</option>
 
+<option>PRIMERA</option>
 
-<option>
-PRIMERA
-</option>
+<option>MATUTINA</option>
 
+<option>VESPERTINA</option>
 
-<option>
-MATUTINA
-</option>
-
-
-<option>
-VESPERTINA
-</option>
-
-
-<option>
-NOCTURNA
-</option>
-
+<option>NOCTURNA</option>
 
 
 </select>
@@ -405,47 +393,19 @@ NOCTURNA
 
 
 
-<input 
-id="corrientes"
-placeholder="Corrientes 4 cifras">
+<input id="corrientes" placeholder="Corrientes 4 cifras">
 
+<input id="ciudad" placeholder="Ciudad 4 cifras">
 
+<input id="bonaerense" placeholder="Bonaerense 4 cifras">
 
-<input 
-id="ciudad"
-placeholder="Ciudad 4 cifras">
+<input id="santaFe" placeholder="Santa Fe 4 cifras">
 
+<input id="cordoba" placeholder="Córdoba 4 cifras">
 
+<input id="entreRios" placeholder="Entre Ríos 4 cifras">
 
-<input 
-id="bonaerense"
-placeholder="Bonaerense 4 cifras">
-
-
-
-<input 
-id="santaFe"
-placeholder="Santa Fe 4 cifras">
-
-
-
-<input 
-id="cordoba"
-placeholder="Córdoba 4 cifras">
-
-
-
-<input 
-id="entreRios"
-placeholder="Entre Ríos 4 cifras">
-
-
-
-<input 
-id="chaco"
-placeholder="Chaco 4 cifras">
-
-
+<input id="chaco" placeholder="Chaco 4 cifras">
 
 
 
@@ -458,7 +418,7 @@ placeholder="Chaco 4 cifras">
 
 </div>
 
-    
+
 <!-- RESULTADO -->
 
 

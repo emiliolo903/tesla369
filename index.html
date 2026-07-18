@@ -2012,7 +2012,17 @@ return lista.filter(x=>!usados[x]);
 
 
 
+function obtenerPreviaActual(){
 
+    let n = document.getElementById("corrientes").value.trim();
+
+    if(n.length===4){
+        return n.slice(-2);
+    }
+
+    return null;
+
+}
 
 
 //////////////////////////////////////////////////
@@ -2022,7 +2032,27 @@ return lista.filter(x=>!usados[x]);
 
 async function generarResultadoIA(){
 
+    let previa = obtenerPreviaActual();
+
+let candidatos = [];
+
+if(previa){
+
+    candidatos.push(previa);
+
+    let acomp = await buscarAcompananteV47(previa);
+
+    candidatos.push(...acomp);
+
+}else{
+
     let nucleo = await analizarNucleoV47();
+
+    if(nucleo.dominante) candidatos.push(nucleo.dominante);
+    if(nucleo.segundo) candidatos.push(nucleo.segundo);
+    if(nucleo.sobreviviente) candidatos.push(nucleo.sobreviviente);
+
+}
 
     let candidatos=[];
 
@@ -2044,23 +2074,36 @@ async function generarResultadoIA(){
 
     candidatos=[...new Set(candidatos)];
 
-    let finales=await quitarRepetidosV47(candidatos);
+let finales = await quitarRepetidosV47(candidatos);
 
-    let ambos=finales.slice(0,3);
+// Si quedaron menos de 3 candidatos,
+// usar los originales.
+if(finales.length < 3){
+    finales = [...new Set(candidatos)];
+}
 
-    let principal=(ambos.length>0)?ambos[0]:"00";
+let ambos = finales.slice(0,3);
+
+let principal = ambos[0];
+
+if(!principal){
+    mostrarV47("No hay suficientes datos para generar IA.");
+    return;
+    }
 
     principal=String(principal).padStart(2,"0").slice(-2);
 
-    let ternos=[
-        principal+principal[0],
-        principal+principal[1]
-    ];
+    // Generar ternos
+let ternos = [
+    principal + principal.charAt(0),
+    principal + principal.charAt(1)
+];
 
-    let cuaternos=[
-        principal+principal[0]+principal[1],
-        principal+principal[1]+principal[0]
-    ];
+// Generar cuaternos
+let cuaternos = [
+    principal + principal.charAt(0) + principal.charAt(1),
+    principal + principal.charAt(1) + principal.charAt(0)
+];
 
     mostrarV47(
 `🧠 EMI TESLA PRO V47

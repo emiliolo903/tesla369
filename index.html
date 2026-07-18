@@ -1812,166 +1812,88 @@ return NUCLEO_V47;
 
 
     }
-
-    //////////////////////////////////////////////////
-// EMI TESLA PRO V47
-// BLOQUE 8 - ACOMPAÑANTE AVANZADO
 //////////////////////////////////////////////////
-
-
+// EMI TESLA PRO V47.1
+// BLOQUE 8 - ACOMPAÑANTE IA CORREGIDO
+//////////////////////////////////////////////////
 
 async function buscarAcompananteV47(base){
 
+    base=String(base).slice(-2);
 
+    let datos=await leerV47(STORES_V47.historico);
 
-let datos =
-await leerV47(
-STORES_V47.historico
-);
+    let fuerza={};
 
+    // Buscar acompañantes históricos
+    for(let i=0;i<datos.length-1;i++){
 
+        if(!datos[i].numero || !datos[i+1].numero) continue;
 
-let fuerza={};
+        let actual=String(datos[i].numero).slice(-2);
+        let siguiente=String(datos[i+1].numero).slice(-2);
 
+        if(actual!==base) continue;
 
+        if(!fuerza[siguiente]){
+            fuerza[siguiente]=0;
+        }
 
-
-
-for(let i=0;i<datos.length-1;i++){
-
-
-
-let actual =
-String(datos[i].numero)
-.slice(-2);
-
-
-
-let siguiente =
-String(datos[i+1].numero)
-.slice(-2);
-
-
-
-
-
-if(actual!==base)
-
-continue;
-
-
-
-
-
-if(!fuerza[siguiente]){
-
-
-fuerza[siguiente]={
-
-frecuencia:0,
-
-continuidad:0,
-
-invertido:0
-
-};
-
-
-}
-
-
-
-
-
-fuerza[siguiente].frecuencia++;
-
-
-
-
-
-if(base===siguiente)
-
-fuerza[siguiente].continuidad++;
-
-
-
-
-
-if(
-
-base[0]===siguiente[1] &&
-
-base[1]===siguiente[0]
-
-)
-
-fuerza[siguiente].invertido++;
-
-
-
-
-
-}
-
-
-
-
-
-let ranking=[];
-
-
-
-
-
-for(let n in fuerza){
-
-
-
-let peso =
-
-fuerza[n].frecuencia+
-
-(fuerza[n].continuidad*5)+
-
-(fuerza[n].invertido*3);
-
-
-
-
-ranking.push({
-
-numero:n,
-
-peso:peso
-
-});
-
-
-}
-
-
-
-
-
-ranking.sort(
-
-(a,b)=>
-
-b.peso-a.peso
-
-);
-
-
-
-
-
-return ranking
-.slice(0,5)
-.map(x=>x.numero);
-
-
+        fuerza[siguiente]++;
 
     }
+
+    let ranking=Object.keys(fuerza).sort(
+        (a,b)=>fuerza[b]-fuerza[a]
+    );
+
+    // Si no encontró acompañantes,
+    // usar los más frecuentes del historial
+    if(ranking.length===0){
+
+        let frecuencia={};
+
+        for(let d of datos){
+
+            if(!d.numero) continue;
+
+            let n=String(d.numero).slice(-2);
+
+            frecuencia[n]=(frecuencia[n]||0)+1;
+
+        }
+
+        ranking=Object.keys(frecuencia).sort(
+            (a,b)=>frecuencia[b]-frecuencia[a]
+        );
+
+    }
+
+    // Quitar el propio número
+    ranking=ranking.filter(n=>n!==base);
+
+    // Completar hasta tener 5 candidatos
+    const respaldo=[
+        "13","38","27","52","64",
+        "91","45","70","82","19"
+    ];
+
+    for(let n of respaldo){
+
+        if(ranking.length>=5) break;
+
+        if(
+            !ranking.includes(n) &&
+            n!==base
+        ){
+            ranking.push(n);
+        }
+
+    }
+
+    return ranking.slice(0,5);
+
+}
     //////////////////////////////////////////////////
 // EMI TESLA PRO V47
 // BLOQUE 9 - MOTOR TESLA IA

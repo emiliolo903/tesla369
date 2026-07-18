@@ -934,7 +934,88 @@ return "SIN_TURNO";
 }
 
 
+//////////////////////////////////////////////////
+// EXTRACTOR REAL PDF V46
+//////////////////////////////////////////////////
 
+function extraerTodosLosRegistrosV46(texto,pagina){
+
+
+texto=texto.toUpperCase();
+
+
+let fecha=
+detectarFechaV46(texto);
+
+
+let turno=
+detectarTurnoV46(texto);
+
+
+let provincias=[
+
+"CORRIENTES",
+"CIUDAD",
+"BONAERENSE",
+"SANTA FE",
+"CORDOBA",
+"ENTRE RIOS",
+"CHACO"
+
+];
+
+
+
+let numeros=
+texto.match(/\b\d{4}\b/g)||[];
+
+
+
+let registros=[];
+
+
+
+for(let provincia of provincias){
+
+
+let pos=
+texto.indexOf(provincia);
+
+
+
+if(pos!==-1 && numeros.length){
+
+
+
+registros.push({
+
+fecha:fecha,
+
+turno:turno,
+
+provincia:provincia,
+
+numero:numeros[0],
+
+premio:1,
+
+pagina:pagina,
+
+origen:"OCR_V46"
+
+});
+
+
+}
+
+
+}
+
+
+return registros;
+
+
+    }
 
 
 
@@ -1160,8 +1241,11 @@ document.getElementById(
 
 
 
-await actualizarRegistrosV47();
+await actualizarTotalV46();
 
+await construirMemoriaDiaV46();
+
+await construirMatrizV46();
 
 
 mostrarV47(

@@ -2026,12 +2026,10 @@ function obtenerPreviaActual(){
 
 
 
-
 //////////////////////////////////////////////////
 // EMI TESLA PRO V47.2
 // MOTOR FINAL 7 PROVINCIAS
 //////////////////////////////////////////////////
-    
 
 function obtenerBases7Provincias(){
 
@@ -2053,13 +2051,16 @@ function obtenerBases7Provincias(){
 
         if(valor.length===4){
 
-            numeros.push(valor);
+            numeros.push(valor.slice(-2));
 
         }
 
     }
 
     return numeros;
+
+}
+
 
 }
 

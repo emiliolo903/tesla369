@@ -1922,237 +1922,252 @@ e
 
 
 //////////////////////////////////////////////////
-// MOTOR TRANSICIÓN TURNOS V48.2 CORREGIDO
+// BLOQUE 8 (PARTE 1/2)
+// MOTOR IA HISTÓRICA V48.5
 //////////////////////////////////////////////////
-
 
 function obtenerSiguienteTurnoV48(turno){
 
-let mapa={
+    const mapa={
 
-"PREVIA":"PRIMERA",
+        "PREVIA":"PRIMERA",
 
-"PRIMERA":"MATUTINA",
+        "PRIMERA":"MATUTINA",
 
-"MATUTINA":"VESPERTINA",
+        "MATUTINA":"VESPERTINA",
 
-"VESPERTINA":"NOCTURNA",
+        "VESPERTINA":"NOCTURNA",
 
-"NOCTURNA":"PREVIA"
+        "NOCTURNA":"PREVIA"
 
-};
+    };
 
-
-return mapa[turno] || "PRIMERA";
+    return mapa[turno] || "PRIMERA";
 
 }
 
 
-////////////////////////////////////////////////
-// MOTOR TRANSICIÓN TURNOS V48.3
-////////////////////////////////////////////////
 
-async function analizarTransicionTurnoV48(base, turnoOrigen){
+async function analizarTransicionTurnoV48(base,turnoOrigen){
 
-    let destino = obtenerSiguienteTurnoV48(turnoOrigen);
+    const turnoDestino=
+    obtenerSiguienteTurnoV48(turnoOrigen);
 
-    let datos = await leerV48(STORES_V48.historico);
+    const datos=
+    await leerV48(STORES_V48.historico);
 
-    let pesos = {};
+    let pesos={};
 
-    base = String(base).slice(-2);
+    base=String(base).slice(-2);
 
-    for(let i=0;i<datos.length;i++){
+    for(let actual of datos){
 
-        let actual = datos[i];
+        if(actual.turno!==turnoOrigen)
+        continue;
 
-        if(actual.turno !== turnoOrigen)
+        if(String(actual.numero).slice(-2)!==base)
+        continue;
+
+        for(let siguiente of datos){
+
+            if(siguiente.fecha!==actual.fecha)
             continue;
 
-        if(String(actual.numero).slice(-2) !== base)
+            if(siguiente.provincia!==actual.provincia)
             continue;
 
-        for(let j=0;j<datos.length;j++){
+            if(siguiente.turno!==turnoDestino)
+            continue;
 
-            let siguiente = datos[j];
+            let salida=
+            String(siguiente.numero).slice(-2);
 
-            if(siguiente.fecha !== actual.fecha)
-                continue;
+            if(!pesos[salida])
+            pesos[salida]=0;
 
-            if(siguiente.provincia !== actual.provincia)
-                continue;
+            pesos[salida]+=20;
 
-            if(siguiente.turno !== destino)
-                continue;
+            if(salida[0]===base[0])
+            pesos[salida]+=3;
 
-            let salida = String(siguiente.numero).slice(-2);
+            if(salida[1]===base[1])
+            pesos[salida]+=3;
 
-            pesos[salida] = (pesos[salida] || 0) + 10;
+            if(salida===base[1]+base[0])
+            pesos[salida]+=8;
 
-            if(salida[0] === base[0])
-                pesos[salida] += 2;
+            if(
+            salida.includes(base[0]) ||
+            salida.includes(base[1])
+            )
+            pesos[salida]+=2;
 
-            if(salida[1] === base[1])
-                pesos[salida] += 2;
-
-            if(salida === base[1] + base[0])
-                pesos[salida] += 5;
         }
 
     }
 
-    console.log("===== TRANSICIÓN IA =====");
-    console.log("Base:", base);
-    console.log("Turno:", turnoOrigen);
-    console.log("Destino:", destino);
-    console.log("Pesos:", pesos);
+    return Object.keys(pesos)
+    .sort((a,b)=>pesos[b]-pesos[a]);
 
-    return Object.keys(pesos).sort((a,b)=>pesos[b]-pesos[a]);
-
-                  }
+}
 
 
 
+function construirTernosIA(lista){
 
+    let salida=[];
+
+    for(let i=0;i<lista.length-1;i++){
+
+        let t=
+        lista[i]+lista[i+1][1];
+
+        if(!salida.includes(t))
+        salida.push(t);
+
+    }
+
+    return salida;
+
+}
+
+
+
+function construirCuaternosIA(lista){
+
+    let salida=[];
+
+    for(let i=0;i<lista.length-1;i++){
+
+        let c=
+        lista[i]+lista[i+1];
+
+        if(!salida.includes(c))
+        salida.push(c);
+
+    }
+
+    return salida;
+
+}
+
+
+
+function eliminarDuplicadosIA(lista){
+
+    return [...new Set(lista)];
+
+    }
+    //////////////////////////////////////////////////
+// BLOQUE 8 (PARTE 2/2)
+// GENERADOR IA HISTÓRICA V48.5
+//////////////////////////////////////////////////
 
 async function generarResultadoIA(){
 
-    let turnoOrigen =
+    let turnoOrigen=
     document.getElementById("turnoCarga").value;
 
-    let destino =
+    let turnoDestino=
     obtenerSiguienteTurnoV48(turnoOrigen);
 
-    let bases =
+    let bases=
     obtenerBases7Provincias();
 
     if(bases.length===0){
 
-        let datos =
+        let datos=
         await leerV48(
         STORES_V48.historico
         );
 
-        bases =
+        bases=
         datos
-        .slice(-20)
+        .slice(-30)
         .map(x=>String(x.numero).slice(-2));
 
     }
+
+    bases=
+    eliminarDuplicadosIA(bases);
 
     let ranking={};
 
     for(let base of bases){
 
-        let candidatos =
+        let candidatos=
         await analizarTransicionTurnoV48(
             base,
             turnoOrigen
         );
 
-        for(let n of candidatos){
+        for(let i=0;i<candidatos.length;i++){
 
-            ranking[n] =
-            (ranking[n]||0)+1;
+            let numero=
+            candidatos[i];
+
+            if(!ranking[numero])
+            ranking[numero]=0;
+
+            ranking[numero]+=100-i;
 
         }
 
     }
 
-    let orden =
+    let ambos=
     Object.keys(ranking)
-    .sort((a,b)=>ranking[b]-ranking[a]);
+    .sort((a,b)=>ranking[b]-ranking[a])
+    .slice(0,10);
 
-    if(orden.length===0){
+    ambos=
+    eliminarDuplicadosIA(ambos);
 
-        mostrarV48(
+    let ternos=
+    construirTernosIA(ambos);
 
-"⚠️ SIN DATOS DE TRANSICIÓN\n\n"+
-"Verifique que existan registros del turno "+
-turnoOrigen+
-" y del turno "+
-destino+
-" para la misma fecha y provincia."
-
-        );
-
-        return;
-
-    }
-
-    let ambos =
-    orden.slice(0,3);
-
-    let ternos=[];
-
-    if(ambos.length>=2){
-
-        ternos.push(
-            ambos[0]+ambos[1][1]
-        );
-
-    }
-
-    if(ambos.length>=3){
-
-        ternos.push(
-            ambos[1]+ambos[2][1]
-        );
-
-    }
-
-    let cuaternos=[];
-
-    if(ambos.length>=2){
-
-        cuaternos.push(
-            ambos[0]+ambos[1]
-        );
-
-    }
-
-    if(ambos.length>=3){
-
-        cuaternos.push(
-            ambos[1]+ambos[2]
-        );
-
-    }
+    let cuaternos=
+    construirCuaternosIA(ambos);
 
     mostrarV48(
 
-"🧠 TESLA IA V48\n\n"+
+"🧠 EMI TESLA PRO V48.5\n\n"+
 
-"TRANSICIÓN\n"+
+"TRANSICIÓN IA\n"+
 turnoOrigen+
-" → "+
-destino+
+" ➜ "+
+turnoDestino+
 
-"\n\n⚡ AMBOS\n"+
-ambos.join("\n")+
+"\n\n📊 BASES ANALIZADAS\n"+
+bases.join(" - ")+
 
-"\n\n🎯 TERNOS\n"+
-(ternos.length ? ternos.join("\n") : "-")+
+"\n\n⚡ AMBOS IA\n"+
+(ambos.length?ambos.join("\n"):"SIN DATOS")+
 
-"\n\n🔷 CUATERNOS\n"+
-(cuaternos.length ? cuaternos.join("\n") : "-")
+"\n\n🎯 TERNOS IA\n"+
+(ternos.length?ternos.join("\n"):"SIN DATOS")+
+
+"\n\n🔷 CUATERNOS IA\n"+
+(cuaternos.length?cuaternos.join("\n"):"SIN DATOS")
 
     );
 
-    }
-    
+}
 
 
 
 window.addEventListener(
-"load",
-()=>{
 
-inicializarV48();
+"load",
+
+async()=>{
+
+    await inicializarV48();
 
 }
 
 );
+
 </script> 
     
 </body>

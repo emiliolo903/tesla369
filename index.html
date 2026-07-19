@@ -1948,116 +1948,172 @@ function obtenerSiguienteTurnoV48(turno){
 
 
 
-async function analizarTransicionTurnoV48(base,turnoOrigen){
+////////////////////////////////////////////////
+// MOTOR TRANSICIÓN IA V49
+// PARTE 1/2
+////////////////////////////////////////////////
 
-    const turnoDestino=
+async function analizarTransicionTurnoV48(base, turnoOrigen){
+
+    let destino =
     obtenerSiguienteTurnoV48(turnoOrigen);
 
-    const datos=
-    await leerV48(STORES_V48.historico);
+    let datos =
+    await leerV48(
+        STORES_V48.historico
+    );
 
-    let pesos={};
+    base =
+    String(base).slice(-2);
 
-    base=String(base).slice(-2);
+    let pesos = {};
 
-    for(let actual of datos){
+    let frecuencia = {};
+
+    let inversiones = [
+        base,
+        base[1]+base[0]
+    ];
+
+    for(let i=0;i<datos.length;i++){
+
+        let actual = datos[i];
 
         if(actual.turno!==turnoOrigen)
-        continue;
-
-        if(String(actual.numero).slice(-2)!==base)
-        continue;
-
-        for(let siguiente of datos){
-
-            if(siguiente.fecha!==actual.fecha)
             continue;
 
-            if(siguiente.provincia!==actual.provincia)
+        if(
+            actual.numero==null
+        )
             continue;
 
-            if(siguiente.turno!==turnoDestino)
+        let baseActual =
+        String(actual.numero).slice(-2);
+
+        if(
+            !inversiones.includes(baseActual)
+        )
             continue;
 
-            let salida=
+        for(let j=0;j<datos.length;j++){
+
+            let siguiente = datos[j];
+
+            if(
+                siguiente.fecha!==actual.fecha
+            )
+                continue;
+
+            if(
+                siguiente.provincia!==actual.provincia
+            )
+                continue;
+
+            if(
+                siguiente.turno!==destino
+            )
+                continue;
+
+            let salida =
             String(siguiente.numero).slice(-2);
 
+            if(
+                salida===base
+            )
+                continue;
+
+            if(
+                salida===base[1]+base[0]
+            )
+                continue;
+
             if(!pesos[salida])
-            pesos[salida]=0;
+                pesos[salida]=0;
+
+            if(!frecuencia[salida])
+                frecuencia[salida]=0;
+
+            frecuencia[salida]++;
 
             pesos[salida]+=20;
 
-            if(salida[0]===base[0])
-            pesos[salida]+=3;
-
-            if(salida[1]===base[1])
-            pesos[salida]+=3;
-
-            if(salida===base[1]+base[0])
-            pesos[salida]+=8;
+            if(
+                salida[0]===base[0]
+            )
+                pesos[salida]+=3;
 
             if(
-            salida.includes(base[0]) ||
-            salida.includes(base[1])
+                salida[1]===base[1]
             )
-            pesos[salida]+=2;
+                pesos[salida]+=3;
+
+            if(
+                salida[0]===base[1]
+            )
+                pesos[salida]+=4;
+
+            if(
+                salida[1]===base[0]
+            )
+                pesos[salida]+=4;
+                        // Peso por frecuencia histórica
+            pesos[salida] += frecuencia[salida];
+
+            // Peso por núcleo dominante
+            if(
+                NUCLEO_V48.dominante &&
+                salida===NUCLEO_V48.dominante
+            ){
+                pesos[salida]+=15;
+            }
+
+            if(
+                NUCLEO_V48.segundo &&
+                salida===NUCLEO_V48.segundo
+            ){
+                pesos[salida]+=8;
+            }
+
+            if(
+                NUCLEO_V48.sobreviviente &&
+                salida===NUCLEO_V48.sobreviviente
+            ){
+                pesos[salida]+=4;
+            }
 
         }
 
     }
 
-    return Object.keys(pesos)
-    .sort((a,b)=>pesos[b]-pesos[a]);
+    let candidatos =
 
-}
+    Object.keys(pesos)
 
+    .sort((a,b)=>pesos[b]-pesos[a])
 
+    .filter(n=>{
 
-function construirTernosIA(lista){
+        return (
 
-    let salida=[];
+            n!==base &&
 
-    for(let i=0;i<lista.length-1;i++){
+            n!==base[1]+base[0]
 
-        let t=
-        lista[i]+lista[i+1][1];
+        );
 
-        if(!salida.includes(t))
-        salida.push(t);
+    });
 
-    }
+    console.log("===== IA TESLA V49 =====");
+    console.log("BASE:",base);
+    console.log("ORIGEN:",turnoOrigen);
+    console.log("DESTINO:",destino);
+    console.log("PESOS:",pesos);
+    console.log("CANDIDATOS:",candidatos);
 
-    return salida;
+    return candidatos;
 
-}
-
-
-
-function construirCuaternosIA(lista){
-
-    let salida=[];
-
-    for(let i=0;i<lista.length-1;i++){
-
-        let c=
-        lista[i]+lista[i+1];
-
-        if(!salida.includes(c))
-        salida.push(c);
-
-    }
-
-    return salida;
-
-}
-
-
-
-function eliminarDuplicadosIA(lista){
-
-    return [...new Set(lista)];
-
-    }
+        }
+    
     //////////////////////////////////////////////////
 // BLOQUE 8 (PARTE 2/2)
 // GENERADOR IA HISTÓRICA V48.5

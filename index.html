@@ -635,7 +635,19 @@ salida.innerText=texto;
 //////////////////////////////////////////////////
 
 let DETENER_OCR_V48=false;
+let auditoriaCarga={
 
+PREVIA:0,
+
+PRIMERA:0,
+
+MATUTINA:0,
+
+VESPERTINA:0,
+
+NOCTURNA:0
+
+};
 
 function detectarFechaV48(texto){
 
@@ -901,14 +913,34 @@ pagina
 
 for(let r of registros){
 
+    await guardarV48(
+        STORES_V48.historico,
+        r
+    );
 
-await guardarV48(
-STORES_V48.historico,
-r
-);
+    if(auditoriaCarga[r.turno]!==undefined){
 
+        auditoriaCarga[r.turno]++;
+
+    }
 
 }
+
+document.getElementById("auditoria").innerText=
+
+"🛡 IA APRENDIENDO...\n\n"+
+
+"PREVIA: "+auditoriaCarga.PREVIA+" cargados\n"+
+
+"PRIMERA: "+auditoriaCarga.PRIMERA+" cargados\n"+
+
+"MATUTINA: "+auditoriaCarga.MATUTINA+" cargados\n"+
+
+"VESPERTINA: "+auditoriaCarga.VESPERTINA+" cargados\n"+
+
+"NOCTURNA: "+auditoriaCarga.NOCTURNA+" cargados\n\n"+
+
+"📄 Página "+pagina+" de "+pdf.numPages;
 
 
 }
@@ -917,20 +949,44 @@ r
 
 await worker.terminate();
 
-
-
 await actualizarRegistrosV48();
 
+await construirMemoriaV48();
 
+await construirMatrizTurnosV48();
+
+await construirMatrizProvinciasV48();
 
 document.getElementById(
 "estadoMemoria"
-).innerText="APRENDIENDO";
+).innerText="LISTA";
 
+document.getElementById(
+"estadoMatriz"
+).innerText="ACTIVA";
 
+document.getElementById("auditoria").innerText=
+
+"✅ CARGA COMPLETA\n\n"+
+
+"PREVIA ✔ "+auditoriaCarga.PREVIA+"\n"+
+
+"PRIMERA ✔ "+auditoriaCarga.PRIMERA+"\n"+
+
+"MATUTINA ✔ "+auditoriaCarga.MATUTINA+"\n"+
+
+"VESPERTINA ✔ "+auditoriaCarga.VESPERTINA+"\n"+
+
+"NOCTURNA ✔ "+auditoriaCarga.NOCTURNA+"\n\n"+
+
+"🧠 MEMORIA IA: LISTA\n"+
+
+"📊 MATRIZ: ACTIVA\n"+
+
+"🚀 IA PREPARADA PARA PREDECIR";
 
 mostrarV48(
-"✅ PDF PROCESADO\nREGISTROS GUARDADOS"
+"✅ PDF PROCESADO\n\nLA IA YA PUEDE GENERAR PREDICCIONES"
 );
 
 

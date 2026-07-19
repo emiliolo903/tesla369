@@ -2117,7 +2117,14 @@ console.log("====================================");
     return Object.keys(pesos).sort((a,b)=>pesos[b]-pesos[a]);
            }
 
-
+console.log(
+"TRANSICION",
+base,
+turnoOrigen,
+"ENCONTRADOS",
+encontrados,
+pesos
+);
 
 async function generarResultadoIA(){
     
@@ -2161,7 +2168,8 @@ alert("Registros en la base: " + datos.length);
 
 
 for(let base of bases){
-
+    
+console.log("BASE ANALIZADA:", base, "TURNO:", turnoOrigen);
 
 let candidatos=[];
 

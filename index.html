@@ -2125,7 +2125,10 @@ obtenerBases7Provincias();
 
 
 let ranking={};
+    
+let datos = await leerV48(STORES_V48.historico);
 
+alert("Registros en la base: " + datos.length);
 
 
 for(let base of bases){

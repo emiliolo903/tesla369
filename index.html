@@ -2036,90 +2036,68 @@ function obtenerSiguienteTurnoV48(turno){
 
 async function analizarTransicionTurnoV48(base, turnoOrigen){
 
+    let destino=obtenerSiguienteTurnoV48(turnoOrigen);
 
-let destino =
-obtenerSiguienteTurnoV48(turnoOrigen);
+    let datos=await leerV48(STORES_V48.historico);
+const ordenTurnos={
+    PREVIA:0,
+    PRIMERA:1,
+    MATUTINA:2,
+    VESPERTINA:3,
+    NOCTURNA:4
+};
 
+datos.sort((a,b)=>{
 
+    if(a.fecha!==b.fecha)
+        return a.fecha.localeCompare(b.fecha);
 
-let datos =
-await leerV48(STORES_V48.historico);
+    if(ordenTurnos[a.turno]!==ordenTurnos[b.turno])
+        return ordenTurnos[a.turno]-ordenTurnos[b.turno];
 
+    return a.provincia.localeCompare(b.provincia);
 
+});
+    let pesos={};
 
-let pesos={};
+    base=String(base).slice(-2);
 
+    for(let i=0;i<datos.length-1;i++){
 
+        let actual=datos[i];
+        let siguiente=datos[i+1];
+        
+if(actual.fecha!==siguiente.fecha)
+    continue;
 
-for(let i=0;i<datos.length-1;i++){
+if(actual.provincia!==siguiente.provincia)
+    continue;
 
+if(actual.turno!==turnoOrigen)
+    continue;
 
-let actual=datos[i];
+if(siguiente.turno!==destino)
+    continue;
+        
 
-let siguiente=datos[i+1];
+        let origen=String(actual.numero).slice(-2);
+        let salida=String(siguiente.numero).slice(-2);
 
+        if(origen===base)
+            pesos[salida]=(pesos[salida]||0)+10;
 
+        if(origen===base[1]+base[0])
+            pesos[salida]=(pesos[salida]||0)+5;
 
-if(
-actual.turno!==turnoOrigen ||
-siguiente.turno!==destino
-)
+        if(origen[0]===base[0])
+            pesos[salida]=(pesos[salida]||0)+2;
 
-continue;
+        if(origen[1]===base[1])
+            pesos[salida]=(pesos[salida]||0)+2;
+    }
 
-
-
-let nActual=
-String(actual.numero)
-.slice(-2);
-
-
-
-let nSalida=
-String(siguiente.numero)
-.slice(-2);
-
-
-
-if(nActual===base){
-
-
-pesos[nSalida]=
-(pesos[nSalida]||0)+5;
-
-
-}
-
-
-
-// invertido
-
-if(
-nActual===base[1]+base[0]
-){
-
-
-pesos[nSalida]=
-(pesos[nSalida]||0)+2;
-
-
-}
-
-
-
-}
-
-
-
-return Object.keys(pesos)
-.sort(
-(a,b)=>pesos[b]-pesos[a]
-);
-
-
-}
-
-
+    return Object.keys(pesos).sort((a,b)=>pesos[b]-pesos[a]);
+           }
 
 
 
@@ -2203,26 +2181,20 @@ orden.slice(0,3);
 
 
 
-while(ambos.length<3){
+if(ambos.length===0){
 
-let extra=[
-"23",
-"45",
-"67"
-];
+mostrarV48(
 
+"⚠️ NO HAY SUFICIENTE HISTORIAL\n\n"+
+"Cargue más sorteos o un PDF histórico."
 
-for(let e of extra){
+);
 
-if(!ambos.includes(e))
-ambos.push(e);
-
-if(ambos.length===3)
-break;
+return;
 
 }
 
-}
+ambos=ambos.slice(0,3);
 
 
 

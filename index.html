@@ -2121,9 +2121,11 @@ async function analizarTransicionTurnoV48(base, turnoOrigen){
 
 async function generarResultadoIA(){
 
+    // Actualizar el núcleo antes de generar la IA
+    await analizarNucleoV48();
+
     let turnoOrigen =
     document.getElementById("turnoCarga").value;
-
 
     let destino =
     obtenerSiguienteTurnoV48(turnoOrigen);

@@ -366,7 +366,7 @@ pdf:false
 
 
 
-const DB_NAME_V48="EMI_TESLA_PRO_V48";
+const DB_NAME_V48="EMI_TESLA_PRO_V47_FINAL";
 
 const DB_VERSION_V48=1;
 
@@ -1963,15 +1963,9 @@ async function inicializarV48(){
 
 try{
 
-console.log("INICIANDO SISTEMA V48");
-
 await abrirBaseV48();
 
-console.log("BASE ABIERTA", dbV48);
-
-
 await actualizarRegistrosV48();
-
 
 let datos = await leerV48(
 STORES_V48.historico
@@ -1979,10 +1973,9 @@ STORES_V48.historico
 
 
 console.log(
-"REGISTROS CARGADOS:",
+"REGISTROS RECUPERADOS:",
 datos.length
 );
-
 
 
 if(datos.length>0){
@@ -1994,29 +1987,18 @@ await construirMatrizTurnosV48();
 await construirMatrizProvinciasV48();
 
 
-document.getElementById(
-"estadoMemoria"
-).innerText="LISTA";
+document.getElementById("estadoMemoria").innerText="LISTA";
 
-
-document.getElementById(
-"estadoMatriz"
-).innerText="ACTIVA";
+document.getElementById("estadoMatriz").innerText="ACTIVA";
 
 
 }else{
 
-document.getElementById(
-"estadoMemoria"
-).innerText="SIN DATOS";
+document.getElementById("estadoMemoria").innerText="SIN DATOS";
 
-document.getElementById(
-"estadoMatriz"
-).innerText="SIN DATOS";
-
+document.getElementById("estadoMatriz").innerText="SIN DATOS";
 
 }
-
 
 
 }
@@ -2027,14 +2009,10 @@ console.log(
 e
 );
 
-alert(
-"ERROR INICIO SISTEMA\n\n"+e
-);
-
-
 }
 
-}
+    }
+
 
 
 //////////////////////////////////////////////////

@@ -366,8 +366,7 @@ pdf:false
 
 
 
-const DB_NAME_V48="EMI_TESLA_PRO_V47_FINAL";
-
+const DB_NAME_V48="EMI_TESLA_PRO_V48_FINAL";
 const DB_VERSION_V48=1;
 
 
@@ -1766,142 +1765,33 @@ mostrarV48(salida);
 
 }
 
-
-
-
-
 //////////////////////////////////////////////////
-// MOTOR PREDICTOR IA V48.1
-// TRANSICIÓN DE TURNOS + ACOMPAÑANTES
-//////////////////////////////////////////////////
-
-
-function invertirNumeroV48(n){
-
-    n=String(n);
-
-    return n[1]+n[0];
-
-}
-
-
-
-async function buscarCandidatosTurnoV48(base){
-
-
-let datos=
-await leerV48(
-STORES_V48.historico
-);
-
-
-
-let pesos={};
-
-
-
-base=String(base).slice(-2);
-
-
-
-for(let i=0;i<datos.length-1;i++){
-
-
-let actual=
-String(datos[i].numero)
-.slice(-2);
-
-
-
-let siguiente=
-String(datos[i+1].numero)
-.slice(-2);
-
-
-
-if(actual===base){
-
-
-pesos[siguiente]=
-(pesos[siguiente]||0)+3;
-
-
-}
-
-
-
-if(actual===invertirNumeroV48(base)){
-
-
-pesos[siguiente]=
-(pesos[siguiente]||0)+1;
-
-
-}
-
-
-
-}
-
-
-
-let ranking=
-Object.keys(pesos)
-.sort(
-(a,b)=>pesos[b]-pesos[a]
-);
-
-
-
-return ranking;
-
-
-}
-
-
-
-
-
-
-
-
-    //////////////////////////////////////////////////
 // BLOQUE 8/8
-// AUDITORÍA + ARRANQUE SISTEMA V48
+// AUDITORÍA + ARRANQUE SISTEMA V48 CORREGIDO
 //////////////////////////////////////////////////
 
 
 async function auditoriaSistema(){
 
-
 try{
 
-
-let datos=
-await leerV48(
+let datos = await leerV48(
 STORES_V48.historico
 );
 
 
-
-let nucleo=
-await analizarNucleoV48();
+let nucleo = await analizarNucleoV48();
 
 
-
-let salida=
-document.getElementById(
+let salida=document.getElementById(
 "auditoria"
 );
 
 
-
-if(!salida)
-return;
+if(!salida) return;
 
 
-
-salida.innerText=
+salida.innerText =
 
 "🛡 AUDITORÍA TESLA PRO V48\n\n"+
 
@@ -1909,14 +1799,13 @@ salida.innerText=
 datos.length+
 
 "\n\nNÚCLEO DOMINANTE: "+
-(nucleo.dominante||"SIN DATOS")+
+(nucleo.dominante || "SIN DATOS")+
 
 "\nSEGUNDO NÚCLEO: "+
-(nucleo.segundo||"SIN DATOS")+
+(nucleo.segundo || "SIN DATOS")+
 
 "\nSOBREVIVIENTE: "+
-(nucleo.sobreviviente||"SIN DATOS");
-
+(nucleo.sobreviviente || "SIN DATOS");
 
 
 await guardarV48(
@@ -1936,24 +1825,17 @@ nucleo:nucleo
 );
 
 
-
 }
+
 catch(e){
 
+document.getElementById("auditoria").innerText=
 
-document.getElementById(
-"auditoria"
-).innerText=
-
-"❌ ERROR AUDITORÍA\n"+
-e;
-
+"❌ ERROR AUDITORÍA\n"+e;
 
 }
 
-
 }
-
 
 
 
@@ -1963,9 +1845,12 @@ async function inicializarV48(){
 
 try{
 
+
 await abrirBaseV48();
 
+
 await actualizarRegistrosV48();
+
 
 let datos = await leerV48(
 STORES_V48.historico
@@ -1978,30 +1863,49 @@ datos.length
 );
 
 
+
 if(datos.length>0){
+
 
 await construirMemoriaV48();
 
+
 await construirMatrizTurnosV48();
+
 
 await construirMatrizProvinciasV48();
 
 
-document.getElementById("estadoMemoria").innerText="LISTA";
 
-document.getElementById("estadoMatriz").innerText="ACTIVA";
+document.getElementById(
+"estadoMemoria"
+).innerText="LISTA";
+
+
+document.getElementById(
+"estadoMatriz"
+).innerText="ACTIVA";
 
 
 }else{
 
-document.getElementById("estadoMemoria").innerText="SIN DATOS";
 
-document.getElementById("estadoMatriz").innerText="SIN DATOS";
+document.getElementById(
+"estadoMemoria"
+).innerText="SIN DATOS";
+
+
+document.getElementById(
+"estadoMatriz"
+).innerText="SIN DATOS";
+
 
 }
 
 
+
 }
+
 catch(e){
 
 console.log(
@@ -2011,191 +1915,239 @@ e
 
 }
 
-    }
+}
+
+
 
 
 
 //////////////////////////////////////////////////
-// MOTOR TRANSICIÓN TURNOS V48.2
-// PREVIA→PRIMERA→MATUTINA→VESPERTINA→NOCTURNA
+// MOTOR TRANSICIÓN TURNOS V48.2 CORREGIDO
 //////////////////////////////////////////////////
+
 
 function obtenerSiguienteTurnoV48(turno){
 
-    let mapa={
+let mapa={
 
-        "PREVIA":"PRIMERA",
+"PREVIA":"PRIMERA",
 
-        "PRIMERA":"MATUTINA",
+"PRIMERA":"MATUTINA",
 
-        "MATUTINA":"VESPERTINA",
+"MATUTINA":"VESPERTINA",
 
-        "VESPERTINA":"NOCTURNA",
+"VESPERTINA":"NOCTURNA",
 
-        "NOCTURNA":"PREVIA"
+"NOCTURNA":"PREVIA"
 
-    };
+};
 
 
-    return mapa[turno] || "PRIMERA";
+return mapa[turno] || "PRIMERA";
 
 }
 
 
 
-async function analizarTransicionTurnoV48(base, turnoOrigen){
 
-    let destino=obtenerSiguienteTurnoV48(turnoOrigen);
+async function analizarTransicionTurnoV48(base,turnoOrigen){
 
-    let datos=await leerV48(STORES_V48.historico);
+
+let destino =
+obtenerSiguienteTurnoV48(turnoOrigen);
+
+
+
+let datos =
+await leerV48(
+STORES_V48.historico
+);
+
+
+
 const ordenTurnos={
-    PREVIA:0,
-    PRIMERA:1,
-    MATUTINA:2,
-    VESPERTINA:3,
-    NOCTURNA:4
+
+PREVIA:0,
+PRIMERA:1,
+MATUTINA:2,
+VESPERTINA:3,
+NOCTURNA:4
+
 };
+
+
 
 datos.sort((a,b)=>{
 
-    if(a.fecha!==b.fecha)
-        return a.fecha.localeCompare(b.fecha);
 
-    if(ordenTurnos[a.turno]!==ordenTurnos[b.turno])
-        return ordenTurnos[a.turno]-ordenTurnos[b.turno];
+if(a.fecha!==b.fecha)
 
-    return a.provincia.localeCompare(b.provincia);
+return a.fecha.localeCompare(b.fecha);
+
+
+
+return ordenTurnos[a.turno]-
+ordenTurnos[b.turno];
+
 
 });
-    let pesos={};
-    let encontrados=0;
 
-    base=String(base).slice(-2);
 
-    for(let i=0;i<datos.length-1;i++){
 
-        let actual=datos[i];
-        let siguiente=datos[i+1];
+let pesos={};
+
+
+
+base=String(base).slice(-2);
+
+
+
+for(let i=0;i<datos.length-1;i++){
+
+
+let actual=datos[i];
+
+let siguiente=datos[i+1];
+
+
+
 if(actual.turno!==turnoOrigen)
-    continue;
+
+continue;
+
+
 
 if(actual.provincia!==siguiente.provincia)
-    continue;
+
+continue;
+
+
 
 if(
-    siguiente.turno!==destino &&
-    siguiente.turno!=="SIN_TURNO"
+siguiente.turno!==destino
 )
-    continue;
-        
 
-        let origen=String(actual.numero).slice(-2);
-        let salida=String(siguiente.numero).slice(-2);
+continue;
 
-        if(origen===base)
-            
-            encontrados++;
-        
-            pesos[salida]=(pesos[salida]||0)+10;
-    }
 
-        if(origen===base[1]+base[0])
-            pesos[salida]=(pesos[salida]||0)+5;
 
-        if(origen[0]===base[0])
-            pesos[salida]=(pesos[salida]||0)+2;
+let origen=
+String(actual.numero).slice(-2);
 
-        if(origen[1]===base[1])
-            pesos[salida]=(pesos[salida]||0)+2;
-        
-    
-    }
-    console.log("===== AUDITORIA TRANSICION V48 =====");
 
-console.log("Turno origen:", turnoOrigen);
 
-console.log("Destino buscado:", destino);
+let salida=
+String(siguiente.numero).slice(-2);
 
-console.log("Base analizada:", base);
 
-console.log("Registros totales:", datos.length);
 
-console.log("Coincidencias encontradas:", encontrados);
+if(origen===base){
 
-console.log("Pesos obtenidos:", pesos);
+pesos[salida]=
+(pesos[salida]||0)+10;
 
-console.log("====================================");
+}
 
-    return Object.keys(pesos).sort((a,b)=>pesos[b]-pesos[a]);
-           }
+
+
+if(origen===base[1]+base[0]){
+
+pesos[salida]=
+(pesos[salida]||0)+5;
+
+}
+
+
+
+if(origen[0]===base[0]){
+
+pesos[salida]=
+(pesos[salida]||0)+2;
+
+}
+
+
+
+if(origen[1]===base[1]){
+
+pesos[salida]=
+(pesos[salida]||0)+2;
+
+}
+
+
+}
+
+
+
+return Object.keys(pesos)
+.sort(
+(a,b)=>pesos[b]-pesos[a]
+);
+
+
+}
+
+
 
 
 
 async function generarResultadoIA(){
-    
-alert("Entró al Generador IA");
 
-let turnoOrigen=
+
+let turnoOrigen =
 document.getElementById(
 "turnoCarga"
 ).value;
 
 
 
-let destino=
+let destino =
 obtenerSiguienteTurnoV48(
 turnoOrigen
 );
 
 
 
-let bases=
+let bases =
 obtenerBases7Provincias();
-    
+
+
+
 if(bases.length===0){
 
-let datosBase = await leerV48(
+
+let datos =
+await leerV48(
 STORES_V48.historico
 );
 
-bases = datosBase
-.slice(-20)
-.map(x=>String(x.numero).slice(-2));
 
-    }
+
+bases =
+datos.slice(-10)
+.map(
+x=>String(x.numero).slice(-2)
+);
+
+
+}
+
 
 
 let ranking={};
-    
-let datos = await leerV48(STORES_V48.historico);
 
-alert("Registros en la base: " + datos.length);
 
 
 for(let base of bases){
-    
-console.log("BASE ANALIZADA:", base, "TURNO:", turnoOrigen);
 
-let candidatos=[];
 
-try{
+let candidatos =
+await analizarTransicionTurnoV48(
+base,
+turnoOrigen
+);
 
-    candidatos=
-    await analizarTransicionTurnoV48(
-        base,
-        turnoOrigen
-    );
-alert("Base: "+base+" -> "+JSON.stringify(candidatos));
-}
-catch(e){
-
-    alert(
-        "ERROR analizarTransicionTurnoV48\n\n"+e
-    );
-
-    return;
-
-}
 
 
 for(let n of candidatos){
@@ -2208,12 +2160,11 @@ ranking[n]=
 }
 
 
-
 }
 
 
 
-let orden=
+let orden =
 Object.keys(ranking)
 .sort(
 (a,b)=>ranking[b]-ranking[a]
@@ -2221,83 +2172,55 @@ Object.keys(ranking)
 
 
 
-let ambos=
-orden.slice(0,3);
+if(orden.length===0){
 
-
-
-if(ambos.length===0){
 
 mostrarV48(
-
-"⚠️ NO HAY SUFICIENTE HISTORIAL\n\n"+
-"Cargue más sorteos o un PDF histórico."
-
+"⚠️ SIN DATOS DE TRANSICIÓN"
 );
+
 
 return;
 
 }
 
-ambos=ambos.slice(0,3);
 
 
-
-let ternos=[
-
-ambos[0]+ambos[1][1],
-
-ambos[1]+ambos[2][1]
-
-];
-
-
-
-let cuaternos=[
-
-ambos[0]+ambos[1],
-
-ambos[1]+ambos[2]
-
-];
+let ambos =
+orden.slice(0,3);
 
 
 
 mostrarV48(
-"🧠 TESLA IA TRANSICIÓN\n\n"+
 
-"ANÁLISIS:\n"+
+"🧠 TESLA IA TRANSICIÓN V48\n\n"+
+
 turnoOrigen+
 " → "+
 destino+
 
 "\n\n⚡ AMBOS\n"+
-ambos.join("\n")+
+ambos.join("\n")
 
-"\n\n🎯 TERNOS\n"+
-ternos.join("\n")+
-
-"\n\n🔷 CUATERNOS\n"+
-cuaternos.join("\n")
 );
 
-    }
+
+}
+
+
+
 
 
 window.addEventListener(
 "load",
 ()=>{
 
-
 inicializarV48();
 
+}
 
-});
-
-
-</script>
-
-
+);
+</script> 
+    
 </body>
-
 </html>

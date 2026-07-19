@@ -1949,8 +1949,7 @@ function obtenerSiguienteTurnoV48(turno){
 
 
 ////////////////////////////////////////////////
-// MOTOR TRANSICIÓN IA V49
-// PARTE 1/2
+// MOTOR IA HISTÓRICO V49
 ////////////////////////////////////////////////
 
 async function analizarTransicionTurnoV48(base, turnoOrigen){
@@ -1968,30 +1967,22 @@ async function analizarTransicionTurnoV48(base, turnoOrigen){
 
     let pesos = {};
 
-    let frecuencia = {};
-
-    let inversiones = [
-        base,
-        base[1]+base[0]
-    ];
+    let inversion =
+    base[1] + base[0];
 
     for(let i=0;i<datos.length;i++){
 
         let actual = datos[i];
 
-        if(actual.turno!==turnoOrigen)
+        if(!actual.numero)
+            continue;
+
+        if(actual.turno !== turnoOrigen)
             continue;
 
         if(
-            actual.numero==null
-        )
-            continue;
-
-        let baseActual =
-        String(actual.numero).slice(-2);
-
-        if(
-            !inversiones.includes(baseActual)
+            String(actual.numero).slice(-2)!==base &&
+            String(actual.numero).slice(-2)!==inversion
         )
             continue;
 
@@ -2000,17 +1991,17 @@ async function analizarTransicionTurnoV48(base, turnoOrigen){
             let siguiente = datos[j];
 
             if(
-                siguiente.fecha!==actual.fecha
+                siguiente.fecha !== actual.fecha
             )
                 continue;
 
             if(
-                siguiente.provincia!==actual.provincia
+                siguiente.provincia !== actual.provincia
             )
                 continue;
 
             if(
-                siguiente.turno!==destino
+                siguiente.turno !== destino
             )
                 continue;
 
@@ -2018,102 +2009,162 @@ async function analizarTransicionTurnoV48(base, turnoOrigen){
             String(siguiente.numero).slice(-2);
 
             if(
-                salida===base
-            )
-                continue;
-
-            if(
-                salida===base[1]+base[0]
+                salida===base ||
+                salida===inversion
             )
                 continue;
 
             if(!pesos[salida])
                 pesos[salida]=0;
 
-            if(!frecuencia[salida])
-                frecuencia[salida]=0;
+            ////////////////////////////////////////////////////
+            // PESO HISTÓRICO REAL
+            ////////////////////////////////////////////////////
 
-            frecuencia[salida]++;
+            pesos[salida]+=30;
 
-            pesos[salida]+=20;
+            ////////////////////////////////////////////////////
+            // NÚCLEO DOMINANTE
+            ////////////////////////////////////////////////////
 
-            if(
-                salida[0]===base[0]
-            )
-                pesos[salida]+=3;
-
-            if(
-                salida[1]===base[1]
-            )
-                pesos[salida]+=3;
-
-            if(
-                salida[0]===base[1]
-            )
-                pesos[salida]+=4;
-
-            if(
-                salida[1]===base[0]
-            )
-                pesos[salida]+=4;
-                        // Peso por frecuencia histórica
-            pesos[salida] += frecuencia[salida];
-
-            // Peso por núcleo dominante
             if(
                 NUCLEO_V48.dominante &&
                 salida===NUCLEO_V48.dominante
             ){
-                pesos[salida]+=15;
+                pesos[salida]+=20;
             }
 
             if(
                 NUCLEO_V48.segundo &&
                 salida===NUCLEO_V48.segundo
             ){
-                pesos[salida]+=8;
+                pesos[salida]+=12;
             }
 
             if(
                 NUCLEO_V48.sobreviviente &&
                 salida===NUCLEO_V48.sobreviviente
             ){
-                pesos[salida]+=4;
+                pesos[salida]+=6;
+            }
+
+            ////////////////////////////////////////////////////
+            // TESLA
+            ////////////////////////////////////////////////////
+
+            let tesla =
+            aplicarTeslaV48(base);
+
+            if(
+                salida===tesla
+            ){
+                pesos[salida]+=15;
+            }
+
+            ////////////////////////////////////////////////////
+            // DÍGITOS FUERTES
+            ////////////////////////////////////////////////////
+
+            if(
+                salida.includes(base[0])
+            ){
+                pesos[salida]+=2;
+            }
+
+            if(
+                salida.includes(base[1])
+            ){
+                pesos[salida]+=2;
             }
 
         }
 
     }
 
-    let candidatos =
+    ////////////////////////////////////////////////////
+    // MATRIZ HISTÓRICA GENERAL
+    ////////////////////////////////////////////////////
 
-    Object.keys(pesos)
+    let frecuencia={};
 
-    .sort((a,b)=>pesos[b]-pesos[a])
+    for(let n in pesos){
 
-    .filter(n=>{
+        frecuencia[n]=pesos[n];
+    }
 
-        return (
+    let orden =
 
-            n!==base &&
+    Object.keys(frecuencia)
 
-            n!==base[1]+base[0]
+    .sort(
+        (a,b)=>
+        frecuencia[b]-frecuencia[a]
+    );
 
+    ////////////////////////////////////////////////////
+    // SI NO ENCUENTRA DATOS
+    ////////////////////////////////////////////////////
+
+    if(orden.length===0){
+
+        let todos={};
+
+        for(let d of datos){
+
+            if(!d.numero)
+                continue;
+
+            let n=
+            String(d.numero).slice(-2);
+
+            todos[n]=
+            (todos[n]||0)+1;
+        }
+
+        orden=
+
+        Object.keys(todos)
+
+        .sort(
+            (a,b)=>
+            todos[b]-todos[a]
         );
+    }
 
-    });
+    ////////////////////////////////////////////////////
+    // ELIMINAR DUPLICADOS
+    ////////////////////////////////////////////////////
 
-    console.log("===== IA TESLA V49 =====");
-    console.log("BASE:",base);
-    console.log("ORIGEN:",turnoOrigen);
-    console.log("DESTINO:",destino);
-    console.log("PESOS:",pesos);
-    console.log("CANDIDATOS:",candidatos);
+    let final=[];
 
-    return candidatos;
+    for(let n of orden){
+
+        if(
+            !final.includes(n)
+        ){
+
+            final.push(n);
 
         }
-    
+
+        if(final.length>=10)
+            break;
+    }
+
+    console.log(
+        "BASE:",
+        base
+    );
+
+    console.log(
+        "PREDICCIÓN:",
+        final
+    );
+
+    return final;
+
+        }
+                
     //////////////////////////////////////////////////
 // BLOQUE 8 (PARTE 2/2)
 // GENERADOR IA HISTÓRICA V48.5

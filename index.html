@@ -2117,7 +2117,18 @@ turnoOrigen
 
 let bases=
 obtenerBases7Provincias();
+    
+if(bases.length===0){
 
+let datosBase = await leerV48(
+STORES_V48.historico
+);
+
+bases = datosBase
+.slice(-20)
+.map(x=>String(x.numero).slice(-2));
+
+    }
 
 
 let ranking={};

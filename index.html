@@ -2066,17 +2066,13 @@ datos.sort((a,b)=>{
 
         let actual=datos[i];
         let siguiente=datos[i+1];
-        
-if(actual.fecha!==siguiente.fecha)
-    continue;
-
-if(actual.provincia!==siguiente.provincia)
-    continue;
-
 if(actual.turno!==turnoOrigen)
     continue;
 
 if(siguiente.turno!==destino)
+    continue;
+
+if(actual.provincia!==siguiente.provincia)
     continue;
         
 

@@ -2065,94 +2065,216 @@ function eliminarDuplicadosIA(lista){
 
 async function generarResultadoIA(){
 
-    let turnoOrigen=
+    let turnoOrigen =
     document.getElementById("turnoCarga").value;
 
-    let turnoDestino=
+
+    let destino =
     obtenerSiguienteTurnoV48(turnoOrigen);
 
-    let bases=
+
+    let bases =
     obtenerBases7Provincias();
+
+
 
     if(bases.length===0){
 
-        let datos=
+        let datos =
         await leerV48(
         STORES_V48.historico
         );
 
-        bases=
+
+        bases =
         datos
         .slice(-30)
         .map(x=>String(x.numero).slice(-2));
 
+
     }
 
-    bases=
-    eliminarDuplicadosIA(bases);
+
 
     let ranking={};
 
+
+
     for(let base of bases){
 
-        let candidatos=
+
+        let candidatos =
         await analizarTransicionTurnoV48(
             base,
             turnoOrigen
         );
 
-        for(let i=0;i<candidatos.length;i++){
 
-            let numero=
-            candidatos[i];
+        for(let n of candidatos){
 
-            if(!ranking[numero])
-            ranking[numero]=0;
 
-            ranking[numero]+=100-i;
+            if(n!==base){
+
+                ranking[n]=
+                (ranking[n]||0)+1;
+
+            }
+
 
         }
 
+
     }
 
-    let ambos=
+
+
+
+    let orden =
+
     Object.keys(ranking)
-    .sort((a,b)=>ranking[b]-ranking[a])
-    .slice(0,10);
 
-    ambos=
-    eliminarDuplicadosIA(ambos);
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    );
 
-    let ternos=
-    construirTernosIA(ambos);
 
-    let cuaternos=
-    construirCuaternosIA(ambos);
+
+    if(orden.length<3){
+
+
+        mostrarV48(
+
+        "⚠️ NO HAY SUFICIENTES DATOS\n\n"+
+        turnoOrigen+
+        " → "+
+        destino
+
+        );
+
+
+        return;
+
+    }
+
+
+
+
+    // 3 AMBOS DIFERENTES
+
+    let ambos=[];
+
+
+
+    for(let n of orden){
+
+
+        if(!ambos.includes(n)){
+
+
+            ambos.push(n);
+
+
+        }
+
+
+        if(ambos.length===3)
+        break;
+
+
+    }
+
+
+
+
+    // CREAR 2 TERNOS
+
+    let ternos=[
+
+        ambos[0][0]+
+        ambos[1][0]+
+        ambos[2][1],
+
+
+        ambos[1][0]+
+        ambos[2][0]+
+        ambos[0][1]
+
+    ];
+
+
+
+
+
+
+    // CREAR 2 CUATERNOS
+
+
+    let cuaternos=[
+
+
+        ambos[0]+ambos[1],
+
+
+        ambos[1]+ambos[2]
+
+
+    ];
+
+
+
+
+
 
     mostrarV48(
 
-"🧠 EMI TESLA PRO V48.5\n\n"+
 
-"TRANSICIÓN IA\n"+
+"🧠 TESLA IA V48\n\n"+
+
+
+"TRANSICIÓN\n"+
+
 turnoOrigen+
-" ➜ "+
-turnoDestino+
 
-"\n\n📊 BASES ANALIZADAS\n"+
-bases.join(" - ")+
+" → "+
 
-"\n\n⚡ AMBOS IA\n"+
-(ambos.length?ambos.join("\n"):"SIN DATOS")+
+destino+
 
-"\n\n🎯 TERNOS IA\n"+
-(ternos.length?ternos.join("\n"):"SIN DATOS")+
 
-"\n\n🔷 CUATERNOS IA\n"+
-(cuaternos.length?cuaternos.join("\n"):"SIN DATOS")
 
-    );
+"\n\n⚡ 3 AMBOS\n"+
+
+"1. "+ambos[0]+"\n"+
+
+"2. "+ambos[1]+"\n"+
+
+"3. "+ambos[2]+
+
+
+
+
+"\n\n🎯 2 TERNOS\n"+
+
+"1. "+ternos[0]+"\n"+
+
+"2. "+ternos[1]+
+
+
+
+
+"\n\n🔷 2 CUATERNOS\n"+
+
+"1. "+cuaternos[0]+"\n"+
+
+"2. "+cuaternos[1]
+
+
+);
+
 
 }
+
+    
 
 
 

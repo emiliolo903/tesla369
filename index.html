@@ -958,11 +958,11 @@ mostrarV48(
 
 async function guardarCargaManualV48(){
 
+try{
+
 
 let turno =
-document.getElementById(
-"turnoCarga"
-).value;
+document.getElementById("turnoCarga").value;
 
 
 
@@ -970,31 +970,31 @@ let provincias={
 
 
 "CORRIENTES":
-document.getElementById("corrientes").value,
+document.getElementById("corrientes").value.trim(),
 
 
 "CIUDAD":
-document.getElementById("ciudad").value,
+document.getElementById("ciudad").value.trim(),
 
 
 "BONAERENSE":
-document.getElementById("bonaerense").value,
+document.getElementById("bonaerense").value.trim(),
 
 
 "SANTA FE":
-document.getElementById("santaFe").value,
+document.getElementById("santaFe").value.trim(),
 
 
 "CORDOBA":
-document.getElementById("cordoba").value,
+document.getElementById("cordoba").value.trim(),
 
 
 "ENTRE RIOS":
-document.getElementById("entreRios").value,
+document.getElementById("entreRios").value.trim(),
 
 
 "CHACO":
-document.getElementById("chaco").value
+document.getElementById("chaco").value.trim()
 
 
 };
@@ -1008,16 +1008,20 @@ new Date()
 
 
 
+let guardados=0;
+
+
+
 for(let provincia in provincias){
 
 
-let numero =
-provincias[provincia]
-.trim();
+let numero=provincias[provincia];
 
 
 
-if(numero.length===4){
+if(
+/^\d{4}$/.test(numero)
+){
 
 
 await guardarV48(
@@ -1041,6 +1045,10 @@ origen:"MANUAL_V48"
 );
 
 
+
+guardados++;
+
+
 }
 
 
@@ -1056,12 +1064,27 @@ mostrarV48(
 
 "✅ BLOQUE GUARDADO\n\n"+
 "Turno: "+turno+
+"\nRegistros: "+guardados+
 "\n\nIA ACTUALIZADA"
 
 );
 
 
-    }
+
+}
+catch(e){
+
+
+alert(
+"ERROR CARGA MANUAL V48\n\n"+e
+);
+
+
+}
+
+
+}
+
     //////////////////////////////////////////////////
 // BLOQUE 4/8
 // MEMORIA IA + MATRIZ TURNOS V48
@@ -2181,10 +2204,9 @@ ambos.join("\n")+
 
 "\n\n🎯 TERNOS\n"+
 ternos.join("\n")+
-
+    
 "\n\n🔷 CUATERNOS\n"+
 cuaternos.join("\n")
-
 );
 
 }

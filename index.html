@@ -2059,6 +2059,7 @@ datos.sort((a,b)=>{
 
 });
     let pesos={};
+    let encontrados=0;
 
     base=String(base).slice(-2);
 
@@ -2069,10 +2070,13 @@ datos.sort((a,b)=>{
 if(actual.turno!==turnoOrigen)
     continue;
 
-if(siguiente.turno!==destino)
+if(actual.provincia!==siguiente.provincia)
     continue;
 
-if(actual.provincia!==siguiente.provincia)
+if(
+    siguiente.turno!==destino &&
+    siguiente.turno!=="SIN_TURNO"
+)
     continue;
         
 
@@ -2080,6 +2084,7 @@ if(actual.provincia!==siguiente.provincia)
         let salida=String(siguiente.numero).slice(-2);
 
         if(origen===base)
+            encontrados++;
             pesos[salida]=(pesos[salida]||0)+10;
 
         if(origen===base[1]+base[0])
@@ -2090,7 +2095,24 @@ if(actual.provincia!==siguiente.provincia)
 
         if(origen[1]===base[1])
             pesos[salida]=(pesos[salida]||0)+2;
+        
+    
     }
+    console.log("===== AUDITORIA TRANSICION V48 =====");
+
+console.log("Turno origen:", turnoOrigen);
+
+console.log("Destino buscado:", destino);
+
+console.log("Base analizada:", base);
+
+console.log("Registros totales:", datos.length);
+
+console.log("Coincidencias encontradas:", encontrados);
+
+console.log("Pesos obtenidos:", pesos);
+
+console.log("====================================");
 
     return Object.keys(pesos).sort((a,b)=>pesos[b]-pesos[a]);
            }

@@ -1958,23 +1958,40 @@ e;
 
 
 
-async function inicializarV48(){
 
+async function inicializarV48(){
 
 try{
 
+console.log("INICIANDO SISTEMA V48");
 
-await iniciarMemoriaV48();
+await abrirBaseV48();
 
+console.log("BASE ABIERTA", dbV48);
+
+
+await actualizarRegistrosV48();
+
+
+let datos = await leerV48(
+STORES_V48.historico
+);
+
+
+console.log(
+"REGISTROS CARGADOS:",
+datos.length
+);
+
+
+
+if(datos.length>0){
 
 await construirMemoriaV48();
 
-
 await construirMatrizTurnosV48();
 
-
 await construirMatrizProvinciasV48();
-
 
 
 document.getElementById(
@@ -1982,26 +1999,40 @@ document.getElementById(
 ).innerText="LISTA";
 
 
-
 document.getElementById(
 "estadoMatriz"
 ).innerText="ACTIVA";
+
+
+}else{
+
+document.getElementById(
+"estadoMemoria"
+).innerText="SIN DATOS";
+
+document.getElementById(
+"estadoMatriz"
+).innerText="SIN DATOS";
+
+
+}
 
 
 
 }
 catch(e){
 
-
 console.log(
 "ERROR INICIO V48",
 e
 );
 
+alert(
+"ERROR INICIO SISTEMA\n\n"+e
+);
+
 
 }
-
-
 
 }
 
@@ -2084,8 +2115,11 @@ if(
         let salida=String(siguiente.numero).slice(-2);
 
         if(origen===base)
+            
             encontrados++;
+        
             pesos[salida]=(pesos[salida]||0)+10;
+    }
 
         if(origen===base[1]+base[0])
             pesos[salida]=(pesos[salida]||0)+5;
@@ -2117,14 +2151,7 @@ console.log("====================================");
     return Object.keys(pesos).sort((a,b)=>pesos[b]-pesos[a]);
            }
 
-console.log(
-"TRANSICION",
-base,
-turnoOrigen,
-"ENCONTRADOS",
-encontrados,
-pesos
-);
+
 
 async function generarResultadoIA(){
     

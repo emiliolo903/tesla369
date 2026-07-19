@@ -2189,12 +2189,26 @@ let ranking={};
 for(let base of bases){
 
 
-let candidatos=
-await analizarTransicionTurnoV48(
-base,
-turnoOrigen
-);
+let candidatos=[];
 
+try{
+
+    candidatos=
+    await analizarTransicionTurnoV48(
+        base,
+        turnoOrigen
+    );
+
+}
+catch(e){
+
+    alert(
+        "ERROR analizarTransicionTurnoV48\n\n"+e
+    );
+
+    return;
+
+}
 
 
 for(let n of candidatos){

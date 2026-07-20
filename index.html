@@ -2408,215 +2408,363 @@ async function corregirAmbosIAV48(ambos, turnoOrigen){
 }
                 
     //////////////////////////////////////////////////
-// GENERADOR IA V48.6 MEJORADO
-// CONTINUIDAD + MATRIZ + INVERTIDO + CERCANÍA
+// GENERADOR IA HÍBRIDO V48.6
+// MOTOR ANTERIOR + MATRIZ HISTÓRICA COMO APOYO
 //////////////////////////////////////////////////
 
 async function generarResultadoIA(){
 
-let turnoOrigen =
-document.getElementById("turnoCarga").value;
+    let turnoOrigen =
+    document.getElementById("turnoCarga").value;
 
 
-let turnoDestino =
-obtenerSiguienteTurnoV48(turnoOrigen);
+    let turnoDestino =
+    obtenerSiguienteTurnoV48(turnoOrigen);
 
 
+    let provincias=[
 
-let bases =
-obtenerBases7Provincias();
+        "CORRIENTES",
+        "CIUDAD",
+        "BONAERENSE",
+        "SANTA FE",
+        "CORDOBA",
+        "ENTRE RIOS",
+        "CHACO"
 
+    ];
 
 
-if(bases.length===0){
+    let ranking={};
 
-let datos =
-await leerV48(
-STORES_V48.historico
-);
 
 
-bases =
-datos
-.slice(-14)
-.map(x=>String(x.numero).slice(-2));
+    //=========================================
+    // 1) MOTOR ORIGINAL V48.3
+    //=========================================
 
-}
+    let bases =
+    obtenerBases7Provincias();
 
 
+    if(bases.length===0){
 
-let ranking={};
+        let datos =
+        await leerV48(
+            STORES_V48.historico
+        );
 
 
+        bases =
+        datos
+        .slice(-30)
+        .map(x=>String(x.numero).slice(-2));
 
-function sumar(numero,peso){
+    }
 
-if(!numero)
-return;
 
-numero=String(numero)
-.padStart(2,"0");
 
-ranking[numero]=
-(ranking[numero]||0)+peso;
+    for(let base of bases){
 
-}
 
+        let candidatos =
+        await analizarTransicionTurnoV48(
+            base,
+            turnoOrigen
+        );
 
 
-// 1) MATRIZ HISTÓRICA SI EXISTE
 
-for(let base of bases){
+        for(let salida of candidatos){
 
 
-for(let provincia of [
+            if(!ranking[salida])
+                ranking[salida]=0;
 
-"CORRIENTES",
-"CIUDAD",
-"BONAERENSE",
-"SANTA FE",
-"CORDOBA",
-"ENTRE RIOS",
-"CHACO"
 
-]){
 
+            // peso principal motor viejo
 
-let matriz =
-MATRIZ_HISTORICA_V48
-?.[turnoOrigen]
-?.[turnoDestino]
-?.[provincia]
-?.[base];
+            ranking[salida]+=10;
 
 
 
-if(matriz){
+            //================================
+            // corrección por cercanía
+            //================================
 
 
-for(let salida in matriz){
+            let decena =
+            Number(salida[0]);
 
-sumar(
-salida,
-matriz[salida]*10
-);
 
+            let unidad =
+            Number(salida[1]);
 
-}
 
-}
 
+            let vecinos=[
 
-}
+                decena+""+(unidad+1),
+                decena+""+(unidad-1),
+                (decena+1)+""+unidad,
+                (decena-1)+""+unidad
 
+            ];
 
-// 2) INVERTIDO
 
-let invertido =
-base[1]+base[0];
 
+            for(let v of vecinos){
 
-sumar(
-invertido,
-8
-);
 
+                if(v.length===2){
 
+                    ranking[v]=
+                    (ranking[v]||0)+2;
 
-// 3) CAMBIO CONTROLADO DE DIGITO
+                }
 
-for(let d=0;d<=9;d++){
 
+            }
 
-sumar(
-base[0]+d,
-2
-);
 
 
-sumar(
-d+base[1],
-2
-);
+            //================================
+            // invertidos
+            //================================
 
 
-}
+            let invertido =
+            salida[1]+salida[0];
 
 
-}
+            ranking[invertido]=
+            (ranking[invertido]||0)+3;
 
 
+        }
 
-// ORDENAR RESULTADOS
+    }
 
-let orden =
-Object.keys(ranking)
-.sort(
-(a,b)=>ranking[b]-ranking[a]
-);
 
 
+    //=========================================
+    // 2) APOYO MATRIZ HISTÓRICA
+    //=========================================
 
-if(orden.length===0){
 
-mostrarV48(
-"⚠️ SIN DATOS IA"
-);
+    for(let provincia of provincias){
 
-return;
 
-}
+        let elemento =
+        document.getElementById(
+            provincia
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g,"")
+            .replace(" ","")
+        );
 
 
+        if(!elemento)
+            continue;
 
-// 3 AMBOS
 
-let ambos =
-orden.slice(0,3);
 
+        let valor =
+        elemento.value.trim();
 
 
-// CREAR TERNOS COMO PEDISTE
 
-let ternos=[];
+        if(!/^\d{4}$/.test(valor))
+            continue;
 
 
-ternos.push(
-ambos[0][0]+
-ambos[1]
-);
 
+        let base =
+        valor.slice(-2);
 
-ternos.push(
-ambos[1][0]+
-ambos[2]
-);
 
 
+        let historial =
 
-// CREAR CUATERNOS
+        MATRIZ_HISTORICA_V48
+        ?. [turnoOrigen]
+        ?. [turnoDestino]
+        ?. [provincia]
+        ?. [base];
 
-let cuaternos=[];
 
 
-cuaternos.push(
-ambos[0]+
-ambos[1]
-);
+        if(!historial)
+            continue;
 
 
-cuaternos.push(
-ambos[1]+
-ambos[2]
-);
 
+        for(let salida in historial){
 
 
-mostrarV48(
+            ranking[salida]=
+            (ranking[salida]||0)
+            +
+            historial[salida]*5;
 
-"🧠 IA TESLA V48.6\n\n"+
 
-"TRANSICIÓN\n"+
+        }
+
+
+        }
+        //=========================================
+    // 3) ORDENAR RANKING FINAL
+    //=========================================
+
+
+    let orden =
+
+    Object.keys(ranking)
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    );
+
+
+
+    if(orden.length===0){
+
+
+        mostrarV48(
+
+        "⚠️ SIN DATOS PARA GENERAR\n\n"+
+        "La IA necesita más historial."
+
+        );
+
+
+        return;
+
+    }
+
+
+
+    //=========================================
+    // 4) SELECCIÓN DE 3 AMBOS
+    //=========================================
+
+
+    let ambos=[];
+
+
+
+    for(let n of orden){
+
+
+        if(!/^\d{2}$/.test(n))
+            continue;
+
+
+        if(ambos.indexOf(n)===-1){
+
+
+            ambos.push(n);
+
+
+        }
+
+
+        if(ambos.length===3)
+            break;
+
+
+    }
+
+
+
+    //=========================================
+    // 5) GENERAR TERNOS
+    //=========================================
+
+
+    let ternos=[];
+
+
+    if(ambos.length>=2){
+
+
+        ternos.push(
+
+            ambos[0][0]+
+            ambos[1]
+
+        );
+
+
+    }
+
+
+    if(ambos.length>=3){
+
+
+        ternos.push(
+
+            ambos[1][0]+
+            ambos[2]
+
+        );
+
+
+    }
+
+
+
+    //=========================================
+    // 6) GENERAR CUATERNOS
+    //=========================================
+
+
+    let cuaternos=[];
+
+
+    if(ambos.length>=2){
+
+
+        cuaternos.push(
+
+            ambos[0]+
+            ambos[1]
+
+        );
+
+
+    }
+
+
+
+    if(ambos.length>=3){
+
+
+        cuaternos.push(
+
+            ambos[1]+
+            ambos[2]
+
+        );
+
+
+    }
+
+
+
+    //=========================================
+    // 7) MOSTRAR RESULTADO
+    //=========================================
+
+
+    mostrarV48(
+
+
+"🧠 TESLA IA HÍBRIDA V48.6\n\n"+
+
+"🔄 TRANSICIÓN\n"+
 turnoOrigen+
 " ➜ "+
 turnoDestino+
@@ -2637,13 +2785,16 @@ ternos.map((n,i)=>
 
 cuaternos.map((n,i)=>
 (i+1)+". "+n
-).join("\n")
+).join("\n")+
 
-);
+"\n\n📊 CANDIDATOS ANALIZADOS: "+
+orden.length
 
 
-    }
-    
+    );
+
+
+}
 
 window.addEventListener(
 

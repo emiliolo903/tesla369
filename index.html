@@ -1488,10 +1488,27 @@ async function construirMatrizHistoricaV48(){
 
     }
 
-    console.log(
-        "MATRIZ HISTÓRICA CREADA",
-        MATRIZ_HISTORICA_V48
-    );
+    let total = 0;
+
+for(let t1 in MATRIZ_HISTORICA_V48){
+
+    for(let t2 in MATRIZ_HISTORICA_V48[t1]){
+
+        for(let p in MATRIZ_HISTORICA_V48[t1][t2]){
+
+            for(let b in MATRIZ_HISTORICA_V48[t1][t2][p]){
+
+                total++;
+
+            }
+
+        }
+
+    }
+
+}
+
+alert("Transiciones creadas: " + total);
 
 }
 

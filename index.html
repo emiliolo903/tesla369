@@ -2413,17 +2413,27 @@ async function generarResultadoIA(){
 
     let ranking = {};
 
-    for(let provincia of provincias){
+    const ids = {
+    "CORRIENTES":"corrientes",
+    "CIUDAD":"ciudad",
+    "BONAERENSE":"bonaerense",
+    "SANTA FE":"santaFe",
+    "CORDOBA":"cordoba",
+    "ENTRE RIOS":"entreRios",
+    "CHACO":"chaco"
+};
 
-        let valor =
-        document.getElementById(
-        provincia.toLowerCase()
-        .replace(" ","")
-        .replace("ó","o")
-        ).value;
+for(let provincia of provincias){
 
-        if(!valor || valor.length!=4)
-            continue;
+    let input = document.getElementById(ids[provincia]);
+
+    if(!input)
+        continue;
+
+    let valor = input.value.trim();
+
+    if(valor.length!=4)
+        continue;
 
         let base =
         valor.slice(-2);

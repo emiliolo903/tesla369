@@ -954,8 +954,10 @@ await construirMemoriaV48();
 
 await construirMatrizTurnosV48();
 
-await construirMatrizProvinciasV48();
+await construirMatrizHistoricaV48();
 
+await construirMatrizProvinciasV48();
+    
 document.getElementById(
 "estadoMemoria"
 ).innerText="LISTA";
@@ -2016,13 +2018,11 @@ if(datos.length>0){
 
 await construirMemoriaV48();
 
-
 await construirMatrizTurnosV48();
 
+await construirMatrizHistoricaV48();
 
 await construirMatrizProvinciasV48();
-
-await construirMatrizHistoricaV48();
 
 document.getElementById(
 "estadoMemoria"

@@ -2406,7 +2406,111 @@ async function corregirAmbosIAV48(ambos, turnoOrigen){
     return mejor;
 
 }
-                
+      //////////////////////////////////////////////////
+// BUSCADOR ACOMPAÑANTE EXACTO V48.7
+//////////////////////////////////////////////////
+
+async function buscarAcompananteExactoV48(base){
+
+    let datos = await leerV48(
+        STORES_V48.historico
+    );
+
+
+    let ranking={};
+
+
+    base=String(base).slice(-2);
+
+
+
+    for(let d of datos){
+
+
+        if(!d.numero)
+            continue;
+
+
+        let numero =
+        String(d.numero).slice(-2);
+
+
+
+        // busca números con misma decena
+
+        if(numero[0]===base[0]){
+
+
+            ranking[numero]=
+            (ranking[numero]||0)+3;
+
+
+        }
+
+
+
+        // busca misma unidad
+
+
+        if(numero[1]===base[1]){
+
+
+            ranking[numero]=
+            (ranking[numero]||0)+2;
+
+
+        }
+
+
+
+        // invertido
+
+
+        if(numero===base[1]+base[0]){
+
+
+            ranking[numero]=
+            (ranking[numero]||0)+5;
+
+
+        }
+
+
+
+        // diferencia de 1
+
+
+        let diferencia =
+        Math.abs(
+            Number(numero)-Number(base)
+        );
+
+
+
+        if(diferencia===1){
+
+
+            ranking[numero]=
+            (ranking[numero]||0)+4;
+
+
+        }
+
+
+    }
+
+
+
+    return Object.keys(ranking)
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    )
+    .slice(0,5);
+
+
+    }
+    
     //////////////////////////////////////////////////
 // GENERADOR IA HÍBRIDO V48.6
 // MOTOR ANTERIOR + MATRIZ HISTÓRICA COMO APOYO
@@ -2679,78 +2783,113 @@ async function generarResultadoIA(){
 
 
 
-    //=========================================
-    // 5) GENERAR TERNOS
-    //=========================================
-
-
-    let ternos=[];
-
-
-    if(ambos.length>=2){
-
-
-        ternos.push(
-
-            ambos[0][0]+
-            ambos[1]
-
-        );
-
-
-    }
-
-
-    if(ambos.length>=3){
-
-
-        ternos.push(
-
-            ambos[1][0]+
-            ambos[2]
-
-        );
-
-
-    }
-
-
+    
 
     //=========================================
-    // 6) GENERAR CUATERNOS
-    //=========================================
+// 5) GENERAR TERNOS Y CUATERNOS
+// DESDE AMBOS PRINCIPAL
+//=========================================
 
 
-    let cuaternos=[];
+let principal =
+ambos[0];
 
 
-    if(ambos.length>=2){
-
-
-        cuaternos.push(
-
-            ambos[0]+
-            ambos[1]
-
-        );
-
-
-    }
+let acompañantes =
+await buscarAcompananteExactoV48(
+    principal
+);
 
 
 
-    if(ambos.length>=3){
+let ternos=[];
+
+let cuaternos=[];
 
 
-        cuaternos.push(
 
-            ambos[1]+
-            ambos[2]
+// Primer terno usando principal
 
-        );
+if(principal && ambos[1]){
 
 
-    }
+    ternos.push(
+
+        principal+
+        ambos[1][1]
+
+    );
+
+
+}
+
+
+
+// Segundo terno con acompañante histórico
+
+if(acompañantes.length>0){
+
+
+    ternos.push(
+
+        principal[0]+
+        acompañantes[0]
+
+    );
+
+
+}
+
+
+
+// Primer cuaterno
+
+if(principal && ambos[1]){
+
+
+    cuaternos.push(
+
+        principal+
+        ambos[1]
+
+    );
+
+
+}
+
+
+
+// Segundo cuaterno usando acompañante exacto
+
+if(
+principal &&
+acompañantes.length>0
+){
+
+
+    cuaternos.push(
+
+        principal+
+        acompañantes[0]
+
+    );
+
+
+}
+
+
+
+// Limitar resultados
+
+ternos =
+ternos.slice(0,2);
+
+
+cuaternos =
+cuaternos.slice(0,2);
+
+
+
 
 
 

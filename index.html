@@ -3337,6 +3337,48 @@ async function guardarPrediccionV49(
         "PREDICCIÓN GUARDADA V49",
         PREDICCION_ACTUAL_V49
     );
+    //////////////////////////////////////////////////
+// CARGAR APRENDIZAJE AL INICIAR V49
+//////////////////////////////////////////////////
+
+async function cargarAprendizajeV49(){
+
+
+let datos =
+await leerV48(
+STORES_V48.aprendizaje
+);
+
+
+
+if(datos.length===0)
+return;
+
+
+
+let ultimo =
+datos[datos.length-1];
+
+
+
+if(
+ultimo.datos
+){
+
+APRENDIZAJE_V49 =
+ultimo.datos;
+
+}
+
+
+
+console.log(
+"MEMORIA IA V49 CARGADA",
+APRENDIZAJE_V49
+);
+
+
+}
 
 
 }

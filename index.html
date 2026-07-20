@@ -1345,6 +1345,153 @@ return MATRIZ_TURNOS_V48;
 let MATRIZ_PROV_V48={};
 
 
+//////////////////////////////////////////////////
+// MATRIZ HISTÓRICA ESPECÍFICA V48
+//////////////////////////////////////////////////
+
+let MATRIZ_HISTORICA_V48 = {};
+
+function limpiarMatrizHistoricaV48(){
+
+    MATRIZ_HISTORICA_V48={};
+
+}
+
+function agregarMatrizHistoricaV48(
+
+    turnoOrigen,
+    turnoDestino,
+    provincia,
+    base,
+    salida
+
+){
+
+    if(!MATRIZ_HISTORICA_V48[turnoOrigen])
+        MATRIZ_HISTORICA_V48[turnoOrigen]={};
+
+    if(!MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino])
+        MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino]={};
+
+    if(!MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino][provincia])
+        MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino][provincia]={};
+
+    if(!MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino][provincia][base])
+        MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino][provincia][base]={};
+
+    if(!MATRIZ_HISTORICA_V48
+        [turnoOrigen]
+        [turnoDestino]
+        [provincia]
+        [base]
+        [salida])
+
+        MATRIZ_HISTORICA_V48
+        [turnoOrigen]
+        [turnoDestino]
+        [provincia]
+        [base]
+        [salida]=0;
+
+    MATRIZ_HISTORICA_V48
+    [turnoOrigen]
+    [turnoDestino]
+    [provincia]
+    [base]
+    [salida]++;
+
+}
+    //////////////////////////////////////////////////
+// CONSTRUIR MATRIZ HISTÓRICA V48
+//////////////////////////////////////////////////
+
+async function construirMatrizHistoricaV48(){
+
+    limpiarMatrizHistoricaV48();
+
+    let datos = await leerV48(
+        STORES_V48.historico
+    );
+
+    let orden = [
+        "PREVIA",
+        "PRIMERA",
+        "MATUTINA",
+        "VESPERTINA",
+        "NOCTURNA"
+    ];
+
+    let dias = {};
+
+    for(let r of datos){
+
+        if(!dias[r.fecha])
+            dias[r.fecha]={};
+
+        if(!dias[r.fecha][r.turno])
+            dias[r.fecha][r.turno]={};
+
+        dias[r.fecha][r.turno][r.provincia]=
+        String(r.numero).slice(-2);
+
+    }
+
+    for(let fecha in dias){
+
+        let dia = dias[fecha];
+
+        for(let i=0;i<orden.length;i++){
+
+            let turnoOrigen = orden[i];
+
+            let turnoDestino =
+            (i==4)
+            ? "PREVIA"
+            : orden[i+1];
+
+            if(!dia[turnoOrigen])
+                continue;
+
+            if(!dia[turnoDestino])
+                continue;
+
+            for(let provincia in dia[turnoOrigen]){
+
+                if(!dia[turnoDestino][provincia])
+                    continue;
+
+                let base =
+                dia[turnoOrigen][provincia];
+
+                let salida =
+                dia[turnoDestino][provincia];
+
+                agregarMatrizHistoricaV48(
+
+                    turnoOrigen,
+
+                    turnoDestino,
+
+                    provincia,
+
+                    base,
+
+                    salida
+
+                );
+
+            }
+
+        }
+
+    }
+
+    console.log(
+        "MATRIZ HISTÓRICA CREADA",
+        MATRIZ_HISTORICA_V48
+    );
+
+}
 
 async function construirMatrizProvinciasV48(){
 
@@ -1875,7 +2022,7 @@ await construirMatrizTurnosV48();
 
 await construirMatrizProvinciasV48();
 
-
+await construirMatrizHistoricaV48();
 
 document.getElementById(
 "estadoMemoria"
@@ -2246,142 +2393,140 @@ async function corregirAmbosIAV48(ambos, turnoOrigen){
 // BLOQUE 8 (PARTE 2/2)
 // GENERADOR IA HISTÓRICA V48.5
 //////////////////////////////////////////////////
-
 async function generarResultadoIA(){
 
     let turnoOrigen =
     document.getElementById("turnoCarga").value;
 
-    let destino =
+    let turnoDestino =
     obtenerSiguienteTurnoV48(turnoOrigen);
 
-    let bases =
-    obtenerBases7Provincias();
+    let provincias = [
+        "CORRIENTES",
+        "CIUDAD",
+        "BONAERENSE",
+        "SANTA FE",
+        "CORDOBA",
+        "ENTRE RIOS",
+        "CHACO"
+    ];
 
-    if(bases.length===0){
+    let ranking = {};
 
-        let datos =
-        await leerV48(
-        STORES_V48.historico
-        );
+    for(let provincia of provincias){
 
-        bases =
-        datos
-        .slice(-20)
-        .map(x=>String(x.numero).slice(-2));
+        let valor =
+        document.getElementById(
+        provincia.toLowerCase()
+        .replace(" ","")
+        .replace("ó","o")
+        ).value;
 
-    }
+        if(!valor || valor.length!=4)
+            continue;
 
-    let ranking={};
+        let base =
+        valor.slice(-2);
 
-    for(let base of bases){
+        let historial =
 
-        let candidatos =
-        await analizarTransicionTurnoV48(
-            base,
-            turnoOrigen
-        );
+        MATRIZ_HISTORICA_V48
+        ?. [turnoOrigen]
+        ?. [turnoDestino]
+        ?. [provincia]
+        ?. [base];
 
-        for(let i=0;i<candidatos.length;i++){
+        if(!historial)
+            continue;
 
-            let n=candidatos[i];
+        for(let salida in historial){
 
-            ranking[n]=
-            (ranking[n]||0)+(10-i);
+            ranking[salida]=
+            (ranking[salida]||0)+
+            historial[salida];
 
         }
 
     }
 
-    let ambos=
+    let ambos =
+
     Object.keys(ranking)
-    .sort((a,b)=>ranking[b]-ranking[a])
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    )
     .slice(0,3);
 
-    if(ambos.length===0){
+    if(ambos.length==0){
 
         mostrarV48(
-        "SIN DATOS SUFICIENTES");
-        return;
 
-    }
+"⚠️ NO EXISTEN TRANSICIONES HISTÓRICAS\n\nCargue más días para que la IA aprenda."
 
-    // CORRECCIÓN FINAL IA
-    let ambosFinal=[];
-
-    for(let a of ambos){
-
-        let corregido=
-        await corregirAmbosIAV48(
-            a,
-            turnoOrigen
         );
 
-        if(!ambosFinal.includes(corregido)){
-
-            ambosFinal.push(corregido);
-
-        }
-
-    }
-
-    while(ambosFinal.length<3){
-
-        ambosFinal.push(
-        ambos[ambosFinal.length]);
+        return;
 
     }
 
     let ternos=[];
 
-    ternos.push(
-        "0"+
-        ambosFinal[0]
-    );
+    if(ambos.length>=2)
+        ternos.push(
+        "0"+ambos[0]
+        );
 
-    ternos.push(
-        ambosFinal[1][0]+
-        ambosFinal[2]
-    );
+    if(ambos.length>=3)
+        ternos.push(
+        ambos[1][0]+ambos[2]
+        );
 
     let cuaternos=[];
 
-    cuaternos.push(
-        ambosFinal[0]+
-        ambosFinal[1]
-    );
+    if(ambos.length>=2)
+        cuaternos.push(
+        ambos[0]+ambos[1]
+        );
 
-    cuaternos.push(
-        ambosFinal[1]+
-        ambosFinal[2]
-    );
+    if(ambos.length>=3)
+        cuaternos.push(
+        ambos[1]+ambos[2]
+        );
 
     mostrarV48(
 
-"🧠 IA TESLA V48.5\n\n"+
+"🧠 IA HISTÓRICA ESPECÍFICA\n\n"+
 
 "TRANSICIÓN\n"+
+
 turnoOrigen+
-" → "+
-destino+
+
+" ➜ "+
+
+turnoDestino+
 
 "\n\n⚡ AMBOS\n"+
-"1. "+ambosFinal[0]+"\n"+
-"2. "+ambosFinal[1]+"\n"+
-"3. "+ambosFinal[2]+
+
+ambos.map((n,i)=>
+(i+1)+". "+n
+).join("\n")+
 
 "\n\n🎯 TERNOS\n"+
-"1. "+ternos[0]+"\n"+
-"2. "+ternos[1]+
+
+ternos.map((n,i)=>
+(i+1)+". "+n
+).join("\n")+
 
 "\n\n🔷 CUATERNOS\n"+
-"1. "+cuaternos[0]+"\n"+
-"2. "+cuaternos[1]
+
+cuaternos.map((n,i)=>
+(i+1)+". "+n
+).join("\n")
 
     );
 
 }
-    
 
 
 

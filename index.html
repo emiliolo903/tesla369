@@ -2408,134 +2408,217 @@ async function corregirAmbosIAV48(ambos, turnoOrigen){
 }
                 
     //////////////////////////////////////////////////
-// BLOQUE 8 (PARTE 2/2)
-// GENERADOR IA HISTÓRICA V48.5
+// GENERADOR IA V48.6 MEJORADO
+// CONTINUIDAD + MATRIZ + INVERTIDO + CERCANÍA
 //////////////////////////////////////////////////
+
 async function generarResultadoIA(){
 
-    let turnoOrigen =
-    document.getElementById("turnoCarga").value;
+let turnoOrigen =
+document.getElementById("turnoCarga").value;
 
-    let turnoDestino =
-    obtenerSiguienteTurnoV48(turnoOrigen);
 
-    let provincias = [
-        "CORRIENTES",
-        "CIUDAD",
-        "BONAERENSE",
-        "SANTA FE",
-        "CORDOBA",
-        "ENTRE RIOS",
-        "CHACO"
-    ];
+let turnoDestino =
+obtenerSiguienteTurnoV48(turnoOrigen);
 
-    let ranking = {};
 
-    const ids = {
-    "CORRIENTES":"corrientes",
-    "CIUDAD":"ciudad",
-    "BONAERENSE":"bonaerense",
-    "SANTA FE":"santaFe",
-    "CORDOBA":"cordoba",
-    "ENTRE RIOS":"entreRios",
-    "CHACO":"chaco"
-};
 
-for(let provincia of provincias){
+let bases =
+obtenerBases7Provincias();
 
-    let input = document.getElementById(ids[provincia]);
 
-    if(!input)
-        continue;
 
-    let valor = input.value.trim();
+if(bases.length===0){
 
-    if(valor.length!=4)
-        continue;
+let datos =
+await leerV48(
+STORES_V48.historico
+);
 
-        let base =
-        valor.slice(-2);
 
-        let historial =
+bases =
+datos
+.slice(-14)
+.map(x=>String(x.numero).slice(-2));
 
-        MATRIZ_HISTORICA_V48
-        ?. [turnoOrigen]
-        ?. [turnoDestino]
-        ?. [provincia]
-        ?. [base];
+}
 
-        if(!historial)
-            continue;
-    
-    console.log("Provincia:", provincia);
-console.log("Base:", base);
-console.log(MATRIZ_HISTORICA_V48?.[turnoOrigen]?.[turnoDestino]?.[provincia]);
 
-        for(let salida in historial){
 
-            ranking[salida]=
-            (ranking[salida]||0)+
-            historial[salida];
+let ranking={};
 
-        }
 
-    }
 
-    let ambos =
+function sumar(numero,peso){
 
-    Object.keys(ranking)
-    .sort(
-        (a,b)=>
-        ranking[b]-ranking[a]
-    )
-    .slice(0,3);
+if(!numero)
+return;
 
-    if(ambos.length==0){
+numero=String(numero)
+.padStart(2,"0");
 
-        mostrarV48(
+ranking[numero]=
+(ranking[numero]||0)+peso;
 
-"⚠️ NO EXISTEN TRANSICIONES HISTÓRICAS\n\nCargue más días para que la IA aprenda."
+}
 
-        );
 
-        return;
 
-    }
+// 1) MATRIZ HISTÓRICA SI EXISTE
 
-    let ternos=[];
+for(let base of bases){
 
-    if(ambos.length>=2)
-        ternos.push(
-        "0"+ambos[0]
-        );
 
-    if(ambos.length>=3)
-        ternos.push(
-        ambos[1][0]+ambos[2]
-        );
+for(let provincia of [
 
-    let cuaternos=[];
+"CORRIENTES",
+"CIUDAD",
+"BONAERENSE",
+"SANTA FE",
+"CORDOBA",
+"ENTRE RIOS",
+"CHACO"
 
-    if(ambos.length>=2)
-        cuaternos.push(
-        ambos[0]+ambos[1]
-        );
+]){
 
-    if(ambos.length>=3)
-        cuaternos.push(
-        ambos[1]+ambos[2]
-        );
 
-    mostrarV48(
+let matriz =
+MATRIZ_HISTORICA_V48
+?.[turnoOrigen]
+?.[turnoDestino]
+?.[provincia]
+?.[base];
 
-"🧠 IA HISTÓRICA ESPECÍFICA\n\n"+
+
+
+if(matriz){
+
+
+for(let salida in matriz){
+
+sumar(
+salida,
+matriz[salida]*10
+);
+
+
+}
+
+}
+
+
+}
+
+
+// 2) INVERTIDO
+
+let invertido =
+base[1]+base[0];
+
+
+sumar(
+invertido,
+8
+);
+
+
+
+// 3) CAMBIO CONTROLADO DE DIGITO
+
+for(let d=0;d<=9;d++){
+
+
+sumar(
+base[0]+d,
+2
+);
+
+
+sumar(
+d+base[1],
+2
+);
+
+
+}
+
+
+}
+
+
+
+// ORDENAR RESULTADOS
+
+let orden =
+Object.keys(ranking)
+.sort(
+(a,b)=>ranking[b]-ranking[a]
+);
+
+
+
+if(orden.length===0){
+
+mostrarV48(
+"⚠️ SIN DATOS IA"
+);
+
+return;
+
+}
+
+
+
+// 3 AMBOS
+
+let ambos =
+orden.slice(0,3);
+
+
+
+// CREAR TERNOS COMO PEDISTE
+
+let ternos=[];
+
+
+ternos.push(
+ambos[0][0]+
+ambos[1]
+);
+
+
+ternos.push(
+ambos[1][0]+
+ambos[2]
+);
+
+
+
+// CREAR CUATERNOS
+
+let cuaternos=[];
+
+
+cuaternos.push(
+ambos[0]+
+ambos[1]
+);
+
+
+cuaternos.push(
+ambos[1]+
+ambos[2]
+);
+
+
+
+mostrarV48(
+
+"🧠 IA TESLA V48.6\n\n"+
 
 "TRANSICIÓN\n"+
-
 turnoOrigen+
-
 " ➜ "+
-
 turnoDestino+
 
 "\n\n⚡ AMBOS\n"+
@@ -2556,7 +2639,11 @@ cuaternos.map((n,i)=>
 (i+1)+". "+n
 ).join("\n")
 
-    );
+);
+
+
+    }
+    
 
 }
 

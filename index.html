@@ -2164,6 +2164,83 @@ async function analizarTransicionTurnoV48(base, turnoOrigen){
     return final;
 
         }
+    //////////////////////////////////////////////////
+// CORRECTOR IA V48.5
+//////////////////////////////////////////////////
+
+async function corregirAmbosIAV48(ambos, turnoOrigen){
+
+    let destino = obtenerSiguienteTurnoV48(turnoOrigen);
+
+    let datos = await leerV48(STORES_V48.historico);
+
+    let mejor = ambos;
+    let mejorPeso = -1;
+
+    let variantes = [];
+
+    let a = parseInt(ambos[0]);
+    let b = parseInt(ambos[1]);
+
+    variantes.push(ambos);
+
+    variantes.push(ambos[1]+ambos[0]);
+
+    variantes.push(
+        String(a)+String((b+1)%10)
+    );
+
+    variantes.push(
+        String(a)+String((b+9)%10)
+    );
+
+    variantes.push(
+        String((a+1)%10)+String(b)
+    );
+
+    variantes.push(
+        String((a+9)%10)+String(b)
+    );
+
+    variantes=[...new Set(variantes)];
+
+    for(let candidato of variantes){
+
+        let peso=0;
+
+        for(let r of datos){
+
+            if(r.turno!==destino)
+                continue;
+
+            let num=String(r.numero).slice(-2);
+
+            if(num===candidato)
+                peso+=10;
+
+            if(num===candidato[1]+candidato[0])
+                peso+=6;
+
+            if(num[0]===candidato[0])
+                peso+=2;
+
+            if(num[1]===candidato[1])
+                peso+=2;
+
+        }
+
+        if(peso>mejorPeso){
+
+            mejorPeso=peso;
+            mejor=candidato;
+
+        }
+
+    }
+
+    return mejor;
+
+}
                 
     //////////////////////////////////////////////////
 // BLOQUE 8 (PARTE 2/2)
@@ -2172,20 +2249,14 @@ async function analizarTransicionTurnoV48(base, turnoOrigen){
 
 async function generarResultadoIA(){
 
-    // Actualizar el núcleo antes de generar la IA
-    await analizarNucleoV48();
-
     let turnoOrigen =
     document.getElementById("turnoCarga").value;
 
     let destino =
     obtenerSiguienteTurnoV48(turnoOrigen);
 
-
     let bases =
     obtenerBases7Provincias();
-
-
 
     if(bases.length===0){
 
@@ -2194,23 +2265,16 @@ async function generarResultadoIA(){
         STORES_V48.historico
         );
 
-
         bases =
         datos
-        .slice(-30)
+        .slice(-20)
         .map(x=>String(x.numero).slice(-2));
-
 
     }
 
-
-
     let ranking={};
 
-
-
     for(let base of bases){
-
 
         let candidatos =
         await analizarTransicionTurnoV48(
@@ -2218,171 +2282,105 @@ async function generarResultadoIA(){
             turnoOrigen
         );
 
+        for(let i=0;i<candidatos.length;i++){
 
-        for(let n of candidatos){
+            let n=candidatos[i];
 
-
-            if(n!==base){
-
-                ranking[n]=
-                (ranking[n]||0)+1;
-
-            }
-
+            ranking[n]=
+            (ranking[n]||0)+(10-i);
 
         }
 
-
     }
 
-
-
-
-    let orden =
-
+    let ambos=
     Object.keys(ranking)
+    .sort((a,b)=>ranking[b]-ranking[a])
+    .slice(0,3);
 
-    .sort(
-        (a,b)=>
-        ranking[b]-ranking[a]
-    );
-
-
-
-    if(orden.length<3){
-
+    if(ambos.length===0){
 
         mostrarV48(
-
-        "⚠️ NO HAY SUFICIENTES DATOS\n\n"+
-        turnoOrigen+
-        " → "+
-        destino
-
-        );
-
-
+        "SIN DATOS SUFICIENTES");
         return;
 
     }
 
+    // CORRECCIÓN FINAL IA
+    let ambosFinal=[];
 
+    for(let a of ambos){
 
+        let corregido=
+        await corregirAmbosIAV48(
+            a,
+            turnoOrigen
+        );
 
-    // 3 AMBOS DIFERENTES
+        if(!ambosFinal.includes(corregido)){
 
-    let ambos=[];
-
-
-
-    for(let n of orden){
-
-
-        if(!ambos.includes(n)){
-
-
-            ambos.push(n);
-
+            ambosFinal.push(corregido);
 
         }
 
+    }
 
-        if(ambos.length===3)
-        break;
+    while(ambosFinal.length<3){
 
+        ambosFinal.push(
+        ambos[ambosFinal.length]);
 
     }
 
+    let ternos=[];
 
+    ternos.push(
+        "0"+
+        ambosFinal[0]
+    );
 
+    ternos.push(
+        ambosFinal[1][0]+
+        ambosFinal[2]
+    );
 
-    // CREAR 2 TERNOS
+    let cuaternos=[];
 
-    let ternos=[
+    cuaternos.push(
+        ambosFinal[0]+
+        ambosFinal[1]
+    );
 
-        ambos[0][0]+
-        ambos[1][0]+
-        ambos[2][1],
-
-
-        ambos[1][0]+
-        ambos[2][0]+
-        ambos[0][1]
-
-    ];
-
-
-
-
-
-
-    // CREAR 2 CUATERNOS
-
-
-    let cuaternos=[
-
-
-        ambos[0]+ambos[1],
-
-
-        ambos[1]+ambos[2]
-
-
-    ];
-
-
-
-
-
+    cuaternos.push(
+        ambosFinal[1]+
+        ambosFinal[2]
+    );
 
     mostrarV48(
 
-
-"🧠 TESLA IA V48\n\n"+
-
+"🧠 IA TESLA V48.5\n\n"+
 
 "TRANSICIÓN\n"+
-
 turnoOrigen+
-
 " → "+
-
 destino+
 
+"\n\n⚡ AMBOS\n"+
+"1. "+ambosFinal[0]+"\n"+
+"2. "+ambosFinal[1]+"\n"+
+"3. "+ambosFinal[2]+
 
-
-"\n\n⚡ 3 AMBOS\n"+
-
-"1. "+ambos[0]+"\n"+
-
-"2. "+ambos[1]+"\n"+
-
-"3. "+ambos[2]+
-
-
-
-
-"\n\n🎯 2 TERNOS\n"+
-
+"\n\n🎯 TERNOS\n"+
 "1. "+ternos[0]+"\n"+
-
 "2. "+ternos[1]+
 
-
-
-
-"\n\n🔷 2 CUATERNOS\n"+
-
+"\n\n🔷 CUATERNOS\n"+
 "1. "+cuaternos[0]+"\n"+
-
 "2. "+cuaternos[1]
 
-
-);
-
+    );
 
 }
-
     
 
 

@@ -379,13 +379,26 @@ matrizTurnos:"matrizTurnos",
 
 matrizProvincias:"matrizProvincias",
 
-auditoria:"auditoria"
+auditoria:"auditoria",
+
+aprendizaje:"aprendizajeAutomatico",
+
+predicciones:"prediccionesIA"
 
 };
 
 
 
 let dbV48=null;
+    
+    //////////////////////////////////////////////////
+// APRENDIZAJE IA V49
+//////////////////////////////////////////////////
+
+let APRENDIZAJE_V49={};
+
+let PREDICCION_ACTUAL_V49=null;
+    
 
 
 
@@ -1114,6 +1127,11 @@ guardados++;
 
 
 await actualizarRegistrosV48();
+    
+    await evaluarAprendizajeV49(
+    turno,
+    provincias
+);
 
 
 
@@ -1138,6 +1156,132 @@ alert(
 
 
 }
+
+
+}
+    //////////////////////////////////////////////////
+// EVALUADOR APRENDIZAJE V49
+//////////////////////////////////////////////////
+
+async function evaluarAprendizajeV49(
+    turno,
+    resultados
+){
+
+
+let predicciones =
+await leerV48(
+    STORES_V48.predicciones
+);
+
+
+if(predicciones.length===0)
+return;
+
+
+let ultima =
+predicciones[predicciones.length-1];
+
+
+let estadistica =
+{
+
+total:1,
+
+acierto:0,
+
+invertido:0,
+
+cerca:0,
+
+error:0
+
+};
+
+
+
+for(let provincia in resultados){
+
+
+let real =
+String(resultados[provincia])
+.slice(-2);
+
+
+
+for(let p of ultima.ambos){
+
+
+if(real===p){
+
+estadistica.acierto++;
+
+}
+
+
+
+else if(
+real===p[1]+p[0]
+){
+
+estadistica.invertido++;
+
+}
+
+
+
+else if(
+Math.abs(
+Number(real)-Number(p)
+)===1
+){
+
+estadistica.cerca++;
+
+}
+
+
+
+}
+
+
+}
+
+
+
+if(
+estadistica.acierto===0 &&
+estadistica.invertido===0 &&
+estadistica.cerca===0
+){
+
+estadistica.error++;
+
+}
+
+
+
+await guardarV48(
+
+STORES_V48.aprendizaje,
+
+{
+
+fecha:new Date(),
+
+turno:turno,
+
+resultado:estadistica
+
+}
+
+);
+
+
+console.log(
+"APRENDIZAJE RESULTADO V49",
+estadistica
+);
 
 
 }
@@ -1654,6 +1798,174 @@ mostrarV48(texto);
 
 
     }
+    //////////////////////////////////////////////////
+// APRENDIZAJE DESDE PDF V49
+//////////////////////////////////////////////////
+
+async function aprenderDesdePDFV49(){
+
+    let datos =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+    if(!APRENDIZAJE_V49)
+        APRENDIZAJE_V49={};
+
+
+
+    if(!APRENDIZAJE_V49.transiciones)
+        APRENDIZAJE_V49.transiciones={};
+
+
+    if(!APRENDIZAJE_V49.acompanantes)
+        APRENDIZAJE_V49.acompanantes={};
+
+
+    if(!APRENDIZAJE_V49.movimientos)
+        APRENDIZAJE_V49.movimientos={};
+
+
+
+    for(let i=0;i<datos.length-1;i++){
+
+
+        let actual=datos[i];
+
+        let siguiente=datos[i+1];
+
+
+
+        if(
+            !actual.numero ||
+            !siguiente.numero
+        )
+        continue;
+
+
+
+        let base=
+        String(actual.numero)
+        .slice(-2);
+
+
+
+        let salida=
+        String(siguiente.numero)
+        .slice(-2);
+
+
+
+        let clave=
+        base+
+        "_"+
+        actual.turno+
+        "_"+
+        actual.provincia;
+
+
+
+        // transición
+
+        if(
+        !APRENDIZAJE_V49.transiciones[clave]
+        )
+
+        APRENDIZAJE_V49.transiciones[clave]={};
+
+
+
+        if(
+        !APRENDIZAJE_V49.transiciones[clave][salida]
+        )
+
+        APRENDIZAJE_V49.transiciones[clave][salida]=0;
+
+
+
+        APRENDIZAJE_V49.transiciones[clave][salida]++;
+
+
+
+        // acompañante
+
+        if(
+        !APRENDIZAJE_V49.acompanantes[base]
+        )
+
+        APRENDIZAJE_V49.acompanantes[base]={};
+
+
+
+        if(
+        !APRENDIZAJE_V49.acompanantes[base][salida]
+        )
+
+        APRENDIZAJE_V49.acompanantes[base][salida]=0;
+
+
+
+        APRENDIZAJE_V49.acompanantes[base][salida]++;
+
+
+
+        // movimientos cercanos
+
+        let diferencia =
+        Number(salida)-
+        Number(base);
+
+
+
+        if(
+        Math.abs(diferencia)===1
+        ){
+
+
+            if(!APRENDIZAJE_V49.movimientos[base])
+
+                APRENDIZAJE_V49.movimientos[base]={};
+
+
+
+            APRENDIZAJE_V49.movimientos[base][salida]=
+            (APRENDIZAJE_V49.movimientos[base][salida]||0)+1;
+
+
+        }
+
+
+    }
+
+
+
+    await guardarV48(
+
+        STORES_V48.aprendizaje,
+
+        {
+
+        fecha:new Date(),
+
+        datos:APRENDIZAJE_V49
+
+        }
+
+    );
+
+
+
+    console.log(
+        "APRENDIZAJE PDF V49 COMPLETADO",
+        APRENDIZAJE_V49
+    );
+
+
+    return APRENDIZAJE_V49;
+
+
+        }
     //////////////////////////////////////////////////
 // BLOQUE 6/8
 // NÚCLEO IA V48
@@ -2718,6 +3030,42 @@ async function generarResultadoIA(){
 
 
         }
+    //////////////////////////////////////////////////
+// AJUSTE APRENDIZAJE V49
+//////////////////////////////////////////////////
+
+for(let n in ranking){
+
+
+    let pesoAprendido = 0;
+
+
+    if(
+        APRENDIZAJE_V49 &&
+        APRENDIZAJE_V49.acompanantes &&
+        APRENDIZAJE_V49.acompanantes[n]
+    ){
+
+
+        for(let a in APRENDIZAJE_V49.acompanantes[n]){
+
+
+            pesoAprendido +=
+            APRENDIZAJE_V49.acompanantes[n][a];
+
+
+        }
+
+
+    }
+
+
+
+    ranking[n] +=
+    pesoAprendido * 0.5;
+
+
+}
         //=========================================
     // 3) ORDENAR RANKING FINAL
     //=========================================
@@ -2942,6 +3290,52 @@ cuaternos.map((n,i)=>
 orden.length
 
 
+    );
+    //////////////////////////////////////////////////
+// GUARDAR PREDICCIÓN IA V49
+//////////////////////////////////////////////////
+
+await guardarPrediccionV49(
+    turnoOrigen,
+    ambos
+);
+
+
+}
+    //////////////////////////////////////////////////
+// MEMORIA DE PREDICCIONES V49
+//////////////////////////////////////////////////
+
+async function guardarPrediccionV49(
+    turno,
+    ambos
+){
+
+    PREDICCION_ACTUAL_V49={
+
+        fecha:new Date()
+        .toISOString()
+        .slice(0,10),
+
+        turno:turno,
+
+        ambos:ambos
+
+    };
+
+
+    await guardarV48(
+
+        STORES_V48.predicciones,
+
+        PREDICCION_ACTUAL_V49
+
+    );
+
+
+    console.log(
+        "PREDICCIÓN GUARDADA V49",
+        PREDICCION_ACTUAL_V49
     );
 
 

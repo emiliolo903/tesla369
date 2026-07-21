@@ -1282,7 +1282,8 @@ resultado:estadistica
 }
 
 );
-
+    
+await actualizarPesosIAV50();
 
 console.log(
 "APRENDIZAJE RESULTADO V49",
@@ -1291,7 +1292,82 @@ estadistica
 
 
 }
+//////////////////////////////////////////////////
+// PESOS IA V50
+//////////////////////////////////////////////////
 
+let PESOS_IA_V50 = {
+
+    transicion:30,
+
+    nucleoDominante:20,
+
+    segundoNucleo:12,
+
+    sobreviviente:6,
+
+    tesla:15,
+
+    mismaDecena:2,
+
+    mismaUnidad:2
+
+};
+
+async function actualizarPesosIAV50(){
+
+    let historial = await leerV48(STORES_V48.aprendizaje);
+
+    if(historial.length===0) return;
+
+    let total=0;
+    let aciertos=0;
+    let invertidos=0;
+    let cercanos=0;
+
+    for(let h of historial){
+
+        if(!h.resultado) continue;
+
+        total += h.resultado.total || 0;
+        aciertos += h.resultado.acierto || 0;
+        invertidos += h.resultado.invertido || 0;
+        cercanos += h.resultado.cerca || 0;
+
+    }
+
+    let precision =
+    (aciertos + invertidos*0.7 + cercanos*0.3) /
+    Math.max(total,1);
+
+    if(precision>=0.80){
+
+        PESOS_IA_V50.transicion =
+        Math.min(PESOS_IA_V50.transicion+1,50);
+
+        PESOS_IA_V50.tesla =
+        Math.min(PESOS_IA_V50.tesla+1,30);
+
+        PESOS_IA_V50.nucleoDominante =
+        Math.min(PESOS_IA_V50.nucleoDominante+1,30);
+
+    }
+
+    if(precision<=0.40){
+
+        PESOS_IA_V50.transicion =
+        Math.max(PESOS_IA_V50.transicion-1,10);
+
+        PESOS_IA_V50.tesla =
+        Math.max(PESOS_IA_V50.tesla-1,5);
+
+        PESOS_IA_V50.nucleoDominante =
+        Math.max(PESOS_IA_V50.nucleoDominante-1,5);
+
+    }
+
+            }
+    
     //////////////////////////////////////////////////
 // BLOQUE 4/8
 // MEMORIA IA + MATRIZ TURNOS V48
@@ -2914,7 +2990,7 @@ async function generarResultadoIA(){
 
             // peso principal motor viejo
 
-            ranking[salida]+=10;
+            ranking[salida] += PESOS_IA_V50.transicion;
 
 
 
@@ -2948,8 +3024,10 @@ async function generarResultadoIA(){
 
                 if(v.length===2){
 
-                    ranking[v]=
-                    (ranking[v]||0)+2;
+                    ranking[v] =
+(ranking[v]||0)
++
+PESOS_IA_V50.mismaDecena;
 
                 }
 
@@ -2967,8 +3045,10 @@ async function generarResultadoIA(){
             salida[1]+salida[0];
 
 
-            ranking[invertido]=
-            (ranking[invertido]||0)+3;
+            ranking[invertido] =
+(ranking[invertido]||0)
++
+PESOS_IA_V50.tesla;
 
 
         }
@@ -3033,10 +3113,10 @@ async function generarResultadoIA(){
         for(let salida in historial){
 
 
-            ranking[salida]=
-            (ranking[salida]||0)
-            +
-            historial[salida]*5;
+            ranking[salida] =
+(ranking[salida]||0)
++
+(historial[salida] * PESOS_IA_V50.nucleoDominante / 4);
 
 
         }

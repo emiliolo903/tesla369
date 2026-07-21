@@ -400,7 +400,65 @@ let APRENDIZAJE_V49={};
 let PREDICCION_ACTUAL_V49=null;
     
 
+//////////////////////////////////////////////////
+// APRENDIZAJE POR PROVINCIA Y TURNO V51
+//////////////////////////////////////////////////
 
+let APRENDIZAJE_PT_V51 = {};
+
+function registrarAprendizajePTV51(
+    provincia,
+    turno,
+    tipo
+){
+
+    if(!APRENDIZAJE_PT_V51[provincia]){
+        APRENDIZAJE_PT_V51[provincia]={};
+    }
+
+    if(!APRENDIZAJE_PT_V51[provincia][turno]){
+        APRENDIZAJE_PT_V51[provincia][turno]={
+
+            aciertos:0,
+            invertidos:0,
+            cercanos:0,
+            errores:0
+
+        };
+    }
+
+    APRENDIZAJE_PT_V51[provincia][turno][tipo]++;
+
+}
+
+function obtenerPesoPTV51(
+    provincia,
+    turno
+){
+
+    if(
+        !APRENDIZAJE_PT_V51[provincia] ||
+        !APRENDIZAJE_PT_V51[provincia][turno]
+    ){
+        return 0;
+    }
+
+    let d =
+    APRENDIZAJE_PT_V51[provincia][turno];
+
+    return (
+
+        d.aciertos*3 +
+
+        d.invertidos*2 +
+
+        d.cercanos -
+
+        d.errores
+
+    );
+
+    }
 
 function abrirBaseV48(){
 
@@ -1217,24 +1275,29 @@ String(resultados[provincia])
 
 for(let p of ultima.ambos){
 
-
 if(real===p){
 
-estadistica.acierto++;
+    estadistica.acierto++;
+
+    registrarAprendizajePTV51(
+        provincia,
+        turno,
+        "aciertos"
+    );
 
 }
 
+else if(real===p[1]+p[0]){
 
+    estadistica.invertido++;
 
-else if(
-real===p[1]+p[0]
-){
-
-estadistica.invertido++;
+    registrarAprendizajePTV51(
+        provincia,
+        turno,
+        "invertidos"
+    );
 
 }
-
-
 
 else if(
 Math.abs(
@@ -1242,7 +1305,13 @@ Number(real)-Number(p)
 )===1
 ){
 
-estadistica.cerca++;
+    estadistica.cerca++;
+
+    registrarAprendizajePTV51(
+        provincia,
+        turno,
+        "cercanos"
+    );
 
 }
 
@@ -1261,7 +1330,17 @@ estadistica.invertido===0 &&
 estadistica.cerca===0
 ){
 
-estadistica.error++;
+    estadistica.error++;
+
+    for(let provincia in resultados){
+
+        registrarAprendizajePTV51(
+            provincia,
+            turno,
+            "errores"
+        );
+
+    }
 
 }
 
@@ -3112,15 +3191,20 @@ PESOS_IA_V50.tesla;
 
         for(let salida in historial){
 
+    let pesoPT =
+    obtenerPesoPTV51(
+        provincia,
+        turnoOrigen
+    );
 
-            ranking[salida] =
-(ranking[salida]||0)
-+
-(historial[salida] * PESOS_IA_V50.nucleoDominante / 4);
-
+    ranking[salida] =
+    (ranking[salida] || 0)
+    +
+    (historial[salida] * PESOS_IA_V50.nucleoDominante / 4)
+    +
+    pesoPT;
 
         }
-
 
         }
     //////////////////////////////////////////////////

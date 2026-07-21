@@ -1363,6 +1363,8 @@ resultado:estadistica
 );
     
 await actualizarPesosIAV50();
+    
+await guardarAprendizajePTV51();
 
 console.log(
 "APRENDIZAJE RESULTADO V49",
@@ -3243,6 +3245,61 @@ for(let n in ranking){
 
 
 }
+    //////////////////////////////////////////////////
+// MEMORIA PERMANENTE APRENDIZAJE PT V51
+//////////////////////////////////////////////////
+
+async function guardarMemoriaPTV51(){
+
+    await guardarV48(
+
+        STORES_V48.aprendizaje,
+
+        {
+
+            fecha:new Date(),
+
+            tipo:"APRENDIZAJE_PT_V51",
+
+            datos:APRENDIZAJE_PT_V51
+
+        }
+
+    );
+
+}
+
+
+
+async function cargarMemoriaPTV51(){
+
+    let datos =
+    await leerV48(
+        STORES_V48.aprendizaje
+    );
+
+
+    for(let d of datos){
+
+
+        if(
+            d.tipo==="APRENDIZAJE_PT_V51"
+        ){
+
+            APRENDIZAJE_PT_V51 =
+            d.datos;
+
+        }
+
+    }
+
+
+    console.log(
+        "MEMORIA PT V51 CARGADA",
+        APRENDIZAJE_PT_V51
+    );
+
+}
         //=========================================
     // 3) ORDENAR RANKING FINAL
     //=========================================
@@ -3478,6 +3535,57 @@ await guardarPrediccionV49(
     ambos
 );
 
+
+}
+    //////////////////////////////////////////////////
+// GUARDAR / CARGAR APRENDIZAJE PT V51
+//////////////////////////////////////////////////
+
+async function guardarAprendizajePTV51(){
+
+    try{
+
+        await guardarV48(
+            STORES_V48.aprendizaje,
+            {
+                tipo:"APRENDIZAJE_PT_V51",
+                fecha:new Date().toISOString(),
+                datos:APRENDIZAJE_PT_V51
+            }
+        );
+
+    }catch(e){
+
+        console.log("No se pudo guardar V51",e);
+
+    }
+
+}
+
+async function cargarAprendizajePTV51(){
+
+    let datos =
+    await leerV48(
+        STORES_V48.aprendizaje
+    );
+
+    for(let i=datos.length-1;i>=0;i--){
+
+        if(datos[i].tipo==="APRENDIZAJE_PT_V51"){
+
+            APRENDIZAJE_PT_V51=
+            datos[i].datos || {};
+
+            console.log(
+                "Aprendizaje PT V51 cargado",
+                APRENDIZAJE_PT_V51
+            );
+
+            break;
+
+        }
+
+    }
 
 }
     //////////////////////////////////////////////////

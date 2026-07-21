@@ -219,6 +219,10 @@ OFF
 <button onclick="auditoriaSistema()">
 🛡 AUDITORÍA
 </button>
+    
+<button onclick="iniciarAuditoriaV49()">
+📊 Ejecutar Backtesting V49
+</button>    
 
 
 </div>
@@ -3377,7 +3381,188 @@ async function cargarMemoriaPTV51(){
 
 
 
-    
+    //////////////////////////////////////////////////
+// CONSTRUCTOR FINAL TERNO / CUATERNO V49.1
+// ACOMPAÑANTE INTELIGENTE
+//////////////////////////////////////////////////
+
+async function construirJugadasFinalesV49(
+    ambos,
+    turnoOrigen
+){
+
+    let datos =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+    let ranking={};
+
+
+    let base =
+    String(ambos).slice(-2);
+
+
+
+    for(let d of datos){
+
+        if(!d.numero)
+            continue;
+
+
+        let numero =
+        String(d.numero).slice(-2);
+
+
+
+        // busca cuando aparece el mismo ambos
+
+        if(numero===base){
+
+
+            let indice =
+            datos.indexOf(d);
+
+
+
+            if(datos[indice+1]){
+
+
+                let siguiente =
+                String(datos[indice+1].numero)
+                .slice(-2);
+
+
+
+                ranking[siguiente]=
+                (ranking[siguiente]||0)+5;
+
+
+            }
+
+
+        }
+
+
+
+        // invertido
+
+        if(
+        numero===base[1]+base[0]
+        ){
+
+            ranking[numero]=
+            (ranking[numero]||0)+3;
+
+        }
+
+
+
+        // misma decena
+
+        if(
+        numero[0]===base[0]
+        ){
+
+            ranking[numero]=
+            (ranking[numero]||0)+2;
+
+        }
+
+
+
+        // misma unidad
+
+        if(
+        numero[1]===base[1]
+        ){
+
+            ranking[numero]=
+            (ranking[numero]||0)+2;
+
+        }
+
+
+    }
+
+
+
+    let acompañantes =
+
+    Object.keys(ranking)
+
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    )
+    .filter(
+        x=>x!==base
+    )
+    .slice(0,5);
+
+
+
+    let ternos=[];
+
+    let cuaternos=[];
+
+
+
+    // TERNO
+
+    for(let a of acompañantes){
+
+
+        if(ternos.length<2){
+
+            ternos.push(
+                a[1]+base
+            );
+
+        }
+
+    }
+
+
+
+    // CUATERNO
+
+    if(
+    acompañantes.length>=2
+    ){
+
+
+        cuaternos.push(
+
+            acompañantes[0]+base
+
+        );
+
+
+        cuaternos.push(
+
+            acompañantes[1]+base
+
+        );
+
+
+    }
+
+
+
+    return {
+
+        ternos:ternos,
+
+        cuaternos:cuaternos,
+
+        acompañantes:acompañantes
+
+    };
+
+
+    }
 
     //=========================================
 // 5) GENERAR TERNOS Y CUATERNOS
@@ -3396,9 +3581,19 @@ await buscarAcompananteExactoV48(
 
 
 
-let ternos=[];
+let jugadasFinales =
+await construirJugadasFinalesV49(
+    principal,
+    turnoOrigen
+);
 
-let cuaternos=[];
+
+let ternos =
+jugadasFinales.ternos;
+
+
+let cuaternos =
+jugadasFinales.cuaternos;
 
 
 
@@ -3682,7 +3877,258 @@ async()=>{
 }
 
 );
+    
+//////////////////////////////////////////////////////
+// EMI TESLA PRO V49
+// SISTEMA DE BACKTESTING IA
+//////////////////////////////////////////////////////
 
+async function ejecutarBacktestingV49(){
+
+    let historial = await leerV48(
+        STORES_V48.historico
+    );
+
+
+    if(!historial || historial.length < 200){
+
+        return {
+            error:"No hay suficiente historial"
+        };
+
+    }
+
+
+    let resultado = {
+
+        total:0,
+
+        directo:0,
+
+        invertido:0,
+
+        cerca:0,
+
+        fallo:0
+
+    };
+
+
+
+    // empieza después de tener datos suficientes
+
+    for(
+        let i = 100;
+        i < historial.length;
+        i++
+    ){
+
+
+        // datos disponibles hasta ese momento
+
+        let entrenamiento =
+        historial.slice(0,i);
+
+
+
+        // genera una predicción usando
+        // la lógica actual de la app
+
+        let prediccion =
+        generarPrediccionBacktestV49(
+            entrenamiento
+        );
+
+
+
+        let real =
+        String(
+            historial[i].numero
+        ).slice(-2);
+
+
+
+        resultado.total++;
+
+
+
+        let encontrado =
+        prediccion.includes(real);
+
+
+
+        let invertido =
+        prediccion.includes(
+            real[1]+real[0]
+        );
+
+
+
+        let cerca = false;
+
+
+
+        for(let n of prediccion){
+
+
+            let valor1 =
+            parseInt(n);
+
+
+            let valor2 =
+            parseInt(real);
+
+
+
+            if(
+                Math.abs(valor1-valor2)<=1
+            ){
+
+                cerca=true;
+
+            }
+
+
+        }
+
+
+
+        if(encontrado){
+
+            resultado.directo++;
+
+        }
+
+        else if(invertido){
+
+            resultado.invertido++;
+
+        }
+
+        else if(cerca){
+
+            resultado.cerca++;
+
+        }
+
+        else{
+
+            resultado.fallo++;
+
+        }
+
+
+    }
+
+
+
+    resultado.porcentajeAcierto =
+
+    (
+        resultado.directo /
+        resultado.total * 100
+
+    ).toFixed(2);
+
+
+
+    return resultado;
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////////
+// GENERADOR PARA BACKTEST
+// USA EL MOTOR ACTUAL DE LA APP
+//////////////////////////////////////////////////////
+
+function generarPrediccionBacktestV49(
+    historial
+){
+
+
+    let ranking={};
+
+
+
+    for(let dato of historial){
+
+
+        let n =
+        String(dato.numero)
+        .slice(-2);
+
+
+
+        if(!ranking[n]){
+
+            ranking[n]=0;
+
+        }
+
+
+        ranking[n]++;
+
+
+    }
+
+
+
+    return Object.keys(ranking)
+
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    )
+
+    .slice(0,3);
+
+    }
+    
+    async function iniciarAuditoriaV49(){
+
+    let datos =
+    await ejecutarBacktestingV49();
+
+
+    console.log(
+        "RESULTADO BACKTEST",
+        datos
+    );
+
+
+    alert(
+
+    `
+    BACKTEST TESLA PRO V49
+
+    Pruebas:
+    ${datos.total}
+
+    Directos:
+    ${datos.directo}
+
+    Invertidos:
+    ${datos.invertido}
+
+    Cerca:
+    ${datos.cerca}
+
+    Fallos:
+    ${datos.fallo}
+
+    Acierto:
+    ${datos.porcentajeAcierto}%
+
+    `
+
+    );
+
+        }
+    
 </script> 
     
 </body>

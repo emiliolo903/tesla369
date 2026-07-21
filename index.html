@@ -2996,6 +2996,40 @@ async function buscarAcompananteExactoV48(base){
 
 
     }
+    //////////////////////////////////////////////////
+// FILTRO FINAL V49.1
+// PUNTADA FINAL
+//////////////////////////////////////////////////
+
+function aplicarFiltroFinalV491(ranking){
+
+    let nuevoRanking = {...ranking};
+
+    for(let n in nuevoRanking){
+
+        let peso = nuevoRanking[n];
+
+        // Premio a candidatos fuertes
+        if(peso >= 15){
+            nuevoRanking[n] += 2;
+        }
+
+        // Premio a candidatos medios
+        else if(peso >= 10){
+            nuevoRanking[n] += 1;
+        }
+
+        // Penalización suave a candidatos débiles
+        else if(peso < 4){
+            nuevoRanking[n] -= 1;
+        }
+
+    }
+
+    return nuevoRanking;
+
+}
+    
     
     //////////////////////////////////////////////////
 // GENERADOR IA HÍBRIDO V48.6
@@ -3308,7 +3342,8 @@ async function cargarMemoriaPTV51(){
     // 3) ORDENAR RANKING FINAL
     //=========================================
 
-
+ranking = aplicarFiltroFinalV491(ranking);
+    
     let orden =
 
     Object.keys(ranking)

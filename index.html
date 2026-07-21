@@ -3915,6 +3915,73 @@ async()=>{
 }
 
 );
+    //////////////////////////////////////////////////////
+// MOTOR IA PARA BACKTESTING
+// USA LA MISMA LÓGICA DE TRANSICIÓN
+//////////////////////////////////////////////////////
+
+async function generarPrediccionBacktestV50(
+    historial,
+    turno
+){
+
+    let ranking = {};
+
+
+    let bases =
+    historial
+    .slice(-30)
+    .map(
+        x=>String(x.numero).slice(-2)
+    );
+
+
+
+    for(let base of bases){
+
+
+        let candidatos =
+
+        await analizarTransicionTurnoV48(
+            base,
+            turno
+        );
+
+
+
+        for(let salida of candidatos){
+
+
+            ranking[salida] =
+            (ranking[salida] || 0)
+            +
+            PESOS_IA_V50.transicion;
+
+
+        }
+
+    }
+
+
+
+    ranking =
+    aplicarFiltroFinalV491(
+        ranking
+    );
+
+
+
+    return Object.keys(ranking)
+
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    )
+
+    .slice(0,3);
+
+
+    }
     
 //////////////////////////////////////////////////////
 // EMI TESLA PRO V49
@@ -3972,10 +4039,25 @@ async function ejecutarBacktestingV49(){
         // genera una predicción usando
         // la lógica actual de la app
 
-        let prediccion =
-        generarPrediccionBacktestV49(
-            entrenamiento
-        );
+        let turnoBacktest =
+
+historial[i-1].turno
+||
+historial[i-1].sorteo
+||
+"NOCTURNA";
+
+
+
+let prediccion =
+
+await generarPrediccionBacktestV50(
+
+    entrenamiento,
+
+    turnoBacktest
+
+);
 
 
 

@@ -3992,10 +3992,20 @@ async function generarPrediccionBacktestV50(
 
 async function ejecutarBacktestingV49(){
 
-    let historial = await leerV48(
-        STORES_V48.historico
-    );
+console.log("1 - ENTRE A EJECUTAR BACKTEST");
 
+
+let historial = await leerV48(
+    STORES_V48.historico
+);
+
+
+console.log(
+"2 - HISTORIAL CARGADO",
+historial.length
+);
+
+    
 
     if(!historial || historial.length < 200){
 
@@ -4019,6 +4029,8 @@ async function ejecutarBacktestingV49(){
         fallo:0
 
     };
+    
+    console.log("3 - EMPIEZA LOOP");
 
 
 
@@ -4056,8 +4068,9 @@ await generarPrediccionBacktestV50(
     entrenamiento,
     turnoBacktest
 );
+        
         console.log(
-"BACKTEST PREDICCION",
+"4 - PREDICCION",
 prediccion
 );
 

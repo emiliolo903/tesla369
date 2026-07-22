@@ -1200,6 +1200,33 @@ await actualizarRegistrosV48();
     turno,
     provincias
 );
+    
+        //////////////////////////////////////////////////////
+// APRENDIZAJE AUTOMÁTICO V53
+//////////////////////////////////////////////////////
+
+if(
+    PREDICCION_ACTUAL_V49 &&
+    PREDICCION_ACTUAL_V49.ambos
+){
+
+    for(let provincia in provincias){
+
+        let real =
+        String(provincias[provincia]).slice(-2);
+
+        for(let ambos of PREDICCION_ACTUAL_V49.ambos){
+
+            registrarResultadoIAV53(
+                ambos,
+                real
+            );
+
+        }
+
+    }
+
+}
 
 
 
@@ -1227,6 +1254,7 @@ alert(
 
 
 }
+
     //////////////////////////////////////////////////
 // EVALUADOR APRENDIZAJE V49
 //////////////////////////////////////////////////
@@ -3566,6 +3594,201 @@ for(let n in ranking){
 
 
 }
+    //////////////////////////////////////////////////////
+// MEMORIA IA V53
+//////////////////////////////////////////////////////
+
+let MEMORIA_IA_V53 = JSON.parse(
+localStorage.getItem("MEMORIA_IA_V53")
+) || {
+
+aciertos:{},
+
+errores:{},
+
+estadisticas:{
+
+directos:0,
+invertidos:0,
+cerca1:0,
+cerca2:0,
+lejos:0
+
+}
+
+};
+
+function guardarMemoriaIAV53(){
+
+localStorage.setItem(
+
+"MEMORIA_IA_V53",
+
+JSON.stringify(MEMORIA_IA_V53)
+
+);
+
+}
+    //////////////////////////////////////////////////////
+// REGISTRAR RESULTADO IA V53
+//////////////////////////////////////////////////////
+
+function registrarResultadoIAV53(predicho, real){
+
+predicho = String(predicho).slice(-2);
+real = String(real).slice(-2);
+
+if(!MEMORIA_IA_V53.aciertos[predicho]){
+    MEMORIA_IA_V53.aciertos[predicho]=0;
+}
+
+if(!MEMORIA_IA_V53.errores[predicho]){
+    MEMORIA_IA_V53.errores[predicho]={
+        invertidos:0,
+        cerca1:0,
+        cerca2:0,
+        lejos:0
+    };
+}
+
+if(predicho===real){
+
+    MEMORIA_IA_V53.aciertos[predicho]++;
+    MEMORIA_IA_V53.estadisticas.directos++;
+
+}
+else if(real===predicho[1]+predicho[0]){
+
+    MEMORIA_IA_V53.errores[predicho].invertidos++;
+    MEMORIA_IA_V53.estadisticas.invertidos++;
+
+}
+else{
+
+    let dif=Math.abs(
+        parseInt(predicho)-parseInt(real)
+    );
+
+    if(dif===1){
+
+        MEMORIA_IA_V53.errores[predicho].cerca1++;
+        MEMORIA_IA_V53.estadisticas.cerca1++;
+
+    }
+    else if(dif===2){
+
+        MEMORIA_IA_V53.errores[predicho].cerca2++;
+        MEMORIA_IA_V53.estadisticas.cerca2++;
+
+    }
+    else{
+
+        MEMORIA_IA_V53.errores[predicho].lejos++;
+        MEMORIA_IA_V53.estadisticas.lejos++;
+
+    }
+
+}
+
+guardarMemoriaIAV53();
+
+    }
+    //////////////////////////////////////////////////////
+// CORRECTOR INTELIGENTE IA V53
+//////////////////////////////////////////////////////
+
+function aplicarMemoriaIAV53(ranking){
+
+    for(let ambos in ranking){
+
+        let memoria =
+        MEMORIA_IA_V53.errores[ambos];
+
+        if(!memoria)
+            continue;
+
+        // Premiar aciertos históricos
+        let aciertos =
+        MEMORIA_IA_V53.aciertos[ambos] || 0;
+
+        ranking[ambos] +=
+        aciertos * 4;
+
+        // Si muchas veces salió invertido,
+        // reforzar el invertido
+        if(memoria.invertidos>0){
+
+            let inv =
+            ambos[1]+ambos[0];
+
+            ranking[inv] =
+            (ranking[inv]||0)
+            +
+            memoria.invertidos*2;
+
+        }
+
+        // Si suele quedar a +1 o -1
+        if(memoria.cerca1>0){
+
+            let n=parseInt(ambos);
+
+            let mas=
+            String((n+1)%100)
+            .padStart(2,"0");
+
+            let menos=
+            String((n+99)%100)
+            .padStart(2,"0");
+
+            ranking[mas]=
+            (ranking[mas]||0)
+            +
+            memoria.cerca1;
+
+            ranking[menos]=
+            (ranking[menos]||0)
+            +
+            memoria.cerca1;
+
+        }
+
+        // Si suele quedar a ±2
+        if(memoria.cerca2>0){
+
+            let n=parseInt(ambos);
+
+            let mas=
+            String((n+2)%100)
+            .padStart(2,"0");
+
+            let menos=
+            String((n+98)%100)
+            .padStart(2,"0");
+
+            ranking[mas]=
+            (ranking[mas]||0)
+            +
+            memoria.cerca2;
+
+            ranking[menos]=
+            (ranking[menos]||0)
+            +
+            memoria.cerca2;
+
+        }
+
+        // Penalizar números que casi siempre fallan
+        ranking[ambos]-=
+        memoria.lejos*0.5;
+
+    }
+
+    return ranking;
+
+}
+    
+    
 
     
     //////////////////////////////////////////////////
@@ -3653,6 +3876,19 @@ ranking = aplicarFiltroFinalV491(ranking);
         return;
 
     }
+    
+    //////////////////////////////////////////////////////
+// IA V53
+// APLICAR MEMORIA DE APRENDIZAJE
+//////////////////////////////////////////////////////
+
+ranking = aplicarMemoriaIAV53(ranking);
+
+// Reordenar el ranking con los nuevos pesos
+orden = Object.keys(ranking)
+.sort(
+    (a,b)=>ranking[b]-ranking[a]
+);
 
 
 

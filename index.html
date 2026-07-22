@@ -3038,6 +3038,277 @@ function aplicarFiltroFinalV491(ranking){
     return nuevoRanking;
 
 }
+    //////////////////////////////////////////////////////
+// CORRECTOR FINAL IA V52
+// AJUSTA ERRORES CERCANOS E INVERTIDOS
+//////////////////////////////////////////////////////
+
+function corregirPrediccionIA_V52(lista){
+
+    let salida=[];
+
+
+    for(let numero of lista){
+
+
+        numero=String(numero)
+        .padStart(2,"0");
+
+
+        // original
+
+        salida.push(numero);
+
+
+
+        // invertido
+
+        salida.push(
+            numero[1]+numero[0]
+        );
+
+
+
+        let a=parseInt(numero[0]);
+        let b=parseInt(numero[1]);
+
+
+
+        // vecinos unidad
+
+        salida.push(
+            String(a)+String((b+1)%10)
+        );
+
+
+        salida.push(
+            String(a)+String((b+9)%10)
+        );
+
+
+
+        // vecinos decena
+
+        salida.push(
+            String((a+1)%10)+String(b)
+        );
+
+
+        salida.push(
+            String((a+9)%10)+String(b)
+        );
+
+
+
+    }
+
+
+
+    return [...new Set(salida)];
+
+}
+    //////////////////////////////////////////////////////
+// MEMORIA DE ERRORES IA V52
+// APRENDE FALLAS DEL GENERADOR
+//////////////////////////////////////////////////////
+
+let MEMORIA_ERRORES_IA_V52 =
+JSON.parse(
+localStorage.getItem(
+"MEMORIA_ERRORES_IA_V52"
+)
+)
+||
+{};
+
+
+
+function guardarErrorIA_V52(
+prediccion,
+real
+){
+
+    prediccion =
+    String(prediccion)
+    .slice(-2);
+
+
+    real =
+    String(real)
+    .slice(-2);
+
+
+
+    if(!MEMORIA_ERRORES_IA_V52[prediccion]){
+
+        MEMORIA_ERRORES_IA_V52[prediccion]={
+
+            cerca:0,
+            invertido:0,
+            cambios:{}
+
+        };
+
+    }
+
+
+
+    // invertido
+
+    if(
+        real ===
+        prediccion[1]+prediccion[0]
+    ){
+
+        MEMORIA_ERRORES_IA_V52[prediccion]
+        .invertido++;
+
+    }
+
+
+
+    // diferencia
+
+    let diferencia =
+
+    Math.abs(
+        parseInt(prediccion) -
+        parseInt(real)
+    );
+
+
+
+    if(diferencia<=2){
+
+        MEMORIA_ERRORES_IA_V52[prediccion]
+        .cerca++;
+
+    }
+
+
+
+    if(
+        !MEMORIA_ERRORES_IA_V52[prediccion]
+        .cambios[real]
+    ){
+
+        MEMORIA_ERRORES_IA_V52[prediccion]
+        .cambios[real]=0;
+
+    }
+
+
+    MEMORIA_ERRORES_IA_V52[prediccion]
+    .cambios[real]++;
+
+
+
+    localStorage.setItem(
+        "MEMORIA_ERRORES_IA_V52",
+        JSON.stringify(
+            MEMORIA_ERRORES_IA_V52
+        )
+    );
+
+
+    }
+    //////////////////////////////////////////////////////
+// APLICADOR DE ERRORES APRENDIDOS IA V52
+//////////////////////////////////////////////////////
+
+function aplicarCorreccionErroresIA_V52(
+    candidatos
+){
+
+    let ranking={};
+
+
+
+    for(let n of candidatos){
+
+
+        n =
+        String(n)
+        .slice(-2);
+
+
+
+        if(!ranking[n])
+            ranking[n]=0;
+
+
+
+        // peso original
+
+        ranking[n]+=10;
+
+
+
+        let memoria =
+        MEMORIA_ERRORES_IA_V52[n];
+
+
+
+        if(!memoria)
+            continue;
+
+
+
+        //////////////////////////////////////////////////
+        // PREMIAR CORRECCIONES HISTÓRICAS
+        //////////////////////////////////////////////////
+
+
+        for(let cambio in memoria.cambios){
+
+
+            ranking[cambio] =
+
+            (ranking[cambio] || 0)
+            +
+            memoria.cambios[cambio] * 3;
+
+
+        }
+
+
+
+        //////////////////////////////////////////////////
+        // SI FALLÓ MUCHO INVERTIDO
+        //////////////////////////////////////////////////
+
+        if(
+            memoria.invertido > 2
+        ){
+
+            let invertido =
+            n[1]+n[0];
+
+
+            ranking[invertido] =
+
+            (ranking[invertido] || 0)
+            +
+            memoria.invertido * 2;
+
+        }
+
+
+
+    }
+
+
+
+    return Object.keys(ranking)
+
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    );
+
+}
+    
+    
 
     //////////////////////////////////////////////////
 // GENERADOR IA HÍBRIDO V48.6
@@ -3427,6 +3698,35 @@ ranking = aplicarFiltroFinalV491(ranking);
     ambos[0]=corregido;
 
     }
+    
+
+let ambosOriginales = [...ambos];
+
+
+let ambosCorregidos =
+corregirPrediccionIA_V52(
+    ambosOriginales
+);
+
+
+// unir sin borrar los originales
+
+ambos = [
+    ...new Set(
+        [
+            ...ambosOriginales,
+            ...ambosCorregidos
+        ]
+    )
+];
+
+ambos = aplicarCorreccionErroresIA_V52(
+    [
+        ...ambosOriginales,
+        ...ambosCorregidos
+    ]
+)
+.slice(0,3);
 
 
 

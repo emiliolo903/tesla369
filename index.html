@@ -3848,11 +3848,14 @@ async function cargarMemoriaPTV51(){
     );
 
 }
+
+    
         //=========================================
     // 3) ORDENAR RANKING FINAL
     //=========================================
 
 ranking = aplicarFiltroFinalV491(ranking);
+    
     let orden =
 
 Object.keys(ranking)
@@ -3862,12 +3865,6 @@ Object.keys(ranking)
 ranking[b]-ranking[a]
 );
     
-
-let orden =
-
-Object.keys(ranking)
-
-.sort((a,b)=>{
 
     let datosA =
     obtenerDatosCandidato_V53(

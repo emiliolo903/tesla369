@@ -1405,108 +1405,7 @@ estadistica
 
 
 }
-    //////////////////////////////////////////////////////
-// MOTOR CENTRAL DE PUNTAJES IA V53
-//////////////////////////////////////////////////////
 
-function calcularPuntajeIA_V53(
-    numero,
-    datos
-){
-
-    let puntaje = 0;
-
-    // Transición histórica
-    puntaje += datos.transicion || 0;
-
-    // Tesla
-    puntaje += datos.tesla || 0;
-
-    // Núcleo dominante
-    puntaje += datos.nucleo || 0;
-
-    // Aprendizaje
-    puntaje += datos.aprendizaje || 0;
-
-    // Matriz histórica
-    puntaje += datos.matriz || 0;
-
-    // Memoria de errores
-    puntaje -= datos.errores || 0;
-
-    // Repetición excesiva
-    puntaje -= datos.repeticion || 0;
-
-    return puntaje;
-
-}
-    //////////////////////////////////////////////////////
-// OBTENER DATOS DEL CANDIDATO V53
-//////////////////////////////////////////////////////
-
-function obtenerDatosCandidato_V53(
-    numero,
-    ranking
-){
-
-    return{
-
-        transicion:
-        ranking[numero] || 0,
-
-        tesla:0,
-
-        nucleo:0,
-
-        aprendizaje:0,
-
-        matriz:0,
-
-        errores:0,
-
-        repeticion:0
-
-    };
-
-}
-    //////////////////////////////////////////////////////
-// DETECTOR DE REPETICIÓN IA V53
-//////////////////////////////////////////////////////
-
-let REPETICIONES_IA_V53={};
-
-function actualizarRepeticionIA_V53(lista){
-
-    REPETICIONES_IA_V53={};
-
-    for(let numero of lista){
-
-        if(!REPETICIONES_IA_V53[numero]){
-
-            REPETICIONES_IA_V53[numero]=0;
-
-        }
-
-        REPETICIONES_IA_V53[numero]++;
-
-    }
-
-}
-
-function obtenerPenalizacionRepeticion_V53(numero){
-
-    if(!REPETICIONES_IA_V53[numero])
-        return 0;
-
-    if(REPETICIONES_IA_V53[numero]>=3)
-        return 15;
-
-    if(REPETICIONES_IA_V53[numero]==2)
-        return 8;
-
-    return 0;
-
-}
     
 //////////////////////////////////////////////////
 // PESOS IA V50
@@ -3954,14 +3853,15 @@ async function cargarMemoriaPTV51(){
     //=========================================
 
 ranking = aplicarFiltroFinalV491(ranking);
-    
-    //////////////////////////////////////////////////////
-// MOTOR CENTRAL IA V53
-//////////////////////////////////////////////////////
+    let orden =
 
-actualizarRepeticionIA_V53(
-    Object.keys(ranking)
+Object.keys(ranking)
+
+.sort(
+(a,b)=>
+ranking[b]-ranking[a]
 );
+    
 
 let orden =
 

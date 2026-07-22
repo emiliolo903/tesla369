@@ -3866,42 +3866,6 @@ ranking[b]-ranking[a]
 );
     
 
-    let datosA =
-    obtenerDatosCandidato_V53(
-        a,
-        ranking
-    );
-
-    let datosB =
-    obtenerDatosCandidato_V53(
-        b,
-        ranking
-    );
-
-    datosA.repeticion =
-    obtenerPenalizacionRepeticion_V53(a);
-
-    datosB.repeticion =
-    obtenerPenalizacionRepeticion_V53(b);
-
-    let puntajeA =
-    calcularPuntajeIA_V53(
-        a,
-        datosA
-    );
-
-    let puntajeB =
-    calcularPuntajeIA_V53(
-        b,
-        datosB
-    );
-
-    return puntajeB-puntajeA;
-
-});
-
-
-
     if(orden.length===0){
 
 

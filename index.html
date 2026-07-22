@@ -4210,18 +4210,41 @@ function generarPrediccionBacktestV49(
 
     async function iniciarAuditoriaV49(){
 
-alert("ENTRO AL BACKTEST");
+    alert("ENTRO AL BACKTEST");
 
-let datos =
-await ejecutarBacktestingV49();
+    try{
+
+        let datos =
+        await ejecutarBacktestingV49();
+
+        console.log(
+            "RESULTADO BACKTEST",
+            datos
+        );
 
 
+        alert(
+        "TERMINÓ BACKTEST\n\n"+
+        JSON.stringify(datos)
+        );
 
 
-    console.log(
-        "RESULTADO BACKTEST",
-        datos
-    );
+    }catch(error){
+
+        console.log(
+            "ERROR BACKTEST:",
+            error
+        );
+
+
+        alert(
+        "ERROR:\n"+
+        error
+        );
+
+    }
+
+    }
 
 
     alert(

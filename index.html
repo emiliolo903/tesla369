@@ -2603,15 +2603,22 @@ function obtenerSiguienteTurnoV48(turno){
 // MOTOR IA HISTÓRICO V49
 ////////////////////////////////////////////////
 
-async function analizarTransicionTurnoV48(base, turnoOrigen){
-
+async function analizarTransicionTurnoV48(
+    base,
+    turnoOrigen,
+    datos = null
+){
     let destino =
     obtenerSiguienteTurnoV48(turnoOrigen);
 
-    let datos =
+    if(!datos){
+
+    datos =
     await leerV48(
         STORES_V48.historico
     );
+
+    }
 
     base =
     String(base).slice(-2);
@@ -3944,9 +3951,10 @@ async function generarPrediccionBacktestV50(
 let candidatos =
 await analizarTransicionTurnoV48(
     base,
-    turno
+    turno,
+    historial
 );
-
+        
 console.log("DESPUES", base);
 
 

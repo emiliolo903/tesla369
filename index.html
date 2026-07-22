@@ -3049,25 +3049,7 @@ async function generarResultadoIA(){
     let turnoOrigen =
     document.getElementById("turnoCarga").value;
     
-    //////////////////////////////////////////////////////
-// NUEVO MOTOR CENTRAL IA V51
-//////////////////////////////////////////////////////
-
-let motorIA =
-await obtenerPrediccionIACompleta(
-    turnoOrigen
-);
-
-let ranking =
-motorIA.ranking;
-
-let orden =
-motorIA.orden;
-
-let turnoDestino =
-motorIA.turnoDestino;
-
-
+    
     let turnoDestino =
     obtenerSiguienteTurnoV48(turnoOrigen);
 

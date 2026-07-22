@@ -3938,14 +3938,18 @@ async function generarPrediccionBacktestV50(
 
 
     for(let base of bases){
+        
+        console.log("ANTES", base);
+
+let candidatos =
+await analizarTransicionTurnoV48(
+    base,
+    turno
+);
+
+console.log("DESPUES", base);
 
 
-        let candidatos =
-
-        await analizarTransicionTurnoV48(
-            base,
-            turno
-        );
 
 
 

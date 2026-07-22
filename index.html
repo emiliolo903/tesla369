@@ -4171,6 +4171,10 @@ await generarPrediccionBacktestV50(
     entrenamiento,
     turnoBacktest
 );
+        console.log(
+"BACKTEST PREDICCION",
+prediccion
+);
 
         let real =
         String(
@@ -4318,8 +4322,7 @@ function generarPrediccionBacktestV49(
     .slice(0,3);
 
     }
-    
-    console.log("BACKTEST V49 CARGADO");
+
     
     async function iniciarAuditoriaV49(){
 

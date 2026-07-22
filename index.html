@@ -4220,36 +4220,16 @@ function generarPrediccionBacktestV49(
     .slice(0,3);
 
     }
-
+    
     async function iniciarAuditoriaV49(){
 
-    
-    alert("ENTRO AL BACKTEST 1");
+    alert("ENTRO AL BACKTEST");
 
-    console.log("PASO 1");
-
-    console.log(
-        "TIPO EJECUTAR:",
-        typeof ejecutarBacktestingV49
-    );
-
-    alert("ENTRO AL BACKTEST 2");
-
-    }
-
-    console.log("PASO 1");
-
-    console.log(
-        "TIPO EJECUTAR:",
-        typeof ejecutarBacktestingV49
-    );
-
-    alert("ENTRO AL BACKTEST 2");
-
-    }
+    try{
 
         let datos =
         await ejecutarBacktestingV49();
+
 
         console.log(
             "RESULTADO BACKTEST",
@@ -4258,8 +4238,28 @@ function generarPrediccionBacktestV49(
 
 
         alert(
-        "TERMINÓ BACKTEST\n\n"+
-        JSON.stringify(datos)
+        `
+        BACKTEST TESLA PRO V49
+
+        Pruebas:
+        ${datos.total}
+
+        Directos:
+        ${datos.directo}
+
+        Invertidos:
+        ${datos.invertido}
+
+        Cerca:
+        ${datos.cerca}
+
+        Fallos:
+        ${datos.fallo}
+
+        Acierto:
+        ${datos.porcentajeAcierto}%
+
+        `
         );
 
 
@@ -4278,8 +4278,7 @@ function generarPrediccionBacktestV49(
 
     }
 
-    }
-
+            }
 
     
 </script> 

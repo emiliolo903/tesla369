@@ -3346,16 +3346,16 @@ function aplicarCorreccionErroresIA_V52(
     
 
     //////////////////////////////////////////////////
-// GENERADOR IA HÍBRIDO V48.6
-// MOTOR ANTERIOR + MATRIZ HISTÓRICA COMO APOYO
+// GENERADOR IA RESTAURADO V48.3
+// MOTOR HISTÓRICO ORIGINAL
 //////////////////////////////////////////////////
 
 async function generarResultadoIA(){
 
     let turnoOrigen =
     document.getElementById("turnoCarga").value;
-    
-    
+
+
     let turnoDestino =
     obtenerSiguienteTurnoV48(turnoOrigen);
 
@@ -3377,12 +3377,14 @@ async function generarResultadoIA(){
 
 
 
-    //=========================================
-    // 1) MOTOR ORIGINAL V48.3
-    //=========================================
+    //////////////////////////////////////////////////
+    // 1) MOTOR TRANSICIÓN HISTÓRICA
+    //////////////////////////////////////////////////
+
 
     let bases =
     obtenerBases7Provincias();
+
 
 
     if(bases.length===0){
@@ -3396,7 +3398,9 @@ async function generarResultadoIA(){
         bases =
         datos
         .slice(-30)
-        .map(x=>String(x.numero).slice(-2));
+        .map(x=>
+        String(x.numero).slice(-2)
+        );
 
     }
 
@@ -3421,71 +3425,8 @@ async function generarResultadoIA(){
 
 
 
-            // peso principal motor viejo
+            ranking[salida]+=30;
 
-            ranking[salida] += PESOS_IA_V50.transicion;
-
-
-
-            //================================
-            // corrección por cercanía
-            //================================
-
-
-            let decena =
-            Number(salida[0]);
-
-
-            let unidad =
-            Number(salida[1]);
-
-
-
-            let vecinos=[
-
-                decena+""+(unidad+1),
-                decena+""+(unidad-1),
-                (decena+1)+""+unidad,
-                (decena-1)+""+unidad
-
-            ];
-
-
-
-            for(let v of vecinos){
-
-
-                if(v.length===2){
-
-                    ranking[v] =
-(ranking[v]||0)
-+
-PESOS_IA_V50.mismaDecena;
-
-                }
-
-
-            }
-            
-            
-
-
-
-            //================================
-            // invertidos
-            //================================
-            
-            
-
-
-            let invertido =
-            salida[1]+salida[0];
-
-
-            // ranking[invertido] =
-// (ranking[invertido]||0)
-// +
-// PESOS_IA_V50.tesla;
 
         }
 
@@ -3493,393 +3434,77 @@ PESOS_IA_V50.mismaDecena;
 
 
 
-    //=========================================
-    // 2) APOYO MATRIZ HISTÓRICA
-    //=========================================
-
-
-    for(let provincia of provincias){
-
-
-        let elemento =
-        document.getElementById(
-            provincia
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g,"")
-            .replace(" ","")
-        );
-
-
-        if(!elemento)
-            continue;
-
-
-
-        let valor =
-        elemento.value.trim();
-
-
-
-        if(!/^\d{4}$/.test(valor))
-            continue;
-
-
-
-        let base =
-        valor.slice(-2);
-
-
-
-        let historial =
-
-        MATRIZ_HISTORICA_V48
-        ?. [turnoOrigen]
-        ?. [turnoDestino]
-        ?. [provincia]
-        ?. [base];
-
-
-
-        if(!historial)
-            continue;
-
-
-
-        for(let salida in historial){
-
-    let pesoPT =
-    obtenerPesoPTV51(
-        provincia,
-        turnoOrigen
-    );
-
-    ranking[salida] =
-    (ranking[salida] || 0)
-    +
-    (historial[salida] * PESOS_IA_V50.nucleoDominante / 4)
-    +
-    pesoPT;
-
-        }
-
-        }
     //////////////////////////////////////////////////
-// AJUSTE APRENDIZAJE V49
-//////////////////////////////////////////////////
-
-for(let n in ranking){
-
-
-    let pesoAprendido = 0;
-    
-
-
-    if(
-        APRENDIZAJE_V49 &&
-        APRENDIZAJE_V49.acompanantes &&
-        APRENDIZAJE_V49.acompanantes[n]
-    ){
-
-
-        for(let a in APRENDIZAJE_V49.acompanantes[n]){
-
-
-            pesoAprendido +=
-            APRENDIZAJE_V49.acompanantes[n][a];
-
-
-        }
-
-
-    }
-
-
-
-    ranking[n] +=
-    pesoAprendido * 0.5;
-
-
-}
-    //////////////////////////////////////////////////////
-// MEMORIA IA V53
-//////////////////////////////////////////////////////
-
-let MEMORIA_IA_V53 = JSON.parse(
-localStorage.getItem("MEMORIA_IA_V53")
-) || {
-
-aciertos:{},
-
-errores:{},
-
-estadisticas:{
-
-directos:0,
-invertidos:0,
-cerca1:0,
-cerca2:0,
-lejos:0
-
-}
-
-};
-
-function guardarMemoriaIAV53(){
-
-localStorage.setItem(
-
-"MEMORIA_IA_V53",
-
-JSON.stringify(MEMORIA_IA_V53)
-
-);
-
-}
-   
-    //////////////////////////////////////////////////////
-// REGISTRAR RESULTADO IA V53
-//////////////////////////////////////////////////////
-
-function registrarResultadoIAV53(predicho, real){
-
-predicho = String(predicho).slice(-2);
-real = String(real).slice(-2);
-
-if(!MEMORIA_IA_V53.aciertos[predicho]){
-    MEMORIA_IA_V53.aciertos[predicho]=0;
-}
-
-if(!MEMORIA_IA_V53.errores[predicho]){
-    MEMORIA_IA_V53.errores[predicho]={
-        invertidos:0,
-        cerca1:0,
-        cerca2:0,
-        lejos:0
-    };
-}
-
-if(predicho===real){
-
-    MEMORIA_IA_V53.aciertos[predicho]++;
-    MEMORIA_IA_V53.estadisticas.directos++;
-
-}
-else if(real===predicho[1]+predicho[0]){
-
-    MEMORIA_IA_V53.errores[predicho].invertidos++;
-    MEMORIA_IA_V53.estadisticas.invertidos++;
-
-}
-else{
-
-    let dif=Math.abs(
-        parseInt(predicho)-parseInt(real)
-    );
-
-    if(dif===1){
-
-        MEMORIA_IA_V53.errores[predicho].cerca1++;
-        MEMORIA_IA_V53.estadisticas.cerca1++;
-
-    }
-    else if(dif===2){
-
-        MEMORIA_IA_V53.errores[predicho].cerca2++;
-        MEMORIA_IA_V53.estadisticas.cerca2++;
-
-    }
-    else{
-
-        MEMORIA_IA_V53.errores[predicho].lejos++;
-        MEMORIA_IA_V53.estadisticas.lejos++;
-
-    }
-
-}
-
-guardarMemoriaIAV53();
-
-    }
-    
-    //////////////////////////////////////////////////////
-// CORRECTOR INTELIGENTE IA V53
-//////////////////////////////////////////////////////
-
-function aplicarMemoriaIAV53(ranking){
-
-    for(let ambos in ranking){
-
-        let memoria =
-        MEMORIA_IA_V53.errores[ambos];
-
-        if(!memoria)
-            continue;
-
-        // Premiar aciertos históricos
-        let aciertos =
-        MEMORIA_IA_V53.aciertos[ambos] || 0;
-
-        ranking[ambos] +=
-        aciertos * 4;
-
-        // Si muchas veces salió invertido,
-        // reforzar el invertido
-        if(memoria.invertidos>0){
-
-            let inv =
-            ambos[1]+ambos[0];
-
-            ranking[inv] =
-            (ranking[inv]||0)
-            +
-            memoria.invertidos*2;
-
-        }
-
-        // Si suele quedar a +1 o -1
-        if(memoria.cerca1>0){
-
-            let n=parseInt(ambos);
-
-            let mas=
-            String((n+1)%100)
-            .padStart(2,"0");
-
-            let menos=
-            String((n+99)%100)
-            .padStart(2,"0");
-
-            ranking[mas]=
-            (ranking[mas]||0)
-            +
-            memoria.cerca1;
-
-            ranking[menos]=
-            (ranking[menos]||0)
-            +
-            memoria.cerca1;
-
-        }
-
-        // Si suele quedar a ±2
-        if(memoria.cerca2>0){
-
-            let n=parseInt(ambos);
-
-            let mas=
-            String((n+2)%100)
-            .padStart(2,"0");
-
-            let menos=
-            String((n+98)%100)
-            .padStart(2,"0");
-
-            ranking[mas]=
-            (ranking[mas]||0)
-            +
-            memoria.cerca2;
-
-            ranking[menos]=
-            (ranking[menos]||0)
-            +
-            memoria.cerca2;
-
-        }
-
-        // Penalizar números que casi siempre fallan
-        ranking[ambos]-=
-        memoria.lejos*0.5;
-
-    }
-
-    return ranking;
-
-}
-    
-    
-
-    
+    // 2) MATRIZ HISTÓRICA APOYO
     //////////////////////////////////////////////////
-// MEMORIA PERMANENTE APRENDIZAJE PT V51
-//////////////////////////////////////////////////
-
-async function guardarMemoriaPTV51(){
-
-    await guardarV48(
-
-        STORES_V48.aprendizaje,
-
-        {
-
-            fecha:new Date(),
-
-            tipo:"APRENDIZAJE_PT_V51",
-
-            datos:APRENDIZAJE_PT_V51
-
-        }
-
-    );
-
-}
 
 
-
-async function cargarMemoriaPTV51(){
-
-    let datos =
-    await leerV48(
-        STORES_V48.aprendizaje
-    );
-
-
-    for(let d of datos){
+    for(let base in MATRIZ_HISTORICA_V48){
 
 
         if(
-            d.tipo==="APRENDIZAJE_PT_V51"
+            MATRIZ_HISTORICA_V48[turnoOrigen]
         ){
 
-            APRENDIZAJE_PT_V51 =
-            d.datos;
+            let destino =
+            MATRIZ_HISTORICA_V48
+            [turnoOrigen]
+            [turnoDestino];
+
+
+            if(destino){
+
+                for(let provincia in destino){
+
+
+                    let datos =
+                    destino[provincia];
+
+
+                    for(let salida in datos){
+
+
+                        if(!ranking[salida])
+                            ranking[salida]=0;
+
+
+                        ranking[salida]+=datos[salida];
+
+
+                    }
+
+                }
+
+            }
 
         }
 
     }
 
 
-    console.log(
-        "MEMORIA PT V51 CARGADA",
-        APRENDIZAJE_PT_V51
-    );
 
-}
+    //////////////////////////////////////////////////
+    // 3) ORDENAR RESULTADO
+    //////////////////////////////////////////////////
 
-    
-        //=========================================
-    // 3) ORDENAR RANKING FINAL
-    //=========================================
 
-ranking = aplicarFiltroFinalV491(ranking);
-    
     let orden =
 
-Object.keys(ranking)
+    Object.keys(ranking)
 
-.sort(
-(a,b)=>
-ranking[b]-ranking[a]
-);
-    
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    );
+
+
 
     if(orden.length===0){
 
 
         mostrarV48(
 
-        "⚠️ SIN DATOS PARA GENERAR\n\n"+
-        "La IA necesita más historial."
+        "⚠️ SIN DATOS HISTÓRICOS"
 
         );
 
@@ -3887,25 +3512,12 @@ ranking[b]-ranking[a]
         return;
 
     }
-    
-    //////////////////////////////////////////////////////
-// IA V53
-// APLICAR MEMORIA DE APRENDIZAJE
-//////////////////////////////////////////////////////
-
-ranking = aplicarMemoriaIAV53(ranking);
-
-// Reordenar el ranking con los nuevos pesos
-orden = Object.keys(ranking)
-.sort(
-    (a,b)=>ranking[b]-ranking[a]
-);
 
 
 
-    //=========================================
+    //////////////////////////////////////////////////
     // 4) SELECCIÓN DE 3 AMBOS
-    //=========================================
+    //////////////////////////////////////////////////
 
 
     let ambos=[];
@@ -3919,13 +3531,13 @@ orden = Object.keys(ranking)
             continue;
 
 
-        if(ambos.indexOf(n)===-1){
 
+        if(!ambos.includes(n)){
 
             ambos.push(n);
 
-
         }
+
 
 
         if(ambos.length===3)
@@ -3934,399 +3546,126 @@ orden = Object.keys(ranking)
 
     }
 
-    // let corregido =
-// await corregirAmbosIAV48(
-//     ambos[0],
-//     turnoOrigen
-// );
-
-// ambos[0]=corregido;
-    
-    
-    
-    
-
-let ambosOriginales = [...ambos];
 
 
-let ambosCorregidos =
-corregirPrediccionIA_V52(
-    ambosOriginales
-);
+    //////////////////////////////////////////////////
+    // 5) GENERAR TERNO Y CUATERNO
+    //////////////////////////////////////////////////
 
 
-// unir sin borrar los originales
+    let principal =
+    ambos[0];
 
-ambos = [
-    ...new Set(
-        [
-            ...ambosOriginales,
-            ...ambosCorregidos
-        ]
-    )
-];
 
-ambos = aplicarCorreccionErroresIA_V52(
-    [
-        ...ambosOriginales,
-        ...ambosCorregidos
-    ]
-)
-.slice(0,3);
+
+    let jugadasFinales =
+    await construirJugadasFinalesV49(
+        principal,
+        turnoOrigen
+    );
+
+
+
+    let ternos =
+    jugadasFinales.ternos || [];
+
+
+
+    let cuaternos =
+    jugadasFinales.cuaternos || [];
 
 
 
     //////////////////////////////////////////////////
-// CONSTRUCTOR FINAL TERNO / CUATERNO V49.1
-// ACOMPAÑANTE INTELIGENTE
-//////////////////////////////////////////////////
+    // LIMITAR
+    //////////////////////////////////////////////////
 
-async function construirJugadasFinalesV49(
-    ambos,
-    turnoOrigen
-){
 
-    let datos =
-    await leerV48(
-        STORES_V48.historico
+    ternos =
+    ternos.slice(0,2);
+
+
+
+    cuaternos =
+    cuaternos.slice(0,2);
+
+
+
+    //////////////////////////////////////////////////
+    // GUARDAR PREDICCIÓN
+    //////////////////////////////////////////////////
+
+
+    await guardarV48(
+
+        STORES_V48.predicciones,
+
+        {
+
+            fecha:new Date(),
+
+            turnoOrigen:turnoOrigen,
+
+            turnoDestino:turnoDestino,
+
+            ambos:ambos,
+
+            ternos:ternos,
+
+            cuaternos:cuaternos,
+
+            origen:"GENERADOR_V48_RESTAURADO"
+
+        }
+
     );
 
 
-    let ranking={};
 
+    PREDICCION_ACTUAL_V49={
 
-    let base =
-    String(ambos).slice(-2);
-
-
-
-    for(let d of datos){
-
-        if(!d.numero)
-            continue;
-
-
-        let numero =
-        String(d.numero).slice(-2);
-
-
-
-        // busca cuando aparece el mismo ambos
-
-        if(numero===base){
-
-
-            let indice =
-            datos.indexOf(d);
-
-
-
-            if(datos[indice+1]){
-
-
-                let siguiente =
-                String(datos[indice+1].numero)
-                .slice(-2);
-
-
-
-                ranking[siguiente]=
-                (ranking[siguiente]||0)+5;
-
-
-            }
-
-
-        }
-
-
-
-        // invertido
-
-        if(
-        numero===base[1]+base[0]
-        ){
-
-            ranking[numero]=
-            (ranking[numero]||0)+3;
-
-        }
-
-
-
-        // misma decena
-
-        if(
-        numero[0]===base[0]
-        ){
-
-            ranking[numero]=
-            (ranking[numero]||0)+2;
-
-        }
-
-
-
-        // misma unidad
-
-        if(
-        numero[1]===base[1]
-        ){
-
-            ranking[numero]=
-            (ranking[numero]||0)+2;
-
-        }
-
-
-    }
-
-
-
-    let acompañantes =
-
-    Object.keys(ranking)
-
-    .sort(
-        (a,b)=>
-        ranking[b]-ranking[a]
-    )
-    .filter(
-        x=>x!==base
-    )
-    .slice(0,5);
-
-
-
-    let ternos=[];
-
-    let cuaternos=[];
-
-
-
-    // TERNO
-
-    for(let a of acompañantes){
-
-
-        if(ternos.length<2){
-
-            ternos.push(
-                a[1]+base
-            );
-
-        }
-
-    }
-
-
-
-    // CUATERNO
-
-    if(
-    acompañantes.length>=2
-    ){
-
-
-        cuaternos.push(
-
-            acompañantes[0]+base
-
-        );
-
-
-        cuaternos.push(
-
-            acompañantes[1]+base
-
-        );
-
-
-    }
-
-
-
-    return {
+        ambos:ambos,
 
         ternos:ternos,
 
-        cuaternos:cuaternos,
-
-        acompañantes:acompañantes
+        cuaternos:cuaternos
 
     };
 
 
-    }
-
-    //=========================================
-// 5) GENERAR TERNOS Y CUATERNOS
-// DESDE AMBOS PRINCIPAL
-//=========================================
-
-
-let principal =
-ambos[0];
-
-
-let acompañantes =
-await buscarAcompananteExactoV48(
-    principal
-);
-
-
-
-let jugadasFinales =
-await construirJugadasFinalesV49(
-    principal,
-    turnoOrigen
-);
-
-
-let ternos =
-jugadasFinales.ternos;
-
-
-let cuaternos =
-jugadasFinales.cuaternos;
-
-
-
-// Primer terno usando principal
-
-if(principal && ambos[1]){
-
-
-    ternos.push(
-
-        principal+
-        ambos[1][1]
-
-    );
-
-
-}
-
-
-
-// Segundo terno con acompañante histórico
-
-if(acompañantes.length>0){
-
-
-    ternos.push(
-
-        principal[0]+
-        acompañantes[0]
-
-    );
-
-
-}
-
-
-
-// Primer cuaterno
-
-if(principal && ambos[1]){
-
-
-    cuaternos.push(
-
-        principal+
-        ambos[1]
-
-    );
-
-
-}
-
-
-
-// Segundo cuaterno usando acompañante exacto
-
-if(
-principal &&
-acompañantes.length>0
-){
-
-
-    cuaternos.push(
-
-        principal+
-        acompañantes[0]
-
-    );
-
-
-}
-
-
-
-// Limitar resultados
-
-ternos =
-ternos.slice(0,2);
-
-
-cuaternos =
-cuaternos.slice(0,2);
-
-
-
-
-
-
-    //=========================================
-    // 7) MOSTRAR RESULTADO
-    //=========================================
-
 
     mostrarV48(
 
+`
+🧠 IA RESTAURADA V48.3
 
-"🧠 TESLA IA HÍBRIDA V48.6\n\n"+
-
-"🔄 TRANSICIÓN\n"+
-turnoOrigen+
-" ➜ "+
-turnoDestino+
-
-"\n\n⚡ AMBOS\n"+
-
-ambos.map((n,i)=>
-(i+1)+". "+n
-).join("\n")+
-
-"\n\n🎯 TERNOS\n"+
-
-ternos.map((n,i)=>
-(i+1)+". "+n
-).join("\n")+
-
-"\n\n🔷 CUATERNOS\n"+
-
-cuaternos.map((n,i)=>
-(i+1)+". "+n
-).join("\n")+
-
-"\n\n📊 CANDIDATOS ANALIZADOS: "+
-orden.length
+Turno:
+${turnoOrigen} → ${turnoDestino}
 
 
-    );
+AMBOS:
 
-    //////////////////////////////////////////////////
-// GUARDAR PREDICCIÓN IA V49
-//////////////////////////////////////////////////
+${ambos.join("\n")}
 
-await guardarPrediccionV49(
-    turnoOrigen,
-    ambos
+
+TERNOS:
+
+${ternos.join("\n")}
+
+
+CUATERNOS:
+
+${cuaternos.join("\n")}
+
+
+Motor:
+TRANSICIÓN HISTÓRICA REAL
+`
 );
 
 
 }
+    
     //////////////////////////////////////////////////
 // GUARDAR / CARGAR APRENDIZAJE PT V51
 //////////////////////////////////////////////////

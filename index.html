@@ -3637,6 +3637,167 @@ ambos: ambos
     
     
     
+    //////////////////////////////////////////////////////
+// CORRECTOR DE DESVIACIÓN IA V55.2
+// Ajusta errores repetidos del motor
+//////////////////////////////////////////////////////
+
+async function aplicarCorrectorDesviacionV55_2(
+    ranking
+){
+
+    let historial =
+    await leerV48(
+        STORES_V48.predicciones
+    );
+
+
+    let correcciones={};
+
+
+
+    let resultados =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+
+    for(let pred of historial){
+
+
+        if(!pred.ambos)
+            continue;
+
+
+
+        // buscar resultado posterior
+
+        let realEncontrado =
+        resultados.find(r=>{
+
+            return (
+            r.fecha &&
+            new Date(r.fecha) >
+            new Date(pred.fecha)
+            );
+
+        });
+
+
+
+        if(!realEncontrado)
+            continue;
+
+
+
+        let real =
+        String(realEncontrado.numero)
+        .slice(-2);
+
+
+
+        for(let p of pred.ambos){
+
+
+            p =
+            String(p)
+            .padStart(2,"0");
+
+
+
+            if(p===real)
+                continue;
+
+
+
+            let cambios=[];
+
+
+
+            // cambio unidad
+
+            if(
+            p[0]===real[0]
+            ){
+
+                cambios.push(real);
+
+            }
+
+
+
+            // cambio decena
+
+            if(
+            p[1]===real[1]
+            ){
+
+                cambios.push(real);
+
+            }
+
+
+
+            // invertido
+
+            if(
+            p[1]+p[0]===real
+            ){
+
+                cambios.push(real);
+
+            }
+
+
+
+            for(let c of cambios){
+
+                if(!correcciones[c])
+                    correcciones[c]=0;
+
+
+                correcciones[c]+=3;
+
+            }
+
+
+        }
+
+
+    }
+
+
+
+    // aplicar pesos aprendidos
+
+
+    for(let n in correcciones){
+
+
+        if(!ranking[n])
+            ranking[n]=0;
+
+
+        ranking[n]+=
+        correcciones[n];
+
+
+    }
+
+
+
+    console.log(
+    "CORRECTOR V55.2",
+    correcciones
+    );
+
+
+    return ranking;
+
+
+            }
+    
     
 
     //////////////////////////////////////////////////
@@ -3785,6 +3946,10 @@ aplicarMotorV55(
     turnoDestino
 
 );
+  ranking =
+await aplicarCorrectorDesviacionV55_2(
+    ranking
+);  
 
 let orden =
 

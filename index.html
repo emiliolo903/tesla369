@@ -3876,6 +3876,72 @@ async function aplicarCorrectorDecenaV56(
     return [...new Set(salida)];
 
 }
+    /////////////////////////////////////////////////////
+// CORRECTOR FINAL DE PATRÓN V57
+/////////////////////////////////////////////////////
+
+async function aplicarCorrectorPatronV57(
+    ambos,
+    turnoOrigen
+){
+
+    let datos =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    let salida=[];
+
+    for(let numero of ambos){
+
+        let votos={};
+
+        for(let i=0;i<datos.length-1;i++){
+
+            let actual =
+            String(datos[i].numero).slice(-2);
+
+            if(actual!==numero)
+                continue;
+
+            let siguiente =
+            String(datos[i+1].numero).slice(-2);
+
+            votos[siguiente]=
+            (votos[siguiente]||0)+1;
+        }
+
+        let mejor=numero;
+        let mayor=0;
+
+        for(let n in votos){
+
+            if(votos[n]>mayor){
+
+                mayor=votos[n];
+                mejor=n;
+
+            }
+
+        }
+
+        // Solo corrige si el patrón apareció varias veces
+        if(mayor>=3){
+
+            salida.push(mejor);
+
+        }else{
+
+            salida.push(numero);
+
+        }
+
+    }
+
+    return [...new Set(salida)];
+
+}
+    
     
     //////////////////////////////////////////////////
 // GENERADOR IA RESTAURADO V48.3
@@ -4055,7 +4121,15 @@ ambos =
 await aplicarCorrectorDecenaV56(
     ambos,
     turnoOrigen
+    );
+    
+    ambos =
+await aplicarCorrectorPatronV57(
+    ambos,
+    turnoOrigen
 );
+    
+
 console.log(
 
 "IA V55",

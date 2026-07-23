@@ -3352,6 +3352,12 @@ function aplicarCorreccionErroresIA_V52(
 
 
     async function generarResultadoIA(){
+        
+        console.log(
+"PASO 5 - RESULTADOS",
+ternos,
+cuaternos
+);
 
 console.log("ENTRÓ GENERADOR V48 RESTAURADO");
 
@@ -3377,6 +3383,8 @@ console.log("ENTRÓ GENERADOR V48 RESTAURADO");
 
 
     let ranking={};
+        
+        console.log("PASO 2 - RANKING CREADO");
 
 
 
@@ -3486,6 +3494,7 @@ for(let provincia in destinoMatriz){
         (a,b)=>
         ranking[b]-ranking[a]
     );
+        console.log("PASO 3 - ORDEN:", orden);
 
 
 
@@ -3511,6 +3520,8 @@ for(let provincia in destinoMatriz){
 
 
     let ambos=[];
+        
+        console.log("PASO 4 - AMBOS:", ambos);
 
 
 

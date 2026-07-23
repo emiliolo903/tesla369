@@ -3392,8 +3392,9 @@ console.log("ENTRÓ GENERADOR V48 RESTAURADO");
     //////////////////////////////////////////////////
 
 
-    let bases =
-    obtenerBases7Provincias();
+    let bases = obtenerBases7Provincias();
+
+alert("Bases encontradas: " + JSON.stringify(bases));
 
 
 
@@ -3432,9 +3433,10 @@ bases
         );
 
 
-        console.log(
-"CANDIDATOS:",
-candidatos
+        alert(
+"Base: " + base +
+"\nCandidatos: " +
+JSON.stringify(candidatos)
 );
 
 

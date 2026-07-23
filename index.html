@@ -3342,6 +3342,300 @@ function aplicarCorreccionErroresIA_V52(
     );
 
 }
+    /////////////////////////////////////////////////////////////
+// MOTOR IA V55
+// MEMORIA INTELIGENTE
+/////////////////////////////////////////////////////////////
+
+let MEMORIA_V55 = {
+
+transiciones:{},
+
+aciertos:{},
+
+errores:{},
+
+invertidos:{},
+
+cerca1:{},
+
+cerca2:{},
+
+ultimaGeneracion:[]
+
+};
+
+/////////////////////////////////////////////////////////////
+// REGISTRAR RESULTADO
+/////////////////////////////////////////////////////////////
+
+function registrarResultadoV55(
+predicho,
+real,
+turnoOrigen,
+turnoDestino
+){
+
+predicho=String(predicho).slice(-2);
+real=String(real).slice(-2);
+
+let clave=turnoOrigen+"->"+turnoDestino;
+
+if(!MEMORIA_V55.transiciones[clave])
+MEMORIA_V55.transiciones[clave]={};
+
+if(!MEMORIA_V55.transiciones[clave][predicho])
+MEMORIA_V55.transiciones[clave][predicho]=0;
+
+if(predicho===real){
+
+MEMORIA_V55.aciertos[predicho]=
+(MEMORIA_V55.aciertos[predicho]||0)+1;
+
+MEMORIA_V55.transiciones[clave][predicho]+=5;
+
+return;
+
+}
+
+if(predicho===real[1]+real[0]){
+
+MEMORIA_V55.invertidos[predicho]=
+(MEMORIA_V55.invertidos[predicho]||0)+1;
+
+MEMORIA_V55.transiciones[clave][predicho]+=3;
+
+return;
+
+}
+
+let d=Math.abs(
+Number(predicho)-Number(real)
+);
+
+if(d===1){
+
+MEMORIA_V55.cerca1[predicho]=
+(MEMORIA_V55.cerca1[predicho]||0)+1;
+
+MEMORIA_V55.transiciones[clave][predicho]+=2;
+
+return;
+
+}
+
+if(d===2){
+
+MEMORIA_V55.cerca2[predicho]=
+(MEMORIA_V55.cerca2[predicho]||0)+1;
+
+MEMORIA_V55.transiciones[clave][predicho]+=1;
+
+return;
+
+}
+
+MEMORIA_V55.errores[predicho]=
+(MEMORIA_V55.errores[predicho]||0)+1;
+
+MEMORIA_V55.transiciones[clave][predicho]-=1;
+
+}
+
+/////////////////////////////////////////////////////////////
+// OBTENER PESO IA
+/////////////////////////////////////////////////////////////
+
+function obtenerPesoV55(
+numero,
+turnoOrigen,
+turnoDestino
+){
+
+numero=String(numero).slice(-2);
+
+let peso=0;
+
+let clave=
+turnoOrigen+"->"+turnoDestino;
+
+if(
+MEMORIA_V55.transiciones[clave] &&
+MEMORIA_V55.transiciones[clave][numero]
+){
+
+peso+=
+MEMORIA_V55.transiciones[clave][numero];
+
+}
+
+peso+=
+(MEMORIA_V55.aciertos[numero]||0)*4;
+
+peso+=
+(MEMORIA_V55.invertidos[numero]||0)*2;
+
+peso+=
+(MEMORIA_V55.cerca1[numero]||0);
+
+peso+=
+(MEMORIA_V55.cerca2[numero]||0)*0.5;
+
+peso-=
+(MEMORIA_V55.errores[numero]||0);
+
+return peso;
+
+    }
+    /////////////////////////////////////////////////////////////
+// MOTOR DE RANKING IA V55
+/////////////////////////////////////////////////////////////
+
+function construirRankingV55(
+ranking,
+turnoOrigen,
+turnoDestino
+){
+
+let nuevo={...ranking};
+
+for(let numero in nuevo){
+
+let peso=0;
+
+peso+=nuevo[numero];
+
+peso+=obtenerPesoV55(
+numero,
+turnoOrigen,
+turnoDestino
+);
+
+// Premio Tesla
+
+try{
+
+let tesla=
+aplicarTeslaV48(numero);
+
+if(tesla===numero)
+peso+=8;
+
+}catch(e){}
+
+// Penalizar repetición
+
+if(
+MEMORIA_V55.ultimaGeneracion
+.includes(numero)
+){
+
+peso-=12;
+
+}
+
+// Premio por transición fuerte
+
+let clave=
+turnoOrigen+"->"+turnoDestino;
+
+if(
+MEMORIA_V55.transiciones[clave] &&
+MEMORIA_V55.transiciones[clave][numero]
+){
+
+peso+=
+MEMORIA_V55.transiciones
+[clave][numero];
+
+}
+
+nuevo[numero]=peso;
+
+}
+
+return Object.keys(nuevo)
+
+.sort(
+(a,b)=>nuevo[b]-nuevo[a]
+);
+
+}
+    /////////////////////////////////////////////////////////////
+// SELECCIÓN INTELIGENTE V55
+/////////////////////////////////////////////////////////////
+
+function seleccionarAmbosV55(
+orden
+){
+
+let ambos=[];
+
+for(let numero of orden){
+
+numero=
+String(numero)
+.padStart(2,"0");
+
+if(ambos.includes(numero))
+continue;
+
+// evita repetidos
+
+if(
+MEMORIA_V55.ultimaGeneracion
+.includes(numero)
+)
+continue;
+
+ambos.push(numero);
+
+if(ambos.length===3)
+break;
+
+}
+
+MEMORIA_V55.ultimaGeneracion=
+[...ambos];
+
+return ambos;
+
+}
+    /////////////////////////////////////////////////////////////
+// BLOQUE 4
+// CONEXIÓN DEL MOTOR V55
+/////////////////////////////////////////////////////////////
+
+function aplicarMotorV55(
+ranking,
+turnoOrigen,
+turnoDestino
+){
+
+// Construye el ranking inteligente
+let orden = construirRankingV55(
+ranking,
+turnoOrigen,
+turnoDestino
+);
+
+// Selecciona los 3 mejores ambos
+let ambos = seleccionarAmbosV55(
+orden
+);
+
+// Devuelve el resultado
+return {
+
+orden: orden,
+
+ambos: ambos
+
+};
+
+}
+    
+    
     
     
 
@@ -3350,15 +3644,6 @@ function aplicarCorreccionErroresIA_V52(
 // MOTOR HISTÓRICO ORIGINAL
 //////////////////////////////////////////////////
 async function generarResultadoIA(){
-
-console.clear();
-
-console.log("🚀 GENERADOR INICIO");
-    
-
-    
-
-console.log("ENTRÓ GENERADOR V48 RESTAURADO");
 
     let turnoOrigen =
     document.getElementById("turnoCarga").value;
@@ -3383,7 +3668,7 @@ console.log("ENTRÓ GENERADOR V48 RESTAURADO");
 
     let ranking={};
         
-        console.log("PASO 2 - RANKING CREADO");
+        
 
 
 
@@ -3393,8 +3678,6 @@ console.log("ENTRÓ GENERADOR V48 RESTAURADO");
 
 
     let bases = obtenerBases7Provincias();
-
-alert("Bases encontradas: " + JSON.stringify(bases));
 
 
 
@@ -3419,10 +3702,7 @@ alert("Bases encontradas: " + JSON.stringify(bases));
 
     for(let base of bases){
         
-        console.log(
-"BASES ENCONTRADAS:",
-bases
-);
+        
         
 
 
@@ -3489,74 +3769,46 @@ for(let provincia in destinoMatriz){
 }
 
 
+    
+/////////////////////////////////////////////////////////////
+// MOTOR IA V55
+/////////////////////////////////////////////////////////////
 
+let motorV55 =
 
-    //////////////////////////////////////////////////
-    // 3) ORDENAR RESULTADO
-    //////////////////////////////////////////////////
+aplicarMotorV55(
 
+    ranking,
 
-    let orden =
+    turnoOrigen,
 
-    Object.keys(ranking)
+    turnoDestino
 
-    .sort(
-        (a,b)=>
-        ranking[b]-ranking[a]
-    );
-        
+);
 
+let orden =
 
+motorV55.orden;
 
-    if(orden.length===0){
+let ambos =
 
+motorV55.ambos;
 
-        mostrarV48(
+console.log(
 
-        "⚠️ SIN DATOS HISTÓRICOS"
+"IA V55",
 
-        );
+{
 
+orden,
 
-        return;
+ambos
 
-    }
+}
 
+);
 
-
-    //////////////////////////////////////////////////
-    // 4) SELECCIÓN DE 3 AMBOS
-    //////////////////////////////////////////////////
-
-
-    let ambos=[];
-        
-        console.log("PASO 4 - AMBOS:", ambos);
-
-
-
-    for(let n of orden){
-
-
-        if(!/^\d{2}$/.test(n))
-            continue;
-
-
-
-        if(!ambos.includes(n)){
-
-            ambos.push(n);
-
-        }
-
-
-
-        if(ambos.length===3)
-            break;
-
-
-    }
-
+    
 
 
     //////////////////////////////////////////////////

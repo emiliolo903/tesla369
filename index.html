@@ -4129,63 +4129,48 @@ for(let provincia in destinoMatriz){
 /////////////////////////////////////////////////////////////
 // MOTOR IA V55
 /////////////////////////////////////////////////////////////
-    
+
 ranking =
 await aplicarCorrectorDesviacionV55_2(
     ranking
-);    
+);
 
-    
+
 let motorV55 =
-
 aplicarMotorV55(
-
     ranking,
-
     turnoOrigen,
-
     turnoDestino
-
 );
-    alert(JSON.stringify(motorV55));
-    
-    
-    console.log(
-"RESULTADO MOTOR V55:",
-motorV55
-);
-      
-alert(
-"Motor V55 llegó"
-);
-    
 
-    
 
-let orden =
+let orden = motorV55.orden;
 
-motorV55.orden;
+let ambos = motorV55.ambos;
 
-let ambos =
 
-motorV55.ambos;
-    
+// Corrector decena
 ambos =
 await aplicarCorrectorDecenaV56(
     ambos,
     turnoOrigen
-    );
+);
+
+
+// Corrector patrón
 ambos =
 await aplicarCorrectorPatronV57(
     ambos,
     turnoOrigen
-);    
-  
+);
+
 
 console.log(
+"RESULTADO FINAL IA",
+ambos
+);
 
-"IA V55",
-
+    
 {
 
 orden,

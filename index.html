@@ -3876,69 +3876,121 @@ async function aplicarCorrectorDecenaV56(
     return [...new Set(salida)];
 
 }
-    /////////////////////////////////////////////////////
-// CORRECTOR FINAL DE PATRÓN V57
-/////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+// CORRECTOR FINAL DE PATRÓN V57.1 SEGURO
+//////////////////////////////////////////////////////
 
 async function aplicarCorrectorPatronV57(
     ambos,
     turnoOrigen
 ){
 
-    let datos =
-    await leerV48(
-        STORES_V48.historico
-    );
+    try{
 
-    let salida=[];
+        let datos =
+        await leerV48(
+            STORES_V48.historico
+        );
 
-    for(let numero of ambos){
 
-        let votos={};
+        if(!Array.isArray(datos) || datos.length===0)
+            return ambos;
 
-        for(let i=0;i<datos.length-1;i++){
 
-            let actual =
-            String(datos[i].numero).slice(-2);
 
-            if(actual!==numero)
-                continue;
+        let salida=[];
 
-            let siguiente =
-            String(datos[i+1].numero).slice(-2);
 
-            votos[siguiente]=
-            (votos[siguiente]||0)+1;
-        }
+        for(let numero of ambos){
 
-        let mejor=numero;
-        let mayor=0;
 
-        for(let n in votos){
+            numero=
+            String(numero)
+            .padStart(2,"0");
 
-            if(votos[n]>mayor){
 
-                mayor=votos[n];
-                mejor=n;
+
+            let votos={};
+
+
+
+            for(let i=0;i<datos.length-1;i++){
+
+
+                let actual=
+                String(datos[i].numero)
+                .slice(-2);
+
+
+
+                if(actual!==numero)
+                    continue;
+
+
+
+                let siguiente=
+                String(datos[i+1].numero)
+                .slice(-2);
+
+
+
+                votos[siguiente]=
+                (votos[siguiente]||0)+1;
 
             }
 
+
+
+            let mejor=numero;
+            let mayor=0;
+
+
+
+            for(let n in votos){
+
+                if(votos[n]>mayor){
+
+                    mayor=votos[n];
+                    mejor=n;
+
+                }
+
+            }
+
+
+
+            // SOLO cambia si hay patrón muy fuerte
+
+            if(mayor>=5){
+
+                salida.push(mejor);
+
+            }else{
+
+                salida.push(numero);
+
+            }
+
+
         }
 
-        // Solo corrige si el patrón apareció varias veces
-        if(mayor>=3){
 
-            salida.push(mejor);
 
-        }else{
+        return [...new Set(salida)];
 
-            salida.push(numero);
 
-        }
+    }catch(e){
+
+
+        console.log(
+            "ERROR V57:",
+            e
+        );
+
+
+        return ambos;
 
     }
-
-    return [...new Set(salida)];
 
 }
     

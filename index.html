@@ -3433,12 +3433,7 @@ bases
         );
 
 
-        alert(
-"Base: " + base +
-"\nCandidatos: " +
-JSON.stringify(candidatos)
-);
-
+        
 
 
         for(let salida of candidatos){
@@ -3509,10 +3504,7 @@ for(let provincia in destinoMatriz){
         (a,b)=>
         ranking[b]-ranking[a]
     );
-        alert(
-"ORDEN:\n\n"+
-JSON.stringify(orden)
-);
+        
 
 
 
@@ -3587,23 +3579,45 @@ JSON.stringify(orden)
 
 
 
+    let ternos = [];
+let cuaternos = [];
+
+try{
+
     let jugadasFinales =
     await construirJugadasFinalesV49(
         principal,
         turnoOrigen
     );
 
+    if(jugadasFinales){
 
+        ternos =
+        jugadasFinales.ternos || [];
 
-    let ternos =
-    jugadasFinales.ternos || [];
+        cuaternos =
+        jugadasFinales.cuaternos || [];
 
+    }
 
+}catch(e){
 
-    let cuaternos =
-    jugadasFinales.cuaternos || [];
+    console.log(
+        "ERROR CONSTRUCTOR:",
+        e
+    );
 
+    ternos = [
+        principal + ambos[1][1],
+        principal + ambos[2][1]
+    ];
 
+    cuaternos = [
+        principal + ambos[1],
+        principal + ambos[2]
+    ];
+
+}
 
     //////////////////////////////////////////////////
     // LIMITAR

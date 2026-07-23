@@ -3800,7 +3800,83 @@ async function aplicarCorrectorDesviacionV55_2(
             }
     
     
+//////////////////////////////////////////////////////
+// CORRECTOR DE DECENA INTELIGENTE V56
+//////////////////////////////////////////////////////
 
+async function aplicarCorrectorDecenaV56(
+    ambos,
+    turnoOrigen
+){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    let turnoDestino =
+    obtenerSiguienteTurnoV48(turnoOrigen);
+
+    let salida=[];
+
+    for(let ambosBase of ambos){
+
+        ambosBase=
+        String(ambosBase)
+        .padStart(2,"0");
+
+        let unidad=
+        ambosBase[1];
+
+        let mejor=
+        ambosBase;
+
+        let mejorPeso=-1;
+
+        for(let d=0;d<=9;d++){
+
+            let candidato=
+            String(d)+unidad;
+
+            let peso=0;
+
+            for(let i=0;i<historial.length-1;i++){
+
+                let actual=historial[i];
+                let siguiente=historial[i+1];
+
+                if(actual.turno!==turnoOrigen)
+                    continue;
+
+                if(siguiente.turno!==turnoDestino)
+                    continue;
+
+                if(
+                    String(siguiente.numero)
+                    .slice(-2)===candidato
+                ){
+                    peso++;
+                }
+
+            }
+
+            if(peso>mejorPeso){
+
+                mejorPeso=peso;
+                mejor=candidato;
+
+            }
+
+        }
+
+        salida.push(mejor);
+
+    }
+
+    return [...new Set(salida)];
+
+}
+    
     //////////////////////////////////////////////////
 // GENERADOR IA RESTAURADO V48.3
 // MOTOR HISTÓRICO ORIGINAL
@@ -3974,7 +4050,12 @@ motorV55.orden;
 let ambos =
 
 motorV55.ambos;
-
+    
+ambos =
+await aplicarCorrectorDecenaV56(
+    ambos,
+    turnoOrigen
+);
 console.log(
 
 "IA V55",

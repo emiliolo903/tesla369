@@ -4186,6 +4186,100 @@ console.log("DESPUES", base);
 
 
     }
+
+    //////////////////////////////////////////////////////
+// EVALUADOR INTELIGENTE V55.1
+//////////////////////////////////////////////////////
+
+function evaluarPrediccionV55_1(
+prediccion,
+real
+){
+
+let resultado={
+
+directo:false,
+invertido:false,
+cerca1:false,
+cerca2:false,
+mismaDecena:false,
+mismaUnidad:false
+
+};
+
+
+real=
+String(real)
+.padStart(2,"0");
+
+
+for(let p of prediccion){
+
+p=
+String(p)
+.padStart(2,"0");
+
+
+if(p===real){
+
+resultado.directo=true;
+
+}
+
+
+if(
+p[1]+p[0]===real
+){
+
+resultado.invertido=true;
+
+}
+
+
+if(
+p[0]===real[0]
+){
+
+resultado.mismaDecena=true;
+
+}
+
+
+if(
+p[1]===real[1]
+){
+
+resultado.mismaUnidad=true;
+
+}
+
+
+let diferencia =
+Math.abs(
+parseInt(p)-parseInt(real)
+);
+
+
+if(diferencia===1){
+
+resultado.cerca1=true;
+
+}
+
+
+if(diferencia===2){
+
+resultado.cerca2=true;
+
+}
+
+
+}
+
+
+return resultado;
+
+}
     
 
     
@@ -4290,84 +4384,51 @@ prediccion
 
 
 
-        let encontrado =
-        prediccion.includes(real);
+        ////////////////////////////////////////////////
+// EVALUACION V55.1
+////////////////////////////////////////////////
 
-        // ====================================
-// GUARDAR ERROR IA V52
-// ====================================
+let evaluacion =
+evaluarPrediccionV55_1(
+    prediccion,
+    real
+);
 
-for(let p of prediccion){
 
-    guardarErrorIA_V52(
-        p,
-        real
-    );
+console.log(
+"EVALUACION V55.1",
+evaluacion
+);
+
+
+if(evaluacion.directo){
+
+resultado.directo++;
 
 }
 
+else if(evaluacion.invertido){
 
+resultado.invertido++;
 
-        let invertido =
-        prediccion.includes(
-            real[1]+real[0]
-        );
+}
 
+else if(
+evaluacion.cerca1 ||
+evaluacion.cerca2 ||
+evaluacion.mismaDecena ||
+evaluacion.mismaUnidad
+){
 
+resultado.cerca++;
 
-        let cerca = false;
+}
 
+else{
 
+resultado.fallo++;
 
-        for(let n of prediccion){
-
-
-            let valor1 =
-            parseInt(n);
-
-
-            let valor2 =
-            parseInt(real);
-
-
-
-            if(
-                Math.abs(valor1-valor2)<=1
-            ){
-
-                cerca=true;
-
-            }
-
-
-        }
-
-
-
-        if(encontrado){
-
-            resultado.directo++;
-
-        }
-
-        else if(invertido){
-
-            resultado.invertido++;
-
-        }
-
-        else if(cerca){
-
-            resultado.cerca++;
-
-        }
-
-        else{
-
-            resultado.fallo++;
-
-        }
-
+}
 
     }
 

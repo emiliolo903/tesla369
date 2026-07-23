@@ -4458,19 +4458,28 @@ await aplicarCorrectorDesviacionV55_2(
     ranking
 );
 
+// =========================
+// MOTOR IA V60
+// =========================
 
-let motorV55 =
-aplicarMotorV55(
+let motorV60 =
+await aplicarMotorV60(
+
     ranking,
+
+    bases,
+
     turnoOrigen,
+
     turnoDestino
+
 );
 
+ranking = motorV60.ranking;
 
-let orden = motorV55.orden;
+let orden = motorV60.orden;
 
-let ambos = motorV55.ambos;
-
+let ambos = motorV60.ambos;
 
 // Corrector decena
 ambos =

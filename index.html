@@ -3440,49 +3440,36 @@ console.log("ENTRÓ GENERADOR V48 RESTAURADO");
     //////////////////////////////////////////////////
     // 2) MATRIZ HISTÓRICA APOYO
     //////////////////////////////////////////////////
+        
+let destinoMatriz =
+    
+MATRIZ_HISTORICA_V48[turnoOrigen]
+&&
+MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino];
 
 
-    for(let base in MATRIZ_HISTORICA_V48){
+if(destinoMatriz){
+
+for(let provincia in destinoMatriz){
+
+    let datos =
+    destinoMatriz[provincia];
 
 
-        if(
-            MATRIZ_HISTORICA_V48[turnoOrigen]
-        ){
+    for(let salida in datos){
 
-            let destino =
-            MATRIZ_HISTORICA_V48
-            [turnoOrigen]
-            [turnoDestino];
+        if(!ranking[salida])
+            ranking[salida]=0;
 
 
-            if(destino){
-
-                for(let provincia in destino){
-
-
-                    let datos =
-                    destino[provincia];
-
-
-                    for(let salida in datos){
-
-
-                        if(!ranking[salida])
-                            ranking[salida]=0;
-
-
-                        ranking[salida]+=datos[salida];
-
-
-                    }
-
-                }
-
-            }
-
-        }
+        ranking[salida]+=datos[salida];
 
     }
+
+}
+
+}
+
 
 
 
@@ -3558,6 +3545,16 @@ console.log("ENTRÓ GENERADOR V48 RESTAURADO");
 
     let principal =
     ambos[0];
+        
+        if(!principal){
+
+    mostrarV48(
+    "⚠️ NO HAY AMBOS PRINCIPAL"
+    );
+
+    return;
+
+        }
 
 
 

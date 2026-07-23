@@ -3993,6 +3993,329 @@ async function aplicarCorrectorPatronV57(
     }
 
 }
+    //////////////////////////////////////////////////////
+// MOTOR IA V60
+// BLOQUE 1
+// MEMORIA HISTÓRICA GLOBAL
+//////////////////////////////////////////////////////
+
+let MEMORIA_V60 = {
+
+    transiciones:{},
+
+    frecuencia:{},
+
+    unidades:{},
+
+    decenas:{},
+
+    total:0
+
+};
+
+//////////////////////////////////////////////////////
+// CONSTRUIR MEMORIA GLOBAL
+//////////////////////////////////////////////////////
+
+async function construirMemoriaHistoricaV60(){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    MEMORIA_V60 = {
+
+        transiciones:{},
+
+        frecuencia:{},
+
+        unidades:{},
+
+        decenas:{},
+
+        total:historial.length
+
+    };
+
+    for(let i=0;i<historial.length-1;i++){
+
+        let actual = historial[i];
+        let siguiente = historial[i+1];
+
+        if(
+            !actual.numero ||
+            !siguiente.numero
+        ) continue;
+
+        let origen =
+        String(actual.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        let destino =
+        String(siguiente.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        let clave =
+        actual.turno+"->"+siguiente.turno;
+
+        if(!MEMORIA_V60.transiciones[clave])
+            MEMORIA_V60.transiciones[clave]={};
+
+        if(!MEMORIA_V60.transiciones[clave][origen])
+            MEMORIA_V60.transiciones[clave][origen]={};
+
+        MEMORIA_V60.transiciones[clave][origen][destino]=
+        (MEMORIA_V60.transiciones[clave][origen][destino]||0)+1;
+
+        MEMORIA_V60.frecuencia[destino]=
+        (MEMORIA_V60.frecuencia[destino]||0)+1;
+
+        let d = destino[0];
+        let u = destino[1];
+
+        MEMORIA_V60.decenas[d]=
+        (MEMORIA_V60.decenas[d]||0)+1;
+
+        MEMORIA_V60.unidades[u]=
+        (MEMORIA_V60.unidades[u]||0)+1;
+    }
+
+    console.log(
+        "MEMORIA V60 CARGADA",
+        MEMORIA_V60.total,
+        "registros"
+    );
+
+    return MEMORIA_V60;
+    }
+    
+    //////////////////////////////////////////////////////
+// MOTOR IA V60
+// BLOQUE 2
+// TRANSICIÓN HISTÓRICA GLOBAL
+//////////////////////////////////////////////////////
+
+function aplicarMotorHistoricoV60(
+    ranking,
+    base,
+    turnoOrigen,
+    turnoDestino
+){
+
+    let clave =
+    turnoOrigen + "->" + turnoDestino;
+
+    if(
+        !MEMORIA_V60.transiciones[clave]
+    ){
+        return ranking;
+    }
+
+    if(
+        !MEMORIA_V60.transiciones[clave][base]
+    ){
+        return ranking;
+    }
+
+    let historial =
+    MEMORIA_V60.transiciones[clave][base];
+
+    for(let numero in historial){
+
+        if(!ranking[numero]){
+            ranking[numero]=0;
+        }
+
+        // Peso histórico V60
+        ranking[numero] +=
+        historial[numero] * 10;
+
+    }
+
+    return ranking;
+
+    }
+
+    //////////////////////////////////////////////////////
+// MOTOR IA V60
+// BLOQUE 3
+// DETECTOR DE ACOMPAÑANTES HISTÓRICOS
+//////////////////////////////////////////////////////
+
+function aplicarAcompanantesV60(
+    ranking,
+    base,
+    turnoOrigen,
+    turnoDestino
+){
+
+    let clave =
+    turnoOrigen + "->" + turnoDestino;
+
+    if(
+        !MEMORIA_V60.transiciones[clave]
+    ) return ranking;
+
+    let historialBase =
+    MEMORIA_V60.transiciones[clave][base];
+
+    if(!historialBase)
+        return ranking;
+
+    let lista =
+    Object.keys(historialBase)
+    .sort(
+        (a,b)=>
+        historialBase[b]-
+        historialBase[a]
+    );
+
+    let limite =
+    Math.min(5,lista.length);
+
+    for(let i=0;i<limite;i++){
+
+        let numero =
+        lista[i];
+
+        if(!ranking[numero])
+            ranking[numero]=0;
+
+        // Premio fuerte a los acompañantes
+        ranking[numero]+=20-i;
+
+    }
+
+    return ranking;
+
+}
+    //////////////////////////////////////////////////////
+// MOTOR IA V60
+// BLOQUE 4
+// ORIENTADOR INTELIGENTE
+//////////////////////////////////////////////////////
+
+function aplicarOrientadorV60(
+    ranking
+){
+
+    let nuevo = {};
+
+    for(let numero in ranking){
+
+        numero =
+        String(numero)
+        .padStart(2,"0");
+
+        let peso =
+        ranking[numero];
+
+        let decena =
+        numero[0];
+
+        let unidad =
+        numero[1];
+
+        // Premio por unidad fuerte
+        peso +=
+        (MEMORIA_V60.unidades[unidad] || 0) * 0.6;
+
+        // Premio por decena fuerte
+        peso +=
+        (MEMORIA_V60.decenas[decena] || 0) * 0.4;
+
+        nuevo[numero] = peso;
+
+    }
+
+    return nuevo;
+
+    }
+
+    //////////////////////////////////////////////////////
+// MOTOR IA V60
+// BLOQUE 6
+// MOTOR PRINCIPAL V60
+//////////////////////////////////////////////////////
+
+async function aplicarMotorV60(
+    ranking,
+    bases,
+    turnoOrigen,
+    turnoDestino
+){
+
+    // Construir memoria una sola vez
+    if(MEMORIA_V60.total===0){
+        await construirMemoriaHistoricaV60();
+    }
+
+    // Aplicar historial para cada base
+    for(let base of bases){
+
+        ranking =
+        aplicarMotorHistoricoV60(
+            ranking,
+            base,
+            turnoOrigen,
+            turnoDestino
+        );
+
+        ranking =
+        aplicarAcompanantesV60(
+            ranking,
+            base,
+            turnoOrigen,
+            turnoDestino
+        );
+
+    }
+
+    // Orientación inteligente
+    ranking =
+    aplicarOrientadorV60(
+        ranking
+    );
+
+    // Ordenar resultado
+    let orden =
+
+    Object.keys(ranking)
+
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    );
+
+    // Elegir los 3 mejores ambos
+    let ambos = [];
+
+    for(let n of orden){
+
+        n =
+        String(n).padStart(2,"0");
+
+        if(!ambos.includes(n))
+            ambos.push(n);
+
+        if(ambos.length===3)
+            break;
+    }
+
+    return{
+
+        ranking,
+
+        orden,
+
+        ambos
+
+    };
+
+}
     
     
     //////////////////////////////////////////////////

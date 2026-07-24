@@ -14,3 +14,14 @@
     }
   ]
 }
+
+
+
+
+
+{
+"name":"Poseada Correntina IA",
+"short_name":"Poseada IA",
+"start_url":"index.html",
+"display":"standalone"
+}

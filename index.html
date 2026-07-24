@@ -4326,27 +4326,21 @@ let elemento =
 document.getElementById("turnoCarga");
 
 
-alert(
-"ELEMENTO TURNO: " + elemento
-);
+
 
 
 let turnoOrigen =
 elemento.value;
 
 
-alert(
-"TURNO ORIGEN: " + turnoOrigen
-);
+
 
 
 let turnoDestino =
 obtenerSiguienteTurnoV48(turnoOrigen);
 
 
-alert(
-"TURNO DESTINO: " + turnoDestino
-);
+
     
 
 
@@ -4392,30 +4386,17 @@ if(!bases || bases.length===0){
     );
 
 
-    console.log(
-        "V60 USA HISTORICO DIRECTO:",
-        bases.length
-    );
+    
 
 }
 
     
-    alert(
-"BASES DESPUÉS DEL RESPALDO: " + bases.length
-);
-
+    
 
 
     for(let base of bases){
         
-        alert(
-"ANALIZANDO BASE: " + base
-);
         
-        
-        
-
-
         let candidatos =
         await analizarTransicionTurnoV48(
             base,
@@ -4492,12 +4473,7 @@ await aplicarCorrectorDesviacionV55_2(
 // =========================
 // MOTOR IA V60
 // =========================
-alert(
-"ANTES DE ENTRAR AL MOTOR V60"
-);
-    alert(
-"V60 TERMINÓ"
-);
+
     
 let motorV60 = {
     ranking: ranking,

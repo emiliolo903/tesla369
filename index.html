@@ -4472,18 +4472,11 @@ await aplicarCorrectorDesviacionV55_2(
 // MOTOR IA V60
 // =========================
 
-let motorV60 =
-await aplicarMotorV60(
-
-    ranking,
-
-    bases,
-
-    turnoOrigen,
-
-    turnoDestino
-
-);
+let motorV60 = {
+    ranking: ranking,
+    orden: Object.keys(ranking),
+    ambos: Object.keys(ranking).slice(0,3)
+};
 
 ranking = motorV60.ranking;
 

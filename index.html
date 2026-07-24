@@ -4323,29 +4323,36 @@ async function aplicarMotorV60(
 // MOTOR HISTÓRICO ORIGINAL
 //////////////////////////////////////////////////
 async function generarResultadoIA(){
-    
-    alert("ENTRÓ A GENERAR IA");
 
-    let turnoOrigen =
-    document.getElementById("turnoCarga").value;
-    
-    console.log( 
-"TURNOS:",
-turnoOrigen,
-turnoDestino
-);
-console.log(
-"RANKING:",
-ranking
+alert("ENTRÓ A GENERAR IA");
+
+
+let elemento =
+document.getElementById("turnoCarga");
+
+
+alert(
+"ELEMENTO TURNO: " + elemento
 );
 
 
-    let turnoDestino =
-    obtenerSiguienteTurnoV48(turnoOrigen);
-    
-    alert(
-"TURNOS: " + turnoOrigen + " → " + turnoDestino
+let turnoOrigen =
+elemento.value;
+
+
+alert(
+"TURNO ORIGEN: " + turnoOrigen
 );
+
+
+let turnoDestino =
+obtenerSiguienteTurnoV48(turnoOrigen);
+
+
+alert(
+"TURNO DESTINO: " + turnoDestino
+);
+    
 
 
     let provincias=[

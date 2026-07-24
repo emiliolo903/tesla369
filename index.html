@@ -3638,7 +3638,9 @@ ambos: ambos
 //////////////////////////////////////////////////////
 
 async function aplicarCorrectorDesviacionV55_2(
-    ranking
+    ranking,
+    historico
+)
 ){
     
 
@@ -3652,9 +3654,7 @@ async function aplicarCorrectorDesviacionV55_2(
 
 
 
-    let resultados =
-    await leerV48(
-        STORES_V48.historico
+    let resultados = historico;
     );
 
 
@@ -4352,6 +4352,11 @@ alert("3 Destino: " + turnoDestino);
 
 
     let ranking={};
+    
+    let historico =
+await leerV48(
+    STORES_V48.historico
+);
         
         
 
@@ -4469,8 +4474,10 @@ for(let provincia in destinoMatriz){
 
 ranking =
 await aplicarCorrectorDesviacionV55_2(
-    ranking
+    ranking,
+    historico
 );
+    
 
 // =========================
 // MOTOR IA V60

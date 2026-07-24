@@ -4324,7 +4324,10 @@ alert("ENTRÓ A GENERAR IA");
 
 let elemento =
 document.getElementById("turnoCarga");
-
+obtenerSiguienteTurnoV48(turnoOrigen);
+    
+    alert("2 Turno origen: " + turnoOrigen);
+    
 
 
 
@@ -4337,7 +4340,7 @@ elemento.value;
 
 
 let turnoDestino =
-obtenerSiguienteTurnoV48(turnoOrigen);
+    alert("3 Destino: " + turnoDestino);
 
 
 
@@ -4367,7 +4370,7 @@ obtenerSiguienteTurnoV48(turnoOrigen);
     // 1) MOTOR TRANSICIÓN HISTÓRICA
     //////////////////////////////////////////////////
 let bases = obtenerBases7Provincias();
-
+alert("4 Bases: " + bases.length);
 
 if(!bases || bases.length===0){
 
@@ -4377,7 +4380,7 @@ if(!bases || bases.length===0){
     );
 
 
-    bases =
+    bases =1
     datos
     .slice(-100)
     .map(x =>
@@ -4493,7 +4496,7 @@ await aplicarCorrectorDecenaV56(
     ambos,
     turnoOrigen
 );
-
+alert("5 Motor terminado");
 
 // Corrector patrón
 ambos =

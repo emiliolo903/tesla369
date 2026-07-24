@@ -4324,27 +4324,18 @@ alert("ENTRÓ A GENERAR IA");
 
 let elemento =
 document.getElementById("turnoCarga");
-obtenerSiguienteTurnoV48(turnoOrigen);
+
     
-    alert("2 Turno origen: " + turnoOrigen);
-    
-
-
-
 
 let turnoOrigen =
 elemento.value;
 
-
-
-
+alert("2 Turno origen: " + turnoOrigen);
 
 let turnoDestino =
-    alert("3 Destino: " + turnoDestino);
+obtenerSiguienteTurnoV48(turnoOrigen);
 
-
-
-    
+alert("3 Destino: " + turnoDestino);
 
 
     let provincias=[
@@ -4380,8 +4371,9 @@ if(!bases || bases.length===0){
     );
 
 
-    bases =1
+    bases =
     datos
+        
     .slice(-100)
     .map(x =>
         String(x.numero)
@@ -4491,13 +4483,6 @@ let ambos = orden.slice(0,3);
 
 alert("Ambos: " + ambos.join(","));
         
-);
-    
-ranking = motorV60.ranking;
-
-let orden = motorV60.orden;
-
-let ambos = motorV60.ambos;
 
 // Corrector decena
 ambos =

@@ -4519,17 +4519,23 @@ ambos
 
 
     let principal =
-    ambos[0];
-        
-        if(!principal){
+ambos && ambos.length ? ambos[0] : null;
 
-    mostrarV48(
-    "⚠️ NO HAY AMBOS PRINCIPAL"
-    );
+if(!principal){
 
-    return;
+    console.log("AMBOS VACÍO:", ambos);
 
-        }
+    principal = orden[0];
+
+    if(!principal){
+
+        mostrarV48("ERROR: No se pudo generar ningún número.");
+
+        return;
+
+    }
+
+}
 
 
 
@@ -4538,19 +4544,15 @@ let cuaternos = [];
 
 try{
 
-    let jugadasFinales =
-    await construirJugadasFinalesV49(
-        principal,
-        turnoOrigen
-    );
+    let ternos = [
+    principal + ambos[1].slice(-1),
+    principal + ambos[2].slice(-1)
+];
 
-    if(jugadasFinales){
-
-        ternos =
-        jugadasFinales.ternos || [];
-
-        cuaternos =
-        jugadasFinales.cuaternos || [];
+let cuaternos = [
+    principal + ambos[1],
+    principal + ambos[2]
+];
 
     }
 

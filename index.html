@@ -4477,12 +4477,21 @@ await aplicarCorrectorDesviacionV55_2(
 // MOTOR IA V60
 // =========================
 
+   alert("Motor V60 - Inicio");
+
+console.log("Ranking:", ranking);
+
+let orden = Object.keys(ranking).sort(
+    (a,b) => ranking[b] - ranking[a]
+);
+
+alert("Ordenados: " + orden.length);
+
+let ambos = orden.slice(0,3);
+
+alert("Ambos: " + ambos.join(","));
     
-let motorV60 = {
-    ranking: ranking,
-    orden: Object.keys(ranking),
-    ambos: Object.keys(ranking).slice(0,3)
-};
+
 
 ranking = motorV60.ranking;
 

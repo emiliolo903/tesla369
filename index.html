@@ -4377,36 +4377,33 @@ alert(
     //////////////////////////////////////////////////
     // 1) MOTOR TRANSICIÓN HISTÓRICA
     //////////////////////////////////////////////////
+let bases = obtenerBases7Provincias();
 
 
-    let bases = obtenerBases7Provincias();
-    
-    alert(
-"BASES OK: " + bases.length
-);
+if(!bases || bases.length===0){
+
+    let datos =
+    await leerV48(
+        STORES_V48.historico
+    );
 
 
-
-    if(bases.length===0){
-
-        let datos =
-        await leerV48(
-            STORES_V48.historico
-        );
-        
-        alert(
-"HISTORICO OK: " + datos.length
-);
+    bases =
+    datos
+    .slice(-100)
+    .map(x =>
+        String(x.numero)
+        .slice(-2)
+    );
 
 
-        bases =
-        datos
-        .slice(-30)
-        .map(x=>
-        String(x.numero).slice(-2)
-        );
+    console.log(
+        "V60 USA HISTORICO DIRECTO:",
+        bases.length
+    );
 
-    }
+}
+
     
     alert(
 "BASES DESPUÉS DEL RESPALDO: " + bases.length

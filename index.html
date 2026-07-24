@@ -4323,6 +4323,8 @@ async function aplicarMotorV60(
 // MOTOR HISTÓRICO ORIGINAL
 //////////////////////////////////////////////////
 async function generarResultadoIA(){
+    
+    alert("ENTRÓ A GENERAR IA");
 
     let turnoOrigen =
     document.getElementById("turnoCarga").value;
@@ -4340,6 +4342,10 @@ ranking
 
     let turnoDestino =
     obtenerSiguienteTurnoV48(turnoOrigen);
+    
+    alert(
+"TURNOS: " + turnoOrigen + " → " + turnoDestino
+);
 
 
     let provincias=[
@@ -4471,7 +4477,13 @@ await aplicarCorrectorDesviacionV55_2(
 // =========================
 // MOTOR IA V60
 // =========================
-
+alert(
+"ANTES DE ENTRAR AL MOTOR V60"
+);
+    alert(
+"V60 TERMINÓ"
+);
+    
 let motorV60 = {
     ranking: ranking,
     orden: Object.keys(ranking),

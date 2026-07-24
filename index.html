@@ -4481,6 +4481,30 @@ await aplicarCorrectorPatronV57(
     ambos,
     turnoOrigen
 );
+    // ASEGURAR 3 AMBOS SIEMPRE
+
+if(ambos.length < 3){
+
+    for(let n of orden){
+
+        n =
+        String(n)
+        .padStart(2,"0");
+
+
+        if(!ambos.includes(n)){
+
+            ambos.push(n);
+
+        }
+
+
+        if(ambos.length===3)
+            break;
+
+    }
+
+}
 
 
 // Asegurar formato

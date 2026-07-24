@@ -4514,64 +4514,42 @@ ambos
 );
     //////////////////////////////////////////////////
 // BLOQUE 4
-// GENERADOR TERNO Y CUATERNO V60
+// GENERADOR TERNO Y CUATERNO CORREGIDO
 //////////////////////////////////////////////////
 
 let principal =
-ambos[0];
-
-
-if(!principal){
-
-    mostrarV48(
-        "⚠️ NO HAY AMBOS PARA GENERAR"
-    );
-
-    return;
-
-}
+String(ambos[0])
+.padStart(2,"0");
 
 
 let ternos = [];
 let cuaternos = [];
 
 
-// Generación segura
+for(let i=1;i<ambos.length;i++){
 
-if(ambos.length >= 3){
+    let apoyo =
+    String(ambos[i])
+    .padStart(2,"0");
 
 
-    ternos = [
-
+    // TERNO
+    ternos.push(
         principal +
-        String(ambos[1])
-        .slice(-1),
+        apoyo[1]
+    );
 
 
+    // CUATERNO
+    cuaternos.push(
         principal +
-        String(ambos[2])
-        .slice(-1)
-
-    ];
-
-
-
-    cuaternos = [
-
-        principal +
-        String(ambos[1]),
-
-
-        principal +
-        String(ambos[2])
-
-    ];
-
+        apoyo
+    );
 
 }
 
 
-// Limitar resultados
+// asegurar máximo 2
 
 ternos =
 ternos.slice(0,2);
@@ -4581,15 +4559,16 @@ cuaternos =
 cuaternos.slice(0,2);
 
 
-
 console.log(
-"V60 JUGADAS",
+"GENERADO:",
 {
-    ambos,
-    ternos,
-    cuaternos
+ambos,
+ternos,
+cuaternos
 }
 );
+
+
     //////////////////////////////////////////////////
 // BLOQUE 5
 // GUARDADO Y SALIDA FINAL V60

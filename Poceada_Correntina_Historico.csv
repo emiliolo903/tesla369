@@ -1,1620 +1,480 @@
-<!-- ========================================= -->
-<!-- POSEADA CORRENTINA IA V1 -->
-<!-- PARTE 1A -->
-<!-- INTERFAZ HTML -->
-<!-- ========================================= -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
 
-<div class="card">
+<meta charset="UTF-8">
 
-<h2>🎯 POSEADA CORRENTINA IA</h2>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<p>
-Módulo independiente para analizar la Poseada Correntina.
-</p>
+<title>Poseada Correntina IA V1</title>
 
-<hr>
 
-<h3>📄 Carga Histórica</h3>
+<style>
 
-<input
-type="file"
-id="pdfPoseada"
-accept=".pdf">
+body{
 
-<br><br>
+background:#111;
 
-<button onclick="iniciarOCRPoseada()">
+color:white;
 
-📄 Cargar PDF Histórico
+font-family:Arial;
 
-</button>
+margin:0;
 
-<button onclick="detenerOCRPoseada()">
-
-⛔ Detener OCR
-
-</button>
-
-<hr>
-
-<h3>➕ Último Sorteo</h3>
-
-<input
-type="date"
-id="fechaPoseada">
-
-<br><br>
-
-<div id="numerosPoseada">
-
-<input maxlength="2" id="p0">
-<input maxlength="2" id="p1">
-<input maxlength="2" id="p2">
-<input maxlength="2" id="p3">
-<input maxlength="2" id="p4">
-
-<br><br>
-
-<input maxlength="2" id="p5">
-<input maxlength="2" id="p6">
-<input maxlength="2" id="p7">
-<input maxlength="2" id="p8">
-<input maxlength="2" id="p9">
-
-</div>
-
-<br>
-
-<button onclick="guardarUltimoPoseada()">
-
-💾 Guardar Último Sorteo
-
-</button>
-
-<hr>
-
-<h3>🧠 Inteligencia Artificial</h3>
-
-<button onclick="construirMemoriaPoseada()">
-
-🧠 Analizar Historial
-
-</button>
-
-<button onclick="generarPoseadaIA()">
-
-🎯 Generar 5 Números
-
-</button>
-
-<button onclick="aprenderPoseadaManual()">
-
-📈 Aprender
-
-</button>
-
-<hr>
-
-<h3>📊 Auditoría</h3>
-
-<button onclick="estadisticasPoseada()">
-
-📊 Estadísticas
-
-</button>
-
-<button onclick="verAuditoriaPoseada()">
-
-📋 Auditoría IA
-
-</button>
-
-<button onclick="probarIAPoseada()">
-
-🧪 Probar IA
-
-</button>
-
-<hr>
-
-<h3>📌 Estado</h3>
-
-<div id="estadoPoseada">
-
-Base:
-
-0 sorteos
-
-<br>
-
-IA:
-
-INACTIVA
-
-</div>
-
-<hr>
-
-<h3>🎯 Resultado</h3>
-
-<div id="resultadoPoseada">
-
-Esperando análisis...
-
-</div>
-
-</div>
-#numerosPoseada{
-
-display:grid;
-
-grid-template-columns:repeat(5,55px);
-
-gap:8px;
-
-margin-top:10px;
+padding:20px;
 
 }
 
-#numerosPoseada input{
 
-width:50px;
+.card{
 
-height:40px;
+background:#1d1d1d;
+
+padding:20px;
+
+border-radius:15px;
+
+max-width:500px;
+
+margin:auto;
+
+box-shadow:0 0 15px #000;
+
+}
+
+
+h1,h2{
 
 text-align:center;
 
-font-size:18px;
+}
 
-font-weight:bold;
+
+button{
+
+width:100%;
+
+padding:14px;
+
+margin-top:10px;
+
+border:none;
+
+border-radius:10px;
+
+font-size:16px;
+
+cursor:pointer;
+
+}
+
+
+input{
+
+width:100%;
+
+padding:12px;
+
+margin-top:10px;
 
 border-radius:8px;
 
 }
 
-#resultadoPoseada{
 
-margin-top:15px;
+#resultado{
+
+margin-top:20px;
 
 padding:15px;
 
-background:#111;
+background:#000;
 
 border-radius:10px;
 
-font-size:18px;
-
 color:#00ff88;
+
+font-size:20px;
 
 }
 
-#estadoPoseada{
+
+#estado{
+
+margin-top:15px;
 
 padding:10px;
 
 background:#222;
 
-border-radius:8px;
-
-color:white;
+border-radius:10px;
 
 }
-//////////////////////////////////////////////////////
-// POSEADA CORRENTINA IA V1
-// PARTE 1B
-// ETAPA 1 - BASE DE DATOS
-//////////////////////////////////////////////////////
 
-const DB_POSEADA = "POSEADA_CORRENTINA_IA_V1";
 
-const VERSION_DB_POSEADA = 1;
+</style>
 
 
-const STORE_POSEADA = {
+</head>
 
-    sorteos:"sorteosPoseada",
 
-    aprendizaje:"aprendizajePoseada",
+<body>
 
-    predicciones:"prediccionesPoseada",
 
-    auditoria:"auditoriaPoseada"
+<div class="card">
 
-};
 
+<h1>🎯 Poseada Correntina IA</h1>
 
-let dbPoseada = null;
 
+<p>
+Módulo independiente de análisis Poseada.
+</p>
 
 
-//////////////////////////////////////////////////////
-// ABRIR BASE
-//////////////////////////////////////////////////////
+<hr>
 
-function abrirBasePoseada(){
 
-    return new Promise((resolve,reject)=>{
+<h3>📄 Archivo histórico</h3>
 
 
-        let request = indexedDB.open(
+<input 
+type="file"
+id="pdf"
+accept=".pdf">
 
-            DB_POSEADA,
 
-            VERSION_DB_POSEADA
 
-        );
+<button onclick="cargarPDF()">
 
+📄 Cargar PDF
 
+</button>
 
-        request.onupgradeneeded=function(e){
 
 
-            let db=e.target.result;
+<button onclick="analizarHistorial()">
 
+🧠 Analizar Historial
 
+</button>
 
-            Object.values(STORE_POSEADA)
-            .forEach(store=>{
 
 
-                if(!db.objectStoreNames.contains(store)){
+<button onclick="generarNumeros()">
 
+🎯 Generar 5 Números
 
-                    db.createObjectStore(
+</button>
 
-                        store,
 
-                        {
-                            keyPath:"id",
-                            autoIncrement:true
-                        }
 
-                    );
+<hr>
 
 
-                }
+<div id="estado">
 
+Inicializando...
 
-            });
+</div>
 
 
 
-        };
+<div id="resultado">
 
+Esperando análisis...
 
+</div>
 
-        request.onsuccess=function(e){
 
+</div>
 
-            dbPoseada=e.target.result;
 
 
-            console.log(
+<script>
 
-                "BASE POSEADA IA OK"
 
-            );
+/////////////////////////////////////////////////
+// BASE DE DATOS
+/////////////////////////////////////////////////
 
 
-            actualizarEstadoPoseada();
+const DB_NAME="POSEADA_IA";
 
 
-            resolve(true);
+let db=null;
 
 
-        };
 
+function abrirDB(){
 
 
-        request.onerror=function(e){
+return new Promise((resolve,reject)=>{
 
 
-            console.error(
+let request=indexedDB.open(DB_NAME,1);
 
-                "Error base Poseada",
 
-                e
 
-            );
+request.onupgradeneeded=function(e){
 
 
-            reject(e);
+let base=e.target.result;
 
 
-        };
 
+if(!base.objectStoreNames.contains("sorteos")){
 
 
-    });
+base.createObjectStore(
 
+"sorteos",
+
+{
+
+keyPath:"id",
+
+autoIncrement:true
 
 }
 
-
-
-
-//////////////////////////////////////////////////////
-// GUARDAR DATOS
-//////////////////////////////////////////////////////
-
-function guardarPoseada(store,dato){
-
-
-    return new Promise((resolve,reject)=>{
-
-
-        let tx=dbPoseada.transaction(
-
-            store,
-
-            "readwrite"
-
-        );
-
-
-
-        let tabla=
-
-        tx.objectStore(store);
-
-
-
-        tabla.add(dato);
-
-
-
-        tx.oncomplete=function(){
-
-            resolve(true);
-
-        };
-
-
-
-        tx.onerror=function(e){
-
-            reject(e);
-
-        };
-
-
-
-    });
+);
 
 
 }
 
-
-
-
-
-//////////////////////////////////////////////////////
-// LEER DATOS
-//////////////////////////////////////////////////////
-
-function leerPoseada(store){
-
-
-    return new Promise((resolve,reject)=>{
-
-
-        let tx=dbPoseada.transaction(
-
-            store,
-
-            "readonly"
-
-        );
-
-
-
-        let tabla=
-
-        tx.objectStore(store);
-
-
-
-        let consulta=
-
-        tabla.getAll();
-
-
-
-        consulta.onsuccess=function(){
-
-
-            resolve(
-
-                consulta.result
-
-            );
-
-
-        };
-
-
-
-        consulta.onerror=function(e){
-
-
-            reject(e);
-
-
-        };
-
-
-
-    });
-
-
-}
-
-
-
-
-
-//////////////////////////////////////////////////////
-// CONTADOR DE SORTEOS
-//////////////////////////////////////////////////////
-
-async function totalSorteosPoseada(){
-
-
-    let datos=
-
-    await leerPoseada(
-
-        STORE_POSEADA.sorteos
-
-    );
-
-
-
-    return datos.length;
-
-
-}
-
-
-
-
-
-//////////////////////////////////////////////////////
-// ACTUALIZAR ESTADO EN PANTALLA
-//////////////////////////////////////////////////////
-
-async function actualizarEstadoPoseada(){
-
-
-    if(!dbPoseada)
-
-    return;
-
-
-
-    let total=
-
-    await totalSorteosPoseada();
-
-
-
-    document.getElementById(
-
-        "estadoPoseada"
-
-    ).innerHTML=
-
-
-    "Base Poseada: "
-
-    +
-
-    total
-
-    +
-
-    " sorteos"
-
-    +
-
-    "<br>"
-
-    +
-
-    "IA: LISTA PARA ANALIZAR";
-
-
-
-}
-
-
-
-
-//////////////////////////////////////////////////////
-// INICIO DEL MODULO
-//////////////////////////////////////////////////////
-
-async function iniciarPoseadaIA(){
-
-
-    await abrirBasePoseada();
-
-
-    console.log(
-
-        "POSEADA IA INICIADA"
-
-    );
-
-
-}
-//////////////////////////////////////////////////////
-// POSEADA CORRENTINA IA V1
-// PARTE 1C
-// ETAPA 2 - OCR HISTÓRICO
-//////////////////////////////////////////////////////
-
-let DETENER_OCR_POSEADA = false;
-
-
-
-//////////////////////////////////////////////////////
-// DETENER OCR
-//////////////////////////////////////////////////////
-
-function detenerOCRPoseada(){
-
-    DETENER_OCR_POSEADA = true;
-
-    console.log(
-        "OCR Poseada detenido"
-    );
-
-}
-
-
-
-//////////////////////////////////////////////////////
-// DETECTAR FECHA
-//////////////////////////////////////////////////////
-
-function detectarFechaPoseada(texto){
-
-
-    let fecha = texto.match(
-        /\d{2}\/\d{2}\/\d{4}/
-    );
-
-
-    if(!fecha)
-
-    return "";
-
-
-
-    let partes = fecha[0].split("/");
-
-
-    return (
-
-        partes[2]
-
-        +
-
-        "-"
-
-        +
-
-        partes[1]
-
-        +
-
-        "-"
-
-        +
-
-        partes[0]
-
-    );
-
-
-}
-
-
-
-//////////////////////////////////////////////////////
-// DETECTAR NÚMERO DE SORTEO
-//////////////////////////////////////////////////////
-
-function detectarSorteoPoseada(texto){
-
-
-    let resultado = texto.match(
-
-        /SORTEO\s*N[°º]?\s*:?\s*(\d+)/i
-
-    );
-
-
-
-    if(!resultado)
-
-    return "";
-
-
-
-    return Number(resultado[1]);
-
-
-}
-
-
-
-//////////////////////////////////////////////////////
-// EXTRAER LOS 10 NÚMEROS
-//////////////////////////////////////////////////////
-
-function extraerNumerosPoseada(texto){
-
-
-    let encontrados = texto.match(
-
-        /\b\d{2}\b/g
-
-    );
-
-
-
-    if(!encontrados)
-
-    return [];
-
-
-
-    let numeros = encontrados.filter(n=>{
-
-
-        let valor = Number(n);
-
-
-        return valor >=0 && valor<=99;
-
-
-    });
-
-
-
-    return numeros.slice(0,10);
-
-
-}
-
-
-
-
-//////////////////////////////////////////////////////
-// GUARDAR SORTEO
-//////////////////////////////////////////////////////
-
-async function guardarSorteoPoseadaOCR(texto){
-
-
-    let fecha = detectarFechaPoseada(texto);
-
-
-    let sorteo = detectarSorteoPoseada(texto);
-
-
-    let numeros = extraerNumerosPoseada(texto);
-
-
-
-    if(numeros.length !== 10){
-
-
-        console.log(
-
-            "Página sin datos completos"
-
-        );
-
-
-        return false;
-
-
-    }
-
-
-
-    await guardarPoseada(
-
-        STORE_POSEADA.sorteos,
-
-        {
-
-
-            fecha,
-
-            sorteo,
-
-            numeros,
-
-            origen:"OCR PDF"
-
-
-        }
-
-
-    );
-
-
-    return true;
-
-
-}
-
-
-
-
-//////////////////////////////////////////////////////
-// INICIAR OCR PDF
-//////////////////////////////////////////////////////
-
-async function iniciarOCRPoseada(){
-
-
-    let archivo =
-
-    document.getElementById(
-
-        "pdfPoseada"
-
-    ).files[0];
-
-
-
-    if(!archivo){
-
-
-        alert(
-
-        "Seleccioná un PDF"
-
-        );
-
-
-        return;
-
-
-    }
-
-
-
-    DETENER_OCR_POSEADA=false;
-
-
-
-    let pdf =
-
-    await pdfjsLib.getDocument(
-
-        URL.createObjectURL(archivo)
-
-    ).promise;
-
-
-
-    let worker =
-
-    await Tesseract.createWorker("spa");
-
-
-
-    let cargados = 0;
-
-
-
-    for(
-
-        let pagina=1;
-
-        pagina<=pdf.numPages;
-
-        pagina++
-
-    ){
-
-
-
-        if(DETENER_OCR_POSEADA)
-
-        break;
-
-
-
-        let page =
-
-        await pdf.getPage(pagina);
-
-
-
-        let viewport =
-
-        page.getViewport({
-
-            scale:2
-
-        });
-
-
-
-        let canvas =
-
-        document.createElement(
-
-            "canvas"
-
-        );
-
-
-
-        canvas.width=
-
-        viewport.width;
-
-
-
-        canvas.height=
-
-        viewport.height;
-
-
-
-        let contexto=
-
-        canvas.getContext("2d");
-
-
-
-        await page.render({
-
-            canvasContext:
-
-            contexto,
-
-            viewport
-
-        }).promise;
-
-
-
-        let resultado=
-
-        await worker.recognize(
-
-            canvas
-
-        );
-
-
-
-        let guardado=
-
-        await guardarSorteoPoseadaOCR(
-
-            resultado.data.text
-
-        );
-
-
-
-        if(guardado)
-
-        cargados++;
-
-
-
-        document.getElementById(
-
-            "estadoPoseada"
-
-        ).innerHTML=
-
-
-        "Procesando página "
-
-        +
-
-        pagina
-
-        +
-
-        "/"
-
-        +
-
-        pdf.numPages
-
-        +
-
-        "<br>Sorteos cargados: "
-
-        +
-
-        cargados;
-
-
-
-    }
-
-
-
-    await worker.terminate();
-
-
-
-    actualizarEstadoPoseada();
-
-
-
-    console.log(
-
-        "OCR POSEADA FINALIZADO"
-
-    );
-
-
-}
-//////////////////////////////////////////////////////
-// POSEADA IA V1
-// PARTE 2A
-// ETAPA 3 - MEMORIA HISTÓRICA
-//////////////////////////////////////////////////////
-
-let MEMORIA_POSEADA = {
-
-
-    frecuencia:{},
-
-    ultimaSalida:{},
-
-    atraso:{},
-
-    pares:{},
-
-    repeticiones:{},
-
-    ciclos:{},
-
-    calientes:[],
-
-    frios:[]
 
 
 };
 
 
 
-async function construirMemoriaPoseada(){
+request.onsuccess=function(e){
 
 
-    let historico = await leerPoseada(
+db=e.target.result;
 
-        STORE_POSEADA.sorteos
 
-    );
+actualizarEstado();
 
 
+resolve();
 
-    if(historico.length===0){
-
-
-        alert(
-
-        "No hay sorteos cargados"
-
-        );
-
-
-        return;
-
-
-    }
-
-
-
-    MEMORIA_POSEADA={
-
-
-        frecuencia:{},
-
-        ultimaSalida:{},
-
-        atraso:{},
-
-        pares:{},
-
-        repeticiones:{},
-
-        ciclos:{},
-
-        calientes:[],
-
-        frios:[]
-
-    };
-
-
-
-    // Inicializar 00-99
-
-    for(let i=0;i<100;i++){
-
-
-        let n=i.toString().padStart(2,"0");
-
-
-        MEMORIA_POSEADA.frecuencia[n]=0;
-
-
-        MEMORIA_POSEADA.atraso[n]=0;
-
-
-    }
-
-
-
-    historico.forEach((sorteo,index)=>{
-
-
-        let numeros=sorteo.numeros;
-
-
-
-        numeros.forEach(n=>{
-
-
-            MEMORIA_POSEADA.frecuencia[n]++;
-
-
-            MEMORIA_POSEADA.ultimaSalida[n]=index;
-
-
-        });
-
-
-
-        // PARES
-
-        for(let a=0;a<numeros.length;a++){
-
-
-            for(let b=a+1;b<numeros.length;b++){
-
-
-                let par=
-
-                numeros[a]+"-"+numeros[b];
-
-
-                if(!MEMORIA_POSEADA.pares[par])
-
-                MEMORIA_POSEADA.pares[par]=0;
-
-
-                MEMORIA_POSEADA.pares[par]++;
-
-
-            }
-
-
-        }
-
-
-
-        // REPETICIONES
-
-        if(index>0){
-
-
-            let anterior=
-
-            historico[index-1].numeros;
-
-
-
-            numeros.forEach(n=>{
-
-
-                if(anterior.includes(n)){
-
-
-                    if(!MEMORIA_POSEADA.repeticiones[n])
-
-                    MEMORIA_POSEADA.repeticiones[n]=0;
-
-
-
-                    MEMORIA_POSEADA.repeticiones[n]++;
-
-
-                }
-
-
-            });
-
-
-        }
-
-
-
-    });
-
-
-
-    // ATRASO
-
-    let ultimo=
-
-    historico.length-1;
-
-
-
-    Object.keys(
-
-        MEMORIA_POSEADA.frecuencia
-
-    ).forEach(n=>{
-
-
-        if(MEMORIA_POSEADA.ultimaSalida[n]!==undefined){
-
-
-            MEMORIA_POSEADA.atraso[n]=
-
-            ultimo -
-
-            MEMORIA_POSEADA.ultimaSalida[n];
-
-
-        }
-
-
-    });
-
-
-
-    // CALIENTES
-
-    MEMORIA_POSEADA.calientes=
-
-    Object.entries(
-
-        MEMORIA_POSEADA.frecuencia
-
-    )
-
-    .sort((a,b)=>b[1]-a[1])
-
-    .slice(0,10);
-
-
-
-    // FRÍOS
-
-    MEMORIA_POSEADA.frios=
-
-    Object.entries(
-
-        MEMORIA_POSEADA.frecuencia
-
-    )
-
-    .sort((a,b)=>a[1]-b[1])
-
-    .slice(0,10);
-
-
-
-    // CICLOS
-
-    Object.keys(
-
-    MEMORIA_POSEADA.frecuencia
-
-    ).forEach(n=>{
-
-
-        let f=
-
-        MEMORIA_POSEADA.frecuencia[n];
-
-
-
-        if(f>0){
-
-
-            MEMORIA_POSEADA.ciclos[n]=
-
-            Math.round(
-
-            historico.length/f
-
-            );
-
-
-        }
-
-
-    });
-
-
-
-    console.log(
-
-    "MEMORIA POSEADA LISTA"
-
-    );
-
-
-}
-//////////////////////////////////////////////////////
-// POSEADA IA V1
-// PARTE 2B
-// ETAPA 4 - MOTOR IA
-//////////////////////////////////////////////////////
-
-let RANKING_POSEADA=[];
-
-
-
-async function generarPoseadaIA(){
-
-
-    await construirMemoriaPoseada();
-
-
-
-    RANKING_POSEADA=[];
-
-
-
-    for(let i=0;i<100;i++){
-
-
-        let numero=
-
-        i.toString().padStart(2,"0");
-
-
-
-        let puntos=0;
-
-
-
-        // Frecuencia
-
-        puntos +=
-
-        MEMORIA_POSEADA.frecuencia[numero] || 0;
-
-
-
-        // Atraso
-
-        puntos +=
-
-        (MEMORIA_POSEADA.atraso[numero]||0)*0.5;
-
-
-
-        // Repetición
-
-        puntos +=
-
-        (MEMORIA_POSEADA.repeticiones[numero]||0)*3;
-
-
-
-        // Ciclo
-
-        puntos +=
-
-        (MEMORIA_POSEADA.ciclos[numero]||0);
-
-
-
-        // Calientes
-
-        if(
-
-        MEMORIA_POSEADA.calientes
-
-        .some(x=>x[0]===numero)
-
-        ){
-
-
-            puntos+=15;
-
-
-        }
-
-
-
-        RANKING_POSEADA.push({
-
-
-            numero,
-
-            puntos
-
-
-        });
-
-
-    }
-
-
-
-    RANKING_POSEADA.sort(
-
-        (a,b)=>b.puntos-a.puntos
-
-    );
-
-
-
-    let resultado=
-
-    RANKING_POSEADA.slice(0,5);
-
-
-
-    await guardarPoseada(
-
-        STORE_POSEADA.predicciones,
-
-        {
-
-
-            fecha:new Date(),
-
-
-            resultado
-
-
-        }
-
-
-    );
-
-
-
-    mostrarResultadoPoseada(
-
-    resultado
-
-    );
-
-
-}
-
-
-
-function mostrarResultadoPoseada(lista){
-
-
-    let html=
-
-    "<h3>🎯 POSEADA IA</h3>";
-
-
-
-    html+="<br>5 NÚMEROS SUGERIDOS<br><br>";
-
-
-
-    lista.forEach(n=>{
-
-
-        html+=
-
-        n.numero
-
-        +
-
-        " - "
-
-        +
-
-        n.puntos.toFixed(2)
-
-        +
-
-        " puntos<br>";
-
-
-
-    });
-
-
-
-    document.getElementById(
-
-    "resultadoPoseada"
-
-    ).innerHTML=html;
-
-
-}
-//////////////////////////////////////////////////////
-// POSEADA IA V1
-// PARTE 3A
-// ETAPA 5 - APRENDIZAJE AUTOMÁTICO
-//////////////////////////////////////////////////////
-
-
-let PESOS_POSEADA = {
-
-    frecuencia:1,
-
-    atraso:1,
-
-    repeticion:1,
-
-    ciclo:1,
-
-    pares:1
 
 };
 
 
 
-//////////////////////////////////////////////////////
-// APRENDER DEL ÚLTIMO RESULTADO
-//////////////////////////////////////////////////////
+request.onerror=reject;
 
-async function aprenderPoseada(resultadoReal){
 
 
-    let predicciones = await leerPoseada(
-
-        STORE_POSEADA.predicciones
-
-    );
-
-
-
-    if(predicciones.length===0){
-
-
-        alert(
-
-        "No hay predicciones para aprender"
-
-        );
-
-
-        return;
-
-
-    }
-
-
-
-    let ultima =
-
-    predicciones[predicciones.length-1];
-
-
-
-    let numerosIA =
-
-    ultima.resultado.map(x=>x.numero);
-
-
-
-    let aciertos=0;
-
-
-
-    numerosIA.forEach(n=>{
-
-
-        if(resultadoReal.includes(n)){
-
-
-            aciertos++;
-
-
-        }
-
-
-    });
-
-
-
-    //////////////////////////////////////
-    // AJUSTE DE PESOS
-    //////////////////////////////////////
-
-
-    if(aciertos>=4){
-
-
-        PESOS_POSEADA.frecuencia +=0.05;
-
-
-        PESOS_POSEADA.repeticion +=0.05;
-
-
-        PESOS_POSEADA.pares +=0.05;
-
-
-    }
-
-
-
-    if(aciertos==3){
-
-
-        PESOS_POSEADA.ciclo +=0.03;
-
-
-    }
-
-
-
-    if(aciertos<=2){
-
-
-        PESOS_POSEADA.atraso +=0.05;
-
-
-    }
-
-
-
-
-    await guardarPoseada(
-
-        STORE_POSEADA.aprendizaje,
-
-        {
-
-
-            fecha:new Date(),
-
-
-            prediccion:numerosIA,
-
-
-            resultado:resultadoReal,
-
-
-            aciertos,
-
-
-            pesos:{...PESOS_POSEADA}
-
-
-        }
-
-
-    );
-
-
-
-    alert(
-
-    "Aprendizaje guardado. Aciertos: "
-
-    +
-
-    aciertos
-
-    );
+});
 
 
 }
+
+
+
+
+
+function guardarSorteo(dato){
+
+
+let tx=db.transaction(
+
+"sorteos",
+
+"readwrite"
+
+);
+
+
+tx.objectStore("sorteos").add(dato);
+
+
+}
+
+
+
+
+function leerSorteos(){
+
+
+return new Promise((resolve)=>{
+
+
+let tx=db.transaction(
+
+"sorteos",
+
+"readonly"
+
+);
+
+
+
+let req=
+
+tx.objectStore("sorteos").getAll();
+
+
+
+req.onsuccess=function(){
+
+
+resolve(req.result);
+
+
+};
+
+
+
+});
+
+
+}
+
+
+
+
+
+async function actualizarEstado(){
+
+
+let datos=await leerSorteos();
+
+
+document.getElementById("estado").innerHTML=
+
+
+"Sorteos guardados: "
+
++
+
+datos.length
+
++
+
+"<br>IA lista";
+
+
+
+}
+
+
+
+
+
+/////////////////////////////////////////////////
+// BOTONES
+/////////////////////////////////////////////////
+
+
+function cargarPDF(){
+
+
+alert(
+
+"Preparado para conectar OCR PDF"
+
+);
+
+
+}
+
+
+
+
+
+async function analizarHistorial(){
+
+
+let datos=await leerSorteos();
+
+
+
+document.getElementById("resultado").innerHTML=
+
+
+"Analizados: "
+
++
+
+datos.length
+
++
+
+" sorteos";
+
+
+
+}
+
+
+
+
+
+function generarNumeros(){
+
+
+let numeros=[];
+
+
+
+while(numeros.length<5){
+
+
+let n=Math.floor(Math.random()*100)
+
+.toString()
+
+.padStart(2,"0");
+
+
+
+if(!numeros.includes(n)){
+
+
+numeros.push(n);
+
+
+}
+
+
+}
+
+
+
+document.getElementById("resultado").innerHTML=
+
+
+"🎯 Resultado:<br><br>"
+
++
+
+numeros.join("<br>");
+
+
+
+}
+
+
+
+
+
+/////////////////////////////////////////////////
+// INICIO APP
+/////////////////////////////////////////////////
+
+
+abrirDB();
+
+
+
+</script>
+
+
+</body>
+
+</html>

@@ -4313,128 +4313,94 @@ async function aplicarMotorV60(
 }
     
     
-    //////////////////////////////////////////////////
-// GENERADOR IA RESTAURADO V48.3
-// MOTOR HISTÓRICO ORIGINAL
 //////////////////////////////////////////////////
+// GENERADOR IA V60
+// BLOQUE 1
+//////////////////////////////////////////////////
+
 async function generarResultadoIA(){
-
-alert("ENTRÓ A GENERAR IA");
-
 
 let elemento =
 document.getElementById("turnoCarga");
 
-    
-
 let turnoOrigen =
 elemento.value;
 
-alert("2 Turno origen: " + turnoOrigen);
-
 let turnoDestino =
-obtenerSiguienteTurnoV48(turnoOrigen);
+obtenerSiguienteTurnoV48(
+    turnoOrigen
+);
 
-alert("3 Destino: " + turnoDestino);
-
-
-    let provincias=[
-
-        "CORRIENTES",
-        "CIUDAD",
-        "BONAERENSE",
-        "SANTA FE",
-        "CORDOBA",
-        "ENTRE RIOS",
-        "CHACO"
-
-    ];
-
-
-    let ranking={};
-    
-    let historico =
+// Leer el histórico UNA sola vez
+let historico =
 await leerV48(
     STORES_V48.historico
 );
-        
-        
 
+// Ranking inicial
+let ranking = {};
 
+// Obtener bases desde las provincias
+let bases =
+obtenerBases7Provincias();
 
-    //////////////////////////////////////////////////
-    // 1) MOTOR TRANSICIÓN HISTÓRICA
-    //////////////////////////////////////////////////
-let bases = obtenerBases7Provincias();
-alert("4 Bases: " + bases.length);
-
+// Si no hay bases cargadas,
+// usar las últimas 100 del histórico
 if(!bases || bases.length===0){
-    
-    let datos = historico;
-    
+
     bases =
-    datos
-        
+    historico
     .slice(-100)
-    .map(x =>
+    .map(x=>
         String(x.numero)
         .slice(-2)
     );
 
-
-    
-
 }
-    alert("Bases finales: " + bases.length);
 
-    
-    
+    //////////////////////////////////////////////////
+// BLOQUE 2
+// MOTOR TRANSICIÓN + MATRIZ + V60
+//////////////////////////////////////////////////
 
+// Analizar cada base histórica
 
-    for(let base of bases){
-        
-        
-        let candidatos =
-        await analizarTransicionTurnoV48(
-            base,
-            turnoOrigen
-        );
-        alert("Base: " + base);
+for(let base of bases){
 
-alert(
-"Candidatos: " +
-(candidatos ? candidatos.length : "NULL")
-);
+    let candidatos =
+    await analizarTransicionTurnoV48(
+        base,
+        turnoOrigen
+    );
 
 
-        
+    if(!candidatos)
+        continue;
 
 
-        for(let salida of candidatos){
-            
-            
+    for(let salida of candidatos){
+
+        salida =
+        String(salida)
+        .padStart(2,"0");
 
 
-            if(!ranking[salida])
-                ranking[salida]=0;
+        if(!ranking[salida])
+            ranking[salida]=0;
 
 
-
-            ranking[salida]+=30;
-
-
-        }
+        ranking[salida]+=30;
 
     }
 
 
+}
 
-    //////////////////////////////////////////////////
-    // 2) MATRIZ HISTÓRICA APOYO
-    //////////////////////////////////////////////////
-        
+
+// Apoyo de matriz histórica
+
 let destinoMatriz =
-    
+
 MATRIZ_HISTORICA_V48[turnoOrigen]
 &&
 MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino];
@@ -4442,67 +4408,74 @@ MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino];
 
 if(destinoMatriz){
 
-for(let provincia in destinoMatriz){
+    for(let provincia in destinoMatriz){
 
-    let datos =
-    destinoMatriz[provincia];
-
-
-    for(let salida in datos){
-
-        if(!ranking[salida])
-            ranking[salida]=0;
+        let datos =
+        destinoMatriz[provincia];
 
 
-        ranking[salida]+=datos[salida];
+        for(let salida in datos){
+
+            if(!ranking[salida])
+                ranking[salida]=0;
+
+
+            ranking[salida]+=datos[salida];
+
+        }
 
     }
 
 }
 
-}
 
-
-    
-/////////////////////////////////////////////////////////////
-// MOTOR IA V55
-/////////////////////////////////////////////////////////////
+// Corrector aprendizaje V55
 
 ranking =
 await aplicarCorrectorDesviacionV55_2(
     ranking,
     historico
 );
-    
 
-// =========================
-// MOTOR IA V60
-// =========================
 
-   alert("Motor V60 - Inicio");
+// MOTOR V60 REAL
 
-console.log("Ranking:", ranking);
-
-let orden = Object.keys(ranking).sort(
-    (a,b) => ranking[b] - ranking[a]
+let motorV60 =
+await aplicarMotorV60(
+    ranking,
+    bases,
+    turnoOrigen,
+    turnoDestino
 );
 
-alert("Ordenados: " + orden.length);
 
-let ambos = orden.slice(0,3);
+ranking =
+motorV60.ranking;
 
-alert("Ambos: " + ambos.join(","));
-        
 
-// Corrector decena
+let orden =
+motorV60.orden;
+
+
+let ambos =
+motorV60.ambos;
+
+    //////////////////////////////////////////////////
+// BLOQUE 3
+// CORRECTORES FINALES
+//////////////////////////////////////////////////
+
+// Corrector de decena
+
 ambos =
 await aplicarCorrectorDecenaV56(
     ambos,
     turnoOrigen
 );
-alert("5 Motor terminado");
 
-// Corrector patrón
+
+// Corrector patrón seguro
+
 ambos =
 await aplicarCorrectorPatronV57(
     ambos,
@@ -4510,144 +4483,178 @@ await aplicarCorrectorPatronV57(
 );
 
 
-console.log(
-"RESULTADO FINAL IA",
-ambos
+// Asegurar formato
+
+ambos =
+ambos.map(n=>
+    String(n)
+    .padStart(2,"0")
 );
 
-    
-   //////////////////////////////////////////////////
-    // 5) GENERAR TERNO Y CUATERNO
+
+// Si por algún motivo queda vacío,
+// recuperar del ranking
+
+if(!ambos.length){
+
+    ambos =
+    orden
+    .slice(0,3)
+    .map(n=>
+        String(n)
+        .padStart(2,"0")
+    );
+
+}
+
+
+console.log(
+"V60 RESULTADO AMBOS",
+ambos
+);
     //////////////////////////////////////////////////
+// BLOQUE 4
+// GENERADOR TERNO Y CUATERNO V60
+//////////////////////////////////////////////////
 
+let principal =
+ambos[0];
 
-    let principal =
-ambos && ambos.length ? ambos[0] : null;
 
 if(!principal){
 
-    console.log("AMBOS VACÍO:", ambos);
+    mostrarV48(
+        "⚠️ NO HAY AMBOS PARA GENERAR"
+    );
 
-    principal = orden[0];
-
-    if(!principal){
-
-        mostrarV48("ERROR: No se pudo generar ningún número.");
-
-        return;
-
-    }
+    return;
 
 }
 
 
-
-    let ternos = [];
+let ternos = [];
 let cuaternos = [];
 
-try{
 
-    let ternos = [
-    principal + ambos[1].slice(-1),
-    principal + ambos[2].slice(-1)
-];
+// Generación segura
 
-let cuaternos = [
-    principal + ambos[1],
-    principal + ambos[2]
-];
+if(ambos.length >= 3){
 
-    }
-
-}catch(e){
-
-    console.log(
-        "ERROR CONSTRUCTOR:",
-        e
-    );
 
     ternos = [
-        principal + ambos[1][1],
-        principal + ambos[2][1]
+
+        principal +
+        String(ambos[1])
+        .slice(-1),
+
+
+        principal +
+        String(ambos[2])
+        .slice(-1)
+
     ];
 
+
+
     cuaternos = [
-        principal + ambos[1],
-        principal + ambos[2]
+
+        principal +
+        String(ambos[1]),
+
+
+        principal +
+        String(ambos[2])
+
     ];
+
 
 }
 
+
+// Limitar resultados
+
+ternos =
+ternos.slice(0,2);
+
+
+cuaternos =
+cuaternos.slice(0,2);
+
+
+
+console.log(
+"V60 JUGADAS",
+{
+    ambos,
+    ternos,
+    cuaternos
+}
+);
     //////////////////////////////////////////////////
-    // LIMITAR
-    //////////////////////////////////////////////////
+// BLOQUE 5
+// GUARDADO Y SALIDA FINAL V60
+//////////////////////////////////////////////////
 
+// Guardar predicción
 
-    ternos =
-    ternos.slice(0,2);
+await guardarV48(
 
+    STORES_V48.predicciones,
 
+    {
 
-    cuaternos =
-    cuaternos.slice(0,2);
+        fecha:new Date(),
 
+        turnoOrigen:turnoOrigen,
 
-
-    //////////////////////////////////////////////////
-    // GUARDAR PREDICCIÓN
-    //////////////////////////////////////////////////
-
-
-    await guardarV48(
-
-        STORES_V48.predicciones,
-
-        {
-
-            fecha:new Date(),
-
-            turnoOrigen:turnoOrigen,
-
-            turnoDestino:turnoDestino,
-
-            ambos:ambos,
-
-            ternos:ternos,
-
-            cuaternos:cuaternos,
-
-            origen:"GENERADOR_V48_RESTAURADO"
-
-        }
-
-    );
-
-
-
-    PREDICCION_ACTUAL_V49={
+        turnoDestino:turnoDestino,
 
         ambos:ambos,
 
         ternos:ternos,
 
-        cuaternos:cuaternos
+        cuaternos:cuaternos,
 
-    };
-        console.log(
-"AMBOS:",
-ambos,
-"TERNOS:",
-ternos,
-"CUATERNOS:",
-cuaternos
+        origen:"MOTOR_IA_V60"
+
+    }
+
 );
 
 
 
-    mostrarV48(
+// Actualizar memoria actual
+
+PREDICCION_ACTUAL_V49 = {
+
+    fecha:new Date()
+    .toISOString(),
+
+    turno:turnoOrigen,
+
+    ambos:ambos,
+
+    ternos:ternos,
+
+    cuaternos:cuaternos
+
+};
+
+
+
+console.log(
+"V60 PREDICCION FINAL",
+PREDICCION_ACTUAL_V49
+);
+
+
+
+// Mostrar resultado
+
+mostrarV48(
 
 `
-🧠 IA RESTAURADA V48.3
+🧠 MOTOR IA V60 ACTIVO
 
 Turno:
 ${turnoOrigen} → ${turnoDestino}
@@ -4669,12 +4676,14 @@ ${cuaternos.join("\n")}
 
 
 Motor:
-TRANSICIÓN HISTÓRICA REAL
+MEMORIA HISTÓRICA + TRANSICIÓN + ACOMPAÑANTES
 `
+
 );
 
 
 }
+
     
     //////////////////////////////////////////////////
 // GUARDAR / CARGAR APRENDIZAJE PT V51

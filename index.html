@@ -4369,13 +4369,9 @@ let bases = obtenerBases7Provincias();
 alert("4 Bases: " + bases.length);
 
 if(!bases || bases.length===0){
-
-    let datos =
-    await leerV48(
-        STORES_V48.historico
-    );
-
-
+    
+    let datos = historico;
+    
     bases =
     datos
         

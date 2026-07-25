@@ -2552,6 +2552,14 @@ await construirMatrizProvinciasV48();
     
 await cargarAprendizajeV49();
     
+iniciarIACerebroV60();
+    
+await aprenderHistoricoV60();
+    
+await cargarPatronesIAV60();
+    
+await conectarIAInicioV60();
+    
     SISTEMA_V48.memoria=true;
 
 document.getElementById(
@@ -5277,7 +5285,1938 @@ function generarPrediccionBacktestV49(
     }
 
             }
+    
 
+    //////////////////////////////////////////////////////////
+// BLOQUE 1
+// IA CEREBRO V60
+//////////////////////////////////////////////////////////
+
+const IA_CEREBRO_V60={
+
+    version:"60.0",
+
+    activa:false,
+
+    entrenando:false,
+
+    registros:0,
+
+    ultimoEntrenamiento:null,
+
+    memoria:{
+
+        provincias:{},
+
+        turnos:{},
+
+        historico:{},
+
+        transiciones:{},
+
+        invertidos:{},
+
+        cercanos:{},
+
+        estrategias:{},
+
+        confianza:{}
+
+    },
+
+    pesos:{
+
+        tesla:1,
+
+        memoria:1,
+
+        historico:1,
+
+        provincias:1,
+
+        turnos:1,
+
+        transiciones:1,
+
+        invertidos:1,
+
+        cercanos:1
+
+    },
+
+    ruido:{
+
+        tesla:0,
+
+        memoria:0,
+
+        historico:0,
+
+        provincias:0,
+
+        turnos:0,
+
+        transiciones:0,
+
+        invertidos:0,
+
+        cercanos:0
+
+    },
+
+    estadisticas:{
+
+        aciertos:0,
+
+        invertidos:0,
+
+        cercanos:0,
+
+        errores:0
+
+    }
+
+};
+
+//////////////////////////////////////////////////////////
+
+function iniciarIACerebroV60(){
+
+    IA_CEREBRO_V60.activa=true;
+
+    IA_CEREBRO_V60.entrenando=false;
+
+    IA_CEREBRO_V60.ultimoEntrenamiento=new Date();
+
+    console.log("IA CEREBRO V60 ACTIVA");
+
+}
+
+//////////////////////////////////////////////////////////
+
+function reiniciarIAV60(){
+
+    IA_CEREBRO_V60.memoria={
+
+        provincias:{},
+
+        turnos:{},
+
+        historico:{},
+
+        transiciones:{},
+
+        invertidos:{},
+
+        cercanos:{},
+
+        estrategias:{},
+
+        confianza:{}
+
+    };
+
+}
+
+//////////////////////////////////////////////////////////
+
+function confianzaGlobalV60(){
+
+    let s=IA_CEREBRO_V60.estadisticas;
+
+    let total=s.aciertos+s.invertidos+s.cercanos+s.errores;
+
+    if(total===0) return 0;
+
+    return (
+
+        s.aciertos+
+
+        s.invertidos*0.75+
+
+        s.cercanos*0.40
+
+    )/total*100;
+
+}
+
+//////////////////////////////////////////////////////////
+
+function estadoIAV60(){
+
+    console.table({
+
+        Estado:IA_CEREBRO_V60.activa,
+
+        Registros:IA_CEREBRO_V60.registros,
+
+        Confianza:confianzaGlobalV60().toFixed(2)+"%",
+
+        Entrenando:IA_CEREBRO_V60.entrenando,
+
+        Version:IA_CEREBRO_V60.version
+
+    });
+
+}
+    //////////////////////////////////////////////////////////
+// BLOQUE 2
+// APRENDIZAJE MASIVO IA CEREBRO V60
+//////////////////////////////////////////////////////////
+
+async function aprenderHistoricoV60(){
+
+    IA_CEREBRO_V60.entrenando=true;
+
+    let datos=await leerV48(
+        STORES_V48.historico
+    );
+
+    IA_CEREBRO_V60.registros=datos.length;
+
+    for(const r of datos){
+
+        const provincia=(r.provincia||"").toUpperCase();
+
+        const turno=(r.turno||"").toUpperCase();
+
+        const numero=String(r.numero||"")
+            .padStart(4,"0");
+
+        //////////////////////////////////////////////////
+        // PROVINCIAS
+        //////////////////////////////////////////////////
+
+        if(!IA_CEREBRO_V60.memoria.provincias[provincia]){
+
+            IA_CEREBRO_V60.memoria.provincias[provincia]={
+
+                total:0,
+
+                numeros:{}
+
+            };
+
+        }
+
+        IA_CEREBRO_V60
+            .memoria
+            .provincias[provincia]
+            .total++;
+
+        let p=
+        IA_CEREBRO_V60
+        .memoria
+        .provincias[provincia]
+        .numeros;
+
+        p[numero]=(p[numero]||0)+1;
+
+        //////////////////////////////////////////////////
+        // TURNOS
+        //////////////////////////////////////////////////
+
+        if(!IA_CEREBRO_V60.memoria.turnos[turno]){
+
+            IA_CEREBRO_V60.memoria.turnos[turno]={
+
+                total:0,
+
+                numeros:{}
+
+            };
+
+        }
+
+        IA_CEREBRO_V60
+        .memoria
+        .turnos[turno]
+        .total++;
+
+        let t=
+        IA_CEREBRO_V60
+        .memoria
+        .turnos[turno]
+        .numeros;
+
+        t[numero]=(t[numero]||0)+1;
+
+        //////////////////////////////////////////////////
+        // PROVINCIA + TURNO
+        //////////////////////////////////////////////////
+
+        const clave=provincia+"_"+turno;
+
+        if(!IA_CEREBRO_V60.memoria.historico[clave]){
+
+            IA_CEREBRO_V60.memoria.historico[clave]={
+
+                total:0,
+
+                numeros:{}
+
+            };
+
+        }
+
+        IA_CEREBRO_V60
+        .memoria
+        .historico[clave]
+        .total++;
+
+        IA_CEREBRO_V60
+        .memoria
+        .historico[clave]
+        .numeros[numero]=
+        (
+            IA_CEREBRO_V60
+            .memoria
+            .historico[clave]
+            .numeros[numero]||0
+        )+1;
+
+    }
+
+    IA_CEREBRO_V60.entrenando=false;
+
+    IA_CEREBRO_V60.ultimoEntrenamiento=new Date();
+
+    console.log(
+        "IA APRENDIÓ",
+        IA_CEREBRO_V60.registros,
+        "REGISTROS"
+    );
+
+    }
+    //////////////////////////////////////////////////////////
+// BLOQUE 3
+// IA CEREBRO V60
+// PATRONES: INVERTIDOS - CERCANOS - TRANSICIONES
+//////////////////////////////////////////////////////////
+
+
+function aprenderPatronesV60(datos){
+
+
+    for(let i=0;i<datos.length;i++){
+
+
+        let actual=datos[i];
+
+
+        let numeroA=String(actual.numero||"")
+        .padStart(4,"0");
+
+
+        let ambosA=numeroA.slice(-2);
+
+
+
+        //////////////////////////////////////////////////
+        // APRENDIZAJE DE INVERTIDOS
+        //////////////////////////////////////////////////
+
+
+        let invertido=
+        ambosA[1]+ambosA[0];
+
+
+        if(!IA_CEREBRO_V60.memoria.invertidos[ambosA]){
+
+
+            IA_CEREBRO_V60.memoria.invertidos[ambosA]={};
+
+        }
+
+
+        IA_CEREBRO_V60
+        .memoria
+        .invertidos[ambosA][invertido]=
+        (
+            IA_CEREBRO_V60
+            .memoria
+            .invertidos[ambosA][invertido]||0
+        )+1;
+
+
+
+        //////////////////////////////////////////////////
+        // APRENDIZAJE DE CERCANOS
+        //////////////////////////////////////////////////
+
+
+        let base=Number(ambosA);
+
+
+        let cercanos=[];
+
+
+        if(base>0)
+        cercanos.push(
+            String(base-1).padStart(2,"0")
+        );
+
+
+        if(base<99)
+        cercanos.push(
+            String(base+1).padStart(2,"0")
+        );
+
+
+        if(base>1)
+        cercanos.push(
+            String(base-2).padStart(2,"0")
+        );
+
+
+        if(base<98)
+        cercanos.push(
+            String(base+2).padStart(2,"0")
+        );
+
+
+
+        if(!IA_CEREBRO_V60.memoria.cercanos[ambosA]){
+
+
+            IA_CEREBRO_V60.memoria.cercanos[ambosA]={};
+
+        }
+
+
+        cercanos.forEach(c=>{
+
+
+            IA_CEREBRO_V60
+            .memoria
+            .cercanos[ambosA][c]=
+
+            (
+                IA_CEREBRO_V60
+                .memoria
+                .cercanos[ambosA][c]||0
+            )+1;
+
+
+        });
+
+
+
+        //////////////////////////////////////////////////
+        // TRANSICIÓN ENTRE TURNOS
+        //////////////////////////////////////////////////
+
+
+        if(i < datos.length-1){
+
+
+            let siguiente=datos[i+1];
+
+
+            let turnoA=
+            actual.turno||"";
+
+
+            let turnoB=
+            siguiente.turno||"";
+
+
+            let clave=
+            turnoA+"->"+turnoB;
+
+
+
+            if(!IA_CEREBRO_V60.memoria.transiciones[clave]){
+
+
+                IA_CEREBRO_V60.memoria.transiciones[clave]={};
+
+            }
+
+
+
+            IA_CEREBRO_V60
+            .memoria
+            .transiciones[clave][ambosA]=
+
+            (
+                IA_CEREBRO_V60
+                .memoria
+                .transiciones[clave][ambosA]||0
+
+            )+1;
+
+
+        }
+
+
+    }
+
+
+    console.log(
+        "PATRONES IA V60 APRENDIDOS"
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// CARGAR PATRONES DESDE HISTORIAL
+//////////////////////////////////////////////////////////
+
+async function cargarPatronesIAV60(){
+
+
+    let datos=
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+    aprenderPatronesV60(datos);
+
+
+                }
+
+    //////////////////////////////////////////////////////////
+// BLOQUE 4
+// IA CEREBRO V60
+// CONTROL DE PESOS - RUIDO - ADAPTACIÓN
+//////////////////////////////////////////////////////////
+
+
+function evaluarModuloV60(
+    modulo,
+    aciertos,
+    errores
+){
+
+    let total=
+    aciertos+errores;
+
+
+    if(total===0)
+    return;
+
+
+    let rendimiento=
+    aciertos/total;
+
+
+
+    // Guardar rendimiento
+
+    IA_CEREBRO_V60.memoria.confianza[modulo]=
+    rendimiento*100;
+
+
+
+    //////////////////////////////////////////////////
+    // SUBIR O BAJAR PESO
+    //////////////////////////////////////////////////
+
+
+    if(rendimiento>=0.70){
+
+        IA_CEREBRO_V60.pesos[modulo]+=0.10;
+
+    }
+
+
+    else if(rendimiento<=0.40){
+
+
+        IA_CEREBRO_V60.pesos[modulo]-=0.10;
+
+
+    }
+
+
+
+    // límites de seguridad
+
+    if(IA_CEREBRO_V60.pesos[modulo]<0.10)
+
+    IA_CEREBRO_V60.pesos[modulo]=0.10;
+
+
+
+    if(IA_CEREBRO_V60.pesos[modulo]>3)
+
+    IA_CEREBRO_V60.pesos[modulo]=3;
+
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// DETECTAR RUIDO
+//////////////////////////////////////////////////////////
+
+
+function detectarRuidoV60(){
+
+
+    for(let modulo in IA_CEREBRO_V60.pesos){
+
+
+        let peso=
+        IA_CEREBRO_V60.pesos[modulo];
+
+
+
+        if(peso<0.50){
+
+
+            IA_CEREBRO_V60.ruido[modulo]=
+            "ALTO";
+
+
+        }
+
+
+        else if(peso<1){
+
+
+            IA_CEREBRO_V60.ruido[modulo]=
+            "MEDIO";
+
+
+        }
+
+
+        else{
+
+
+            IA_CEREBRO_V60.ruido[modulo]=
+            "BAJO";
+
+
+        }
+
+
+    }
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// AJUSTE AUTOMÁTICO GENERAL
+//////////////////////////////////////////////////////////
+
+
+function ajustarInteligenciaV60(){
+
+
+    detectarRuidoV60();
+
+
+    IA_CEREBRO_V60.confianzaGlobal=
+    confianzaGlobalV60();
+
+
+
+    IA_CEREBRO_V60.ultimoEntrenamiento=
+    new Date();
+
+
+
+    console.log(
+        "IA V60 AJUSTADA",
+        IA_CEREBRO_V60.pesos,
+        IA_CEREBRO_V60.ruido
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// INFORME DEL CEREBRO
+//////////////////////////////////////////////////////////
+
+
+function informeCerebroV60(){
+
+
+    console.table({
+
+        Tesla:
+        IA_CEREBRO_V60.pesos.tesla,
+
+        Historico:
+        IA_CEREBRO_V60.pesos.historico,
+
+        Invertidos:
+        IA_CEREBRO_V60.pesos.invertidos,
+
+        Cercanos:
+        IA_CEREBRO_V60.pesos.cercanos,
+
+        Transiciones:
+        IA_CEREBRO_V60.pesos.transiciones,
+
+        Confianza:
+        IA_CEREBRO_V60.confianzaGlobal+"%"
+
+
+    });
+
+
+    }
+
+    //////////////////////////////////////////////////////////
+// BLOQUE 5
+// IA CEREBRO V60
+// MOTOR DE DECISIÓN INTELIGENTE
+//////////////////////////////////////////////////////////
+
+
+function puntuarNumeroV60(
+    numero,
+    provincia,
+    turno
+){
+
+    let puntos=0;
+
+
+    //////////////////////////////////////////////////
+    // PESO HISTÓRICO
+    //////////////////////////////////////////////////
+
+
+    let clave=
+    provincia+"_"+turno;
+
+
+    if(
+        IA_CEREBRO_V60
+        .memoria
+        .historico[clave]
+    ){
+
+        let cantidad=
+
+        IA_CEREBRO_V60
+        .memoria
+        .historico[clave]
+        .numeros[numero] || 0;
+
+
+
+        puntos +=
+
+        cantidad *
+
+        IA_CEREBRO_V60
+        .pesos
+        .historico;
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // PESO PROVINCIA
+    //////////////////////////////////////////////////
+
+
+    if(
+        IA_CEREBRO_V60
+        .memoria
+        .provincias[provincia]
+    ){
+
+        let cantidad=
+
+        IA_CEREBRO_V60
+        .memoria
+        .provincias[provincia]
+        .numeros[numero] || 0;
+
+
+
+        puntos +=
+
+        cantidad *
+
+        IA_CEREBRO_V60
+        .pesos
+        .provincias;
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // PESO TURNO
+    //////////////////////////////////////////////////
+
+
+    if(
+        IA_CEREBRO_V60
+        .memoria
+        .turnos[turno]
+    ){
+
+        let cantidad=
+
+        IA_CEREBRO_V60
+        .memoria
+        .turnos[turno]
+        .numeros[numero] || 0;
+
+
+
+        puntos +=
+
+        cantidad *
+
+        IA_CEREBRO_V60
+        .pesos
+        .turnos;
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // PESO INVERTIDO
+    //////////////////////////////////////////////////
+
+
+    let ambos=
+
+    String(numero)
+    .slice(-2);
+
+
+    let inv=
+
+    ambos[1]+ambos[0];
+
+
+
+    if(
+        IA_CEREBRO_V60
+        .memoria
+        .invertidos[ambos]
+        &&
+        IA_CEREBRO_V60
+        .memoria
+        .invertidos[ambos][inv]
+    ){
+
+
+        puntos +=
+
+        IA_CEREBRO_V60
+        .memoria
+        .invertidos[ambos][inv]
+
+        *
+
+        IA_CEREBRO_V60
+        .pesos
+        .invertidos;
+
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // PESO CERCANOS
+    //////////////////////////////////////////////////
+
+
+    if(
+        IA_CEREBRO_V60
+        .memoria
+        .cercanos[ambos]
+    ){
+
+
+        let cerca=
+
+        IA_CEREBRO_V60
+        .memoria
+        .cercanos[ambos][ambos] || 0;
+
+
+
+        puntos +=
+
+        cerca *
+
+        IA_CEREBRO_V60
+        .pesos
+        .cercanos;
+
+
+    }
+
+
+
+    return puntos;
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// ORDENAR CANDIDATOS
+//////////////////////////////////////////////////////////
+
+
+function ordenarCandidatosV60(
+    lista,
+    provincia,
+    turno
+){
+
+
+    return lista.map(n=>{
+
+
+        return {
+
+            numero:n,
+
+            puntaje:
+            puntuarNumeroV60(
+                n,
+                provincia,
+                turno
+            )
+
+        };
+
+
+    })
+
+    .sort(
+        (a,b)=>
+        b.puntaje-a.puntaje
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// DECISIÓN PRINCIPAL
+//////////////////////////////////////////////////////////
+
+
+function decidirEstrategiaV60(
+    provincia,
+    turno,
+    candidatos
+){
+
+
+    let ranking=
+
+    ordenarCandidatosV60(
+        candidatos,
+        provincia,
+        turno
+    );
+
+
+    return {
+
+
+        provincia,
+
+        turno,
+
+        mejor:
+        ranking.slice(0,10),
+
+
+        confianza:
+        confianzaGlobalV60()
+
+
+    };
+
+
+            }
+
+    //////////////////////////////////////////////////////////
+// BLOQUE 6
+// IA CEREBRO V60
+// GENERADOR DE AMBOS - TERNOS - CUATERNOS
+//////////////////////////////////////////////////////////
+
+
+function generarSalidaIAV60(
+    provincia,
+    turno,
+    candidatos
+){
+
+    let ranking =
+    ordenarCandidatosV60(
+        candidatos,
+        provincia,
+        turno
+    );
+
+
+    //////////////////////////////////////////////////
+    // SELECCIONAR AMBOS
+    //////////////////////////////////////////////////
+
+
+    let ambos=[];
+
+
+    for(let i=0;i<ranking.length;i++){
+
+        let n=
+        String(ranking[i].numero)
+        .slice(-2);
+
+
+        if(!ambos.includes(n)){
+
+            ambos.push(n);
+
+        }
+
+
+        if(ambos.length===3)
+        break;
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // GENERAR TERNOS
+    //////////////////////////////////////////////////
+
+
+    let ternos=[];
+
+
+    ambos.forEach(a=>{
+
+
+        let base=
+        String(a)
+        .padStart(2,"0");
+
+
+        let terno=
+        base[0]+
+        base[1]+
+        base[0];
+
+
+        ternos.push(terno);
+
+
+    });
+
+
+
+    //////////////////////////////////////////////////
+    // GENERAR CUATERNOS
+    //////////////////////////////////////////////////
+
+
+    let cuaternos=[];
+
+
+    ambos.forEach(a=>{
+
+
+        let base=
+        String(a)
+        .padStart(2,"0");
+
+
+        let cuatro=
+
+        base[0]+
+        base[1]+
+        base[1]+
+        base[0];
+
+
+        cuaternos.push(cuatro);
+
+
+    });
+
+
+
+    //////////////////////////////////////////////////
+    // LIMITES PEDIDOS
+    //////////////////////////////////////////////////
+
+
+    return {
+
+        provincia,
+
+        turno,
+
+
+        ambos:
+        ambos.slice(0,3),
+
+
+        ternos:
+        ternos.slice(0,2),
+
+
+        cuaternos:
+        cuaternos.slice(0,2),
+
+
+
+        confianza:
+        confianzaGlobalV60(),
+
+
+
+        fecha:
+        new Date()
+
+    };
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// EXPLICACIÓN IA
+//////////////////////////////////////////////////////////
+
+
+function explicarDecisionV60(resultado){
+
+
+    return {
+
+        mensaje:
+
+        "La IA seleccionó estos números combinando memoria histórica, provincia, turno, invertidos y cercanos.",
+
+
+        provincia:
+        resultado.provincia,
+
+
+        turno:
+        resultado.turno,
+
+
+        confianza:
+        resultado.confianza+"%"
+
+    };
+
+
+            }
+    //////////////////////////////////////////////////////////
+// BLOQUE 7
+// IA CEREBRO V60
+// AUTOAPRENDIZAJE Y RETROALIMENTACIÓN
+//////////////////////////////////////////////////////////
+
+
+function compararResultadoIAV60(
+    prediccion,
+    resultadoReal
+){
+
+    let estado="ERROR";
+
+
+    let real=
+    String(resultadoReal)
+    .slice(-2);
+
+
+
+    //////////////////////////////////////////////////
+    // BUSCAR ACIERTO DIRECTO
+    //////////////////////////////////////////////////
+
+
+    if(
+        prediccion.ambos
+        .includes(real)
+    ){
+
+        estado="ACIERTO";
+
+        IA_CEREBRO_V60.estadisticas.aciertos++;
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // BUSCAR INVERTIDO
+    //////////////////////////////////////////////////
+
+
+    else{
+
+
+        let invertido=
+
+        real[1]+real[0];
+
+
+        if(
+            prediccion.ambos
+            .includes(invertido)
+        ){
+
+            estado="INVERTIDO";
+
+
+            IA_CEREBRO_V60
+            .estadisticas
+            .invertidos++;
+
+        }
+
+
+
+        //////////////////////////////////////////////////
+        // BUSCAR CERCANO
+        //////////////////////////////////////////////////
+
+
+        else{
+
+
+            for(let n of prediccion.ambos){
+
+
+                let diferencia=
+
+                Math.abs(
+                    Number(n)-
+                    Number(real)
+                );
+
+
+                if(
+                    diferencia<=2
+                ){
+
+                    estado="CERCANO";
+
+
+                    IA_CEREBRO_V60
+                    .estadisticas
+                    .cercanos++;
+
+
+                    break;
+
+                }
+
+            }
+
+
+        }
+
+
+    }
+
+
+
+    if(estado==="ERROR"){
+
+        IA_CEREBRO_V60
+        .estadisticas
+        .errores++;
+
+    }
+
+
+
+    return estado;
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// AJUSTE DE MÓDULOS SEGÚN RESULTADO
+//////////////////////////////////////////////////////////
+
+
+function aprenderDelResultadoV60(
+    estado
+){
+
+
+
+    if(estado==="ACIERTO"){
+
+
+        IA_CEREBRO_V60.pesos.historico+=0.05;
+
+        IA_CEREBRO_V60.pesos.memoria+=0.05;
+
+
+    }
+
+
+
+    else if(
+        estado==="INVERTIDO"
+    ){
+
+
+        IA_CEREBRO_V60.pesos.invertidos+=0.10;
+
+
+    }
+
+
+
+    else if(
+        estado==="CERCANO"
+    ){
+
+
+        IA_CEREBRO_V60.pesos.cercanos+=0.05;
+
+
+    }
+
+
+
+    else{
+
+
+        IA_CEREBRO_V60.pesos.tesla-=0.05;
+
+
+    }
+
+
+
+    ajustarLimitesPesosV60();
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// CONTROL DE LÍMITES
+//////////////////////////////////////////////////////////
+
+
+function ajustarLimitesPesosV60(){
+
+
+    for(
+        let p in IA_CEREBRO_V60.pesos
+    ){
+
+
+        if(
+            IA_CEREBRO_V60.pesos[p]<0.10
+        ){
+
+            IA_CEREBRO_V60.pesos[p]=0.10;
+
+        }
+
+
+        if(
+            IA_CEREBRO_V60.pesos[p]>3
+        ){
+
+            IA_CEREBRO_V60.pesos[p]=3;
+
+        }
+
+
+    }
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// CICLO COMPLETO DE APRENDIZAJE
+//////////////////////////////////////////////////////////
+
+
+function cicloAprendizajeV60(
+    prediccion,
+    resultado
+){
+
+
+    let estado=
+
+    compararResultadoIAV60(
+        prediccion,
+        resultado
+    );
+
+
+
+    aprenderDelResultadoV60(
+        estado
+    );
+
+
+
+    IA_CEREBRO_V60.ultimoEntrenamiento=
+    new Date();
+
+
+
+    console.log(
+        "IA V60 APRENDIÓ:",
+        estado
+    );
+
+
+    return estado;
+
+                }
+    //////////////////////////////////////////////////////////
+// BLOQUE 8
+// IA CEREBRO V60
+// MEMORIA PERSISTENTE INDEXEDDB
+//////////////////////////////////////////////////////////
+
+
+const STORE_IA_V60 = "memoriaIA_CEREBRO_V60";
+
+
+
+//////////////////////////////////////////////////////////
+// CREAR STORE IA
+//////////////////////////////////////////////////////////
+
+
+function crearStoreIAV60(db){
+
+
+    if(
+        !db.objectStoreNames
+        .contains(STORE_IA_V60)
+    ){
+
+
+        db.createObjectStore(
+            STORE_IA_V60,
+            {
+                keyPath:"id"
+            }
+        );
+
+
+    }
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// GUARDAR MEMORIA IA
+//////////////////////////////////////////////////////////
+
+
+async function guardarMemoriaIAV60(){
+
+
+    let registro={
+
+        id:"cerebro",
+
+        version:
+        IA_CEREBRO_V60.version,
+
+
+        memoria:
+        IA_CEREBRO_V60.memoria,
+
+
+        pesos:
+        IA_CEREBRO_V60.pesos,
+
+
+        ruido:
+        IA_CEREBRO_V60.ruido,
+
+
+        estadisticas:
+        IA_CEREBRO_V60.estadisticas,
+
+
+        registros:
+        IA_CEREBRO_V60.registros,
+
+
+        confianza:
+        confianzaGlobalV60(),
+
+
+        fecha:
+        new Date()
+
+    };
+
+
+
+    let db=
+    await abrirBaseV48();
+
+
+
+    let tx=
+    db.transaction(
+        STORE_IA_V60,
+        "readwrite"
+    );
+
+
+    tx.objectStore(
+        STORE_IA_V60
+    )
+    .put(registro);
+
+
+
+    console.log(
+        "MEMORIA IA V60 GUARDADA"
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// CARGAR MEMORIA IA
+//////////////////////////////////////////////////////////
+
+
+async function cargarMemoriaIAV60(){
+
+
+    let db=
+    await abrirBaseV48();
+
+
+
+    let tx=
+    db.transaction(
+        STORE_IA_V60,
+        "readonly"
+    );
+
+
+    let req=
+
+    tx.objectStore(
+        STORE_IA_V60
+    )
+    .get("cerebro");
+
+
+
+    req.onsuccess=function(){
+
+
+        let datos=req.result;
+
+
+
+        if(datos){
+
+
+            IA_CEREBRO_V60.memoria=
+            datos.memoria;
+
+
+            IA_CEREBRO_V60.pesos=
+            datos.pesos;
+
+
+            IA_CEREBRO_V60.ruido=
+            datos.ruido;
+
+
+            IA_CEREBRO_V60.estadisticas=
+            datos.estadisticas;
+
+
+            IA_CEREBRO_V60.registros=
+            datos.registros;
+
+
+
+            console.log(
+                "MEMORIA IA V60 RESTAURADA"
+            );
+
+
+        }
+
+
+    };
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// GUARDAR DESPUÉS DE APRENDER
+//////////////////////////////////////////////////////////
+
+
+async function guardarEvolucionIAV60(){
+
+
+    await guardarMemoriaIAV60();
+
+
+    IA_CEREBRO_V60.ultimoEntrenamiento=
+    new Date();
+
+
+    }
+    //////////////////////////////////////////////////////////
+// BLOQUE 9
+// IA CEREBRO V60
+// PANEL DE CONTROL Y DIAGNÓSTICO
+//////////////////////////////////////////////////////////
+
+
+function moduloDominanteV60(){
+
+    let mayor=0;
+    let modulo="";
+
+    for(let m in IA_CEREBRO_V60.pesos){
+
+        if(
+            IA_CEREBRO_V60.pesos[m]>mayor
+        ){
+
+            mayor=
+            IA_CEREBRO_V60.pesos[m];
+
+            modulo=m;
+
+        }
+
+    }
+
+    return modulo;
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// MÓDULO CON MÁS RUIDO
+//////////////////////////////////////////////////////////
+
+
+function moduloRuidoV60(){
+
+    let menor=999;
+    let modulo="";
+
+    for(let m in IA_CEREBRO_V60.pesos){
+
+        if(
+            IA_CEREBRO_V60.pesos[m]<menor
+        ){
+
+            menor=
+            IA_CEREBRO_V60.pesos[m];
+
+            modulo=m;
+
+        }
+
+    }
+
+    return modulo;
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// REPORTE GENERAL IA
+//////////////////////////////////////////////////////////
+
+
+function reporteCerebroV60(){
+
+
+    let reporte={
+
+
+        VERSION:
+        IA_CEREBRO_V60.version,
+
+
+        ESTADO:
+        IA_CEREBRO_V60.activa
+        ?
+        "ACTIVA"
+        :
+        "APAGADA",
+
+
+
+        REGISTROS:
+
+        IA_CEREBRO_V60.registros,
+
+
+
+        CONFIANZA:
+
+        confianzaGlobalV60()
+        .toFixed(2)
+        +"%",
+
+
+
+        MODULO_DOMINANTE:
+
+        moduloDominanteV60(),
+
+
+
+        MODULO_RUIDO:
+
+        moduloRuidoV60(),
+
+
+
+        ULTIMO_APRENDIZAJE:
+
+        IA_CEREBRO_V60
+        .ultimoEntrenamiento
+
+    };
+
+
+
+    console.table(reporte);
+
+
+    return reporte;
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// MOSTRAR PESOS ACTUALES
+//////////////////////////////////////////////////////////
+
+
+function verPesosIAV60(){
+
+
+    console.table(
+        IA_CEREBRO_V60.pesos
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// MOSTRAR MEMORIA
+//////////////////////////////////////////////////////////
+
+
+function resumenMemoriaV60(){
+
+
+    console.log({
+
+        Provincias:
+
+        Object.keys(
+            IA_CEREBRO_V60.memoria.provincias
+        ).length,
+
+
+        Turnos:
+
+        Object.keys(
+            IA_CEREBRO_V60.memoria.turnos
+        ).length,
+
+
+        Invertidos:
+
+        Object.keys(
+            IA_CEREBRO_V60.memoria.invertidos
+        ).length,
+
+
+        Cercanos:
+
+        Object.keys(
+            IA_CEREBRO_V60.memoria.cercanos
+        ).length
+
+
+    });
+
+
+    }
+
+    //////////////////////////////////////////////////////////
+// BLOQUE 10
+// IA CEREBRO V60
+// INTEGRACIÓN AUTOMÁTICA DEL CEREBRO
+//////////////////////////////////////////////////////////
+
+
+async function ejecutarCerebroCompletoV60(){
+
+
+    console.log(
+        "INICIANDO IA CEREBRO V60..."
+    );
+
+
+    //////////////////////////////////////////////////
+    // 1 - ACTIVAR IA
+    //////////////////////////////////////////////////
+
+    iniciarIACerebroV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 2 - CARGAR MEMORIA ANTERIOR
+    //////////////////////////////////////////////////
+
+    await cargarMemoriaIAV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 3 - APRENDER HISTORIAL COMPLETO
+    //////////////////////////////////////////////////
+
+    await aprenderHistoricoV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 4 - APRENDER PATRONES
+    //////////////////////////////////////////////////
+
+    await cargarPatronesIAV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 5 - AJUSTAR INTELIGENCIA
+    //////////////////////////////////////////////////
+
+    ajustarInteligenciaV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 6 - GUARDAR EVOLUCIÓN
+    //////////////////////////////////////////////////
+
+    await guardarEvolucionIAV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 7 - REPORTE
+    //////////////////////////////////////////////////
+
+    reporteCerebroV60();
+
+
+
+    console.log(
+        "IA CEREBRO V60 LISTA"
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// AUTOARRANQUE CON LA APP
+//////////////////////////////////////////////////////////
+
+
+async function conectarIAInicioV60(){
+
+
+    try{
+
+
+        await ejecutarCerebroCompletoV60();
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+            "ERROR IA V60:",
+            error
+        );
+
+
+    }
+
+
+            }
+
+    
     
 </script> 
     

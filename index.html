@@ -205,8 +205,8 @@ OFF
 🧠 GENERAR IA
 </button>
     
-<button onclick="probarBloque12V60()">
-🧠 PROBAR BLOQUE 12
+<button onclick="verificarMotorIA()">
+🔍 Verificar Motor IA
 </button>
 
 <button onclick="generarTesla()">
@@ -357,29 +357,7 @@ Sin auditoría todavía
 <script>
 
 
-async function probarBloque12V60(){
 
-console.log("BOTÓN BLOQUE 12 PRESIONADO");
-
-
-if(typeof construirBloque12V60 === "function"){
-
-    console.log("BLOQUE 12 ENCONTRADO");
-
-    await construirBloque12V60();
-
-    alert("BLOQUE 12 EJECUTADO CORRECTAMENTE");
-
-
-}else{
-
-    console.log("BLOQUE 12 NO EXISTE EN ESTA APP");
-
-    alert("NO SE ENCONTRÓ EL BLOQUE 12");
-
-}
-
-}
     
 //////////////////////////////////////////////////
 // BLOQUE 1/8
@@ -9817,6 +9795,76 @@ function mostrarMemoriaEvolutivaV60(){
             }
 
 
+    //////////////////////////////////////////////////
+// AUDITORÍA COMPLETA MOTOR IA
+//////////////////////////////////////////////////
+
+async function verificarMotorIA(){
+
+let texto="";
+
+texto+="========== AUDITORÍA IA ==========\n\n";
+
+// Histórico
+
+let historico=
+await leerV48(
+STORES_V48.historico
+);
+
+texto+="Registros históricos: "
++historico.length+"\n\n";
+
+
+// BLOQUE 11
+
+texto+="BLOQUE 11\n";
+
+texto+="Memoria: "
++(SISTEMA_V48.memoria?"OK":"NO")+"\n";
+
+texto+="Matriz Histórica: "
++(MATRIZ_HISTORICA_V48?"OK":"NO")+"\n";
+
+texto+="Matriz Provincias: "
++(MATRIZ_PROVINCIAS_V48?"OK":"NO")+"\n";
+
+texto+="Patrones IA: "
++(typeof cargarPatronesIAV60==="function"?"OK":"NO")+"\n\n";
+
+
+// BLOQUE 12
+
+texto+="BLOQUE 12\n";
+
+texto+="Constructor: "
++(typeof construirBloque12V60==="function"?"OK":"NO")+"\n";
+
+texto+="Aplicador: "
++(typeof aplicarDiagnosticoBloque12V60==="function"?"OK":"NO")+"\n";
+
+texto+="Diagnóstico: "
++(typeof DIAGNOSTICO_BLOQUE12_V60!="undefined"
+?"CREADO":"NO")+"\n";
+
+
+// MOTOR
+
+texto+="\nMOTOR V60\n";
+
+texto+="Motor: "
++(typeof aplicarMotorV60==="function"
+?"OK":"NO")+"\n";
+
+texto+="Generador IA: "
++(typeof generarResultadoIA==="function"
+?"OK":"NO")+"\n";
+
+alert(texto);
+
+console.log(texto);
+
+}
     
 </script> 
     

@@ -4330,15 +4330,17 @@ async function aplicarMotorV60(
 // BLOQUE 1
 //////////////////////////////////////////////////
 async function generarResultadoIA(){
-    
-alert("ENTRO GENERAR IA");
+
+console.log("GENERAR IA CORRIENDO");
 
 await construirBloque12V60();
+
+console.log("SALIO BLOQUE 12");
 
 
 let elemento =
 document.getElementById("turnoCarga");
-
+    
 let turnoOrigen =
 elemento.value;
 
@@ -8966,6 +8968,8 @@ mostrarV48(estado);
     await guardarMemoriaEvolutivaV60();
 
     console.log("BLOQUE 12 ACTIVO");
+        
+   return true;
 
     }
     //////////////////////////////////////////////////

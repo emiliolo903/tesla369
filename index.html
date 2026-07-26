@@ -214,6 +214,10 @@ OFF
 <button onclick="mostrarMatrizIA()">
 🔄 MOSTRAR MATRIZ
 </button>
+    
+ <button onclick="verificarBloque11()">
+🧠 Verificar Bloque 11
+ </button>   
 
 
 <button onclick="auditoriaSistema()">
@@ -8866,6 +8870,73 @@ null,
 )
 
 );
+
+
+    }
+    //////////////////////////////////////////////////
+// VERIFICADOR BLOQUE 11 IA
+//////////////////////////////////////////////////
+
+function verificarBloque11(){
+
+let estado="";
+
+
+estado += "🧠 VERIFICACIÓN BLOQUE 11\n\n";
+
+
+if(typeof MEMORIA_EVOLUTIVA_IA !== "undefined"){
+
+estado += "✅ Memoria evolutiva: ACTIVA\n";
+
+}else{
+
+estado += "❌ Memoria evolutiva: NO CARGADA\n";
+
+}
+
+
+
+if(typeof registrarEvolucionIA === "function"){
+
+estado += "✅ Registro de evolución: ACTIVO\n";
+
+}else{
+
+estado += "❌ Registro evolución: NO CARGADO\n";
+
+}
+
+
+
+if(typeof buscarMejorCorreccionIA === "function"){
+
+estado += "✅ Buscador de corrección: ACTIVO\n";
+
+}else{
+
+estado += "❌ Buscador corrección: NO CARGADO\n";
+
+}
+
+
+
+if(typeof actualizarCerebroEvolutivoIA === "function"){
+
+estado += "✅ Cerebro evolutivo: ACTIVO\n";
+
+}else{
+
+estado += "❌ Cerebro evolutivo: NO CARGADO\n";
+
+}
+
+
+
+estado += "\n🚀 BLOQUE 11 INSTALADO";
+
+
+mostrarV48(estado);
 
 
     }

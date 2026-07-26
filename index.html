@@ -4356,17 +4356,20 @@ async function aplicarMotorV60(
 // GENERADOR IA V60
 // BLOQUE 1
 //////////////////////////////////////////////////
-async function generarResultadoIA(){
+
     
-console.log("GENERAR IA - LLAMANDO BLOQUE 12");
+async function generarResultadoIA(){
+
+alert("ENTRÓ AL GENERADOR");
 
 await construirBloque12V60();
 
-console.log("GENERAR IA - BLOQUE 12 TERMINADO");
+alert("BLOQUE 12 TERMINÓ");
 
 
 let elemento =
 document.getElementById("turnoCarga");
+
     
 let turnoOrigen =
 elemento.value;

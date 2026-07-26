@@ -7212,8 +7212,1663 @@ async function conectarIAInicioV60(){
 
             }
 
+   //////////////////////////////////////////////////
+// BLOQUE 11.1
+// MATRIZ DE ERRORES INTELIGENTE IA
+//////////////////////////////////////////////////
+
+let MATRIZ_ERRORES_IA = {
+
+    directo:0,
+
+    invertido:0,
+
+    cercano:0,
+
+    primerDigito:0,
+
+    ultimoDigito:0,
+
+    desordenado:0,
+
+    errorCompleto:0
+
+};
+
+
+
+function analizarErrorIA(real,prediccion){
+
+    real = String(real).slice(-2);
+    prediccion = String(prediccion).slice(-2);
+
+
+    let resultado = "";
+
+
+    // acierto directo
+    if(real === prediccion){
+
+        MATRIZ_ERRORES_IA.directo++;
+
+        resultado="DIRECTO";
+
+    }
+
+
+    // invertido
+    else if(
+        real === prediccion[1]+prediccion[0]
+    ){
+
+        MATRIZ_ERRORES_IA.invertido++;
+
+        resultado="INVERTIDO";
+
+    }
+
+
+    // cerca por uno
+    else if(
+        Math.abs(
+            Number(real)-Number(prediccion)
+        )===1
+    ){
+
+        MATRIZ_ERRORES_IA.cercano++;
+
+        resultado="CERCA POR 1";
+
+    }
+
+
+    // mismo primer número
+    else if(
+        real[0]===prediccion[0]
+    ){
+
+        MATRIZ_ERRORES_IA.primerDigito++;
+
+        resultado="MISMO PRIMER DIGITO";
+
+    }
+
+
+    // mismo último número
+    else if(
+        real[1]===prediccion[1]
+    ){
+
+        MATRIZ_ERRORES_IA.ultimoDigito++;
+
+        resultado="MISMO ULTIMO DIGITO";
+
+    }
+
+
+    // mismos números desordenados
+    else if(
+        real.includes(prediccion[0]) ||
+        real.includes(prediccion[1])
+    ){
+
+        MATRIZ_ERRORES_IA.desordenado++;
+
+        resultado="DESORDENADO";
+
+    }
+
+
+    else{
+
+        MATRIZ_ERRORES_IA.errorCompleto++;
+
+        resultado="ERROR COMPLETO";
+
+    }
+
+
+    return resultado;
+
+}
+
+
+
+function mostrarDiagnosticoErroresIA(){
+
+
+let texto = 
+"🧠 DIAGNÓSTICO ERRORES IA\n\n"+
+
+"Directos: "+
+MATRIZ_ERRORES_IA.directo+
+"\n\nInvertidos: "+
+MATRIZ_ERRORES_IA.invertido+
+
+"\nCerca por 1: "+
+MATRIZ_ERRORES_IA.cercano+
+
+"\nMismo primer dígito: "+
+MATRIZ_ERRORES_IA.primerDigito+
+
+"\nMismo último dígito: "+
+MATRIZ_ERRORES_IA.ultimoDigito+
+
+"\nDesordenados: "+
+MATRIZ_ERRORES_IA.desordenado+
+
+"\nErrores completos: "+
+MATRIZ_ERRORES_IA.errorCompleto;
+
+
+mostrarV48(texto);
+
+
+    }
     
+  //////////////////////////////////////////////////
+// BLOQUE 11.2
+// DIAGNÓSTICO AUTOMÁTICO IA
+//////////////////////////////////////////////////
+
+
+let DIAGNOSTICO_IA = {
+
+    problemaPrincipal:"",
+    moduloAjustar:"",
+    accion:""
+
+};
+
+
+
+function diagnosticoAutomaticoIA(){
+
+
+let e = MATRIZ_ERRORES_IA;
+
+
+
+// Muchos invertidos
+if(
+e.invertido >
+e.directo &&
+e.invertido >
+e.errorCompleto
+){
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "La IA encuentra los números pero falla la posición";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "ACOMPAÑANTE / ORIENTACIÓN";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Aumentar peso de invertidos";
+
+
+}
+
+
+
+// Muchos cercanos
+else if(
+
+e.cercano >
+e.directo
+
+){
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "La IA está cerca pero no cierra";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "VECINOS / TRANSICIÓN";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Buscar desplazamiento +1 -1";
+
+
+}
+
+
+
+// Mismo último dígito
+else if(
+
+e.ultimoDigito >
+e.primerDigito
+
+){
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "Acierta unidad pero falla decena";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "NÚCLEO DOMINANTE";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Revisar primer dígito";
+
+
+}
+
+
+
+// Mismo primer dígito
+else if(
+
+e.primerDigito >
+e.ultimoDigito
+
+){
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "Acierta decena pero falla unidad";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "ACOMPAÑANTE";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Buscar segundo dígito correcto";
+
+
+}
+
+
+
+// Muchos errores completos
+else if(
+
+e.errorCompleto >
+e.directo
+
+){
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "El patrón actual no está funcionando";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "TRANSICIÓN HISTÓRICA";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Buscar nuevo patrón";
+
+
+}
+
+
+else{
+
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "Sistema estable";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "NINGUNO";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Mantener configuración";
+
+
+}
+
+
+return DIAGNOSTICO_IA;
+
+}
+
+
+
+
+
+function mostrarDiagnosticoAutomaticoIA(){
+
+
+let d = diagnosticoAutomaticoIA();
+
+
+
+mostrarV48(
+
+"🧠 DIAGNÓSTICO AUTOMÁTICO IA\n\n"+
+
+"Problema:\n"+
+d.problemaPrincipal+
+
+"\n\nMódulo:\n"+
+d.moduloAjustar+
+
+"\n\nAcción:\n"+
+d.accion
+
+);
+
+
+}
+  //////////////////////////////////////////////////
+// BLOQUE 11.3
+// RAZONAMIENTO IA Y AJUSTE AUTOMÁTICO
+//////////////////////////////////////////////////
+
+
+let PESOS_CEREBRO_IA = {
+
+    transicion:30,
+
+    tesla:20,
+
+    acompanante:20,
+
+    nucleo:20,
+
+    vecinos:10
+
+};
+
+
+
+
+function ajustarPesosCerebroIA(){
+
+
+let d = diagnosticoAutomaticoIA();
+
+
+
+switch(d.moduloAjustar){
+
+
+
+case "ACOMPAÑANTE / ORIENTACIÓN":
+
+
+PESOS_CEREBRO_IA.acompanante++;
+
+PESOS_CEREBRO_IA.tesla--;
+
+break;
+
+
+
+
+case "VECINOS / TRANSICIÓN":
+
+
+PESOS_CEREBRO_IA.vecinos++;
+
+PESOS_CEREBRO_IA.transicion++;
+
+break;
+
+
+
+
+case "NÚCLEO DOMINANTE":
+
+
+PESOS_CEREBRO_IA.nucleo++;
+
+break;
+
+
+
+
+case "TRANSICIÓN HISTÓRICA":
+
+
+PESOS_CEREBRO_IA.transicion++;
+
+PESOS_CEREBRO_IA.tesla--;
+
+break;
+
+
+
+}
+
+
+
+Object.keys(PESOS_CEREBRO_IA)
+.forEach(k=>{
+
+
+if(PESOS_CEREBRO_IA[k]<5){
+
+PESOS_CEREBRO_IA[k]=5;
+
+}
+
+
+
+if(PESOS_CEREBRO_IA[k]>50){
+
+PESOS_CEREBRO_IA[k]=50;
+
+}
+
+
+
+});
+
+
+return PESOS_CEREBRO_IA;
+
+
+}
+
+
+
+
+
+function mostrarRazonamientoIA(){
+
+
+let p=ajustarPesosCerebroIA();
+
+
+mostrarV48(
+
+"🧠 RAZONAMIENTO IA\n\n"+
+
+"Transición: "+p.transicion+
+
+"\nTesla: "+p.tesla+
+
+"\nAcompañante: "+p.acompanante+
+
+"\nNúcleo: "+p.nucleo+
+
+"\nVecinos: "+p.vecinos
+
+);
+
+
+}
+//////////////////////////////////////////////////
+// BLOQUE 11.4
+// AUTOAPRENDIZAJE CEREBRO CENTRAL IA
+//////////////////////////////////////////////////
+
+
+let CEREBRO_IA = {
+
+
+decisiones:[],
+
+historialErrores:[],
+
+evolucion:[]
+
+
+};
+
+
+
+
+async function guardarExperienciaIA(tipo,datos){
+
+
+CEREBRO_IA[tipo].push({
+
+fecha:new Date(),
+
+datos:datos
+
+
+});
+
+
+
+await guardarV48(
+
+STORES_V48.aprendizaje,
+
+{
+
+tipo:"CEREBRO_IA",
+
+fecha:new Date(),
+
+contenido:CEREBRO_IA
+
+}
+
+);
+
+
+}
+
+
+
+
+async function aprenderDelErrorIA(
+real,
+prediccion
+){
+
+
+let tipo = analizarErrorIA(
+real,
+prediccion
+);
+
+
+
+let experiencia={
+
+
+real:real,
+
+
+prediccion:prediccion,
+
+
+error:tipo,
+
+
+diagnostico:
+diagnosticoAutomaticoIA(),
+
+
+pesos:
+PESOS_CEREBRO_IA
+
+
+};
+
+
+
+await guardarExperienciaIA(
+
+"historialErrores",
+
+experiencia
+
+);
+
+
+
+ajustarPesosCerebroIA();
+
+
+
+return experiencia;
+
+
+}
+
+
+
+
+async function cargarCerebroIA(){
+
+
+let datos =
+await leerV48(
+STORES_V48.aprendizaje
+);
+
+
+
+let memoria =
+datos.filter(
+x=>x.tipo==="CEREBRO_IA"
+);
+
+
+
+if(memoria.length>0){
+
+
+let ultima =
+memoria[memoria.length-1];
+
+
+CEREBRO_IA =
+ultima.contenido;
+
+
+}
+
+
+return CEREBRO_IA;
+
+
+}
     
+  //////////////////////////////////////////////////
+// BLOQUE 11.5
+// SUPERVISOR INTELIGENTE DEL CEREBRO IA
+//////////////////////////////////////////////////
+
+
+let SUPERVISOR_IA = {
+
+    estado:"ACTIVO",
+
+    cambios:0,
+
+    ultimoAnalisis:null
+
+};
+
+
+
+
+
+function analizarRendimientoModulosIA(){
+
+
+let pesos = PESOS_CEREBRO_IA;
+
+
+let moduloFuerte="";
+let moduloDebil="";
+
+
+let mayor=0;
+let menor=999;
+
+
+
+for(let m in pesos){
+
+
+if(pesos[m]>mayor){
+
+mayor=pesos[m];
+
+moduloFuerte=m;
+
+}
+
+
+
+if(pesos[m]<menor){
+
+menor=pesos[m];
+
+moduloDebil=m;
+
+}
+
+
+}
+
+
+
+return {
+
+fuerte:moduloFuerte,
+
+debil:moduloDebil,
+
+valorFuerte:mayor,
+
+valorDebil:menor
+
+};
+
+
+}
+
+
+
+
+
+function supervisorAutomaticoIA(){
+
+
+let analisis =
+analizarRendimientoModulosIA();
+
+
+let diagnostico =
+diagnosticoAutomaticoIA();
+
+
+
+let accion="";
+
+
+
+// Si hay demasiados errores completos
+if(
+MATRIZ_ERRORES_IA.errorCompleto >
+MATRIZ_ERRORES_IA.directo
+){
+
+
+PESOS_CEREBRO_IA.transicion +=2;
+
+PESOS_CEREBRO_IA.tesla -=1;
+
+
+accion =
+"Buscando nuevo patrón histórico";
+
+
+}
+
+
+
+// Si falla orden pero encuentra números
+else if(
+
+MATRIZ_ERRORES_IA.invertido >
+MATRIZ_ERRORES_IA.directo
+
+){
+
+
+PESOS_CEREBRO_IA.acompanante +=2;
+
+
+accion =
+"Corrigiendo orientación acompañante";
+
+
+}
+
+
+
+// Si está cerca
+else if(
+
+MATRIZ_ERRORES_IA.cercano > 0
+
+){
+
+
+PESOS_CEREBRO_IA.vecinos +=1;
+
+
+accion =
+"Analizando desplazamiento por cercanía";
+
+
+}
+
+
+
+// Mantener límites
+
+for(let p in PESOS_CEREBRO_IA){
+
+
+if(PESOS_CEREBRO_IA[p]>50){
+
+PESOS_CEREBRO_IA[p]=50;
+
+}
+
+
+if(PESOS_CEREBRO_IA[p]<5){
+
+PESOS_CEREBRO_IA[p]=5;
+
+}
+
+
+}
+
+
+
+
+SUPERVISOR_IA.cambios++;
+
+
+SUPERVISOR_IA.ultimoAnalisis={
+
+
+fecha:new Date(),
+
+
+diagnostico:diagnostico,
+
+
+moduloFuerte:
+analisis.fuerte,
+
+
+moduloDebil:
+analisis.debil,
+
+
+accion:accion,
+
+
+pesos:
+PESOS_CEREBRO_IA
+
+
+};
+
+
+
+guardarV48(
+
+STORES_V48.aprendizaje,
+
+{
+
+tipo:"SUPERVISOR_IA",
+
+contenido:
+SUPERVISOR_IA.ultimoAnalisis
+
+}
+
+);
+
+
+
+return SUPERVISOR_IA.ultimoAnalisis;
+
+
+}
+
+
+
+
+
+function mostrarSupervisorIA(){
+
+
+let s =
+supervisorAutomaticoIA();
+
+
+
+mostrarV48(
+
+"🤖 SUPERVISOR IA\n\n"+
+
+"Diagnóstico:\n"+
+s.diagnostico.problemaPrincipal+
+
+"\n\nMódulo fuerte:\n"+
+s.moduloFuerte+
+
+"\n\nMódulo débil:\n"+
+s.moduloDebil+
+
+"\n\nAcción tomada:\n"+
+s.accion+
+
+"\n\nCambios realizados: "+
+SUPERVISOR_IA.cambios
+
+);
+
+
+    }
+    //////////////////////////////////////////////////
+// BLOQUE 11.6
+// SIMULADOR DE SOLUCIONES IA
+//////////////////////////////////////////////////
+
+
+let SIMULADOR_IA = {
+
+
+pruebas:0,
+
+solucionesEncontradas:0,
+
+mejorSolucion:null
+
+
+};
+
+
+
+
+// Analiza diferentes formas de corregir un fallo
+
+function probarSolucionesIA(
+prediccion,
+real
+){
+
+
+let opciones=[];
+
+
+// solución directa
+
+if(prediccion===real){
+
+
+opciones.push({
+
+tipo:"DIRECTO",
+
+resultado:true
+
+});
+
+
+}
+
+
+
+// solución invertida
+
+if(
+prediccion[1]+prediccion[0]===real
+){
+
+
+opciones.push({
+
+tipo:"INVERTIDO",
+
+resultado:true
+
+});
+
+
+}
+
+
+
+// solución por cercanía
+
+let diferencia =
+Math.abs(
+Number(prediccion)-Number(real)
+);
+
+
+
+if(diferencia===1){
+
+
+opciones.push({
+
+tipo:"CERCA",
+
+resultado:true
+
+});
+
+
+}
+
+
+
+// cambio primer dígito
+
+if(
+prediccion[1]+real[1]===real
+){
+
+
+opciones.push({
+
+tipo:"AJUSTE_DECENA",
+
+resultado:true
+
+});
+
+
+}
+
+
+
+// cambio segundo dígito
+
+if(
+prediccion[0]+real[0]===real
+){
+
+
+opciones.push({
+
+tipo:"AJUSTE_UNIDAD",
+
+resultado:true
+
+});
+
+
+}
+
+
+
+return opciones;
+
+
+}
+
+
+
+
+
+async function cerebroBuscaSolucionIA(
+predicciones,
+real
+){
+
+
+
+let soluciones=[];
+
+
+
+for(let p of predicciones){
+
+
+let resultado =
+probarSolucionesIA(
+p,
+real
+);
+
+
+
+if(resultado.length>0){
+
+
+soluciones.push({
+
+prediccion:p,
+
+solucion:resultado
+
+
+});
+
+
+}
+
+
+}
+
+
+
+SIMULADOR_IA.pruebas++;
+
+
+
+if(soluciones.length>0){
+
+
+SIMULADOR_IA.solucionesEncontradas++;
+
+
+SIMULADOR_IA.mejorSolucion =
+soluciones[0];
+
+
+}
+
+
+
+await guardarV48(
+
+STORES_V48.aprendizaje,
+
+{
+
+tipo:"SIMULACION_IA",
+
+fecha:new Date(),
+
+resultado:soluciones
+
+}
+
+);
+
+
+
+return soluciones;
+
+
+}
+
+
+
+
+
+function mostrarSimulacionIA(){
+
+
+mostrarV48(
+
+"🧠 SIMULADOR IA\n\n"+
+
+"Pruebas realizadas: "+
+SIMULADOR_IA.pruebas+
+
+"\nSoluciones encontradas: "+
+SIMULADOR_IA.solucionesEncontradas+
+
+"\n\nÚltima solución:\n"+
+JSON.stringify(
+SIMULADOR_IA.mejorSolucion,
+null,
+2
+)
+
+);
+
+
+    }
+  //////////////////////////////////////////////////
+// BLOQUE 11.7
+// CEREBRO DE DECISIÓN FINAL IA
+//////////////////////////////////////////////////
+
+
+let DECISION_FINAL_IA = {
+
+    ultimaDecision:null,
+
+    confianza:0,
+
+    modo:"APRENDIENDO"
+
+};
+
+
+
+
+
+function calcularConfianzaIA(){
+
+
+let pesos = PESOS_CEREBRO_IA;
+
+
+let suma = 0;
+
+let cantidad = 0;
+
+
+for(let p in pesos){
+
+suma += pesos[p];
+
+cantidad++;
+
+}
+
+
+
+return Math.round(
+(suma/(cantidad*50))*100
+);
+
+
+}
+
+
+
+
+
+function decidirModoIA(){
+
+
+
+let diagnostico =
+diagnosticoAutomaticoIA();
+
+
+
+let modo="NORMAL";
+
+
+
+if(
+diagnostico.problemaPrincipal
+.includes("INVERTIDO")
+){
+
+
+modo="CORREGIR_ORIENTACION";
+
+
+}
+
+
+
+else if(
+diagnostico.problemaPrincipal
+.includes("CERCA")
+){
+
+
+modo="BUSCAR_VECINOS";
+
+
+}
+
+
+
+else if(
+diagnostico.problemaPrincipal
+.includes("POSICION")
+){
+
+
+modo="AJUSTAR_ACOMPAÑANTE";
+
+
+}
+
+
+
+DECISION_FINAL_IA.modo=modo;
+
+
+
+return modo;
+
+
+}
+
+
+
+
+
+function cerebroDecisionFinalIA(
+candidatos
+){
+
+
+let modo =
+decidirModoIA();
+
+
+
+let seleccion=[];
+
+
+
+for(let c of candidatos){
+
+
+let peso=0;
+
+
+
+// núcleo
+
+peso +=
+PESOS_CEREBRO_IA.nucleo;
+
+
+
+// Tesla
+
+peso +=
+PESOS_CEREBRO_IA.tesla;
+
+
+
+// acompañante
+
+peso +=
+PESOS_CEREBRO_IA.acompanante;
+
+
+
+
+if(modo==="CORREGIR_ORIENTACION"){
+
+
+if(c.invertido){
+
+peso+=10;
+
+}
+
+
+}
+
+
+
+if(modo==="BUSCAR_VECINOS"){
+
+
+if(c.cercano){
+
+peso+=8;
+
+}
+
+
+}
+
+
+
+seleccion.push({
+
+numero:c.numero,
+
+peso:peso,
+
+modo:modo
+
+});
+
+
+}
+
+
+
+
+seleccion.sort(
+(a,b)=>b.peso-a.peso
+);
+
+
+
+DECISION_FINAL_IA.ultimaDecision =
+seleccion.slice(0,3);
+
+
+
+DECISION_FINAL_IA.confianza =
+calcularConfianzaIA();
+
+
+
+return DECISION_FINAL_IA;
+
+
+}
+
+
+
+
+
+function mostrarDecisionFinalIA(){
+
+
+let d =
+DECISION_FINAL_IA;
+
+
+
+mostrarV48(
+
+"🧠 CEREBRO DECISIÓN FINAL\n\n"+
+
+"Modo actual: "+
+d.modo+
+
+"\nConfianza IA: "+
+d.confianza+
+"%\n\n"+
+
+JSON.stringify(
+d.ultimaDecision,
+null,
+2
+)
+
+);
+
+
+    }
+    //////////////////////////////////////////////////
+// BLOQUE 11.8 FINAL
+// MEMORIA EVOLUTIVA HISTÓRICA IA
+//////////////////////////////////////////////////
+
+
+let MEMORIA_EVOLUTIVA_IA = {
+
+    patrones:{},
+
+    solucionesExitosas:0,
+
+    ultimaRevision:null
+
+};
+
+
+
+
+
+function registrarEvolucionIA(
+error,
+solucion,
+resultado
+){
+
+
+let clave =
+error+"_"+solucion;
+
+
+
+if(!MEMORIA_EVOLUTIVA_IA.patrones[clave]){
+
+
+MEMORIA_EVOLUTIVA_IA.patrones[clave]={
+
+veces:0,
+
+aciertos:0,
+
+fallos:0
+
+};
+
+
+}
+
+
+
+MEMORIA_EVOLUTIVA_IA.patrones[clave].veces++;
+
+
+
+if(resultado===true){
+
+
+MEMORIA_EVOLUTIVA_IA.patrones[clave].aciertos++;
+
+MEMORIA_EVOLUTIVA_IA.solucionesExitosas++;
+
+
+}
+
+else{
+
+
+MEMORIA_EVOLUTIVA_IA.patrones[clave].fallos++;
+
+
+}
+
+
+
+MEMORIA_EVOLUTIVA_IA.ultimaRevision =
+new Date();
+
+
+}
+
+
+
+
+
+function buscarMejorCorreccionIA(
+tipoError
+){
+
+
+let mejor=null;
+
+let porcentaje=0;
+
+
+
+for(let p in MEMORIA_EVOLUTIVA_IA.patrones){
+
+
+if(!p.includes(tipoError))
+continue;
+
+
+
+let dato =
+MEMORIA_EVOLUTIVA_IA.patrones[p];
+
+
+
+let efectividad =
+(dato.aciertos /
+Math.max(dato.veces,1))*100;
+
+
+
+if(efectividad>porcentaje){
+
+
+porcentaje=efectividad;
+
+mejor={
+
+patron:p,
+
+efectividad:Math.round(efectividad)
+
+};
+
+
+}
+
+
+}
+
+
+
+return mejor;
+
+
+}
+
+
+
+
+
+async function actualizarCerebroEvolutivoIA(){
+
+
+let historial =
+await leerV48(
+STORES_V48.aprendizaje
+);
+
+
+
+for(let h of historial){
+
+
+if(
+h.tipo==="SIMULACION_IA"
+){
+
+
+for(let r of h.resultado){
+
+
+registrarEvolucionIA(
+
+"ERROR",
+
+r.solucion[0].tipo,
+
+true
+
+);
+
+
+}
+
+
+}
+
+
+}
+
+
+
+await guardarV48(
+
+STORES_V48.aprendizaje,
+
+{
+
+tipo:"MEMORIA_EVOLUTIVA",
+
+fecha:new Date(),
+
+memoria:
+MEMORIA_EVOLUTIVA_IA
+
+}
+
+);
+
+
+
+return MEMORIA_EVOLUTIVA_IA;
+
+
+}
+
+
+
+
+
+function mostrarMemoriaEvolutivaIA(){
+
+
+mostrarV48(
+
+"🧠 MEMORIA EVOLUTIVA IA\n\n"+
+
+"Soluciones exitosas: "+
+MEMORIA_EVOLUTIVA_IA.solucionesExitosas+
+
+"\n\nPatrones aprendidos:\n"+
+
+JSON.stringify(
+
+MEMORIA_EVOLUTIVA_IA.patrones,
+
+null,
+
+2
+
+)
+
+);
+
+
+    }
 </script> 
     
 </body>

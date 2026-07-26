@@ -8940,6 +8940,805 @@ mostrarV48(estado);
 
 
     }
+    //////////////////////////////////////////////////
+// BLOQUE 12.1
+// MOTOR MULTIVENTANA IA V60
+//////////////////////////////////////////////////
+
+let MULTIVENTANA_V60={
+
+    historial:[],
+
+    ultimos100:[],
+
+    ultimos200:[],
+
+    ultimos300:[],
+
+    ultimos500:[]
+
+};
+
+async function construirMultiventanaV60(){
+
+    let datos=await leerV48(STORES_V48.historico);
+
+    if(!datos || datos.length===0){
+
+        console.log("SIN HISTORIAL");
+
+        return false;
+
+    }
+
+    MULTIVENTANA_V60.historial=[...datos];
+
+    MULTIVENTANA_V60.ultimos100=
+    datos.slice(-100);
+
+    MULTIVENTANA_V60.ultimos200=
+    datos.slice(-200);
+
+    MULTIVENTANA_V60.ultimos300=
+    datos.slice(-300);
+
+    MULTIVENTANA_V60.ultimos500=
+    datos.slice(-500);
+
+    console.log("MULTIVENTANA IA");
+
+    console.log(
+        "Historial:",
+        MULTIVENTANA_V60.historial.length
+    );
+
+    console.log(
+        "100:",
+        MULTIVENTANA_V60.ultimos100.length
+    );
+
+    console.log(
+        "200:",
+        MULTIVENTANA_V60.ultimos200.length
+    );
+
+    console.log(
+        "300:",
+        MULTIVENTANA_V60.ultimos300.length
+    );
+
+    console.log(
+        "500:",
+        MULTIVENTANA_V60.ultimos500.length
+    );
+
+    return MULTIVENTANA_V60;
+
+}
+
+async function mostrarEstadoMultiventanaV60(){
+
+    if(!MULTIVENTANA_V60.historial.length){
+
+        await construirMultiventanaV60();
+
+    }
+
+    let texto="🧠 BLOQUE 12.1 MULTIVENTANA\n\n";
+
+    texto+="Historial Completo : "+MULTIVENTANA_V60.historial.length+"\n";
+
+    texto+="Últimos 100 : "+MULTIVENTANA_V60.ultimos100.length+"\n";
+
+    texto+="Últimos 200 : "+MULTIVENTANA_V60.ultimos200.length+"\n";
+
+    texto+="Últimos 300 : "+MULTIVENTANA_V60.ultimos300.length+"\n";
+
+    texto+="Últimos 500 : "+MULTIVENTANA_V60.ultimos500.length+"\n";
+
+    mostrarV48(texto);
+
+}
+    //////////////////////////////////////////////////
+// BLOQUE 12.2
+// ANALIZADOR ESTADÍSTICO MULTIVENTANA V60
+//////////////////////////////////////////////////
+
+let ESTADISTICAS_V60={};
+
+function crearEstadisticaV60(){
+
+    return{
+
+        total:0,
+
+        frecuencia:{},
+
+        unidades:{},
+
+        decenas:{},
+
+        invertidos:0,
+
+        repetidos:0,
+
+        consecutivos:0,
+
+        cambiosPosicion:0
+
+    };
+
+}
+
+function analizarVentanaV60(lista){
+
+    let e=crearEstadisticaV60();
+
+    if(!lista || lista.length===0)
+        return e;
+
+    e.total=lista.length;
+
+    for(let i=0;i<lista.length;i++){
+
+        let numero=
+        String(lista[i].numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        let d=numero[0];
+
+        let u=numero[1];
+
+        e.frecuencia[numero]=
+        (e.frecuencia[numero]||0)+1;
+
+        e.decenas[d]=
+        (e.decenas[d]||0)+1;
+
+        e.unidades[u]=
+        (e.unidades[u]||0)+1;
+
+        if(i==0) continue;
+
+        let anterior=
+        String(lista[i-1].numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        if(numero===anterior)
+            e.repetidos++;
+
+        if(numero===anterior[1]+anterior[0])
+            e.invertidos++;
+
+        if(
+            Math.abs(
+                Number(numero)-
+                Number(anterior)
+            )===1
+        )
+            e.consecutivos++;
+
+        if(
+            numero[0]===anterior[1] &&
+            numero[1]===anterior[0]
+        )
+            e.cambiosPosicion++;
+
+    }
+
+    return e;
+
+}
+
+async function construirEstadisticasV60(){
+
+    if(!MULTIVENTANA_V60.historial.length){
+
+        await construirMultiventanaV60();
+
+    }
+
+    ESTADISTICAS_V60.historial=
+    analizarVentanaV60(
+    MULTIVENTANA_V60.historial);
+
+    ESTADISTICAS_V60.v100=
+    analizarVentanaV60(
+    MULTIVENTANA_V60.ultimos100);
+
+    ESTADISTICAS_V60.v200=
+    analizarVentanaV60(
+    MULTIVENTANA_V60.ultimos200);
+
+    ESTADISTICAS_V60.v300=
+    analizarVentanaV60(
+    MULTIVENTANA_V60.ultimos300);
+
+    ESTADISTICAS_V60.v500=
+    analizarVentanaV60(
+    MULTIVENTANA_V60.ultimos500);
+
+    console.log(
+        "ESTADISTICAS V60",
+        ESTADISTICAS_V60
+    );
+
+    return ESTADISTICAS_V60;
+
+}
+
+function mostrarEstadisticasV60(){
+
+    let h=ESTADISTICAS_V60.historial;
+
+    let texto="📊 BLOQUE 12.2\n\n";
+
+    texto+="Historial: "+h.total+"\n";
+
+    texto+="Invertidos: "+h.invertidos+"\n";
+
+    texto+="Repetidos: "+h.repetidos+"\n";
+
+    texto+="Consecutivos: "+h.consecutivos+"\n";
+
+    texto+="Cambios Posición: "+h.cambiosPosicion+"\n";
+
+    mostrarV48(texto);
+
+    }
+    //////////////////////////////////////////////////
+// BLOQUE 12.3
+// COMPARADOR HISTÓRICO MULTIVENTANA V60
+//////////////////////////////////////////////////
+
+let COMPARADOR_V60={};
+
+function compararFrecuenciasV60(reciente,historico){
+
+    let resultado={
+
+        creciendo:[],
+
+        cayendo:[],
+
+        estables:[],
+
+        nuevos:[],
+
+        desapareciendo:[]
+
+    };
+
+    let numeros=new Set([
+
+        ...Object.keys(historico.frecuencia),
+
+        ...Object.keys(reciente.frecuencia)
+
+    ]);
+
+    for(let numero of numeros){
+
+        let h=historico.frecuencia[numero]||0;
+
+        let r=reciente.frecuencia[numero]||0;
+
+        let ph=h/Math.max(historico.total,1);
+
+        let pr=r/Math.max(reciente.total,1);
+
+        let diferencia=pr-ph;
+
+        if(h===0 && r>0){
+
+            resultado.nuevos.push(numero);
+
+            continue;
+
+        }
+
+        if(h>0 && r===0){
+
+            resultado.desapareciendo.push(numero);
+
+            continue;
+
+        }
+
+        if(diferencia>0.02){
+
+            resultado.creciendo.push({
+
+                numero:numero,
+
+                diferencia:diferencia
+
+            });
+
+        }
+
+        else if(diferencia<-0.02){
+
+            resultado.cayendo.push({
+
+                numero:numero,
+
+                diferencia:diferencia
+
+            });
+
+        }
+
+        else{
+
+            resultado.estables.push(numero);
+
+        }
+
+    }
+
+    resultado.creciendo.sort(
+        (a,b)=>b.diferencia-a.diferencia
+    );
+
+    resultado.cayendo.sort(
+        (a,b)=>a.diferencia-b.diferencia
+    );
+
+    return resultado;
+
+}
+
+async function compararVentanasV60(){
+
+    if(!ESTADISTICAS_V60.historial){
+
+        await construirEstadisticasV60();
+
+    }
+
+    COMPARADOR_V60.v100=
+    compararFrecuenciasV60(
+
+        ESTADISTICAS_V60.v100,
+
+        ESTADISTICAS_V60.historial
+
+    );
+
+    COMPARADOR_V60.v200=
+    compararFrecuenciasV60(
+
+        ESTADISTICAS_V60.v200,
+
+        ESTADISTICAS_V60.historial
+
+    );
+
+    COMPARADOR_V60.v300=
+    compararFrecuenciasV60(
+
+        ESTADISTICAS_V60.v300,
+
+        ESTADISTICAS_V60.historial
+
+    );
+
+    COMPARADOR_V60.v500=
+    compararFrecuenciasV60(
+
+        ESTADISTICAS_V60.v500,
+
+        ESTADISTICAS_V60.historial
+
+    );
+
+    console.log(
+
+        "COMPARADOR V60",
+
+        COMPARADOR_V60
+
+    );
+
+    return COMPARADOR_V60;
+
+}
+
+function mostrarComparadorV60(){
+
+    let c=COMPARADOR_V60.v100;
+
+    let texto="📈 BLOQUE 12.3\n\n";
+
+    texto+="VENTANA 100\n\n";
+
+    texto+="Creciendo : "+c.creciendo.length+"\n";
+
+    texto+="Cayendo : "+c.cayendo.length+"\n";
+
+    texto+="Estables : "+c.estables.length+"\n";
+
+    texto+="Nuevos : "+c.nuevos.length+"\n";
+
+    texto+="Desapareciendo : "+c.desapareciendo.length+"\n\n";
+
+    if(c.creciendo.length){
+
+        texto+="TOP CRECIENDO\n";
+
+        c.creciendo.slice(0,5).forEach(x=>{
+
+            texto+=x.numero+"\n";
+
+        });
+
+    }
+
+    mostrarV48(texto);
+
+        }
+
+   //////////////////////////////////////////////////
+// BLOQUE 12.4
+// DIAGNÓSTICO INTELIGENTE IA V60
+//////////////////////////////////////////////////
+
+let DIAGNOSTICO_V60={};
+
+async function generarDiagnosticoV60(){
+
+    if(!COMPARADOR_V60.v100){
+
+        await compararVentanasV60();
+
+    }
+
+    DIAGNOSTICO_V60={
+
+        fortalezas:[],
+
+        debilidades:[],
+
+        alertas:[],
+
+        resumen:""
+
+    };
+
+    let h=ESTADISTICAS_V60.historial;
+
+    let r=ESTADISTICAS_V60.v100;
+
+    if(r.invertidos>h.invertidos/r.total*h.total){
+
+        DIAGNOSTICO_V60.alertas.push(
+        "AUMENTARON LOS INVERTIDOS");
+
+    }
+
+    if(r.consecutivos>h.consecutivos/r.total*h.total){
+
+        DIAGNOSTICO_V60.alertas.push(
+        "AUMENTARON LOS ERRORES ±1");
+
+    }
+
+    if(
+        COMPARADOR_V60.v100.creciendo.length>
+        COMPARADOR_V60.v100.cayendo.length
+    ){
+
+        DIAGNOSTICO_V60.fortalezas.push(
+        "LOS PATRONES RECIENTES SON ESTABLES");
+
+    }else{
+
+        DIAGNOSTICO_V60.debilidades.push(
+        "LOS PATRONES HISTÓRICOS ESTÁN CAMBIANDO");
+
+    }
+
+    if(r.repetidos>0){
+
+        DIAGNOSTICO_V60.fortalezas.push(
+        "EXISTEN REPETICIONES RECIENTES");
+
+    }
+
+    if(COMPARADOR_V60.v100.desapareciendo.length>10){
+
+        DIAGNOSTICO_V60.debilidades.push(
+        "MUCHOS PATRONES DESAPARECIERON");
+
+    }
+
+    DIAGNOSTICO_V60.resumen=
+
+    "FORTALEZAS: "+DIAGNOSTICO_V60.fortalezas.length+
+
+    " | DEBILIDADES: "+DIAGNOSTICO_V60.debilidades.length+
+
+    " | ALERTAS: "+DIAGNOSTICO_V60.alertas.length;
+
+    return DIAGNOSTICO_V60;
+
+}
+
+//////////////////////////////////////////////////
+// BLOQUE 12.5
+// MOTOR DE RECOMENDACIONES IA V60
+//////////////////////////////////////////////////
+
+let RECOMENDACIONES_V60=[];
+
+async function generarRecomendacionesV60(){
+
+    if(!DIAGNOSTICO_V60.resumen){
+
+        await generarDiagnosticoV60();
+
+    }
+
+    RECOMENDACIONES_V60=[];
+
+    for(let alerta of DIAGNOSTICO_V60.alertas){
+
+        if(alerta.includes("INVERTIDOS")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ REFORZAR EL MÓDULO DE INVERTIDOS");
+
+        }
+
+        if(alerta.includes("±1")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ AUMENTAR EL PESO DEL ANÁLISIS ±1");
+
+        }
+
+    }
+
+    for(let debilidad of DIAGNOSTICO_V60.debilidades){
+
+        if(debilidad.includes("CAMBIANDO")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ DAR MAYOR PESO A LOS ÚLTIMOS 100 REGISTROS");
+
+        }
+
+        if(debilidad.includes("DESAPARECIERON")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ REDUCIR EL PESO DEL HISTORIAL MUY ANTIGUO");
+
+        }
+
+    }
+
+    for(let fortaleza of DIAGNOSTICO_V60.fortalezas){
+
+        if(fortaleza.includes("ESTABLES")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ MANTENER LOS PESOS ACTUALES");
+
+        }
+
+        if(fortaleza.includes("REPETICIONES")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ CONSERVAR EL ANÁLISIS DE REPETICIONES");
+
+        }
+
+    }
+
+    RECOMENDACIONES_V60=[
+        ...new Set(RECOMENDACIONES_V60)
+    ];
+
+    return RECOMENDACIONES_V60;
+
+}
+
+function mostrarDiagnosticoV60(){
+
+    let texto="🧠 DIAGNÓSTICO IA V60\n\n";
+
+    texto+="FORTALEZAS\n";
+
+    DIAGNOSTICO_V60.fortalezas.forEach(x=>{
+
+        texto+="✓ "+x+"\n";
+
+    });
+
+    texto+="\nDEBILIDADES\n";
+
+    DIAGNOSTICO_V60.debilidades.forEach(x=>{
+
+        texto+="⚠ "+x+"\n";
+
+    });
+
+    texto+="\nALERTAS\n";
+
+    DIAGNOSTICO_V60.alertas.forEach(x=>{
+
+        texto+="• "+x+"\n";
+
+    });
+
+    texto+="\nRECOMENDACIONES\n";
+
+    RECOMENDACIONES_V60.forEach(x=>{
+
+        texto+=x+"\n";
+
+    });
+
+    mostrarV48(texto);
+
+        }
+    //////////////////////////////////////////////////
+// BLOQUE 12.6
+// MEMORIA EVOLUTIVA IA V60
+//////////////////////////////////////////////////
+
+let MEMORIA_EVOLUTIVA_V60=[];
+
+async function guardarMemoriaEvolutivaV60(){
+
+    if(!DIAGNOSTICO_V60.resumen){
+
+        await generarDiagnosticoV60();
+
+    }
+
+    if(RECOMENDACIONES_V60.length===0){
+
+        await generarRecomendacionesV60();
+
+    }
+
+    let memoria={
+
+        fecha:new Date().toISOString(),
+
+        historial:ESTADISTICAS_V60.historial.total,
+
+        fortalezas:[...DIAGNOSTICO_V60.fortalezas],
+
+        debilidades:[...DIAGNOSTICO_V60.debilidades],
+
+        alertas:[...DIAGNOSTICO_V60.alertas],
+
+        recomendaciones:[...RECOMENDACIONES_V60]
+
+    };
+
+    MEMORIA_EVOLUTIVA_V60.push(memoria);
+
+    try{
+
+        await guardarV48(
+
+            STORES_V48.memoriaEvolutiva,
+
+            memoria
+
+        );
+
+    }catch(e){
+
+        console.log("MEMORIA LOCAL");
+
+    }
+
+    return memoria;
+
+}
+
+async function cargarMemoriaEvolutivaV60(){
+
+    try{
+
+        let datos=await leerV48(
+
+            STORES_V48.memoriaEvolutiva
+
+        );
+
+        MEMORIA_EVOLUTIVA_V60=datos||[];
+
+    }catch(e){
+
+        console.log("SIN MEMORIA");
+
+    }
+
+    return MEMORIA_EVOLUTIVA_V60;
+
+}
+
+function obtenerUltimaMemoriaV60(){
+
+    if(MEMORIA_EVOLUTIVA_V60.length===0)
+
+        return null;
+
+    return MEMORIA_EVOLUTIVA_V60[
+        MEMORIA_EVOLUTIVA_V60.length-1
+    ];
+
+}
+
+function mostrarMemoriaEvolutivaV60(){
+
+    let ultima=obtenerUltimaMemoriaV60();
+
+    if(!ultima){
+
+        mostrarV48(
+        "SIN MEMORIA EVOLUTIVA");
+
+        return;
+
+    }
+
+    let texto="🧠 MEMORIA EVOLUTIVA\n\n";
+
+    texto+="Fecha:\n";
+
+    texto+=ultima.fecha+"\n\n";
+
+    texto+="Historial:\n";
+
+    texto+=ultima.historial+"\n\n";
+
+    texto+="Fortalezas:\n";
+
+    ultima.fortalezas.forEach(x=>{
+
+        texto+="✓ "+x+"\n";
+
+    });
+
+    texto+="\nDebilidades:\n";
+
+    ultima.debilidades.forEach(x=>{
+
+        texto+="⚠ "+x+"\n";
+
+    });
+
+    texto+="\nAlertas:\n";
+
+    ultima.alertas.forEach(x=>{
+
+        texto+="• "+x+"\n";
+
+    });
+
+    texto+="\nRecomendaciones:\n";
+
+    ultima.recomendaciones.forEach(x=>{
+
+        texto+=x+"\n";
+
+    });
+
+    mostrarV48(texto);
+
+            }
+
+
+    
 </script> 
     
 </body>

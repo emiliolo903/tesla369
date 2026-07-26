@@ -4485,7 +4485,75 @@ await aplicarCorrectorDesviacionV55_2(
     historico
 );
 
+//////////////////////////////////////////////////
+// BLOQUE 12
+// AJUSTE DE PESO POR DIAGNÓSTICO EVOLUTIVO
+//////////////////////////////////////////////////
 
+if(typeof obtenerDiagnosticoBloque12V60 === "function"){
+
+    let diagnostico12 =
+    obtenerDiagnosticoBloque12V60();
+
+
+    if(diagnostico12){
+
+        console.log(
+        "APORTE BLOQUE 12:",
+        diagnostico12
+        );
+
+
+        // Refuerzo de acompañantes fuertes
+
+        if(diagnostico12.acompanantes){
+
+            for(let n of diagnostico12.acompanantes){
+
+                n =
+                String(n)
+                .padStart(2,"0");
+
+
+                if(ranking[n] !== undefined){
+
+                    ranking[n] += 10;
+
+                }
+
+            }
+
+        }
+
+
+        // Refuerzo de tendencia reciente
+
+        if(diagnostico12.tendencia){
+
+            for(let n of diagnostico12.tendencia){
+
+                n =
+                String(n)
+                .padStart(2,"0");
+
+
+                if(ranking[n] !== undefined){
+
+                    ranking[n] += 5;
+
+                }
+
+            }
+
+        }
+
+
+    }
+
+}
+    console.log("APORTE BLOQUE 12:", diagnostico12);
+    
+    
 // MOTOR V60 REAL
 
 let motorV60 =

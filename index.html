@@ -2553,12 +2553,16 @@ await construirMatrizTurnosV48();
 await construirMatrizHistoricaV48();
 
 await construirMatrizProvinciasV48();
-    
+
 await cargarAprendizajeV49();
-    
+
 await cargarPatronesIAV60();
-    
+
 await conectarIAInicioV60();
+    
+await construirBloque12V60();
+    
+
     
     SISTEMA_V48.memoria=true;
 
@@ -8938,6 +8942,24 @@ estado += "\n🚀 BLOQUE 11 INSTALADO";
 
 mostrarV48(estado);
 
+
+    }
+
+    async function construirBloque12V60(){
+
+    await construirMultiventanaV60();
+
+    await construirEstadisticasV60();
+
+    await compararVentanasV60();
+
+    await generarDiagnosticoV60();
+
+    await generarRecomendacionesV60();
+
+    await guardarMemoriaEvolutivaV60();
+
+    console.log("BLOQUE 12 ACTIVO");
 
     }
     //////////////////////////////////////////////////

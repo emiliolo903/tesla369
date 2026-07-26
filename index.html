@@ -4337,12 +4337,10 @@ async function aplicarMotorV60(
 
     
 async function generarResultadoIA(){
-
-alert("ENTRÓ AL GENERADOR");
-
+    
+await ejecutarBloque11IA();
+    
 await construirBloque12V60();
-
-alert("BLOQUE 12 TERMINÓ");
 
 
 let elemento =
@@ -8908,6 +8906,26 @@ null,
 
 
     }
+    
+    //////////////////////////////////////////////////
+// ACTIVADOR AUTOMÁTICO BLOQUE 11
+//////////////////////////////////////////////////
+
+async function ejecutarBloque11IA(){
+
+    await cargarCerebroIA();
+
+    diagnosticoAutomaticoIA();
+
+    ajustarPesosCerebroIA();
+
+    supervisorAutomaticoIA();
+
+    await actualizarCerebroEvolutivoIA();
+
+    console.log("BLOQUE 11 EJECUTADO");
+}
+    
     //////////////////////////////////////////////////
 // VERIFICADOR BLOQUE 11 IA
 //////////////////////////////////////////////////

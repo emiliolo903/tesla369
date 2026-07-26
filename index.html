@@ -9794,6 +9794,75 @@ function mostrarMemoriaEvolutivaV60(){
     mostrarV48(texto);
 
             }
+    
+    //////////////////////////////////////////////////
+// BLOQUE 12.7
+// APLICAR DIAGNÓSTICO AL RANKING
+//////////////////////////////////////////////////
+
+async function aplicarDiagnosticoBloque12V60(ranking){
+
+    if(!DIAGNOSTICO_V60.resumen){
+
+        await generarDiagnosticoV60();
+
+    }
+
+    // Si aumentaron los invertidos,
+    // reforzar también los invertidos.
+    if(DIAGNOSTICO_V60.alertas.includes("AUMENTARON LOS INVERTIDOS")){
+
+        for(let numero in ranking){
+
+            let inv =
+            numero[1]+numero[0];
+
+            if(ranking[inv]){
+
+                ranking[inv]+=10;
+
+            }
+
+        }
+
+    }
+
+    // Si aumentaron los errores ±1,
+    // reforzar vecinos.
+    if(DIAGNOSTICO_V60.alertas.includes("AUMENTARON LOS ERRORES ±1")){
+
+        for(let numero in ranking){
+
+            let n=parseInt(numero);
+
+            let menos=
+            String((n+99)%100).padStart(2,"0");
+
+            let mas=
+            String((n+1)%100).padStart(2,"0");
+
+            if(ranking[menos]){
+
+                ranking[menos]+=8;
+
+            }
+
+            if(ranking[mas]){
+
+                ranking[mas]+=8;
+
+            }
+
+        }
+
+    }
+
+    console.log("BLOQUE 12 MODIFICÓ EL RANKING");
+
+    return ranking;
+
+                               }
+    
 
 
     //////////////////////////////////////////////////

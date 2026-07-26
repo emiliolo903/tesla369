@@ -204,7 +204,10 @@ OFF
 <button onclick="generarResultadoIA()">
 🧠 GENERAR IA
 </button>
-
+    
+<button onclick="probarBloque12V60()">
+🧠 PROBAR BLOQUE 12
+</button>
 
 <button onclick="generarTesla()">
 ⚡ TESLA 3-6-9
@@ -354,6 +357,30 @@ Sin auditoría todavía
 <script>
 
 
+async function probarBloque12V60(){
+
+console.log("BOTÓN BLOQUE 12 PRESIONADO");
+
+
+if(typeof construirBloque12V60 === "function"){
+
+    console.log("BLOQUE 12 ENCONTRADO");
+
+    await construirBloque12V60();
+
+    alert("BLOQUE 12 EJECUTADO CORRECTAMENTE");
+
+
+}else{
+
+    console.log("BLOQUE 12 NO EXISTE EN ESTA APP");
+
+    alert("NO SE ENCONTRÓ EL BLOQUE 12");
+
+}
+
+}
+    
 //////////////////////////////////////////////////
 // BLOQUE 1/8
 // BASE SISTEMA + INDEXEDDB

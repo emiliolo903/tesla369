@@ -4477,33 +4477,32 @@ if(destinoMatriz){
 }
 
 
-// Corrector aprendizaje V55
-
 ranking =
 await aplicarCorrectorDesviacionV55_2(
     ranking,
     historico
 );
 
-    console.log("ENTRANDO AJUSTE PESO BLOQUE 12");
-    
+
 //////////////////////////////////////////////////
-// BLOQUE 12
-// 
+// BLOQUE 12 ACTIVO
 //////////////////////////////////////////////////
 
-
-    
-   if(typeof aplicarDiagnosticoBloque12V60 === "function"){
+if(typeof aplicarDiagnosticoBloque12V60 === "function"){
 
     ranking =
     await aplicarDiagnosticoBloque12V60(
         ranking
     );
 
-   }
-    
-    
+    console.log(
+    "BLOQUE 12 APLICADO AL RANKING",
+    ranking
+    );
+
+}
+
+
 // MOTOR V60 REAL
 
 let motorV60 =

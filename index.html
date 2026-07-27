@@ -4273,6 +4273,54 @@ function aplicarOrientadorV60(
 
     }
 
+    async function reevaluarDecenaFinalV60(ranking){
+
+    let historial =
+    await leerV48(STORES_V48.historico);
+
+    let frecuencia = {};
+
+    for(let r of historial){
+
+        let ambos =
+        String(r.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        frecuencia[ambos] =
+        (frecuencia[ambos]||0)+1;
+
+    }
+
+    let candidatos =
+    Object.keys(ranking)
+    .sort((a,b)=>ranking[b]-ranking[a])
+    .slice(0,10);
+
+    for(let numero of candidatos){
+
+        let unidad = numero[1];
+
+        for(let d=0; d<=9; d++){
+
+            let posible = d + unidad;
+
+            if(frecuencia[posible]){
+
+                ranking[posible] =
+                (ranking[posible]||0) +
+                frecuencia[posible]*0.20;
+
+            }
+
+        }
+
+    }
+
+    return ranking;
+
+    }
+
     //////////////////////////////////////////////////////
 // MOTOR IA V60
 // BLOQUE 6
@@ -4317,6 +4365,9 @@ async function aplicarMotorV60(
     aplicarOrientadorV60(
         ranking
     );
+    
+    ranking =
+await reevaluarDecenaFinalV60(ranking);
 
     // Ordenar resultado
     let orden =

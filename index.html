@@ -4360,10 +4360,18 @@ function aplicarOrientadorV60(
 
 
 
-    ranking =
-    aplicarOrientadorV60(
-        ranking
-    );
+    // Orientación inteligente
+ranking =
+aplicarOrientadorV60(
+    ranking
+);
+
+
+// CORRECCIÓN PRECISIÓN AMBOS
+ranking =
+await corregirAmbosExactosV60(
+    ranking
+);
 
 
 
@@ -4484,6 +4492,92 @@ function aplicarOrientadorV60(
 
     }
     
+
+    //////////////////////////////////////////////////
+// CORRECTOR PRECISIÓN AMBOS V60
+//////////////////////////////////////////////////
+
+async function corregirAmbosExactosV60(ranking){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+    let exactos={};
+    let unidades={};
+    let decenas={};
+
+
+    for(let r of historial){
+
+        let n=
+        String(r.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+        exactos[n]=(exactos[n]||0)+1;
+
+
+        decenas[n[0]]=
+        (decenas[n[0]]||0)+1;
+
+
+        unidades[n[1]]=
+        (unidades[n[1]]||0)+1;
+
+    }
+
+
+
+    for(let n in ranking){
+
+        let peso=ranking[n];
+
+
+        // Premio si salió exacto antes
+        if(exactos[n]){
+
+            peso += exactos[n]*2;
+
+        }
+
+
+
+        // Penalizar si solamente coincide unidad
+        let unidad=n[1];
+
+        if(unidades[unidad] && !exactos[n]){
+
+            peso -= unidades[unidad]*0.05;
+
+        }
+
+
+
+        // Penalizar números invertidos
+        let inv =
+        n[1]+n[0];
+
+
+        if(exactos[inv] && !exactos[n]){
+
+            peso -= exactos[inv]*0.5;
+
+        }
+
+
+
+        ranking[n]=peso;
+
+    }
+
+
+    return ranking;
+
+}
     
 //////////////////////////////////////////////////
 // GENERADOR IA V60

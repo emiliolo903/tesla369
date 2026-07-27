@@ -1191,7 +1191,31 @@ origen:"MANUAL_V48"
 
 );
 
+// APRENDER DEL RESULTADO REAL
+if(
+typeof PREDICCION_ACTUAL_V49!="undefined" &&
+PREDICCION_ACTUAL_V49 &&
+PREDICCION_ACTUAL_V49.ambos
+){
 
+    for(let prediccion of PREDICCION_ACTUAL_V49.ambos){
+
+        await aprenderDelErrorIA(
+
+            numero.slice(-2),
+
+            prediccion
+
+        );
+        
+        console.log(
+"APRENDIZAJE ERROR IA",
+MATRIZ_ERRORES_IA
+);
+
+    }
+
+}
 
 guardados++;
 
@@ -1201,14 +1225,16 @@ guardados++;
 
 }
 
-
-
 await actualizarRegistrosV48();
-    
-    await evaluarAprendizajeV49(
+
+await actualizarCerebroEvolutivoIA();
+
+await evaluarAprendizajeV49(
     turno,
     provincias
 );
+
+
     
         //////////////////////////////////////////////////////
 // APRENDIZAJE AUTOMÁTICO V53

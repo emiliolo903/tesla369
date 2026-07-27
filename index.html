@@ -4366,8 +4366,11 @@ async function aplicarMotorV60(
         ranking
     );
     
-    ranking =
-await reevaluarDecenaFinalV60(ranking);
+    // CORRECTOR FINAL DE DECENA
+ranking =
+await reevaluarDecenaFinalV60(
+    ranking
+);
 
     // Ordenar resultado
     let orden =

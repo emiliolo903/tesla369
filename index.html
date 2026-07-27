@@ -4321,25 +4321,22 @@ function aplicarOrientadorV60(
 
     }
 
-    //////////////////////////////////////////////////////
-// MOTOR IA V60
-// BLOQUE 6
-// MOTOR PRINCIPAL V60
-//////////////////////////////////////////////////////
-
-async function aplicarMotorV60(
+    async function aplicarMotorV60(
     ranking,
     bases,
     turnoOrigen,
     turnoDestino
 ){
 
-    // Construir memoria una sola vez
     if(MEMORIA_V60.total===0){
+
         await construirMemoriaHistoricaV60();
+
     }
 
-    // Aplicar historial para cada base
+
+    // MOTOR HISTÓRICO ORIGINAL
+
     for(let base of bases){
 
         ranking =
@@ -4349,6 +4346,7 @@ async function aplicarMotorV60(
             turnoOrigen,
             turnoDestino
         );
+
 
         ranking =
         aplicarAcompanantesV60(
@@ -4360,19 +4358,85 @@ async function aplicarMotorV60(
 
     }
 
-    // Orientación inteligente
+
+
     ranking =
     aplicarOrientadorV60(
         ranking
     );
-    
-    // CORRECTOR FINAL DE DECENA
-ranking =
-await reevaluarDecenaFinalV60(
-    ranking
-);
 
-    // Ordenar resultado
+
+
+    //////////////////////////////////////////////////
+    // NUEVO CORRECTOR DE DECENA V60
+    //////////////////////////////////////////////////
+
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+    let pesoDecenas={};
+
+
+    for(let r of historial){
+
+        let n =
+        String(r.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+        let unidad=n[1];
+
+
+        if(!pesoDecenas[unidad])
+            pesoDecenas[unidad]={};
+
+
+        let decena=n[0];
+
+
+        pesoDecenas[unidad][decena]=
+        (pesoDecenas[unidad][decena]||0)+1;
+
+    }
+
+
+
+    // Ajustar ranking por unidad
+
+    for(let numero in ranking){
+
+        let unidad =
+        numero[1];
+
+
+        let decena =
+        numero[0];
+
+
+        if(
+            pesoDecenas[unidad] &&
+            pesoDecenas[unidad][decena]
+        ){
+
+            ranking[numero] +=
+            pesoDecenas[unidad][decena] * 0.15;
+
+        }
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // ORDEN FINAL
+    //////////////////////////////////////////////////
+
+
     let orden =
 
     Object.keys(ranking)
@@ -4382,22 +4446,33 @@ await reevaluarDecenaFinalV60(
         ranking[b]-ranking[a]
     );
 
-    // Elegir los 3 mejores ambos
-    let ambos = [];
+
+
+    let ambos=[];
+
+
 
     for(let n of orden){
 
+
         n =
-        String(n).padStart(2,"0");
+        String(n)
+        .padStart(2,"0");
+
 
         if(!ambos.includes(n))
             ambos.push(n);
 
+
+
         if(ambos.length===3)
             break;
+
     }
 
-    return{
+
+
+    return {
 
         ranking,
 
@@ -4407,7 +4482,7 @@ await reevaluarDecenaFinalV60(
 
     };
 
-}
+    }
     
     
 //////////////////////////////////////////////////

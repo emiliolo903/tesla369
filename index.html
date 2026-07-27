@@ -4441,43 +4441,82 @@ await corregirAmbosExactosV60(
 
 
     //////////////////////////////////////////////////
-    // ORDEN FINAL
-    //////////////////////////////////////////////////
+// SELECCIÓN INTELIGENTE DECENA + UNIDAD
+//////////////////////////////////////////////////
 
+let rankingDecena={};
+let rankingUnidad={};
 
-    let orden =
+// construir ranking separado
+for(let numero in ranking){
 
-    Object.keys(ranking)
+    numero=String(numero).padStart(2,"0");
 
-    .sort(
-        (a,b)=>
-        ranking[b]-ranking[a]
-    );
+    let d=numero[0];
+    let u=numero[1];
 
+    rankingDecena[d]=(rankingDecena[d]||0)+ranking[numero];
+    rankingUnidad[u]=(rankingUnidad[u]||0)+ranking[numero];
 
+}
 
-    let ambos=[];
+// mejores decenas
+let mejoresDecenas=
+Object.keys(rankingDecena)
+.sort((a,b)=>rankingDecena[b]-rankingDecena[a])
+.slice(0,3);
 
+// mejores unidades
+let mejoresUnidades=
+Object.keys(rankingUnidad)
+.sort((a,b)=>rankingUnidad[b]-rankingUnidad[a])
+.slice(0,3);
 
+// generar combinaciones
+let candidatos=[];
 
-    for(let n of orden){
+for(let d of mejoresDecenas){
 
+    for(let u of mejoresUnidades){
 
-        n =
-        String(n)
-        .padStart(2,"0");
+        let numero=d+u;
 
+        candidatos.push({
 
-        if(!ambos.includes(n))
-            ambos.push(n);
+            numero:numero,
 
+            puntaje:
+            (ranking[numero]||0)+
+            rankingDecena[d]+
+            rankingUnidad[u]
 
-
-        if(ambos.length===3)
-            break;
+        });
 
     }
 
+}
+
+// ordenar candidatos
+candidatos.sort(
+(a,b)=>b.puntaje-a.puntaje
+);
+
+// resultado final
+let ambos=[];
+
+for(let c of candidatos){
+
+    if(!ambos.includes(c.numero))
+        ambos.push(c.numero);
+
+    if(ambos.length==3)
+        break;
+
+}
+
+// orden para el resto del motor
+let orden=
+candidatos.map(x=>x.numero);
 
 
     return {

@@ -4190,75 +4190,63 @@ async function construirMemoriaHistoricaV60(){
 
     };
 
+
     for(let i=0;i<historial.length-1;i++){
 
         let actual = historial[i];
         let siguiente = historial[i+1];
+
 
         if(
             !actual.numero ||
             !siguiente.numero
         ) continue;
 
+
         let origen =
         String(actual.numero)
         .slice(-2)
         .padStart(2,"0");
+
 
         let destino =
         String(siguiente.numero)
         .slice(-2)
         .padStart(2,"0");
 
+
         let clave =
         actual.turno+"->"+siguiente.turno;
-
-        let d = destino[0];
-        let u = destino[1];
-
-        MEMORIA_V60.decenas[d] =
-        (MEMORIA_V60.decenas[d] || 0)+1;
-
-        MEMORIA_V60.unidades[u] =
-        (MEMORIA_V60.unidades[u] || 0)+1;
-
-        if(!MEMORIA_V60.decenaPorUnidad[u]){
-            MEMORIA_V60.decenaPorUnidad[u]={};
-        }
-
-        MEMORIA_V60.decenaPorUnidad[u][d]=
-        (MEMORIA_V60.decenaPorUnidad[u][d]||0)+1;
 
 
         if(!MEMORIA_V60.transiciones[clave])
             MEMORIA_V60.transiciones[clave]={};
 
+
         if(!MEMORIA_V60.transiciones[clave][origen])
             MEMORIA_V60.transiciones[clave][origen]={};
 
 
-        MEMORIA_V60.transiciones[clave][origen][destino]=
+        MEMORIA_V60.transiciones[clave][origen][destino] =
         (MEMORIA_V60.transiciones[clave][origen][destino]||0)+1;
 
 
-        MEMORIA_V60.frecuencia[destino]=
+        MEMORIA_V60.frecuencia[destino] =
         (MEMORIA_V60.frecuencia[destino]||0)+1;
 
     }
 
 
     console.log(
-        "MEMORIA V60 CARGADA",
+        "MEMORIA V60 OK",
         MEMORIA_V60.total
     );
 
 
     return MEMORIA_V60;
 
-            }
+}
 
-
-            
     
     //////////////////////////////////////////////////////
 // MOTOR IA V60

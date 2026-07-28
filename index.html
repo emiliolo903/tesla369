@@ -2794,25 +2794,33 @@ async function analizarTransicionTurnoV48(
                 pesos[salida]+=15;
             }
 
-            ////////////////////////////////////////////////////
-            // DÍGITOS FUERTES
-            ////////////////////////////////////////////////////
+            
+            
+// DÍGITOS FUERTES (CORREGIDO)
+//////////////////////////////////////////////////
 
-            if(
-                salida.includes(base[0])
-            ){
-                pesos[salida]+=2;
-            }
+// La unidad tiene prioridad
+if(salida[1] === base[1]){
+    pesos[salida] += 8;
+}
 
-            if(
-                salida.includes(base[1])
-            ){
-                pesos[salida]+=2;
-            }
+// La decena sólo suma si además coincide la unidad
+if(
+    salida[0] === base[0] &&
+    salida[1] === base[1]
+){
+    pesos[salida] += 6;
+}
 
-        }
+// Penalizar cuando sólo coincide la unidad
+// pero cambia demasiado la decena
+if(
+    salida[1] === base[1] &&
+    salida[0] !== base[0]
+){
+    pesos[salida] -= 2;
+}
 
-    }
 
     ////////////////////////////////////////////////////
     // MATRIZ HISTÓRICA GENERAL

@@ -4188,6 +4188,36 @@ async function construirMemoriaHistoricaV60(){
 
         MEMORIA_V60.frecuencia[destino] =
         (MEMORIA_V60.frecuencia[destino]||0)+1;
+        
+        // MEMORIA DECENA Y UNIDAD V60
+
+let decena = destino[0];
+let unidad = destino[1];
+
+
+// frecuencia de unidades
+
+MEMORIA_V60.unidades[unidad] =
+(MEMORIA_V60.unidades[unidad]||0)+1;
+
+
+// frecuencia de decenas
+
+MEMORIA_V60.decenas[decena] =
+(MEMORIA_V60.decenas[decena]||0)+1;
+
+
+// relación decena por unidad
+
+if(!MEMORIA_V60.decenaPorUnidad[unidad]){
+    MEMORIA_V60.decenaPorUnidad[unidad]={};
+}
+
+
+MEMORIA_V60.decenaPorUnidad[unidad][decena] =
+(
+MEMORIA_V60.decenaPorUnidad[unidad][decena] || 0
+)+1;
 
     }
 

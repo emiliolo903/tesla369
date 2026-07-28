@@ -2553,18 +2553,41 @@ document.getElementById("auditoria").innerText=
 
 async function inicializarV48(){
 
+
 try{
+    await abrirBaseV48();
+    console.log("BASE V48 OK");
+}catch(e){
+    console.error("ERROR ABRIR BASE V48", e);
+}
 
 
-await abrirBaseV48();
+try{
+    await actualizarRegistrosV48();
+    console.log("REGISTROS V48 OK");
+}catch(e){
+    console.error("ERROR ACTUALIZAR REGISTROS", e);
+}
 
 
-await actualizarRegistrosV48();
+let datos=[];
 
+try{
+    datos = await leerV48(
+        STORES_V48.historico
+    );
 
-let datos = await leerV48(
-STORES_V48.historico
-);
+    console.log(
+        "LECTURA HISTORICO OK:",
+        datos.length
+    );
+
+}catch(e){
+    console.error(
+        "ERROR LEER HISTORICO",
+        e
+    );
+}
 
 
 console.log(

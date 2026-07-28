@@ -472,98 +472,70 @@ function obtenerPesoPTV51(
     }
 
 function abrirBaseV48(){
-    
-    console.log(
-"BASE ABIERTA:",
-dbV48.name,
-dbV48.objectStoreNames
-);
-
 
 return new Promise((resolve,reject)=>{
 
+    let request = indexedDB.open(
 
-let request=indexedDB.open(
+        DB_NAME_V48,
 
-DB_NAME_V48,
+        DB_VERSION_V48
 
-DB_VERSION_V48
+    );
 
-);
+    request.onupgradeneeded = function(e){
 
+        let db = e.target.result;
 
+        Object.values(STORES_V48).forEach(store=>{
 
-request.onupgradeneeded=function(e){
+            if(!db.objectStoreNames.contains(store)){
 
+                db.createObjectStore(store,{
 
-let db=e.target.result;
+                    keyPath:"id",
 
+                    autoIncrement:true
 
-Object.values(STORES_V48).forEach(store=>{
+                });
 
+            }
 
-if(!db.objectStoreNames.contains(store)){
+        });
 
+    };
 
-db.createObjectStore(
+    request.onsuccess = function(e){
 
-store,
+        dbV48 = e.target.result;
 
-{
-keyPath:"id",
-autoIncrement:true
-}
+        console.log("DB ABIERTA:", dbV48);
 
-);
+        let estado = document.getElementById("estadoBase");
 
+        if(estado){
 
-}
+            estado.innerText = "ACTIVA";
 
+        }
 
-});
+        resolve(true);
 
+    };
 
-};
+    request.onerror = function(e){
 
+        console.error("ERROR ABRIENDO BASE:", e);
 
+        reject(e);
 
-request.onsuccess=function(e){
-
-
-dbV48=e.target.result;
-
-
-let estado=document.getElementById(
-"estadoBase"
-);
-
-
-if(estado){
-
-estado.innerText="ACTIVA";
-
-}
-
-
-resolve(true);
-
-
-};
-
-
-
-request.onerror=function(e){
-
-reject(e);
-
-};
-
+    };
 
 });
 
-
 }
-
+    
+    
 
 
 

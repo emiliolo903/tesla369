@@ -2587,12 +2587,28 @@ await construirMatrizProvinciasV48();
 
 await cargarAprendizajeV49();
 
-await cargarPatronesIAV60();
+try{
+    await cargarPatronesIAV60();
+    console.log("PATRONES V60 OK");
+}catch(e){
+    console.error("ERROR PATRONES V60", e);
+}
 
-await conectarIAInicioV60();
-    
-await construirBloque12V60();
-    
+
+try{
+    await conectarIAInicioV60();
+    console.log("CONEXION IA V60 OK");
+}catch(e){
+    console.error("ERROR CONEXION IA V60", e);
+}
+
+
+try{
+    await construirBloque12V60();
+    console.log("BLOQUE 12 V60 OK");
+}catch(e){
+    console.error("ERROR BLOQUE 12 V60", e);
+}
 
     
     SISTEMA_V48.memoria=true;

@@ -567,19 +567,25 @@ reject(e);
 
 
 
-function guardarV48(store,dato){
+async function guardarV48(store,dato){
 
+if(!dbV48){
+
+    await abrirBaseV48();
+
+}
 
 return new Promise((resolve,reject)=>{
 
 
 if(!dbV48){
 
-reject("BASE NO ABIERTA");
+    reject("BASE NO ABIERTA");
 
-return;
+    return;
 
 }
+    
 
 
 let tx=dbV48.transaction(

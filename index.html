@@ -683,30 +683,27 @@ total.innerText=datos.length;
 
 async function iniciarMemoriaV48(){
 
+    await abrirBaseV48();
 
-await abrirBaseV48();
+    if(!dbV48){
+        console.log("ERROR: BASE NO ABIERTA");
+        return;
+    }
 
+    await actualizarRegistrosV48();
 
-await actualizarRegistrosV48();
+    SISTEMA_V48.memoria=true;
 
+    let estado=document.getElementById(
+        "estadoMemoria"
+    );
 
-SISTEMA_V48.memoria=true;
-
-
-let estado=document.getElementById(
-"estadoMemoria"
-);
-
-
-if(estado){
-
-estado.innerText="LISTA";
-
-}
-
+    if(estado){
+        estado.innerText="LISTA";
+    }
 
 }
-
+    
 
 
 function mostrarV48(texto){

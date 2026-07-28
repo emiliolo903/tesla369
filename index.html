@@ -4176,16 +4176,23 @@ let MEMORIA_V60 = {
 // CONSTRUIR MEMORIA GLOBAL
 //////////////////////////////////////////////////////
 async function construirMemoriaHistoricaV60(){
-// Protección V60 contra historial vacío o incompleto
-if (!Array.isArray(historial) || historial.length < 2) {
-    MEMORIA_V60 = [];
-    return;
-    }
-    
+
     let historial =
     await leerV48(
         STORES_V48.historico
     );
+
+    if (!Array.isArray(historial) || historial.length < 2) {
+        MEMORIA_V60 = {
+            transiciones:{},
+            frecuencia:{},
+            unidades:{},
+            decenas:{},
+            decenaPorUnidad:{},
+            total:0
+        };
+        return MEMORIA_V60;
+    }
 
     MEMORIA_V60 = {
 
@@ -4200,21 +4207,14 @@ if (!Array.isArray(historial) || historial.length < 2) {
 
 
     for(let i=0;i<historial.length-1;i++){
-        
-        if (!actual || !siguiente) {
-    continue;
-    }
 
         let actual = historial[i];
         let siguiente = historial[i+1];
 
-
-        if(
-            !actual.numero ||
-            !siguiente.numero
-        ) continue;
-
-
+        if (!actual || !siguiente) {
+            continue;
+        }
+    
         let origen =
         String(actual.numero)
         .slice(-2)

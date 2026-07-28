@@ -2675,158 +2675,256 @@ function obtenerSiguienteTurnoV48(turno){
 ////////////////////////////////////////////////
 // MOTOR IA HISTÓRICO V49
 ////////////////////////////////////////////////
- 
-async function analizarTransicionTurnoV48(
+ async function analizarTransicionTurnoV48(
     base,
     turnoOrigen,
     datos = null
 ){
+
     let destino =
     obtenerSiguienteTurnoV48(turnoOrigen);
 
+
     if(!datos){
 
-    datos =
-    await leerV48(
-        STORES_V48.historico
-    );
+        datos =
+        await leerV48(
+            STORES_V48.historico
+        );
 
     }
 
+
     base =
-    String(base).slice(-2);
+    String(base)
+    .slice(-2)
+    .padStart(2,"0");
+
 
     let pesos = {};
 
+
     let inversion =
-    base[1] + base[0];
+    base[1]+base[0];
+
 
     for(let i=0;i<datos.length;i++){
 
         let actual = datos[i];
 
+
         if(!actual.numero)
             continue;
+
 
         if(actual.turno !== turnoOrigen)
             continue;
 
+
+        let numeroActual =
+        String(actual.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
         if(
-            String(actual.numero).slice(-2)!==base &&
-            String(actual.numero).slice(-2)!==inversion
+            numeroActual!==base &&
+            numeroActual!==inversion
         )
-            continue;
+        continue;
+
+
 
         for(let j=0;j<datos.length;j++){
 
             let siguiente = datos[j];
 
+
             if(
                 siguiente.fecha !== actual.fecha
             )
-                continue;
+            continue;
+
 
             if(
                 siguiente.provincia !== actual.provincia
             )
-                continue;
+            continue;
+
 
             if(
                 siguiente.turno !== destino
             )
-                continue;
+            continue;
+
+
 
             let salida =
-            String(siguiente.numero).slice(-2);
+            String(siguiente.numero)
+            .slice(-2)
+            .padStart(2,"0");
+
+
 
             if(
                 salida===base ||
                 salida===inversion
             )
-                continue;
+            continue;
+
+
 
             if(!pesos[salida])
                 pesos[salida]=0;
 
-            ////////////////////////////////////////////////////
-            // PESO HISTÓRICO REAL
-            ////////////////////////////////////////////////////
 
+
+            // HISTÓRICO
             pesos[salida]+=30;
 
-            ////////////////////////////////////////////////////
-            // NÚCLEO DOMINANTE
-            ////////////////////////////////////////////////////
-            
+
+
+            // NÚCLEOS
 
             if(
-    typeof NUCLEO_V48 !== "undefined" &&
-    NUCLEO_V48.dominante &&
-    salida===NUCLEO_V48.dominante
-)
-            
+                typeof NUCLEO_V48 !== "undefined"
             ){
-                pesos[salida]+=20;
+
+                if(
+                    NUCLEO_V48.dominante &&
+                    salida===NUCLEO_V48.dominante
+                ){
+                    pesos[salida]+=20;
+                }
+
+
+                if(
+                    NUCLEO_V48.segundo &&
+                    salida===NUCLEO_V48.segundo
+                ){
+                    pesos[salida]+=12;
+                }
+
+
+                if(
+                    NUCLEO_V48.sobreviviente &&
+                    salida===NUCLEO_V48.sobreviviente
+                ){
+                    pesos[salida]+=6;
+                }
+
             }
 
-            if(
-                NUCLEO_V48.segundo &&
-                salida===NUCLEO_V48.segundo
-            ){
-                pesos[salida]+=12;
-            }
 
-            if(
-                NUCLEO_V48.sobreviviente &&
-                salida===NUCLEO_V48.sobreviviente
-            ){
-                pesos[salida]+=6;
-            }
-            
 
-            ////////////////////////////////////////////////////
             // TESLA
-            ////////////////////////////////////////////////////
 
             let tesla =
             aplicarTeslaV48(base);
 
+
             if(
                 salida===tesla
             ){
+
                 pesos[salida]+=15;
 
-                
             }
 
-            
-//////////////////////////////////////////////////
-// DÍGITOS FUERTES (CORREGIDO)
-//////////////////////////////////////////////////
 
-// La unidad tiene prioridad
-if(salida[1] === base[1]){
-    pesos[salida] += 8;
-}
 
-// La decena sólo suma si además coincide la unidad
-if(
-    salida[0] === base[0] &&
-    salida[1] === base[1]
-){
-    pesos[salida] += 6;
-}
+            // UNIDAD FUERTE
 
-// Penalizar cuando sólo coincide la unidad
-// pero cambia demasiado la decena
-if(
-    salida[1] === base[1] &&
-    salida[0] !== base[0]
-){
-    pesos[salida] -= 2;
-}
+            if(
+                salida[1]===base[1]
+            ){
 
-    } 
+                pesos[salida]+=8;
+
+            }
+
+
+
+            // MISMA DECENA
+
+            if(
+                salida[0]===base[0]
+            ){
+
+                pesos[salida]+=6;
+
+            }
+
+
+
+            // PENALIZACIÓN INVERTIDA
+
+            if(
+                salida===inversion
+            ){
+
+                pesos[salida]-=5;
+
+            }
+
+
+        }
+
+    }
+
+
+
+    let orden =
+    Object.keys(pesos)
+    .sort(
+        (a,b)=>
+        pesos[b]-pesos[a]
+    );
+
+
+
+    // SI NO HAY RESULTADO
+
+    if(
+        orden.length===0
+    ){
+
+        let todos={};
+
+
+        for(let d of datos){
+
+            if(!d.numero)
+            continue;
+
+
+            let n =
+            String(d.numero)
+            .slice(-2)
+            .padStart(2,"0");
+
+
+            todos[n]=
+            (todos[n]||0)+1;
+
+        }
+
+
+        orden =
+        Object.keys(todos)
+        .sort(
+            (a,b)=>
+            todos[b]-todos[a]
+        );
+
+    }
+
+
+
+    return orden.slice(0,10);
+
+                }
+
         
     ////////////////////////////////////////////////////
     // MATRIZ HISTÓRICA GENERAL

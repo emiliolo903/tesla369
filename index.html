@@ -379,9 +379,7 @@ pdf:false
 
 
 
-const DB_NAME_V48="EMI_TESLA_PRO_V48_FINAL";
-const DB_VERSION_V48=1;
-
+const DB_NAME_V48="EMI_TESLA_PRO_V48_REPARADA";
 
 
 const STORES_V48={
@@ -614,39 +612,48 @@ tx.onerror=e=>reject(e);
 
 function leerV48(store){
 
-
 return new Promise((resolve,reject)=>{
 
+if(!dbV48){
+    console.log("DB NO ABIERTA");
+    resolve([]);
+    return;
+}
+
+if(!dbV48.objectStoreNames.contains(store)){
+    console.log("STORE NO EXISTE",store);
+    resolve([]);
+    return;
+}
 
 let tx=dbV48.transaction(
-
 store,
-
 "readonly"
-
 );
-
 
 let tabla=tx.objectStore(store);
 
-
 let consulta=tabla.getAll();
-
 
 consulta.onsuccess=()=>{
 
-resolve(consulta.result);
+resolve(
+consulta.result || []
+);
 
 };
 
+consulta.onerror=()=>{
 
-consulta.onerror=e=>reject(e);
+resolve([]);
 
+};
 
 });
 
-
 }
+
+
 
 
 
@@ -2564,10 +2571,8 @@ async function inicializarV48(){
 
 try{
     await abrirBaseV48();
-    console.log("BASE V48 OK");
-}catch(e){
-    console.error("ERROR ABRIR BASE V48", e);
-}
+    
+    console.log("V48 BASE ABIERTA");
 
 
 try{

@@ -2760,8 +2760,11 @@ async function analizarTransicionTurnoV48(
             
 
             if(
-                NUCLEO_V48.dominante &&
-                salida===NUCLEO_V48.dominante
+    typeof NUCLEO_V48 !== "undefined" &&
+    NUCLEO_V48.dominante &&
+    salida===NUCLEO_V48.dominante
+)
+            
             ){
                 pesos[salida]+=20;
             }

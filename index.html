@@ -5339,19 +5339,33 @@ APRENDIZAJE_V49
 }
 
 
-
-
 window.addEventListener(
-
 "load",
-
 async()=>{
 
-    await inicializarV48();
+console.log("ARRANQUE LOAD OK");
+
+try{
+
+await inicializarV48();
+
+console.log("INICIALIZAR V48 TERMINO OK");
+
+}catch(e){
+
+console.error(
+"FALLO INICIALIZAR V48",
+e
+);
+
+alert(
+"FALLO V48: "+e.message
+);
 
 }
 
-);
+});
+    
     //////////////////////////////////////////////////////
 // MOTOR IA PARA BACKTESTING
 // USA LA MISMA LÓGICA DE TRANSICIÓN

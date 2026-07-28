@@ -4070,12 +4070,8 @@ let MEMORIA_V60 = {
 //////////////////////////////////////////////////////
 // CONSTRUIR MEMORIA GLOBAL
 //////////////////////////////////////////////////////
-
-
 async function construirMemoriaHistoricaV60(){
 
-
-}
     let historial =
     await leerV48(
         STORES_V48.historico
@@ -4083,27 +4079,20 @@ async function construirMemoriaHistoricaV60(){
 
     MEMORIA_V60 = {
 
-    transiciones:{},
+        transiciones:{},
+        frecuencia:{},
+        unidades:{},
+        decenas:{},
+        decenaPorUnidad:{},
+        total:historial.length
 
-    frecuencia:{},
-
-    unidades:{},
-
-    decenas:{},
-
-    decenaPorUnidad:{},
-
-    total:historial.length
-
-};
-        
+    };
 
     for(let i=0;i<historial.length-1;i++){
-        
-let actual = historial[i];
-let siguiente = historial[i+1];
 
-        
+        let actual = historial[i];
+        let siguiente = historial[i+1];
+
         if(
             !actual.numero ||
             !siguiente.numero
@@ -4121,24 +4110,23 @@ let siguiente = historial[i+1];
 
         let clave =
         actual.turno+"->"+siguiente.turno;
-        
-let d = destino[0];
-let u = destino[1];
 
-MEMORIA_V60.decenas[d] =
-(MEMORIA_V60.decenas[d] || 0) + 1;
+        let d = destino[0];
+        let u = destino[1];
 
-MEMORIA_V60.unidades[u] =
-(MEMORIA_V60.unidades[u] || 0) + 1;
+        MEMORIA_V60.decenas[d] =
+        (MEMORIA_V60.decenas[d] || 0)+1;
 
-// MEMORIA DECENA -> UNIDAD
+        MEMORIA_V60.unidades[u] =
+        (MEMORIA_V60.unidades[u] || 0)+1;
 
-if(!MEMORIA_V60.decenaPorUnidad[u]){
-    MEMORIA_V60.decenaPorUnidad[u] = {};
-}
+        if(!MEMORIA_V60.decenaPorUnidad[u]){
+            MEMORIA_V60.decenaPorUnidad[u]={};
+        }
 
-MEMORIA_V60.decenaPorUnidad[u][d] =
-(MEMORIA_V60.decenaPorUnidad[u][d] || 0) + 1;
+        MEMORIA_V60.decenaPorUnidad[u][d]=
+        (MEMORIA_V60.decenaPorUnidad[u][d]||0)+1;
+
 
         if(!MEMORIA_V60.transiciones[clave])
             MEMORIA_V60.transiciones[clave]={};
@@ -4146,23 +4134,29 @@ MEMORIA_V60.decenaPorUnidad[u][d] =
         if(!MEMORIA_V60.transiciones[clave][origen])
             MEMORIA_V60.transiciones[clave][origen]={};
 
+
         MEMORIA_V60.transiciones[clave][origen][destino]=
         (MEMORIA_V60.transiciones[clave][origen][destino]||0)+1;
+
 
         MEMORIA_V60.frecuencia[destino]=
         (MEMORIA_V60.frecuencia[destino]||0)+1;
 
-        
     }
+
 
     console.log(
         "MEMORIA V60 CARGADA",
-        MEMORIA_V60.total,
-        "registros"
+        MEMORIA_V60.total
     );
 
+
     return MEMORIA_V60;
-    }
+
+            }
+
+
+            
     
     //////////////////////////////////////////////////////
 // MOTOR IA V60

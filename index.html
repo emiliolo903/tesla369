@@ -4047,6 +4047,8 @@ let MEMORIA_V60 = {
 
     decenas:{},
 
+    decenaPorUnidad:{},
+
     total:0
 
 };
@@ -4064,22 +4066,36 @@ async function construirMemoriaHistoricaV60(){
 
     MEMORIA_V60 = {
 
-        transiciones:{},
+    transiciones:{},
 
-        frecuencia:{},
+    frecuencia:{},
 
-        unidades:{},
+    unidades:{},
 
-        decenas:{},
+    decenas:{},
 
-        total:historial.length
+    decenaPorUnidad:{},
 
-    };
+    total:historial.length
+
+};
+        
 
     for(let i=0;i<historial.length-1;i++){
 
         let actual = historial[i];
         let siguiente = historial[i+1];
+        
+        // MEMORIA DECENA -> UNIDAD
+
+if(!MEMORIA_V60.decenaPorUnidad[u]){
+
+    MEMORIA_V60.decenaPorUnidad[u]={};
+
+}
+
+MEMORIA_V60.decenaPorUnidad[u][d]=
+(MEMORIA_V60.decenaPorUnidad[u][d]||0)+1;
 
         if(
             !actual.numero ||
@@ -4257,13 +4273,32 @@ function aplicarOrientadorV60(
         let unidad =
         numero[1];
 
-        // Premio por unidad fuerte
-        peso +=
-        (MEMORIA_V60.unidades[unidad] || 0) * 0.6;
+        // Unidad
 
-        // Premio por decena fuerte
-        peso +=
-        (MEMORIA_V60.decenas[decena] || 0) * 0.4;
+peso +=
+(MEMORIA_V60.unidades[unidad]||0)*0.5;
+
+// Decena global
+
+peso +=
+(MEMORIA_V60.decenas[decena]||0)*0.2;
+
+// Decena histórica para esa unidad
+
+if(
+
+    MEMORIA_V60.decenaPorUnidad[unidad] &&
+
+    MEMORIA_V60.decenaPorUnidad[unidad][decena]
+
+){
+
+    peso +=
+    MEMORIA_V60
+    .decenaPorUnidad[unidad][decena]
+    *1.5;
+
+}
 
         nuevo[numero] = peso;
 

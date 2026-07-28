@@ -4174,7 +4174,12 @@ let MEMORIA_V60 = {
 // CONSTRUIR MEMORIA GLOBAL
 //////////////////////////////////////////////////////
 async function construirMemoriaHistoricaV60(){
-
+// Protección V60 contra historial vacío o incompleto
+if (!Array.isArray(historial) || historial.length < 2) {
+    MEMORIA_V60 = [];
+    return;
+    }
+    
     let historial =
     await leerV48(
         STORES_V48.historico
@@ -4193,6 +4198,10 @@ async function construirMemoriaHistoricaV60(){
 
 
     for(let i=0;i<historial.length-1;i++){
+        
+        if (!actual || !siguiente) {
+    continue;
+    }
 
         let actual = historial[i];
         let siguiente = historial[i+1];

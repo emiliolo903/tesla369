@@ -2792,10 +2792,12 @@ async function analizarTransicionTurnoV48(
                 salida===tesla
             ){
                 pesos[salida]+=15;
+
+                
             }
 
             
-            
+//////////////////////////////////////////////////
 // DÍGITOS FUERTES (CORREGIDO)
 //////////////////////////////////////////////////
 
@@ -2905,6 +2907,7 @@ if(
     return final;
 
         }
+        
     //////////////////////////////////////////////////
 // CORRECTOR IA V48.5
 //////////////////////////////////////////////////
@@ -2982,6 +2985,7 @@ async function corregirAmbosIAV48(ambos, turnoOrigen){
     return mejor;
 
 }
+        
       //////////////////////////////////////////////////
 // BUSCADOR ACOMPAÑANTE EXACTO V48.7
 //////////////////////////////////////////////////
@@ -3086,6 +3090,7 @@ async function buscarAcompananteExactoV48(base){
 
 
     }
+        
     //////////////////////////////////////////////////
 // FILTRO FINAL V49.1
 // PUNTADA FINAL
@@ -3119,6 +3124,7 @@ function aplicarFiltroFinalV491(ranking){
     return nuevoRanking;
 
 }
+        
     //////////////////////////////////////////////////////
 // CORRECTOR FINAL IA V52
 // AJUSTA ERRORES CERCANOS E INVERTIDOS

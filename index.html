@@ -356,7 +356,23 @@ Sin auditoría todavía
 
 <script>
 
+window.onerror=function(msg,url,line,col,error){
 
+alert(
+
+"ERROR JAVASCRIPT\n\n"+
+
+msg+
+
+"\n\nLínea: "+line+
+
+"\nColumna: "+col
+
+);
+
+return false;
+
+};
 
     
 //////////////////////////////////////////////////
@@ -6771,26 +6787,31 @@ APRENDIZAJE_V49
 }
 
 
-window.addEventListener(
-"load",
-async()=>{
 
-console.log("ARRANQUE LOAD OK");
+window.addEventListener("load", async()=>{
 
 try{
 
-await inicializarV48();
-    
-if(typeof cargarCerebroV71==="function"){
+    console.log("PASO 1");
 
-    //await cargarCerebroV71();
+    await inicializarV48();
 
-    console.log(
-    "🧠 CEREBRO V71 CARGADO"
+    console.log("PASO 2");
+
+}catch(error){
+
+    alert(
+    "ERROR:\n\n"+
+    error.message+
+    "\n\n"+
+    error.stack
     );
 
-}    
-    
+    console.log(error);
+
+}
+
+});
 
 
 }catch(e){

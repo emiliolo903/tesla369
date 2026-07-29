@@ -5084,52 +5084,38 @@ if(typeof aplicarDiagnosticoBloque12V60 === "function"){
 }
 
 
-// MOTOR V60 REAL
-
-let motorV60 =
-await aplicarMotorV60(
-    ranking,
-    bases,
-    turnoOrigen,
-    turnoDestino
-);
-    
-   //////////////////////////////////////////////////
-// BLOQUE 15-16 V71
-// SELECCIÓN MOTOR GANADOR
+//////////////////////////////////////////////////
+// MOTOR GANADOR V71
 //////////////////////////////////////////////////
 
-if(typeof competirMotoresV71 === "function"){
+await seleccionarMotorGanadorV71();
 
-    await competirMotoresV71();
+let motorV60 =
+await ejecutarMotorSeleccionadoV71(
 
-}
+    ranking,
 
+    bases,
 
-if(typeof seleccionarMotorGanadorV71 === "function"){
+    turnoOrigen,
 
-    let motorGanador =
-    seleccionarMotorGanadorV71();
+    turnoDestino
 
-
-    console.log(
-        "🏆 MOTOR GANADOR V71:",
-        motorGanador
-    );
-
-   } 
-
+);
 
 ranking =
 motorV60.ranking;
 
-
 let orden =
 motorV60.orden;
 
-
 let ambos =
 motorV60.ambos;
+
+console.log(
+"🧠 MOTOR UTILIZADO:",
+obtenerMotorActivoV71()
+);
     
 ambos =
 await corregirDecenaHistoricaV60(

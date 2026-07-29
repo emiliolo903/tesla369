@@ -389,11 +389,66 @@ const STORES_V48 = {
     auditoria: "auditoria",
     aprendizaje: "aprendizajeAutomatico",
     predicciones: "prediccionesIA"
+cerebroMotoresV71:"cerebroMotoresV71"
 };
 
 
 
 let dbV48=null;
+    
+    //////////////////////////////////////////////////
+// MEMORIA PERSISTENTE APRENDIZAJE V71
+//////////////////////////////////////////////////
+
+let CEREBRO_MOTORES_V71={};
+
+
+async function guardarAprendizajeV71(){
+
+await guardarV48(
+STORES_V48.cerebroMotoresV71,
+{
+id:1,
+fecha:new Date().toISOString(),
+cerebro:CEREBRO_MOTORES_V71,
+estado:"GUARDADO"
+}
+);
+
+console.log("APRENDIZAJE V71 GUARDADO");
+
+}
+
+
+
+async function cargarAprendizajeV71(){
+
+let datos =
+await leerV48(
+STORES_V48.cerebroMotoresV71
+);
+
+
+if(datos.length){
+
+CEREBRO_MOTORES_V71 =
+datos[0].cerebro;
+
+
+console.log(
+"MEMORIA V71 CARGADA",
+CEREBRO_MOTORES_V71
+);
+
+return true;
+
+}
+
+
+return false;
+
+}
+    
     
     //////////////////////////////////////////////////
 // APRENDIZAJE IA V49

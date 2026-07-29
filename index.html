@@ -218,9 +218,9 @@ OFF
 🔄 MOSTRAR MATRIZ
 </button>
     
- <button onclick="verificarBloque11()">
-🧠 Verificar Bloque 11
- </button>   
+ <button onclick="ejecutarSimuladorHistoricoV71()">
+🧪 ENTRENAR IA CON HISTÓRICO
+ </button>
 
 
 <button onclick="auditoriaSistema()">
@@ -5492,6 +5492,1263 @@ function mostrarLaboratorioV71(){
     );
 
     }
+    //////////////////////////////////////////////////
+// BLOQUE 14
+// SIMULADOR HISTÓRICO IA V71
+//////////////////////////////////////////////////
+
+async function simularHistoricoV71(){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+    if(!historial || historial.length<20){
+
+        console.log(
+        "NO HAY HISTÓRICO SUFICIENTE"
+        );
+
+        return;
+
+    }
+
+
+    let pruebas=0;
+
+
+    for(let i=0;i<historial.length-1;i++){
+
+
+        let actual =
+        historial[i];
+
+
+        let siguiente =
+        historial[i+1];
+
+
+        if(
+            !actual.numero ||
+            !siguiente.numero
+        )
+        continue;
+
+
+
+        let real =
+
+        String(siguiente.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+
+        // MOTOR V60
+
+        let prediccionV60=[];
+
+
+        let base =
+
+        String(actual.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+
+        if(
+        typeof analizarTransicionTurnoV48==="function"
+        ){
+
+            prediccionV60 =
+
+            await analizarTransicionTurnoV48(
+
+                base,
+
+                actual.turno,
+
+                historial
+
+            );
+
+        }
+
+
+
+        evaluarPrediccionV71(
+
+            "V60",
+
+            prediccionV60,
+
+            real
+
+        );
+
+
+        pruebas++;
+
+
+    }
+
+
+
+    LABORATORIO_V71.totalSimulaciones
+    += pruebas;
+
+
+
+    mostrarLaboratorioV71();
+
+
+
+    console.log(
+
+    "SIMULACIÓN HISTÓRICA TERMINADA",
+
+    pruebas
+
+    );
+
+
+}
+
+
+
+
+function evaluarPrediccionV71(
+
+    motor,
+
+    predicciones,
+
+    real
+
+){
+
+
+    if(
+    !predicciones ||
+    predicciones.length===0
+    ){
+
+        registrarMotorV71(
+            motor,
+            "fallo"
+        );
+
+        return;
+
+    }
+
+
+
+    let encontrado=false;
+
+
+
+    for(let p of predicciones){
+
+
+        p=
+        String(p)
+        .padStart(2,"0");
+
+
+
+        if(p===real){
+
+            registrarMotorV71(
+                motor,
+                "directo"
+            );
+
+            encontrado=true;
+
+            break;
+
+        }
+
+
+
+        if(
+        p===real[1]+real[0]
+        ){
+
+            registrarMotorV71(
+                motor,
+                "invertido"
+            );
+
+            encontrado=true;
+
+            break;
+
+        }
+
+
+
+        if(
+        p[1]===real[1]
+        ){
+
+            registrarMotorV71(
+                motor,
+                "cerca"
+            );
+
+            encontrado=true;
+
+            break;
+
+        }
+
+
+    }
+
+
+
+    if(!encontrado){
+
+        registrarMotorV71(
+            motor,
+            "fallo"
+        );
+
+    }
+
+
+}
+    //////////////////////////////////////////////////
+// BLOQUE 15
+// COMPETENCIA DE MOTORES IA V71
+//////////////////////////////////////////////////
+
+async function competirMotoresV71(){
+
+    let resultados={};
+
+
+    // MOTOR V60
+
+    resultados.V60 =
+    await ejecutarPruebaMotorV71(
+        "V60"
+    );
+
+
+    // MOTOR TRANSICIÓN
+
+    resultados.TRANSICION =
+    await ejecutarPruebaMotorV71(
+        "TRANSICION"
+    );
+
+
+
+    // MOTOR HISTÓRICO
+
+    resultados.HISTORICO =
+    await ejecutarPruebaMotorV71(
+        "HISTORICO"
+    );
+
+
+
+    console.log(
+
+    "COMPETENCIA MOTORES V71",
+
+    resultados
+
+    );
+
+
+
+    return resultados;
+
+}
+
+
+
+
+async function ejecutarPruebaMotorV71(
+motor
+){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+    let aciertos=0;
+
+    let total=0;
+
+
+
+    for(let i=0;i<historial.length-1;i++){
+
+
+        let actual =
+        historial[i];
+
+
+        let siguiente =
+        historial[i+1];
+
+
+        let real =
+        String(siguiente.numero)
+        .slice(-2);
+
+
+
+        let pred=[];
+
+
+
+        if(
+        motor==="V60"
+        ){
+
+            pred =
+            await analizarTransicionTurnoV48(
+
+                String(actual.numero)
+                .slice(-2),
+
+                actual.turno,
+
+                historial
+
+            );
+
+        }
+
+
+
+        for(let p of pred){
+
+
+            if(
+            String(p)
+            ===real
+            ){
+
+                aciertos++;
+
+                break;
+
+            }
+
+        }
+
+
+        total++;
+
+
+    }
+
+
+
+    return {
+
+        motor:motor,
+
+        pruebas:total,
+
+        aciertos:aciertos,
+
+        porcentaje:
+
+        (
+
+        aciertos /
+
+        Math.max(total,1)
+
+        )*100
+
+
+    };
+
+    }
+    
+    //////////////////////////////////////////////////
+// BLOQUE 16
+// SELECTOR INTELIGENTE DE MOTOR V71
+//////////////////////////////////////////////////
+
+function seleccionarMotorGanadorV71(){
+
+    let mejorMotor="V60";
+
+    let mejorPuntaje=-1;
+
+
+    for(let motor in LABORATORIO_V71.motores){
+
+
+        let datos =
+        LABORATORIO_V71.motores[motor];
+
+
+        let puntaje =
+
+        datos.directo*5 +
+
+        datos.invertido*3 +
+
+        datos.cerca*1 -
+
+        datos.fallo*2 +
+
+        datos.mejorRacha*2;
+
+
+
+        if(puntaje > mejorPuntaje){
+
+            mejorPuntaje=puntaje;
+
+            mejorMotor=motor;
+
+        }
+
+    }
+
+
+
+    LABORATORIO_V71.ganador =
+    mejorMotor;
+
+
+
+    console.log(
+
+    "MOTOR ELEGIDO V71:",
+
+    mejorMotor,
+
+    "PUNTAJE:",
+
+    mejorPuntaje
+
+    );
+
+
+
+    return mejorMotor;
+
+}
+
+
+
+
+
+function estadoMotorV71(){
+
+    let ganador =
+    seleccionarMotorGanadorV71();
+
+
+    return {
+
+        activo:ganador,
+
+        estadisticas:
+        LABORATORIO_V71.motores
+
+    };
+
+    }
+    //////////////////////////////////////////////////
+// BLOQUE 17
+// APRENDIZAJE CONTINUO IA V71
+//////////////////////////////////////////////////
+
+async function aprendizajeContinuoV71(){
+
+    if(
+    !PREDICCION_ACTUAL_V49 ||
+    !PREDICCION_ACTUAL_V49.ambos
+    ){
+
+        return;
+
+    }
+
+
+    let datos =
+
+    await leerV48(
+
+        STORES_V48.historico
+
+    );
+
+
+    if(datos.length===0)
+    return;
+
+
+
+    let ultimo =
+
+    datos[datos.length-1];
+
+
+
+    let real =
+
+    String(ultimo.numero)
+
+    .slice(-2)
+
+    .padStart(2,"0");
+
+
+
+    let predicciones =
+
+    PREDICCION_ACTUAL_V49.ambos;
+
+
+
+    for(let p of predicciones){
+
+
+        p=
+
+        String(p)
+
+        .padStart(2,"0");
+
+
+
+        if(p===real){
+
+
+            registrarMotorV71(
+
+                "V60",
+
+                "directo"
+
+            );
+
+
+        }
+
+        else if(
+
+        p===real[1]+real[0]
+
+        ){
+
+
+            registrarMotorV71(
+
+                "V60",
+
+                "invertido"
+
+            );
+
+
+        }
+
+        else if(
+
+        p[1]===real[1]
+
+        ){
+
+
+            registrarMotorV71(
+
+                "V60",
+
+                "cerca"
+
+            );
+
+
+        }
+
+        else{
+
+
+            registrarMotorV71(
+
+                "V60",
+
+                "fallo"
+
+            );
+
+
+        }
+
+
+    }
+
+
+
+    seleccionarMotorGanadorV71();
+
+
+
+    console.log(
+
+    "APRENDIZAJE CONTINUO V71 ACTUALIZADO"
+
+    );
+
+
+}
+    //////////////////////////////////////////////////
+// BLOQUE 18
+// CONEXIÓN MOTOR GANADOR V71
+//////////////////////////////////////////////////
+
+async function ejecutarMotorSeleccionadoV71(
+    ranking,
+    bases,
+    turnoOrigen,
+    turnoDestino
+){
+
+    let motorActivo =
+    seleccionarMotorGanadorV71();
+
+
+    console.log(
+        "MOTOR ACTIVO V71:",
+        motorActivo
+    );
+
+
+    let resultado;
+
+
+
+    switch(motorActivo){
+
+
+        case "V60":
+
+
+            resultado =
+            await aplicarMotorV60(
+                ranking,
+                bases,
+                turnoOrigen,
+                turnoDestino
+            );
+
+
+        break;
+
+
+
+        case "TRANSICION":
+
+
+            resultado =
+            await aplicarMotorTransicionV71(
+                ranking,
+                bases,
+                turnoOrigen,
+                turnoDestino
+            );
+
+
+        break;
+
+
+
+        case "HISTORICO":
+
+
+            resultado =
+            await aplicarMotorHistoricoV60(
+                ranking,
+                bases[0],
+                turnoOrigen,
+                turnoDestino
+            );
+
+
+        break;
+
+
+
+        default:
+
+
+            resultado =
+            await aplicarMotorV60(
+                ranking,
+                bases,
+                turnoOrigen,
+                turnoDestino
+            );
+
+
+        break;
+
+    }
+
+
+
+    return resultado;
+
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// ACTUALIZAR ESTADO DEL MOTOR
+//////////////////////////////////////////////////
+
+function mostrarMotorActivoV71(){
+
+
+let motor =
+seleccionarMotorGanadorV71();
+
+
+let salida =
+document.getElementById(
+"resultado"
+);
+
+
+
+if(salida){
+
+
+salida.innerText +=
+
+
+"\n\n⚙️ MOTOR ELEGIDO V71: "+
+motor;
+
+
+}
+
+
+return motor;
+
+
+        }
+    //////////////////////////////////////////////////
+// BLOQUE 19
+// LABORATORIO SIMULADOR HISTÓRICO V71
+//////////////////////////////////////////////////
+
+let SIMULADOR_V71 = {
+
+    pruebas:0,
+
+    directo:0,
+
+    invertido:0,
+
+    cerca:0,
+
+    fallo:0,
+
+    mejorRacha:0,
+
+    rachaActual:0
+
+};
+
+
+
+async function ejecutarSimuladorHistoricoV71(){
+
+
+let historial =
+
+await leerV48(
+
+STORES_V48.historico
+
+);
+
+
+
+if(!historial || historial.length < 20){
+
+console.log(
+"NO HAY HISTORIAL SUFICIENTE"
+);
+
+return;
+
+}
+
+
+
+SIMULADOR_V71={
+
+    pruebas:0,
+    directo:0,
+    invertido:0,
+    cerca:0,
+    fallo:0,
+    mejorRacha:0,
+    rachaActual:0
+
+};
+
+
+
+
+for(
+let i=10;
+i<historial.length;
+i++
+){
+
+
+let pasado =
+
+historial.slice(
+0,
+i
+);
+
+
+
+let real =
+
+String(
+historial[i].numero
+)
+
+.slice(-2)
+
+.padStart(2,"0");
+
+
+
+let bases =
+
+pasado
+.slice(-20)
+.map(x=>
+
+String(x.numero)
+.slice(-2)
+
+);
+
+
+
+let ranking={};
+
+
+
+let turnoOrigen =
+
+historial[i-1].turno;
+
+
+
+let turnoDestino =
+
+historial[i].turno;
+
+
+
+let resultado =
+
+await ejecutarMotorSeleccionadoV71(
+
+ranking,
+
+bases,
+
+turnoOrigen,
+
+turnoDestino
+
+);
+
+
+
+if(!resultado || !resultado.ambos)
+continue;
+
+
+
+let encontro=false;
+
+
+
+for(let p of resultado.ambos){
+
+
+p=String(p)
+.padStart(2,"0");
+
+
+
+if(p===real){
+
+
+SIMULADOR_V71.directo++;
+
+encontro=true;
+
+
+}
+
+else if(
+p===real[1]+real[0]
+){
+
+
+SIMULADOR_V71.invertido++;
+
+encontro=true;
+
+
+}
+
+else if(
+p[1]===real[1]
+){
+
+
+SIMULADOR_V71.cerca++;
+
+encontro=true;
+
+
+}
+
+
+}
+
+
+
+SIMULADOR_V71.pruebas++;
+
+
+
+if(encontro){
+
+
+SIMULADOR_V71.rachaActual++;
+
+
+if(
+SIMULADOR_V71.rachaActual >
+SIMULADOR_V71.mejorRacha
+){
+
+SIMULADOR_V71.mejorRacha =
+SIMULADOR_V71.rachaActual;
+
+}
+
+
+}
+else{
+
+
+SIMULADOR_V71.fallo++;
+
+SIMULADOR_V71.rachaActual=0;
+
+
+}
+
+
+}
+
+
+
+console.log(
+
+"SIMULADOR V71 TERMINADO",
+
+SIMULADOR_V71
+
+);
+
+
+
+mostrarV48(
+
+`
+🧪 SIMULADOR HISTÓRICO V71
+
+Pruebas:
+${SIMULADOR_V71.pruebas}
+
+
+Directos:
+${SIMULADOR_V71.directo}
+
+
+Invertidos:
+${SIMULADOR_V71.invertido}
+
+
+Cerca:
+${SIMULADOR_V71.cerca}
+
+
+Fallos:
+${SIMULADOR_V71.fallo}
+
+
+🔥 Mejor racha:
+${SIMULADOR_V71.mejorRacha}
+
+`
+
+);
+
+
+
+return SIMULADOR_V71;
+
+
+}
+    //////////////////////////////////////////////////
+// BLOQUE 20
+// CEREBRO COMPETITIVO DE MOTORES V71
+//////////////////////////////////////////////////
+
+
+let CEREBRO_MOTORES_V71 = {
+
+
+    V60:{
+        aciertos:0,
+        pruebas:0,
+        peso:50
+    },
+
+
+    TRANSICION:{
+        aciertos:0,
+        pruebas:0,
+        peso:50
+    },
+
+
+    HISTORICO:{
+        aciertos:0,
+        pruebas:0,
+        peso:50
+    }
+
+
+};
+
+
+
+
+//////////////////////////////////////////////////
+// REGISTRAR RENDIMIENTO MOTOR
+//////////////////////////////////////////////////
+
+function registrarRendimientoMotorV71(
+motor,
+resultado
+){
+
+
+if(!CEREBRO_MOTORES_V71[motor])
+return;
+
+
+
+CEREBRO_MOTORES_V71[motor].pruebas++;
+
+
+
+if(resultado){
+
+CEREBRO_MOTORES_V71[motor].aciertos++;
+
+}
+
+
+
+let precision =
+
+CEREBRO_MOTORES_V71[motor].aciertos /
+
+Math.max(
+CEREBRO_MOTORES_V71[motor].pruebas,
+1
+);
+
+
+
+
+// subir o bajar peso
+
+
+if(precision >= 0.20){
+
+
+CEREBRO_MOTORES_V71[motor].peso +=2;
+
+
+}
+
+
+if(precision < 0.10){
+
+
+CEREBRO_MOTORES_V71[motor].peso -=2;
+
+
+}
+
+
+
+if(
+CEREBRO_MOTORES_V71[motor].peso>100
+)
+
+CEREBRO_MOTORES_V71[motor].peso=100;
+
+
+
+if(
+CEREBRO_MOTORES_V71[motor].peso<1
+)
+
+CEREBRO_MOTORES_V71[motor].peso=1;
+
+
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// ELEGIR MOTOR GANADOR
+//////////////////////////////////////////////////
+
+function seleccionarMotorGanadorV71(){
+
+
+let mejor="V60";
+
+
+let pesoMayor=0;
+
+
+
+for(let motor in CEREBRO_MOTORES_V71){
+
+
+let peso =
+
+CEREBRO_MOTORES_V71[motor].peso;
+
+
+
+if(peso>pesoMayor){
+
+
+pesoMayor=peso;
+
+mejor=motor;
+
+
+}
+
+
+}
+
+
+
+console.log(
+
+"MOTOR GANADOR V71",
+
+mejor,
+
+pesoMayor
+
+);
+
+
+
+return mejor;
+
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// MOSTRAR ESTADO COMPETENCIA
+//////////////////////////////////////////////////
+
+function mostrarCompetenciaV71(){
+
+
+console.log(
+
+"CEREBRO MOTORES",
+
+CEREBRO_MOTORES_V71
+
+);
+
+
+mostrarV48(
+
+`
+🧠 COMPETENCIA MOTORES V71
+
+
+V60:
+${CEREBRO_MOTORES_V71.V60.peso}%
+
+
+TRANSICIÓN:
+${CEREBRO_MOTORES_V71.TRANSICION.peso}%
+
+
+HISTÓRICO:
+${CEREBRO_MOTORES_V71.HISTORICO.peso}%
+
+
+GANADOR:
+${seleccionarMotorGanadorV71()}
+
+`
+
+);
+
+
+}
     
     //////////////////////////////////////////////////
 // GUARDAR / CARGAR APRENDIZAJE PT V51

@@ -5761,50 +5761,47 @@ function evaluarPrediccionV71(
 
 }
     //////////////////////////////////////////////////
-// BLOQUE 15
-// COMPETENCIA DE MOTORES IA V71
+// BLOQUE 15 V71.1
+// COMPETENCIA DE MOTORES
 //////////////////////////////////////////////////
 
 async function competirMotoresV71(){
 
-    let resultados={};
+    let resultados = {};
 
-
-    // MOTOR V60
-
-    resultados.V60 =
-    await ejecutarPruebaMotorV71(
-        "V60"
-    );
-
-
-    // MOTOR TRANSICIÓN
-
-    resultados.TRANSICION =
-    await ejecutarPruebaMotorV71(
-        "TRANSICION"
-    );
-
-
-
-    // MOTOR HISTÓRICO
-
-    resultados.HISTORICO =
-    await ejecutarPruebaMotorV71(
+    let motores = [
+        "V60",
+        "TRANSICION",
         "HISTORICO"
-    );
+    ];
 
+    for(let motor of motores){
 
+        try{
 
-    console.log(
+            resultados[motor] =
+            await ejecutarPruebaMotorV71(motor);
 
-    "COMPETENCIA MOTORES V71",
+        }catch(e){
 
-    resultados
+            console.log(
+                "ERROR MOTOR:",
+                motor,
+                e
+            );
 
-    );
+            resultados[motor]={
+                motor:motor,
+                pruebas:0,
+                aciertos:0,
+                porcentaje:0
+            };
 
+        }
 
+    }
+
+    console.table(resultados);
 
     return resultados;
 
@@ -5812,147 +5809,168 @@ async function competirMotoresV71(){
 
 
 
+//////////////////////////////////////////////////
+// EJECUTAR PRUEBA DE UN MOTOR
+//////////////////////////////////////////////////
 
-async function ejecutarPruebaMotorV71(
-motor
-){
+async function ejecutarPruebaMotorV71(motor){
 
     let historial =
     await leerV48(
         STORES_V48.historico
     );
 
+    if(!historial || historial.length<20){
 
-    let aciertos=0;
+        return{
 
-    let total=0;
+            motor:motor,
 
+            pruebas:0,
 
+            aciertos:0,
 
-    for(let i=0;i<historial.length-1;i++){
+            porcentaje:0
 
-
-        let actual =
-        historial[i];
-
-
-        let siguiente =
-        historial[i+1];
-
-
-        let real =
-        String(siguiente.numero)
-        .slice(-2);
-
-
-
-        let pred=[];
-
-
-
-        if(
-        motor==="V60"
-        ){
-
-            pred =
-            await analizarTransicionTurnoV48(
-
-                String(actual.numero)
-                .slice(-2),
-
-                actual.turno,
-
-                historial
-
-            );
-
-        }
-
-
-
-        for(let p of pred){
-
-
-            if(
-            String(p)
-            ===real
-            ){
-
-                aciertos++;
-
-                break;
-
-            }
-
-        }
-
-
-        total++;
-
+        };
 
     }
 
+    let pruebas=0;
 
+    let aciertos=0;
 
-    return {
+    for(let i=0;i<historial.length-1;i++){
+
+        let actual=
+        historial[i];
+
+        let siguiente=
+        historial[i+1];
+
+        if(
+            !actual.numero ||
+            !siguiente.numero
+        )
+        continue;
+
+        let real=
+        String(siguiente.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        let predicciones=[];
+
+        switch(motor){
+
+            case "V60":
+
+                predicciones=
+                await analizarTransicionTurnoV48(
+
+                    String(actual.numero)
+                    .slice(-2),
+
+                    actual.turno,
+
+                    historial
+
+                );
+
+            break;
+
+            case "TRANSICION":
+
+                predicciones=
+                await analizarTransicionTurnoV48(
+
+                    String(actual.numero)
+                    .slice(-2),
+
+                    actual.turno,
+
+                    historial
+
+                );
+
+            break;
+
+            case "HISTORICO":
+
+                predicciones=
+                await buscarAcompananteExactoV48(
+
+                    String(actual.numero)
+                    .slice(-2)
+
+                );
+
+            break;
+
+        }
+
+        pruebas++;
+
+        if(
+            predicciones &&
+            predicciones.includes(real)
+        ){
+
+            aciertos++;
+
+        }
+
+    }
+
+    return{
 
         motor:motor,
 
-        pruebas:total,
+        pruebas:pruebas,
 
         aciertos:aciertos,
 
         porcentaje:
+        Number(
 
-        (
+            (
+                aciertos/
+                Math.max(pruebas,1)
+            )*100
 
-        aciertos /
-
-        Math.max(total,1)
-
-        )*100
-
+        ).toFixed(2)
 
     };
 
     }
+            
     
-    //////////////////////////////////////////////////
-// BLOQUE 16
-// SELECTOR INTELIGENTE DE MOTOR V71
+//////////////////////////////////////////////////
+// BLOQUE 16 V71.1
+// SELECTOR INTELIGENTE DE MOTOR
 //////////////////////////////////////////////////
 
-function seleccionarMotorGanadorV71(){
+let MOTOR_ACTIVO_V71 = "V60";
+
+async function seleccionarMotorGanadorV71(){
+
+    let resultados =
+    await competirMotoresV71();
 
     let mejorMotor="V60";
 
-    let mejorPuntaje=-1;
+    let mejorPorcentaje=-1;
 
+    for(let motor in resultados){
 
-    for(let motor in LABORATORIO_V71.motores){
+        let porcentaje =
+        Number(
+            resultados[motor].porcentaje
+        );
 
+        if(porcentaje>mejorPorcentaje){
 
-        let datos =
-        LABORATORIO_V71.motores[motor];
-
-
-        let puntaje =
-
-        datos.directo*5 +
-
-        datos.invertido*3 +
-
-        datos.cerca*1 -
-
-        datos.fallo*2 +
-
-        datos.mejorRacha*2;
-
-
-
-        if(puntaje > mejorPuntaje){
-
-            mejorPuntaje=puntaje;
+            mejorPorcentaje=porcentaje;
 
             mejorMotor=motor;
 
@@ -5960,26 +5978,20 @@ function seleccionarMotorGanadorV71(){
 
     }
 
-
-
-    LABORATORIO_V71.ganador =
+    MOTOR_ACTIVO_V71 =
     mejorMotor;
-
-
 
     console.log(
 
-    "MOTOR ELEGIDO V71:",
+        "🏆 MOTOR GANADOR V71:",
 
-    mejorMotor,
+        mejorMotor,
 
-    "PUNTAJE:",
+        "PRECISIÓN:",
 
-    mejorPuntaje
+        mejorPorcentaje+"%"
 
     );
-
-
 
     return mejorMotor;
 
@@ -5987,24 +5999,40 @@ function seleccionarMotorGanadorV71(){
 
 
 
+//////////////////////////////////////////////////
+// DEVOLVER MOTOR ACTUAL
+//////////////////////////////////////////////////
+
+function obtenerMotorActivoV71(){
+
+    return MOTOR_ACTIVO_V71;
+
+}
 
 
-function estadoMotorV71(){
 
-    let ganador =
-    seleccionarMotorGanadorV71();
+//////////////////////////////////////////////////
+// MOSTRAR ESTADO
+//////////////////////////////////////////////////
 
+function mostrarEstadoMotorV71(){
 
-    return {
+    mostrarV48(
 
-        activo:ganador,
+`🧠 MOTOR IA ACTIVO
 
-        estadisticas:
-        LABORATORIO_V71.motores
+Motor:
+${MOTOR_ACTIVO_V71}
 
-    };
+Estado:
+COMPITIENDO AUTOMÁTICAMENTE`
 
-    }
+    );
+
+}
+    
+
+    
     //////////////////////////////////////////////////
 // BLOQUE 17
 // APRENDIZAJE CONTINUO IA V71
@@ -6150,9 +6178,9 @@ async function aprendizajeContinuoV71(){
 
 
 }
-    //////////////////////////////////////////////////
-// BLOQUE 18
-// CONEXIÓN MOTOR GANADOR V71
+//////////////////////////////////////////////////
+// BLOQUE 18 V71.1
+// EJECUTAR MOTOR GANADOR
 //////////////////////////////////////////////////
 
 async function ejecutarMotorSeleccionadoV71(
@@ -6162,97 +6190,42 @@ async function ejecutarMotorSeleccionadoV71(
     turnoDestino
 ){
 
-    let motorActivo =
-    seleccionarMotorGanadorV71();
+    let motor = obtenerMotorActivoV71();
 
-
-    console.log(
-        "MOTOR ACTIVO V71:",
-        motorActivo
-    );
-
-
-    let resultado;
-
-
-
-    switch(motorActivo){
-
-
-        case "V60":
-
-
-            resultado =
-            await aplicarMotorV60(
-                ranking,
-                bases,
-                turnoOrigen,
-                turnoDestino
-            );
-
-
-        break;
-
-
+    switch(motor){
 
         case "TRANSICION":
 
-
-            resultado =
-            await aplicarMotorTransicionV71(
+            return await aplicarMotorV60(
                 ranking,
                 bases,
                 turnoOrigen,
                 turnoDestino
             );
-
-
-        break;
-
-
 
         case "HISTORICO":
 
-
-            resultado =
-            await aplicarMotorHistoricoV60(
-                ranking,
-                bases[0],
-                turnoOrigen,
-                turnoDestino
-            );
-
-
-        break;
-
-
-
-        default:
-
-
-            resultado =
-            await aplicarMotorV60(
+            return await aplicarMotorV60(
                 ranking,
                 bases,
                 turnoOrigen,
                 turnoDestino
             );
 
+        case "V60":
 
-        break;
+        default:
+
+            return await aplicarMotorV60(
+                ranking,
+                bases,
+                turnoOrigen,
+                turnoDestino
+            );
 
     }
 
-
-
-    return resultado;
-
-
 }
-
-
-
-
 
 //////////////////////////////////////////////////
 // ACTUALIZAR ESTADO DEL MOTOR
@@ -6568,225 +6541,118 @@ return SIMULADOR_V71;
 
 
 }
-    //////////////////////////////////////////////////
-// BLOQUE 20
-// CEREBRO COMPETITIVO DE MOTORES V71
+    
+//////////////////////////////////////////////////
+// BLOQUE 20 V71.1
+// CEREBRO COMPETITIVO
 //////////////////////////////////////////////////
 
+let CEREBRO_MOTORES_V71={
 
-let CEREBRO_MOTORES_V71 = {
+    motorActivo:"V60",
 
+    historial:[],
 
-    V60:{
-        aciertos:0,
-        pruebas:0,
-        peso:50
-    },
-
-
-    TRANSICION:{
-        aciertos:0,
-        pruebas:0,
-        peso:50
-    },
-
-
-    HISTORICO:{
-        aciertos:0,
-        pruebas:0,
-        peso:50
-    }
-
+    cambios:0
 
 };
 
 
 
+async function actualizarCerebroMotoresV71(){
 
-//////////////////////////////////////////////////
-// REGISTRAR RENDIMIENTO MOTOR
-//////////////////////////////////////////////////
+    let resultados =
+    await competirMotoresV71();
 
-function registrarRendimientoMotorV71(
-motor,
-resultado
-){
+    let mejor="V60";
 
+    let mayor=-1;
 
-if(!CEREBRO_MOTORES_V71[motor])
-return;
+    for(let motor in resultados){
 
+        let p=
+        Number(
+            resultados[motor].porcentaje
+        );
 
+        if(p>mayor){
 
-CEREBRO_MOTORES_V71[motor].pruebas++;
+            mayor=p;
 
+            mejor=motor;
 
+        }
 
-if(resultado){
+    }
 
-CEREBRO_MOTORES_V71[motor].aciertos++;
+    if(
+        mejor!=CEREBRO_MOTORES_V71.motorActivo
+    ){
 
-}
+        CEREBRO_MOTORES_V71.motorActivo=
+        mejor;
 
+        CEREBRO_MOTORES_V71.cambios++;
 
+    }
 
-let precision =
+    MOTOR_ACTIVO_V71=
+    CEREBRO_MOTORES_V71.motorActivo;
 
-CEREBRO_MOTORES_V71[motor].aciertos /
+    CEREBRO_MOTORES_V71.historial.push({
 
-Math.max(
-CEREBRO_MOTORES_V71[motor].pruebas,
-1
-);
+        fecha:new Date().toISOString(),
 
+        motor:MOTOR_ACTIVO_V71,
 
+        precision:mayor
 
+    });
 
-// subir o bajar peso
+    await guardarV48(
 
+        STORES_V48.aprendizaje,
 
-if(precision >= 0.20){
+        {
 
+            tipo:"CEREBRO_V71",
 
-CEREBRO_MOTORES_V71[motor].peso +=2;
+            datos:CEREBRO_MOTORES_V71,
 
+            fecha:new Date()
 
-}
+        }
 
-
-if(precision < 0.10){
-
-
-CEREBRO_MOTORES_V71[motor].peso -=2;
-
-
-}
-
-
-
-if(
-CEREBRO_MOTORES_V71[motor].peso>100
-)
-
-CEREBRO_MOTORES_V71[motor].peso=100;
-
-
-
-if(
-CEREBRO_MOTORES_V71[motor].peso<1
-)
-
-CEREBRO_MOTORES_V71[motor].peso=1;
-
-
+    );
 
 }
 
 
 
+async function cargarCerebroMotoresV71(){
 
-//////////////////////////////////////////////////
-// ELEGIR MOTOR GANADOR
-//////////////////////////////////////////////////
+    let datos=
+    await leerV48(
+        STORES_V48.aprendizaje
+    );
 
-function seleccionarMotorGanadorV71(){
+    for(let d of datos){
 
+        if(d.tipo=="CEREBRO_V71"){
 
-let mejor="V60";
+            CEREBRO_MOTORES_V71=
+            d.datos;
 
+            MOTOR_ACTIVO_V71=
+            CEREBRO_MOTORES_V71.motorActivo;
 
-let pesoMayor=0;
+        }
 
-
-
-for(let motor in CEREBRO_MOTORES_V71){
-
-
-let peso =
-
-CEREBRO_MOTORES_V71[motor].peso;
-
-
-
-if(peso>pesoMayor){
-
-
-pesoMayor=peso;
-
-mejor=motor;
-
+    }
 
 }
 
 
-}
-
-
-
-console.log(
-
-"MOTOR GANADOR V71",
-
-mejor,
-
-pesoMayor
-
-);
-
-
-
-return mejor;
-
-
-}
-
-
-
-
-//////////////////////////////////////////////////
-// MOSTRAR ESTADO COMPETENCIA
-//////////////////////////////////////////////////
-
-function mostrarCompetenciaV71(){
-
-
-console.log(
-
-"CEREBRO MOTORES",
-
-CEREBRO_MOTORES_V71
-
-);
-
-
-mostrarV48(
-
-`
-🧠 COMPETENCIA MOTORES V71
-
-
-V60:
-${CEREBRO_MOTORES_V71.V60.peso}%
-
-
-TRANSICIÓN:
-${CEREBRO_MOTORES_V71.TRANSICION.peso}%
-
-
-HISTÓRICO:
-${CEREBRO_MOTORES_V71.HISTORICO.peso}%
-
-
-GANADOR:
-${seleccionarMotorGanadorV71()}
-
-`
-
-);
-
-
-}
-    
     //////////////////////////////////////////////////
 // GUARDAR / CARGAR APRENDIZAJE PT V51
 //////////////////////////////////////////////////

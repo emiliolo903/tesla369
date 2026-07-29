@@ -4793,6 +4793,80 @@ async function obtenerTercerAmbosHistoricoV60(
 
 }
     
+//////////////////////////////////////////////////
+// CORRECTOR INTELIGENTE DE DECENA V60
+//////////////////////////////////////////////////
+
+async function corregirDecenaHistoricaV60(
+    ambos,
+    turnoOrigen,
+    turnoDestino
+){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    for(let i=0;i<2;i++){
+
+        let numero =
+        String(ambos[i])
+        .padStart(2,"0");
+
+        let unidad =
+        numero[1];
+
+        let pesos={};
+
+        for(let j=0;j<historial.length-1;j++){
+
+            let actual=historial[j];
+            let siguiente=historial[j+1];
+
+            if(
+                actual.turno!==turnoOrigen
+            ) continue;
+
+            if(
+                siguiente.turno!==turnoDestino
+            ) continue;
+
+            let salida=
+            String(siguiente.numero)
+            .slice(-2)
+            .padStart(2,"0");
+
+            if(
+                salida[1]!==unidad
+            ) continue;
+
+            pesos[salida]=
+            (pesos[salida]||0)+1;
+
+        }
+
+        let mejor=numero;
+        let mejorPeso=0;
+
+        for(let n in pesos){
+
+            if(pesos[n]>mejorPeso){
+
+                mejorPeso=pesos[n];
+                mejor=n;
+
+            }
+
+        }
+
+        ambos[i]=mejor;
+
+    }
+
+    return ambos;
+
+    }
     
 //////////////////////////////////////////////////
 // GENERADOR IA V60
@@ -4964,6 +5038,17 @@ motorV60.orden;
 
 let ambos =
 motorV60.ambos;
+    
+ambos =
+await corregirDecenaHistoricaV60(
+
+    ambos,
+
+    turnoOrigen,
+
+    turnoDestino
+
+);
     
  let terceroHistorico =
 await obtenerTercerAmbosHistoricoV60(

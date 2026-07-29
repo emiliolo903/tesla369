@@ -4739,6 +4739,60 @@ async function corregirAmbosExactosV60(ranking){
     return ranking;
 
 }
+    //////////////////////////////////////////////////
+// TERCER AMBOS HISTÓRICO V60
+//////////////////////////////////////////////////
+
+async function obtenerTercerAmbosHistoricoV60(
+    bases,
+    turnoOrigen,
+    turnoDestino,
+    usados
+){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    let ranking={};
+
+    for(let base of bases){
+
+        let candidatos =
+        await analizarTransicionTurnoV48(
+            base,
+            turnoOrigen,
+            historial
+        );
+
+        for(let n of candidatos){
+
+            n=String(n).padStart(2,"0");
+
+            if(usados.includes(n))
+                continue;
+
+            ranking[n]=
+            (ranking[n]||0)+1;
+
+        }
+
+    }
+
+    let orden=
+    Object.keys(ranking)
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    );
+
+    return orden.length
+        ? orden[0]
+        : null;
+
+}
+    
     
 //////////////////////////////////////////////////
 // GENERADOR IA V60
@@ -4910,6 +4964,25 @@ motorV60.orden;
 
 let ambos =
 motorV60.ambos;
+    
+ let terceroHistorico =
+await obtenerTercerAmbosHistoricoV60(
+
+    bases,
+
+    turnoOrigen,
+
+    turnoDestino,
+
+    [ambos[0],ambos[1]]
+
+);
+
+if(terceroHistorico){
+
+    ambos[2]=terceroHistorico;
+
+}   
 
     //////////////////////////////////////////////////
 // BLOQUE 3

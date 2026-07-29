@@ -5351,6 +5351,147 @@ MEMORIA HISTÓRICA + TRANSICIÓN + ACOMPAÑANTES
 
 }
 
+    //////////////////////////////////////////////////
+// BLOQUE 13
+// LABORATORIO IA V71
+//////////////////////////////////////////////////
+
+let LABORATORIO_V71={
+
+    motores:{},
+
+    ganador:"",
+
+    totalSimulaciones:0
+
+};
+
+function registrarMotorV71(
+    motor,
+    tipo
+){
+
+    if(!LABORATORIO_V71.motores[motor]){
+
+        LABORATORIO_V71.motores[motor]={
+
+            directo:0,
+            invertido:0,
+            cerca:0,
+            fallo:0,
+            racha:0,
+            mejorRacha:0,
+            precision:0
+
+        };
+
+    }
+
+    let m=
+    LABORATORIO_V71.motores[motor];
+
+    if(tipo=="directo"){
+
+        m.directo++;
+        m.racha++;
+
+        if(m.racha>m.mejorRacha){
+            m.mejorRacha=m.racha;
+        }
+
+    }
+
+    else if(tipo=="invertido"){
+
+        m.invertido++;
+        m.racha++;
+
+    }
+
+    else if(tipo=="cerca"){
+
+        m.cerca++;
+        m.racha=0;
+
+    }
+
+    else{
+
+        m.fallo++;
+        m.racha=0;
+
+    }
+
+    let total=
+
+    m.directo+
+
+    m.invertido+
+
+    m.cerca+
+
+    m.fallo;
+
+    m.precision=
+
+    (
+
+        m.directo*1+
+
+        m.invertido*0.70+
+
+        m.cerca*0.30
+
+    )/
+
+    Math.max(total,1);
+
+}
+
+function obtenerMejorMotorV71(){
+
+    let mejor="";
+
+    let mayor=-1;
+
+    for(let nombre in LABORATORIO_V71.motores){
+
+        let p=
+
+        LABORATORIO_V71.motores[nombre]
+        .precision;
+
+        if(p>mayor){
+
+            mayor=p;
+
+            mejor=nombre;
+
+        }
+
+    }
+
+    LABORATORIO_V71.ganador=mejor;
+
+    return mejor;
+
+}
+
+function mostrarLaboratorioV71(){
+
+    console.table(
+        LABORATORIO_V71.motores
+    );
+
+    console.log(
+
+        "MOTOR GANADOR:",
+
+        obtenerMejorMotorV71()
+
+    );
+
+    }
     
     //////////////////////////////////////////////////
 // GUARDAR / CARGAR APRENDIZAJE PT V51

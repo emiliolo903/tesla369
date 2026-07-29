@@ -1082,6 +1082,18 @@ await construirMatrizHistoricaV48();
 
 await construirMatrizProvinciasV48();
     
+ // ENTRENAMIENTO CEREBRO V71 DESDE PDF
+
+if(typeof aprendizajeContinuoV71 === "function"){
+
+    await aprendizajeContinuoV71();
+
+    console.log(
+        "🧠 APRENDIZAJE CONTINUO V71 COMPLETO"
+    );
+
+}   
+    
     SISTEMA_V48.memoria=true;
 
 document.getElementById(
@@ -5081,6 +5093,31 @@ await aplicarMotorV60(
     turnoOrigen,
     turnoDestino
 );
+    
+   //////////////////////////////////////////////////
+// BLOQUE 15-16 V71
+// SELECCIÓN MOTOR GANADOR
+//////////////////////////////////////////////////
+
+if(typeof competirMotoresV71 === "function"){
+
+    await competirMotoresV71();
+
+}
+
+
+if(typeof seleccionarMotorGanadorV71 === "function"){
+
+    let motorGanador =
+    seleccionarMotorGanadorV71();
+
+
+    console.log(
+        "🏆 MOTOR GANADOR V71:",
+        motorGanador
+    );
+
+   } 
 
 
 ranking =
@@ -6891,8 +6928,18 @@ console.log("ARRANQUE LOAD OK");
 try{
 
 await inicializarV48();
+    
+if(typeof cargarCerebroV71==="function"){
 
-console.log("INICIALIZAR V48 TERMINO OK");
+    await cargarCerebroV71();
+
+    console.log(
+    "🧠 CEREBRO V71 CARGADO"
+    );
+
+}    
+    
+
 
 }catch(e){
 

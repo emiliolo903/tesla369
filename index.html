@@ -5192,6 +5192,7 @@ ambos.map(n=>
 );
 
 
+    
 // Si por algún motivo queda vacío,
 // recuperar del ranking
 
@@ -5207,7 +5208,36 @@ if(!ambos.length){
 
 }
 
+//////////////////////////////////////////////////
+// AMBOS 4 ALTERNATIVO IA V60.1
+// BUSCA EL SIGUIENTE CANDIDATO DEL RANKING
+//////////////////////////////////////////////////
 
+let cuartoAmbos = null;
+
+for(let n of orden){
+
+    n = String(n)
+    .padStart(2,"0");
+
+
+    if(!ambos.includes(n)){
+
+        cuartoAmbos = n;
+
+        break;
+
+    }
+
+}
+
+
+if(cuartoAmbos){
+
+    ambos.push(cuartoAmbos);
+
+}
+    
 console.log(
 "V60 RESULTADO AMBOS",
 ambos

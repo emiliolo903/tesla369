@@ -1,1 +1,10542 @@
+<!DOCTYPE html>
+<html lang="es">
 
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>
+EMI TESLA PRO V48 FINAL LIMPIO
+</title>
+
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+
+body{
+
+margin:0;
+padding:15px;
+background:#0d0d0d;
+color:white;
+font-family:Arial,sans-serif;
+
+}
+
+
+h1{
+
+text-align:center;
+color:#00ff99;
+
+}
+
+
+h2{
+
+color:#00ff99;
+font-size:20px;
+
+}
+
+
+.card{
+
+background:#1b1b1b;
+border-radius:12px;
+border:1px solid #333;
+padding:15px;
+margin-bottom:15px;
+
+}
+
+
+button{
+
+width:100%;
+padding:12px;
+margin-top:8px;
+border:0;
+border-radius:8px;
+background:#008f5a;
+color:white;
+font-size:16px;
+font-weight:bold;
+
+}
+
+
+input,
+select{
+
+width:100%;
+padding:10px;
+margin-top:8px;
+background:#111;
+color:white;
+border:1px solid #555;
+border-radius:8px;
+
+}
+
+
+.grid{
+
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
+
+}
+
+
+.estado{
+
+background:#111;
+padding:10px;
+border-radius:8px;
+
+}
+
+
+.resultado{
+
+background:#000;
+padding:15px;
+border-radius:10px;
+white-space:pre-wrap;
+min-height:220px;
+
+}
+
+
+.progreso{
+
+background:#111;
+padding:10px;
+border-radius:8px;
+min-height:100px;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<h1>
+
+🚀 EMI TESLA PRO V48
+
+<br>
+
+🧠 IA HISTÓRICA COMPLETA
+
+</h1>
+
+
+
+<div class="card">
+
+<h2>
+📊 ESTADO SISTEMA
+</h2>
+
+
+<div class="grid">
+
+
+<div class="estado">
+REGISTROS
+<br>
+<span id="totalRegistros">0</span>
+</div>
+
+
+<div class="estado">
+BASE PDF
+<br>
+<span id="estadoBase">
+ESPERANDO
+</span>
+</div>
+
+
+<div class="estado">
+MEMORIA IA
+<br>
+<span id="estadoMemoria">
+OFF
+</span>
+</div>
+
+
+<div class="estado">
+MATRIZ
+<br>
+<span id="estadoMatriz">
+OFF
+</span>
+</div>
+
+
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>
+🎯 CONTROL PRINCIPAL
+</h2>
+
+
+<button onclick="generarResultadoIA()">
+🧠 GENERAR IA
+</button>
+    
+<button onclick="verificarMotorIA()">
+🔍 Verificar Motor IA
+</button>
+
+<button onclick="generarTesla()">
+⚡ TESLA 3-6-9
+</button>
+
+
+<button onclick="mostrarMatrizIA()">
+🔄 MOSTRAR MATRIZ
+</button>
+    
+ <button onclick="verificarBloque11()">
+🧠 Verificar Bloque 11
+ </button>   
+
+
+<button onclick="auditoriaSistema()">
+🛡 AUDITORÍA
+</button>
+    
+<button onclick="iniciarAuditoriaV49()">
+📊 Ejecutar Backtesting V49
+</button>    
+
+
+</div>
+
+
+
+<div class="card">
+
+<h2>
+📄 OCR PDF HISTÓRICO
+</h2>
+
+
+<input 
+type="file"
+id="archivoPDF"
+accept=".pdf">
+
+
+<button onclick="iniciarOCR()">
+📥 CARGAR PDF
+</button>
+
+
+<button onclick="detenerOCR()">
+⛔ DETENER OCR
+</button>
+
+
+<div id="progresoOCR" class="progreso">
+
+Esperando PDF...
+
+</div>
+
+
+</div>
+
+
+
+<div class="card">
+
+<h2>
+✍️ CARGA MANUAL 7 PROVINCIAS
+</h2>
+
+
+<select id="turnoCarga">
+
+<option>PREVIA</option>
+<option>PRIMERA</option>
+<option>MATUTINA</option>
+<option>VESPERTINA</option>
+<option>NOCTURNA</option>
+
+</select>
+
+
+<input id="corrientes" placeholder="Corrientes 4 cifras">
+
+<input id="ciudad" placeholder="Ciudad 4 cifras">
+
+<input id="bonaerense" placeholder="Bonaerense 4 cifras">
+
+<input id="santaFe" placeholder="Santa Fe 4 cifras">
+
+<input id="cordoba" placeholder="Córdoba 4 cifras">
+
+<input id="entreRios" placeholder="Entre Ríos 4 cifras">
+
+<input id="chaco" placeholder="Chaco 4 cifras">
+
+
+<button onclick="guardarCargaManualV48()">
+
+💾 GUARDAR BLOQUE
+
+</button>
+
+
+</div>
+
+
+
+<div class="card">
+
+<h2>
+📌 RESULTADO IA
+</h2>
+
+
+<div id="resultado" class="resultado">
+
+EMI TESLA PRO V48 LISTO...
+
+</div>
+
+</div>
+
+
+
+<div class="card">
+
+<h2>
+🛡 AUDITORÍA DETALLE
+</h2>
+
+
+<div id="auditoria" class="resultado">
+
+Sin auditoría todavía
+
+</div>
+
+
+</div>
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+
+<script>
+
+
+
+    
+//////////////////////////////////////////////////
+// BLOQUE 1/8
+// BASE SISTEMA + INDEXEDDB
+//////////////////////////////////////////////////
+
+
+let SISTEMA_V48={
+
+activo:true,
+
+memoria:false,
+
+matriz:false,
+
+pdf:false
+
+};
+
+
+
+const DB_NAME_V48 = "EMI_TESLA_PRO_V48_REPARADA";
+const DB_VERSION_V48 = 1;
+
+const STORES_V48 = {
+    historico: "historico",
+    matrizTurnos: "matrizTurnos",
+    matrizProvincias: "matrizProvincias",
+    auditoria: "auditoria",
+    aprendizaje: "aprendizajeAutomatico",
+    predicciones: "prediccionesIA"
+};
+
+
+
+let dbV48=null;
+    
+    //////////////////////////////////////////////////
+// APRENDIZAJE IA V49
+//////////////////////////////////////////////////
+
+let APRENDIZAJE_V49={};
+
+let PREDICCION_ACTUAL_V49=null;
+    
+
+//////////////////////////////////////////////////
+// APRENDIZAJE POR PROVINCIA Y TURNO V51
+//////////////////////////////////////////////////
+
+let APRENDIZAJE_PT_V51 = {};
+
+function registrarAprendizajePTV51(
+    provincia,
+    turno,
+    tipo
+){
+
+    if(!APRENDIZAJE_PT_V51[provincia]){
+        APRENDIZAJE_PT_V51[provincia]={};
+    }
+
+    if(!APRENDIZAJE_PT_V51[provincia][turno]){
+        APRENDIZAJE_PT_V51[provincia][turno]={
+
+            aciertos:0,
+            invertidos:0,
+            cercanos:0,
+            errores:0
+
+        };
+    }
+
+    APRENDIZAJE_PT_V51[provincia][turno][tipo]++;
+
+}
+
+function obtenerPesoPTV51(
+    provincia,
+    turno
+){
+
+    if(
+        !APRENDIZAJE_PT_V51[provincia] ||
+        !APRENDIZAJE_PT_V51[provincia][turno]
+    ){
+        return 0;
+    }
+
+    let d =
+    APRENDIZAJE_PT_V51[provincia][turno];
+
+    return (
+
+        d.aciertos*3 +
+
+        d.invertidos*2 +
+
+        d.cercanos -
+
+        d.errores
+
+    );
+
+    }
+
+function abrirBaseV48(){
+
+return new Promise((resolve,reject)=>{
+
+    let request = indexedDB.open(
+
+        DB_NAME_V48,
+
+        DB_VERSION_V48
+
+    );
+
+    request.onupgradeneeded = function(e){
+
+        let db = e.target.result;
+
+        Object.values(STORES_V48).forEach(store=>{
+
+            if(!db.objectStoreNames.contains(store)){
+
+                db.createObjectStore(store,{
+
+                    keyPath:"id",
+
+                    autoIncrement:true
+
+                });
+
+            }
+
+        });
+
+    };
+
+    request.onsuccess = function(e){
+
+        dbV48 = e.target.result;
+
+        console.log("DB ABIERTA:", dbV48);
+
+        let estado = document.getElementById("estadoBase");
+
+        if(estado){
+
+            estado.innerText = "ACTIVA";
+
+        }
+
+        resolve(true);
+
+    };
+
+    request.onerror = function(e){
+
+        console.error("ERROR ABRIENDO BASE:", e);
+
+        reject(e);
+
+    };
+
+});
+
+}
+    
+    
+
+
+
+async function guardarV48(store,dato){
+
+if(!dbV48){
+
+    await abrirBaseV48();
+
+}
+
+return new Promise((resolve,reject)=>{
+
+
+if(!dbV48){
+
+    reject("BASE NO ABIERTA");
+
+    return;
+
+}
+    
+
+
+let tx=dbV48.transaction(
+
+store,
+
+"readwrite"
+
+);
+
+
+let tabla=tx.objectStore(store);
+
+
+tabla.add(dato);
+
+
+tx.oncomplete=()=>resolve(true);
+
+
+tx.onerror=e=>reject(e);
+
+
+});
+
+
+}
+
+
+
+function leerV48(store){
+
+return new Promise((resolve,reject)=>{
+
+if(!dbV48){
+    console.log("DB NO ABIERTA");
+    resolve([]);
+    return;
+}
+
+if(!dbV48.objectStoreNames.contains(store)){
+    console.log("STORE NO EXISTE",store);
+    resolve([]);
+    return;
+}
+
+let tx=dbV48.transaction(
+store,
+"readonly"
+);
+
+let tabla=tx.objectStore(store);
+
+let consulta=tabla.getAll();
+
+consulta.onsuccess=()=>{
+
+resolve(
+consulta.result || []
+);
+
+};
+
+consulta.onerror=()=>{
+
+resolve([]);
+
+};
+
+});
+
+}
+
+
+
+
+
+async function actualizarRegistrosV48(){
+
+
+let datos=await leerV48(
+STORES_V48.historico
+);
+
+
+let total=document.getElementById(
+"totalRegistros"
+);
+
+
+if(total){
+
+total.innerText=datos.length;
+
+}
+
+
+}
+
+
+
+async function iniciarMemoriaV48(){
+
+    await abrirBaseV48();
+
+    if(!dbV48){
+        console.log("ERROR: BASE NO ABIERTA");
+        return;
+    }
+
+    await actualizarRegistrosV48();
+
+    SISTEMA_V48.memoria=true;
+
+    let estado=document.getElementById(
+        "estadoMemoria"
+    );
+
+    if(estado){
+        estado.innerText="LISTA";
+    }
+
+}
+    
+
+
+function mostrarV48(texto){
+
+
+let salida=document.getElementById(
+"resultado"
+);
+
+
+if(salida){
+
+salida.innerText=texto;
+
+}
+
+
+}
+    //////////////////////////////////////////////////
+// BLOQUE 2/8
+// OCR PDF HISTÓRICO V48
+//////////////////////////////////////////////////
+
+let DETENER_OCR_V48=false;
+let auditoriaCarga={
+
+PREVIA:0,
+
+PRIMERA:0,
+
+MATUTINA:0,
+
+VESPERTINA:0,
+
+NOCTURNA:0
+
+};
+
+function detectarFechaV48(texto){
+
+    let fecha=texto.match(
+        /\d{2}[\/\-]\d{2}[\/\-]\d{4}/
+    );
+
+
+    if(!fecha){
+
+        return new Date()
+        .toISOString()
+        .slice(0,10);
+
+    }
+
+
+    let p=fecha[0]
+    .replace(/-/g,"/")
+    .split("/");
+
+
+    return p[2]+"-"+p[1]+"-"+p[0];
+
+}
+
+
+
+function detectarTurnoV48(texto){
+
+    texto=texto.toUpperCase();
+
+
+    if(texto.includes("PREVIA"))
+        return "PREVIA";
+
+    if(texto.includes("PRIMERA"))
+        return "PRIMERA";
+
+    if(texto.includes("MATUTINA"))
+        return "MATUTINA";
+
+    if(texto.includes("VESPERTINA"))
+        return "VESPERTINA";
+
+    if(texto.includes("NOCTURNA"))
+        return "NOCTURNA";
+
+
+    return "SIN_TURNO";
+
+}
+
+
+
+function extraerRegistrosPDFV48(texto,pagina){
+
+
+    texto=texto.toUpperCase();
+
+
+    let fecha=detectarFechaV48(texto);
+
+    let turno=detectarTurnoV48(texto);
+
+
+    let provincias=[
+
+        "CORRIENTES",
+        "CIUDAD",
+        "BONAERENSE",
+        "SANTA FE",
+        "CORDOBA",
+        "ENTRE RIOS",
+        "CHACO"
+
+    ];
+
+
+    let registros=[];
+
+
+
+    for(let provincia of provincias){
+
+
+        let pos=texto.indexOf(provincia);
+
+
+        if(pos===-1)
+            continue;
+
+
+        let bloque=
+        texto.substring(
+            pos,
+            pos+300
+        );
+
+
+        let numeros=
+        bloque.match(/\b\d{4}\b/g);
+
+
+
+        if(!numeros)
+            continue;
+
+
+
+        for(let numero of numeros){
+
+
+            registros.push({
+
+                fecha:fecha,
+
+                turno:turno,
+
+                provincia:provincia,
+
+                numero:numero,
+
+                pagina:pagina,
+
+                origen:"OCR_V48"
+
+            });
+
+
+        }
+
+
+    }
+
+
+    return registros;
+
+}
+
+
+
+
+
+async function iniciarOCR(){
+
+
+let archivo=document.getElementById(
+"archivoPDF"
+).files[0];
+
+
+if(!archivo){
+
+
+mostrarV48(
+"⚠️ SELECCIONE PDF"
+);
+
+
+return;
+
+}
+
+
+
+DETENER_OCR_V48=false;
+
+
+
+let buffer=
+await archivo.arrayBuffer();
+
+
+
+let pdf=
+await pdfjsLib
+.getDocument({
+data:buffer
+})
+.promise;
+
+
+
+let worker=
+await Tesseract
+.createWorker("spa");
+
+
+
+for(
+let pagina=1;
+pagina<=pdf.numPages;
+pagina++
+){
+
+
+if(DETENER_OCR_V48)
+break;
+
+
+
+document.getElementById(
+"progresoOCR"
+).innerText=
+
+"Procesando página "+
+pagina+
+" / "+
+pdf.numPages;
+
+
+
+let page=
+await pdf.getPage(pagina);
+
+
+
+let viewport=
+page.getViewport({
+scale:2
+});
+
+
+
+let canvas=
+document.createElement("canvas");
+
+
+
+canvas.width=
+viewport.width;
+
+
+canvas.height=
+viewport.height;
+
+
+
+await page.render({
+
+canvasContext:
+canvas.getContext("2d"),
+
+viewport:viewport
+
+}).promise;
+
+
+
+let lectura=
+await worker.recognize(canvas);
+
+
+
+let registros=
+extraerRegistrosPDFV48(
+lectura.data.text,
+pagina
+);
+    
+console.log(
+"DB ANTES DE GUARDAR PDF:",
+dbV48
+);
+
+
+for(let r of registros){
+
+    await guardarV48(
+        STORES_V48.historico,
+        r
+    );
+
+    if(auditoriaCarga[r.turno]!==undefined){
+
+        auditoriaCarga[r.turno]++;
+
+    }
+
+}
+
+document.getElementById("auditoria").innerText=
+
+"🛡 IA APRENDIENDO...\n\n"+
+
+"PREVIA: "+auditoriaCarga.PREVIA+" cargados\n"+
+
+"PRIMERA: "+auditoriaCarga.PRIMERA+" cargados\n"+
+
+"MATUTINA: "+auditoriaCarga.MATUTINA+" cargados\n"+
+
+"VESPERTINA: "+auditoriaCarga.VESPERTINA+" cargados\n"+
+
+"NOCTURNA: "+auditoriaCarga.NOCTURNA+" cargados\n\n"+
+
+"📄 Página "+pagina+" de "+pdf.numPages;
+
+
+}
+
+
+
+await worker.terminate();
+
+await actualizarRegistrosV48();
+
+await construirMemoriaV48();
+
+await construirMatrizTurnosV48();
+
+await construirMatrizHistoricaV48();
+
+await construirMatrizProvinciasV48();
+    
+    SISTEMA_V48.memoria=true;
+
+document.getElementById(
+"estadoMemoria"
+).innerText="LISTA";
+    
+document.getElementById(
+"estadoMemoria"
+).innerText="LISTA";
+
+document.getElementById(
+"estadoMatriz"
+).innerText="ACTIVA";
+
+document.getElementById("auditoria").innerText=
+
+"✅ CARGA COMPLETA\n\n"+
+
+"PREVIA ✔ "+auditoriaCarga.PREVIA+"\n"+
+
+"PRIMERA ✔ "+auditoriaCarga.PRIMERA+"\n"+
+
+"MATUTINA ✔ "+auditoriaCarga.MATUTINA+"\n"+
+
+"VESPERTINA ✔ "+auditoriaCarga.VESPERTINA+"\n"+
+
+"NOCTURNA ✔ "+auditoriaCarga.NOCTURNA+"\n\n"+
+
+"🧠 MEMORIA IA: LISTA\n"+
+
+"📊 MATRIZ: ACTIVA\n"+
+
+"🚀 IA PREPARADA PARA PREDECIR";
+
+mostrarV48(
+"✅ PDF PROCESADO\n\nLA IA YA PUEDE GENERAR PREDICCIONES"
+);
+
+
+}
+
+
+
+function detenerOCR(){
+
+
+DETENER_OCR_V48=true;
+
+
+mostrarV48(
+"⛔ OCR DETENIDO"
+);
+
+
+    }
+    
+    //////////////////////////////////////////////////
+// BLOQUE 3/8
+// CARGA MANUAL 7 PROVINCIAS V48
+//////////////////////////////////////////////////
+
+async function guardarCargaManualV48(){
+
+try{
+
+
+let turno =
+document.getElementById("turnoCarga").value;
+
+
+
+let provincias={
+
+
+"CORRIENTES":
+document.getElementById("corrientes").value.trim(),
+
+
+"CIUDAD":
+document.getElementById("ciudad").value.trim(),
+
+
+"BONAERENSE":
+document.getElementById("bonaerense").value.trim(),
+
+
+"SANTA FE":
+document.getElementById("santaFe").value.trim(),
+
+
+"CORDOBA":
+document.getElementById("cordoba").value.trim(),
+
+
+"ENTRE RIOS":
+document.getElementById("entreRios").value.trim(),
+
+
+"CHACO":
+document.getElementById("chaco").value.trim()
+
+
+};
+
+
+
+let fecha =
+new Date()
+.toISOString()
+.slice(0,10);
+
+
+
+let guardados=0;
+
+
+
+for(let provincia in provincias){
+
+
+let numero=provincias[provincia];
+
+
+
+if(
+/^\d{4}$/.test(numero)
+){
+
+
+await guardarV48(
+
+STORES_V48.historico,
+
+{
+
+fecha:fecha,
+
+turno:turno,
+
+provincia:provincia,
+
+numero:numero,
+
+origen:"MANUAL_V48"
+
+}
+
+);
+
+// APRENDER DEL RESULTADO REAL
+if(
+typeof PREDICCION_ACTUAL_V49!="undefined" &&
+PREDICCION_ACTUAL_V49 &&
+PREDICCION_ACTUAL_V49.ambos
+){
+
+    for(let prediccion of PREDICCION_ACTUAL_V49.ambos){
+
+        await aprenderDelErrorIA(
+
+            numero.slice(-2),
+
+            prediccion
+
+        );
+        
+        console.log(
+"APRENDIZAJE ERROR IA",
+MATRIZ_ERRORES_IA
+);
+
+    }
+
+}
+
+guardados++;
+
+
+}
+
+
+}
+
+await actualizarRegistrosV48();
+
+await actualizarCerebroEvolutivoIA();
+
+await evaluarAprendizajeV49(
+    turno,
+    provincias
+);
+
+
+    
+        //////////////////////////////////////////////////////
+// APRENDIZAJE AUTOMÁTICO V53
+//////////////////////////////////////////////////////
+
+if(
+    PREDICCION_ACTUAL_V49 &&
+    PREDICCION_ACTUAL_V49.ambos
+){
+
+    for(let provincia in provincias){
+
+        let real =
+        String(provincias[provincia]).slice(-2);
+
+        for(let ambos of PREDICCION_ACTUAL_V49.ambos){
+
+            registrarResultadoIAV53(
+                ambos,
+                real
+            );
+
+        }
+
+    }
+
+}
+
+
+
+mostrarV48(
+
+"✅ BLOQUE GUARDADO\n\n"+
+"Turno: "+turno+
+"\nRegistros: "+guardados+
+"\n\nIA ACTUALIZADA"
+
+);
+
+
+
+}
+catch(e){
+
+
+alert(
+"ERROR CARGA MANUAL V48\n\n"+e
+);
+
+
+}
+
+
+}
+
+
+
+    //////////////////////////////////////////////////
+// EVALUADOR APRENDIZAJE V49
+//////////////////////////////////////////////////
+
+async function evaluarAprendizajeV49(
+    turno,
+    resultados
+){
+
+
+let predicciones =
+await leerV48(
+    STORES_V48.predicciones
+);
+
+
+if(predicciones.length===0)
+return;
+
+
+let ultima =
+predicciones[predicciones.length-1];
+
+
+let estadistica =
+{
+
+total:1,
+
+acierto:0,
+
+invertido:0,
+
+cerca:0,
+
+error:0
+
+};
+
+
+
+for(let provincia in resultados){
+
+
+let real =
+String(resultados[provincia])
+.slice(-2);
+
+
+
+for(let p of ultima.ambos){
+
+if(real===p){
+
+    estadistica.acierto++;
+
+    registrarAprendizajePTV51(
+        provincia,
+        turno,
+        "aciertos"
+    );
+
+}
+
+else if(real===p[1]+p[0]){
+
+    estadistica.invertido++;
+
+    registrarAprendizajePTV51(
+        provincia,
+        turno,
+        "invertidos"
+    );
+
+}
+
+else if(
+Math.abs(
+Number(real)-Number(p)
+)===1
+){
+
+    estadistica.cerca++;
+
+    registrarAprendizajePTV51(
+        provincia,
+        turno,
+        "cercanos"
+    );
+
+}
+
+
+
+}
+
+
+}
+
+
+
+if(
+estadistica.acierto===0 &&
+estadistica.invertido===0 &&
+estadistica.cerca===0
+){
+
+    estadistica.error++;
+
+    for(let provincia in resultados){
+
+        registrarAprendizajePTV51(
+            provincia,
+            turno,
+            "errores"
+        );
+
+    }
+
+}
+
+
+
+await guardarV48(
+
+STORES_V48.aprendizaje,
+
+{
+
+fecha:new Date(),
+
+turno:turno,
+
+resultado:estadistica
+
+}
+
+);
+    
+ // await actualizarPesosIAV50();
+    
+await actualizarPesosIAV50();
+    
+await guardarAprendizajePTV51();
+
+console.log(
+"APRENDIZAJE RESULTADO V49",
+estadistica
+);
+
+
+}
+
+
+    
+//////////////////////////////////////////////////
+// PESOS IA V50
+//////////////////////////////////////////////////
+
+let PESOS_IA_V50 = {
+
+    transicion:30,
+
+    nucleoDominante:20,
+
+    segundoNucleo:12,
+
+    sobreviviente:6,
+
+    tesla:15,
+
+    mismaDecena:2,
+
+    mismaUnidad:2
+
+};
+
+async function actualizarPesosIAV50(){
+
+    let historial = await leerV48(STORES_V48.aprendizaje);
+
+    if(historial.length===0) return;
+
+    let total=0;
+    let aciertos=0;
+    let invertidos=0;
+    let cercanos=0;
+
+    for(let h of historial){
+
+        if(!h.resultado) continue;
+
+        total += h.resultado.total || 0;
+        aciertos += h.resultado.acierto || 0;
+        invertidos += h.resultado.invertido || 0;
+        cercanos += h.resultado.cerca || 0;
+
+    }
+
+    let precision =
+    (aciertos + invertidos*0.7 + cercanos*0.3) /
+    Math.max(total,1);
+
+    if(precision>=0.80){
+
+        PESOS_IA_V50.transicion =
+        Math.min(PESOS_IA_V50.transicion+1,50);
+
+        PESOS_IA_V50.tesla =
+        Math.min(PESOS_IA_V50.tesla+1,30);
+
+        PESOS_IA_V50.nucleoDominante =
+        Math.min(PESOS_IA_V50.nucleoDominante+1,30);
+
+    }
+
+    if(precision<=0.40){
+
+        PESOS_IA_V50.transicion =
+        Math.max(PESOS_IA_V50.transicion-1,10);
+
+        PESOS_IA_V50.tesla =
+        Math.max(PESOS_IA_V50.tesla-1,5);
+
+        PESOS_IA_V50.nucleoDominante =
+        Math.max(PESOS_IA_V50.nucleoDominante-1,5);
+
+    }
+
+            }
+    
+    //////////////////////////////////////////////////
+// BLOQUE 4/8
+// MEMORIA IA + MATRIZ TURNOS V48
+//////////////////////////////////////////////////
+
+
+let MEMORIA_V48={};
+
+let MATRIZ_TURNOS_V48={};
+
+
+
+async function construirMemoriaV48(){
+
+
+let datos =
+await leerV48(
+STORES_V48.historico
+);
+
+
+
+MEMORIA_V48={};
+
+
+
+for(let d of datos){
+
+
+if(
+!d.fecha ||
+!d.turno ||
+!d.provincia ||
+!d.numero
+)
+
+continue;
+
+
+
+if(!MEMORIA_V48[d.fecha])
+MEMORIA_V48[d.fecha]={};
+
+
+
+if(!MEMORIA_V48[d.fecha][d.turno])
+MEMORIA_V48[d.fecha][d.turno]={};
+
+
+
+if(!MEMORIA_V48[d.fecha][d.turno][d.provincia])
+MEMORIA_V48[d.fecha][d.turno][d.provincia]=[];
+
+
+
+MEMORIA_V48[d.fecha]
+[d.turno]
+[d.provincia]
+.push(
+String(d.numero)
+);
+
+
+
+}
+
+
+
+return MEMORIA_V48;
+
+
+}
+
+
+
+
+
+async function construirMatrizTurnosV48(){
+
+
+await construirMemoriaV48();
+
+
+
+MATRIZ_TURNOS_V48={};
+
+
+
+let orden=[
+
+"PREVIA",
+"PRIMERA",
+"MATUTINA",
+"VESPERTINA",
+"NOCTURNA"
+
+];
+
+
+
+for(let fecha in MEMORIA_V48){
+
+
+let dia=
+MEMORIA_V48[fecha];
+
+
+
+for(let i=0;i<orden.length;i++){
+
+
+let origen=orden[i];
+
+let destino=
+(i===4)
+?
+"PREVIA"
+:
+orden[i+1];
+
+
+
+if(
+!dia[origen] ||
+!dia[destino]
+)
+
+continue;
+
+
+
+for(let provincia in dia[origen]){
+
+
+if(!dia[destino][provincia])
+continue;
+
+
+
+let base=
+String(
+dia[origen][provincia][0]
+)
+.slice(-2);
+
+
+
+let salida=
+String(
+dia[destino][provincia][0]
+)
+.slice(-2);
+
+
+
+if(!MATRIZ_TURNOS_V48[base])
+MATRIZ_TURNOS_V48[base]={};
+
+
+
+if(!MATRIZ_TURNOS_V48[base][salida])
+MATRIZ_TURNOS_V48[base][salida]=0;
+
+
+
+MATRIZ_TURNOS_V48[base][salida]++;
+
+
+}
+
+
+}
+
+
+}
+
+
+
+let estado =
+document.getElementById(
+"estadoMatriz"
+);
+
+
+
+if(estado){
+
+estado.innerText="ACTIVA "+Object.keys(MATRIZ_TURNOS_V48).length;
+
+}
+
+
+
+
+
+return MATRIZ_TURNOS_V48;
+
+
+    }
+    //////////////////////////////////////////////////
+// BLOQUE 5/8
+// MATRIZ PROVINCIAS V48
+//////////////////////////////////////////////////
+
+let MATRIZ_PROV_V48={};
+
+
+//////////////////////////////////////////////////
+// MATRIZ HISTÓRICA ESPECÍFICA V48
+//////////////////////////////////////////////////
+
+let MATRIZ_HISTORICA_V48 = {};
+
+function limpiarMatrizHistoricaV48(){
+
+    MATRIZ_HISTORICA_V48={};
+
+}
+
+function agregarMatrizHistoricaV48(
+
+    turnoOrigen,
+    turnoDestino,
+    provincia,
+    base,
+    salida
+
+){
+
+    if(!MATRIZ_HISTORICA_V48[turnoOrigen])
+        MATRIZ_HISTORICA_V48[turnoOrigen]={};
+
+    if(!MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino])
+        MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino]={};
+
+    if(!MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino][provincia])
+        MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino][provincia]={};
+
+    if(!MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino][provincia][base])
+        MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino][provincia][base]={};
+
+    if(!MATRIZ_HISTORICA_V48
+        [turnoOrigen]
+        [turnoDestino]
+        [provincia]
+        [base]
+        [salida])
+
+        MATRIZ_HISTORICA_V48
+        [turnoOrigen]
+        [turnoDestino]
+        [provincia]
+        [base]
+        [salida]=0;
+
+    MATRIZ_HISTORICA_V48
+    [turnoOrigen]
+    [turnoDestino]
+    [provincia]
+    [base]
+    [salida]++;
+
+}
+    //////////////////////////////////////////////////
+// CONSTRUIR MATRIZ HISTÓRICA V48
+//////////////////////////////////////////////////
+
+async function construirMatrizHistoricaV48(){
+
+    limpiarMatrizHistoricaV48();
+
+    let datos = await leerV48(
+        STORES_V48.historico
+    );
+
+    let orden = [
+        "PREVIA",
+        "PRIMERA",
+        "MATUTINA",
+        "VESPERTINA",
+        "NOCTURNA"
+    ];
+
+    let dias = {};
+
+    for(let r of datos){
+
+        if(!dias[r.fecha])
+            dias[r.fecha]={};
+
+        if(!dias[r.fecha][r.turno])
+            dias[r.fecha][r.turno]={};
+
+        dias[r.fecha][r.turno][r.provincia]=
+        String(r.numero).slice(-2);
+
+    }
+
+    for(let fecha in dias){
+
+        let dia = dias[fecha];
+
+        for(let i=0;i<orden.length;i++){
+
+            let turnoOrigen = orden[i];
+
+            let turnoDestino =
+            (i==4)
+            ? "PREVIA"
+            : orden[i+1];
+
+            if(!dia[turnoOrigen])
+                continue;
+
+            if(!dia[turnoDestino])
+                continue;
+
+            for(let provincia in dia[turnoOrigen]){
+
+                if(!dia[turnoDestino][provincia])
+                    continue;
+
+                let base =
+                dia[turnoOrigen][provincia];
+
+                let salida =
+                dia[turnoDestino][provincia];
+
+                agregarMatrizHistoricaV48(
+
+                    turnoOrigen,
+
+                    turnoDestino,
+
+                    provincia,
+
+                    base,
+
+                    salida
+
+                );
+
+            }
+
+        }
+
+    }
+
+    let total = 0;
+
+for(let t1 in MATRIZ_HISTORICA_V48){
+
+    for(let t2 in MATRIZ_HISTORICA_V48[t1]){
+
+        for(let p in MATRIZ_HISTORICA_V48[t1][t2]){
+
+            for(let b in MATRIZ_HISTORICA_V48[t1][t2][p]){
+
+                total++;
+
+            }
+
+        }
+
+    }
+
+}
+
+alert("Transiciones creadas: " + total);
+
+}
+
+async function construirMatrizProvinciasV48(){
+
+
+let datos =
+await leerV48(
+STORES_V48.historico
+);
+
+
+
+MATRIZ_PROV_V48={};
+
+
+
+for(let i=0;i<datos.length-1;i++){
+
+
+let actual=datos[i];
+
+let siguiente=datos[i+1];
+
+
+
+if(
+!actual.numero ||
+!siguiente.numero
+)
+
+continue;
+
+
+
+let base=
+String(actual.numero)
+.slice(-2);
+
+
+
+let salida=
+String(siguiente.numero)
+.slice(-2);
+
+
+
+let clave=
+actual.provincia+
+" → "+
+siguiente.provincia;
+
+
+
+if(!MATRIZ_PROV_V48[clave])
+MATRIZ_PROV_V48[clave]={};
+
+
+
+if(!MATRIZ_PROV_V48[clave][base])
+MATRIZ_PROV_V48[clave][base]={};
+
+
+
+if(!MATRIZ_PROV_V48[clave][base][salida])
+MATRIZ_PROV_V48[clave][base][salida]=0;
+
+
+
+MATRIZ_PROV_V48[clave][base][salida]++;
+
+
+
+}
+
+
+
+await guardarV48(
+
+STORES_V48.matrizProvincias,
+
+{
+
+fecha:new Date(),
+
+matriz:MATRIZ_PROV_V48
+
+}
+
+);
+
+
+
+return MATRIZ_PROV_V48;
+
+
+}
+
+
+
+
+
+function mostrarMatrizIA(){
+
+
+let texto=
+"🔄 MATRIZ IA V48\n\n";
+
+
+let cantidad=0;
+
+
+
+for(let clave in MATRIZ_PROV_V48){
+
+
+texto+=
+clave+
+"\n";
+
+
+
+cantidad++;
+
+
+if(cantidad>=20)
+break;
+
+
+}
+
+
+
+if(cantidad===0){
+
+texto+="SIN DATOS DE MATRIZ";
+
+}
+
+
+
+mostrarV48(texto);
+
+
+    }
+    //////////////////////////////////////////////////
+// APRENDIZAJE DESDE PDF V49
+//////////////////////////////////////////////////
+
+async function aprenderDesdePDFV49(){
+
+    let datos =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+    if(!APRENDIZAJE_V49)
+        APRENDIZAJE_V49={};
+
+
+
+    if(!APRENDIZAJE_V49.transiciones)
+        APRENDIZAJE_V49.transiciones={};
+
+
+    if(!APRENDIZAJE_V49.acompanantes)
+        APRENDIZAJE_V49.acompanantes={};
+
+
+    if(!APRENDIZAJE_V49.movimientos)
+        APRENDIZAJE_V49.movimientos={};
+
+
+
+    for(let i=0;i<datos.length-1;i++){
+
+
+        let actual=datos[i];
+
+        let siguiente=datos[i+1];
+
+
+
+        if(
+            !actual.numero ||
+            !siguiente.numero
+        )
+        continue;
+
+
+
+        let base=
+        String(actual.numero)
+        .slice(-2);
+
+
+
+        let salida=
+        String(siguiente.numero)
+        .slice(-2);
+
+
+
+        let clave=
+        base+
+        "_"+
+        actual.turno+
+        "_"+
+        actual.provincia;
+
+
+
+        // transición
+
+        if(
+        !APRENDIZAJE_V49.transiciones[clave]
+        )
+
+        APRENDIZAJE_V49.transiciones[clave]={};
+
+
+
+        if(
+        !APRENDIZAJE_V49.transiciones[clave][salida]
+        )
+
+        APRENDIZAJE_V49.transiciones[clave][salida]=0;
+
+
+
+        APRENDIZAJE_V49.transiciones[clave][salida]++;
+
+
+
+        // acompañante
+
+        if(
+        !APRENDIZAJE_V49.acompanantes[base]
+        )
+
+        APRENDIZAJE_V49.acompanantes[base]={};
+
+
+
+        if(
+        !APRENDIZAJE_V49.acompanantes[base][salida]
+        )
+
+        APRENDIZAJE_V49.acompanantes[base][salida]=0;
+
+
+
+        APRENDIZAJE_V49.acompanantes[base][salida]++;
+
+
+
+        // movimientos cercanos
+
+        let diferencia =
+        Number(salida)-
+        Number(base);
+
+
+
+        if(
+        Math.abs(diferencia)===1
+        ){
+
+
+            if(!APRENDIZAJE_V49.movimientos[base])
+
+                APRENDIZAJE_V49.movimientos[base]={};
+
+
+
+            APRENDIZAJE_V49.movimientos[base][salida]=
+            (APRENDIZAJE_V49.movimientos[base][salida]||0)+1;
+
+
+        }
+
+
+    }
+
+
+
+    await guardarV48(
+
+        STORES_V48.aprendizaje,
+
+        {
+
+        fecha:new Date(),
+
+        datos:APRENDIZAJE_V49
+
+        }
+
+    );
+
+
+
+    console.log(
+        "APRENDIZAJE PDF V49 COMPLETADO",
+        APRENDIZAJE_V49
+    );
+
+
+    return APRENDIZAJE_V49;
+
+
+        }
+    //////////////////////////////////////////////////
+// BLOQUE 6/8
+// NÚCLEO IA V48
+//////////////////////////////////////////////////
+
+
+let NUCLEO_V48={
+
+dominante:null,
+
+segundo:null,
+
+sobreviviente:null,
+
+ranking:{}
+
+};
+
+
+
+async function analizarNucleoV48(){
+
+
+let datos=
+await leerV48(
+STORES_V48.historico
+);
+
+
+
+let frecuencia={};
+
+
+
+for(let d of datos){
+
+
+if(!d.numero)
+continue;
+
+
+
+let n=
+String(d.numero)
+.slice(-2);
+
+
+
+frecuencia[n]=
+(frecuencia[n]||0)+1;
+
+
+}
+
+
+
+let ranking=
+Object.keys(frecuencia)
+.sort(
+
+(a,b)=>
+frecuencia[b]-frecuencia[a]
+
+);
+
+
+
+NUCLEO_V48.ranking=
+frecuencia;
+
+
+
+NUCLEO_V48.dominante=
+ranking[0] || null;
+
+
+
+NUCLEO_V48.segundo=
+ranking[1] || null;
+
+
+
+for(let n of ranking){
+
+
+if(
+n!==NUCLEO_V48.dominante &&
+n!==NUCLEO_V48.segundo
+){
+
+NUCLEO_V48.sobreviviente=n;
+
+break;
+
+}
+
+
+}
+
+
+
+return NUCLEO_V48;
+
+
+    }
+    //////////////////////////////////////////////////
+// BLOQUE 7/8
+// MOTOR TESLA 3-6-9 + GENERADOR IA V48
+//////////////////////////////////////////////////
+
+
+const TESLA_V48={
+
+
+"0":["0","0"],
+
+"1":["0","0"],
+
+"2":["5","7"],
+
+"3":["8","0"],
+
+"4":["6","9"],
+
+"5":["2","7"],
+
+"6":["4","9"],
+
+"7":["5","2"],
+
+"8":["3","0"],
+
+"9":["3","4"]
+
+
+};
+
+
+
+function aplicarTeslaV48(numero){
+
+
+numero=String(numero);
+
+
+let salida="";
+
+
+for(let digito of numero){
+
+
+if(TESLA_V48[digito]){
+
+
+salida+=TESLA_V48[digito][0];
+
+
+}
+
+
+}
+
+
+return salida.slice(0,2);
+
+
+}
+
+
+
+
+
+function obtenerBases7Provincias(){
+
+
+let ids=[
+
+"corrientes",
+"ciudad",
+"bonaerense",
+"santaFe",
+"cordoba",
+"entreRios",
+"chaco"
+
+];
+
+
+
+let bases=[];
+
+
+
+for(let id of ids){
+
+
+let valor=
+document.getElementById(id)
+.value
+.trim();
+
+
+
+if(valor.length>=2){
+
+    bases.push(
+        valor.slice(-2)
+    );
+
+}
+
+}
+
+
+return bases;
+
+
+}
+
+
+
+
+
+function generarTesla(){
+
+
+let bases=
+obtenerBases7Provincias();
+
+
+
+let salida=
+"⚡ TESLA 3-6-9 V48\n\n";
+
+
+
+if(bases.length===0){
+
+
+salida+="CARGUE LOS DATOS DE LAS PROVINCIAS";
+
+
+mostrarV48(salida);
+
+return;
+
+
+}
+
+
+
+for(let n of bases){
+
+
+salida+=
+
+n+
+" → "+
+aplicarTeslaV48(n)
++
+"\n";
+
+
+}
+
+
+
+mostrarV48(salida);
+
+
+}
+
+//////////////////////////////////////////////////
+// BLOQUE 8/8
+// AUDITORÍA + ARRANQUE SISTEMA V48 CORREGIDO
+//////////////////////////////////////////////////
+
+
+async function auditoriaSistema(){
+
+try{
+
+let datos = await leerV48(
+STORES_V48.historico
+);
+
+
+let nucleo = await analizarNucleoV48();
+
+
+let salida=document.getElementById(
+"auditoria"
+);
+
+
+if(!salida) return;
+
+
+salida.innerText =
+
+"🛡 AUDITORÍA TESLA PRO V48\n\n"+
+
+"REGISTROS: "+
+datos.length+
+
+"\n\nNÚCLEO DOMINANTE: "+
+(nucleo.dominante || "SIN DATOS")+
+
+"\nSEGUNDO NÚCLEO: "+
+(nucleo.segundo || "SIN DATOS")+
+
+"\nSOBREVIVIENTE: "+
+(nucleo.sobreviviente || "SIN DATOS");
+
+
+await guardarV48(
+
+STORES_V48.auditoria,
+
+{
+
+fecha:new Date(),
+
+registros:datos.length,
+
+nucleo:nucleo
+
+}
+
+);
+
+
+}
+
+catch(e){
+
+document.getElementById("auditoria").innerText=
+
+"❌ ERROR AUDITORÍA\n"+e;
+
+}
+
+}
+
+
+
+
+
+async function inicializarV48(){
+    
+    alert("ENTRO A INICIALIZAR V48");
+
+
+try{
+    await abrirBaseV48();
+    
+    console.log("V48 BASE ABIERTA");
+
+
+try{
+    await actualizarRegistrosV48();
+    console.log("REGISTROS V48 OK");
+}catch(e){
+    console.error("ERROR ACTUALIZAR REGISTROS", e);
+}
+
+
+let datos=[];
+
+try{
+    datos = await leerV48(
+        STORES_V48.historico
+    );
+
+    console.log(
+        "LECTURA HISTORICO OK:",
+        datos.length
+    );
+
+}catch(e){
+    console.error(
+        "ERROR LEER HISTORICO",
+        e
+    );
+}
+
+
+console.log(
+"REGISTROS RECUPERADOS:",
+datos.length
+);
+
+
+
+if(datos.length>0){
+
+
+await construirMemoriaV48();
+
+await construirMatrizTurnosV48();
+
+await construirMatrizHistoricaV48();
+
+await construirMatrizProvinciasV48();
+
+await cargarAprendizajeV49();
+
+try{
+    await cargarPatronesIAV60();
+    console.log("PATRONES V60 OK");
+}catch(e){
+    console.error("ERROR PATRONES V60", e);
+}
+
+
+try{
+    await conectarIAInicioV60();
+    console.log("CONEXION IA V60 OK");
+}catch(e){
+    console.error("ERROR CONEXION IA V60", e);
+}
+
+
+try{
+    await construirBloque12V60();
+    console.log("BLOQUE 12 V60 OK");
+}catch(e){
+    console.error("ERROR BLOQUE 12 V60", e);
+}
+
+    
+    SISTEMA_V48.memoria=true;
+
+document.getElementById(
+"estadoMemoria"
+).innerText="LISTA";
+
+document.getElementById(
+"estadoMatriz"
+).innerText="ACTIVA";
+
+
+}else{
+
+
+document.getElementById(
+"estadoMemoria"
+).innerText="SIN DATOS";
+
+
+document.getElementById(
+"estadoMatriz"
+).innerText="SIN DATOS";
+
+
+}
+
+
+
+}
+
+catch(e){
+
+console.log(
+"ERROR INICIO V48",
+e
+);
+
+}
+console.log(await leerV48(STORES_V48.historico));
+    
+    document.getElementById(
+"estadoMemoria"
+).innerText="LISTA";
+    
+}
+
+
+
+
+
+//////////////////////////////////////////////////
+// BLOQUE 8 (PARTE 1/2)
+// MOTOR IA HISTÓRICA V48.5
+//////////////////////////////////////////////////
+
+function obtenerSiguienteTurnoV48(turno){
+
+    const mapa={
+
+        "PREVIA":"PRIMERA",
+
+        "PRIMERA":"MATUTINA",
+
+        "MATUTINA":"VESPERTINA",
+
+        "VESPERTINA":"NOCTURNA",
+
+        "NOCTURNA":"PREVIA"
+
+    };
+
+    return mapa[turno] || "PRIMERA";
+
+}
+
+
+
+////////////////////////////////////////////////
+// MOTOR IA HISTÓRICO V49
+////////////////////////////////////////////////
+ async function analizarTransicionTurnoV48(
+    base,
+    turnoOrigen,
+    datos = null
+){
+
+    let destino =
+    obtenerSiguienteTurnoV48(turnoOrigen);
+
+
+    if(!datos){
+
+        datos =
+        await leerV48(
+            STORES_V48.historico
+        );
+
+    }
+
+
+    base =
+    String(base)
+    .slice(-2)
+    .padStart(2,"0");
+
+
+    let pesos = {};
+
+
+    let inversion =
+    base[1]+base[0];
+
+
+    for(let i=0;i<datos.length;i++){
+
+        let actual = datos[i];
+
+
+        if(!actual.numero)
+            continue;
+
+
+        if(actual.turno !== turnoOrigen)
+            continue;
+
+
+        let numeroActual =
+        String(actual.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+        if(
+            numeroActual!==base &&
+            numeroActual!==inversion
+        )
+        continue;
+
+
+
+        for(let j=0;j<datos.length;j++){
+
+            let siguiente = datos[j];
+
+
+            if(
+                siguiente.fecha !== actual.fecha
+            )
+            continue;
+
+
+            if(
+                siguiente.provincia !== actual.provincia
+            )
+            continue;
+
+
+            if(
+                siguiente.turno !== destino
+            )
+            continue;
+
+
+
+            let salida =
+            String(siguiente.numero)
+            .slice(-2)
+            .padStart(2,"0");
+
+
+
+            if(
+                salida===base ||
+                salida===inversion
+            )
+            continue;
+
+
+
+            if(!pesos[salida])
+                pesos[salida]=0;
+
+
+
+            // HISTÓRICO
+            pesos[salida]+=30;
+
+
+
+            // NÚCLEOS
+
+            if(
+                typeof NUCLEO_V48 !== "undefined"
+            ){
+
+                if(
+                    NUCLEO_V48.dominante &&
+                    salida===NUCLEO_V48.dominante
+                ){
+                    pesos[salida]+=20;
+                }
+
+
+                if(
+                    NUCLEO_V48.segundo &&
+                    salida===NUCLEO_V48.segundo
+                ){
+                    pesos[salida]+=12;
+                }
+
+
+                if(
+                    NUCLEO_V48.sobreviviente &&
+                    salida===NUCLEO_V48.sobreviviente
+                ){
+                    pesos[salida]+=6;
+                }
+
+            }
+
+
+
+            // TESLA
+
+            let tesla =
+            aplicarTeslaV48(base);
+
+
+            if(
+                salida===tesla
+            ){
+
+                pesos[salida]+=15;
+
+            }
+
+
+
+            // UNIDAD FUERTE
+
+            if(
+                salida[1]===base[1]
+            ){
+
+                pesos[salida]+=8;
+
+            }
+
+
+
+            // MISMA DECENA
+
+            if(
+                salida[0]===base[0]
+            ){
+
+                pesos[salida]+=6;
+
+            }
+
+
+
+            // PENALIZACIÓN INVERTIDA
+
+            if(
+                salida===inversion
+            ){
+
+                pesos[salida]-=5;
+
+            }
+
+
+        }
+
+    }
+
+
+
+    let orden =
+    Object.keys(pesos)
+    .sort(
+        (a,b)=>
+        pesos[b]-pesos[a]
+    );
+
+
+
+    // SI NO HAY RESULTADO
+
+    if(
+        orden.length===0
+    ){
+
+        let todos={};
+
+
+        for(let d of datos){
+
+            if(!d.numero)
+            continue;
+
+
+            let n =
+            String(d.numero)
+            .slice(-2)
+            .padStart(2,"0");
+
+
+            todos[n]=
+            (todos[n]||0)+1;
+
+        }
+
+
+        orden =
+        Object.keys(todos)
+        .sort(
+            (a,b)=>
+            todos[b]-todos[a]
+        );
+
+    }
+
+
+
+    return orden.slice(0,10);
+
+     
+
+                }
+
+                
+    
+    
+    //////////////////////////////////////////////////
+// CORRECTOR IA V48.5
+//////////////////////////////////////////////////
+
+async function corregirAmbosIAV48(ambos, turnoOrigen){
+
+    let destino = obtenerSiguienteTurnoV48(turnoOrigen);
+
+    let datos = await leerV48(STORES_V48.historico);
+
+    let mejor = ambos;
+    let mejorPeso = -1;
+
+    let variantes = [];
+
+    let a = parseInt(ambos[0]);
+    let b = parseInt(ambos[1]);
+
+    variantes.push(ambos);
+
+    variantes.push(ambos[1]+ambos[0]);
+
+    variantes.push(
+        String(a)+String((b+1)%10)
+    );
+
+    variantes.push(
+        String(a)+String((b+9)%10)
+    );
+
+    variantes.push(
+        String((a+1)%10)+String(b)
+    );
+
+    variantes.push(
+        String((a+9)%10)+String(b)
+    );
+
+    variantes=[...new Set(variantes)];
+
+    for(let candidato of variantes){
+
+        let peso=0;
+
+        for(let r of datos){
+
+            if(r.turno!==destino)
+                continue;
+
+            let num=String(r.numero).slice(-2);
+
+            if(num===candidato)
+                peso+=10;
+
+            if(num===candidato[1]+candidato[0])
+                peso+=6;
+
+            if(num[0]===candidato[0])
+                peso+=2;
+
+            if(num[1]===candidato[1])
+                peso+=2;
+
+        }
+
+        if(peso>mejorPeso){
+
+            mejorPeso=peso;
+            mejor=candidato;
+
+        }
+
+    }
+
+    return mejor;
+
+}
+        
+      //////////////////////////////////////////////////
+// BUSCADOR ACOMPAÑANTE EXACTO V48.7
+//////////////////////////////////////////////////
+
+async function buscarAcompananteExactoV48(base){
+
+    let datos = await leerV48(
+        STORES_V48.historico
+    );
+
+
+    let ranking={};
+
+
+    base=String(base).slice(-2);
+
+
+
+    for(let d of datos){
+
+
+        if(!d.numero)
+            continue;
+
+
+        let numero =
+        String(d.numero).slice(-2);
+
+
+
+        // busca números con misma decena
+
+        if(numero[0]===base[0]){
+
+
+            ranking[numero]=
+            (ranking[numero]||0)+3;
+
+
+        }
+
+
+
+        // busca misma unidad
+
+
+        if(numero[1]===base[1]){
+
+
+            ranking[numero]=
+            (ranking[numero]||0)+2;
+
+
+        }
+
+
+
+        // invertido
+
+
+        if(numero===base[1]+base[0]){
+
+
+            ranking[numero]=
+            (ranking[numero]||0)+5;
+
+
+        }
+
+
+
+        // diferencia de 1
+
+
+        let diferencia =
+        Math.abs(
+            Number(numero)-Number(base)
+        );
+
+
+
+        if(diferencia===1){
+
+
+            ranking[numero]=
+            (ranking[numero]||0)+4;
+
+
+        }
+
+
+    }
+
+
+
+    return Object.keys(ranking)
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    )
+    .slice(0,5);
+
+
+    }
+        
+    //////////////////////////////////////////////////
+// FILTRO FINAL V49.1
+// PUNTADA FINAL
+//////////////////////////////////////////////////
+
+function aplicarFiltroFinalV491(ranking){
+
+    let nuevoRanking = {...ranking};
+
+    for(let n in nuevoRanking){
+
+        let peso = nuevoRanking[n];
+
+        // Premio a candidatos fuertes
+        if(peso >= 15){
+            nuevoRanking[n] += 2;
+        }
+
+        // Premio a candidatos medios
+        else if(peso >= 10){
+            nuevoRanking[n] += 1;
+        }
+
+        // Penalización suave a candidatos débiles
+        else if(peso < 4){
+            nuevoRanking[n] -= 1;
+        }
+
+    }
+
+    return nuevoRanking;
+
+}
+        
+    //////////////////////////////////////////////////////
+// CORRECTOR FINAL IA V52
+// AJUSTA ERRORES CERCANOS E INVERTIDOS
+//////////////////////////////////////////////////////
+
+function corregirPrediccionIA_V52(lista){
+
+    let salida=[];
+
+
+    for(let numero of lista){
+
+
+        numero=String(numero)
+        .padStart(2,"0");
+
+
+        // original
+
+        salida.push(numero);
+
+
+
+        // invertido
+
+        salida.push(
+            numero[1]+numero[0]
+        );
+
+
+
+        let a=parseInt(numero[0]);
+        let b=parseInt(numero[1]);
+
+
+
+        // vecinos unidad
+
+        salida.push(
+            String(a)+String((b+1)%10)
+        );
+
+
+        salida.push(
+            String(a)+String((b+9)%10)
+        );
+
+
+
+        // vecinos decena
+
+        salida.push(
+            String((a+1)%10)+String(b)
+        );
+
+
+        salida.push(
+            String((a+9)%10)+String(b)
+        );
+
+
+
+    }
+
+
+
+    return [...new Set(salida)];
+
+}
+    //////////////////////////////////////////////////////
+// MEMORIA DE ERRORES IA V52
+// APRENDE FALLAS DEL GENERADOR
+//////////////////////////////////////////////////////
+
+let MEMORIA_ERRORES_IA_V52 =
+JSON.parse(
+localStorage.getItem(
+"MEMORIA_ERRORES_IA_V52"
+)
+)
+||
+{};
+
+
+
+function guardarErrorIA_V52(
+prediccion,
+real
+){
+
+    prediccion =
+    String(prediccion)
+    .slice(-2);
+
+
+    real =
+    String(real)
+    .slice(-2);
+
+
+
+    if(!MEMORIA_ERRORES_IA_V52[prediccion]){
+
+        MEMORIA_ERRORES_IA_V52[prediccion]={
+
+            cerca:0,
+            invertido:0,
+            cambios:{}
+
+        };
+
+    }
+
+
+
+    // invertido
+
+    if(
+        real ===
+        prediccion[1]+prediccion[0]
+    ){
+
+        MEMORIA_ERRORES_IA_V52[prediccion]
+        .invertido++;
+
+    }
+
+
+
+    // diferencia
+
+    let diferencia =
+
+    Math.abs(
+        parseInt(prediccion) -
+        parseInt(real)
+    );
+
+
+
+    if(diferencia<=2){
+
+        MEMORIA_ERRORES_IA_V52[prediccion]
+        .cerca++;
+
+    }
+
+
+
+    if(
+        !MEMORIA_ERRORES_IA_V52[prediccion]
+        .cambios[real]
+    ){
+
+        MEMORIA_ERRORES_IA_V52[prediccion]
+        .cambios[real]=0;
+
+    }
+
+
+    MEMORIA_ERRORES_IA_V52[prediccion]
+    .cambios[real]++;
+
+
+
+    localStorage.setItem(
+        "MEMORIA_ERRORES_IA_V52",
+        JSON.stringify(
+            MEMORIA_ERRORES_IA_V52
+        )
+    );
+
+
+    }
+    //////////////////////////////////////////////////////
+// APLICADOR DE ERRORES APRENDIDOS IA V52
+//////////////////////////////////////////////////////
+
+function aplicarCorreccionErroresIA_V52(
+    candidatos
+){
+
+    let ranking={};
+
+
+
+    for(let n of candidatos){
+
+
+        n =
+        String(n)
+        .slice(-2);
+
+
+
+        if(!ranking[n])
+            ranking[n]=0;
+
+
+
+        // peso original
+
+        ranking[n]+=10;
+
+
+
+        let memoria =
+        MEMORIA_ERRORES_IA_V52[n];
+
+
+
+        if(!memoria)
+            continue;
+
+
+
+        //////////////////////////////////////////////////
+        // PREMIAR CORRECCIONES HISTÓRICAS
+        //////////////////////////////////////////////////
+
+
+        for(let cambio in memoria.cambios){
+
+
+            ranking[cambio] =
+
+            (ranking[cambio] || 0)
+            +
+            memoria.cambios[cambio] * 3;
+
+
+        }
+
+
+
+        //////////////////////////////////////////////////
+        // SI FALLÓ MUCHO INVERTIDO
+        //////////////////////////////////////////////////
+
+        if(
+            memoria.invertido > 2
+        ){
+
+            let invertido =
+            n[1]+n[0];
+
+
+            ranking[invertido] =
+
+            (ranking[invertido] || 0)
+            +
+            memoria.invertido * 2;
+
+        }
+
+
+
+    }
+
+
+
+    return Object.keys(ranking)
+
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    );
+
+}
+    /////////////////////////////////////////////////////////////
+// MOTOR IA V55
+// MEMORIA INTELIGENTE
+/////////////////////////////////////////////////////////////
+
+let MEMORIA_V55 = {
+
+transiciones:{},
+
+aciertos:{},
+
+errores:{},
+
+invertidos:{},
+
+cerca1:{},
+
+cerca2:{},
+
+ultimaGeneracion:[]
+
+};
+
+/////////////////////////////////////////////////////////////
+// REGISTRAR RESULTADO
+/////////////////////////////////////////////////////////////
+
+function registrarResultadoV55(
+predicho,
+real,
+turnoOrigen,
+turnoDestino
+){
+
+predicho=String(predicho).slice(-2);
+real=String(real).slice(-2);
+
+let clave=turnoOrigen+"->"+turnoDestino;
+
+if(!MEMORIA_V55.transiciones[clave])
+MEMORIA_V55.transiciones[clave]={};
+
+if(!MEMORIA_V55.transiciones[clave][predicho])
+MEMORIA_V55.transiciones[clave][predicho]=0;
+
+if(predicho===real){
+
+MEMORIA_V55.aciertos[predicho]=
+(MEMORIA_V55.aciertos[predicho]||0)+1;
+
+MEMORIA_V55.transiciones[clave][predicho]+=5;
+
+return;
+
+}
+
+if(predicho===real[1]+real[0]){
+
+MEMORIA_V55.invertidos[predicho]=
+(MEMORIA_V55.invertidos[predicho]||0)+1;
+
+MEMORIA_V55.transiciones[clave][predicho]+=3;
+
+return;
+
+}
+
+let d=Math.abs(
+Number(predicho)-Number(real)
+);
+
+if(d===1){
+
+MEMORIA_V55.cerca1[predicho]=
+(MEMORIA_V55.cerca1[predicho]||0)+1;
+
+MEMORIA_V55.transiciones[clave][predicho]+=2;
+
+return;
+
+}
+
+if(d===2){
+
+MEMORIA_V55.cerca2[predicho]=
+(MEMORIA_V55.cerca2[predicho]||0)+1;
+
+MEMORIA_V55.transiciones[clave][predicho]+=1;
+
+return;
+
+}
+
+MEMORIA_V55.errores[predicho]=
+(MEMORIA_V55.errores[predicho]||0)+1;
+
+MEMORIA_V55.transiciones[clave][predicho]-=1;
+
+}
+
+/////////////////////////////////////////////////////////////
+// OBTENER PESO IA
+/////////////////////////////////////////////////////////////
+
+function obtenerPesoV55(
+numero,
+turnoOrigen,
+turnoDestino
+){
+
+numero=String(numero).slice(-2);
+
+let peso=0;
+
+let clave=
+turnoOrigen+"->"+turnoDestino;
+
+if(
+MEMORIA_V55.transiciones[clave] &&
+MEMORIA_V55.transiciones[clave][numero]
+){
+
+peso+=
+MEMORIA_V55.transiciones[clave][numero];
+
+}
+
+peso+=
+(MEMORIA_V55.aciertos[numero]||0)*4;
+
+peso+=
+(MEMORIA_V55.invertidos[numero]||0)*2;
+
+peso+=
+(MEMORIA_V55.cerca1[numero]||0);
+
+peso+=
+(MEMORIA_V55.cerca2[numero]||0)*0.5;
+
+peso-=
+(MEMORIA_V55.errores[numero]||0);
+
+return peso;
+
+    }
+    /////////////////////////////////////////////////////////////
+// MOTOR DE RANKING IA V55
+/////////////////////////////////////////////////////////////
+
+function construirRankingV55(
+ranking,
+turnoOrigen,
+turnoDestino
+){
+
+let nuevo={...ranking};
+
+for(let numero in nuevo){
+
+let peso=0;
+
+peso+=nuevo[numero];
+
+peso+=obtenerPesoV55(
+numero,
+turnoOrigen,
+turnoDestino
+);
+
+// Premio Tesla
+
+try{
+
+let tesla=
+aplicarTeslaV48(numero);
+
+if(tesla===numero)
+peso+=8;
+
+}catch(e){}
+
+// Penalizar repetición
+
+if(
+MEMORIA_V55.ultimaGeneracion
+.includes(numero)
+){
+
+peso-=12;
+
+}
+
+// Premio por transición fuerte
+
+let clave=
+turnoOrigen+"->"+turnoDestino;
+
+if(
+MEMORIA_V55.transiciones[clave] &&
+MEMORIA_V55.transiciones[clave][numero]
+){
+
+peso+=
+MEMORIA_V55.transiciones
+[clave][numero];
+
+}
+
+nuevo[numero]=peso;
+
+}
+
+return Object.keys(nuevo)
+
+.sort(
+(a,b)=>nuevo[b]-nuevo[a]
+);
+
+}
+    /////////////////////////////////////////////////////////////
+// SELECCIÓN INTELIGENTE V55
+/////////////////////////////////////////////////////////////
+
+function seleccionarAmbosV55(
+orden
+){
+
+let ambos=[];
+
+for(let numero of orden){
+
+numero=
+String(numero)
+.padStart(2,"0");
+
+if(ambos.includes(numero))
+continue;
+
+// evita repetidos
+
+if(
+MEMORIA_V55.ultimaGeneracion
+.includes(numero)
+)
+continue;
+
+ambos.push(numero);
+
+if(ambos.length===3)
+break;
+
+}
+
+MEMORIA_V55.ultimaGeneracion=
+[...ambos];
+
+return ambos;
+
+}
+    /////////////////////////////////////////////////////////////
+// BLOQUE 4
+// CONEXIÓN DEL MOTOR V55
+/////////////////////////////////////////////////////////////
+
+function aplicarMotorV55(
+ranking,
+turnoOrigen,
+turnoDestino
+){
+
+// Construye el ranking inteligente
+let orden = construirRankingV55(
+ranking,
+turnoOrigen,
+turnoDestino
+);
+
+// Selecciona los 3 mejores ambos
+let ambos = seleccionarAmbosV55(
+orden
+);
+
+// Devuelve el resultado
+return {
+
+orden: orden,
+
+ambos: ambos
+
+};
+
+}
+    
+    
+    
+    //////////////////////////////////////////////////////
+// CORRECTOR DE DESVIACIÓN IA V55.2
+// Ajusta errores repetidos del motor
+//////////////////////////////////////////////////////
+
+async function aplicarCorrectorDesviacionV55_2(
+    ranking,
+    historico
+){
+
+    
+
+    let historial =
+    await leerV48(
+        STORES_V48.predicciones
+    );
+
+
+    let correcciones={};
+
+
+
+    let resultados = historico;
+    
+
+
+
+    for(let pred of historial){
+
+
+        if(!pred.ambos)
+            continue;
+
+
+
+        // buscar resultado posterior
+
+        let realEncontrado =
+        resultados.find(r=>{
+
+            return (
+            r.fecha &&
+            new Date(r.fecha) >
+            new Date(pred.fecha)
+            );
+
+        });
+
+
+
+        if(!realEncontrado)
+            continue;
+
+
+
+        let real =
+        String(realEncontrado.numero)
+        .slice(-2);
+
+
+
+        for(let p of pred.ambos){
+
+
+            p =
+            String(p)
+            .padStart(2,"0");
+
+
+
+            if(p===real)
+                continue;
+
+
+
+            let cambios=[];
+
+
+
+            // cambio unidad
+
+            if(
+            p[0]===real[0]
+            ){
+
+                cambios.push(real);
+
+            }
+
+
+
+            // cambio decena
+
+            if(
+            p[1]===real[1]
+            ){
+
+                cambios.push(real);
+
+            }
+
+
+
+            // invertido
+
+            if(
+            p[1]+p[0]===real
+            ){
+
+                cambios.push(real);
+
+            }
+
+
+
+            for(let c of cambios){
+
+                if(!correcciones[c])
+                    correcciones[c]=0;
+
+
+                correcciones[c]+=3;
+
+            }
+
+
+        }
+
+
+    }
+
+
+
+    // aplicar pesos aprendidos
+
+
+    for(let n in correcciones){
+
+
+        if(!ranking[n])
+            ranking[n]=0;
+
+
+        ranking[n]+=
+        correcciones[n];
+
+
+    }
+
+
+
+    console.log(
+    "CORRECTOR V55.2",
+    correcciones
+    );
+
+
+    return ranking;
+
+
+            }
+    
+    
+//////////////////////////////////////////////////////
+// CORRECTOR DE DECENA INTELIGENTE V56
+//////////////////////////////////////////////////////
+
+async function aplicarCorrectorDecenaV56(
+    ambos,
+    turnoOrigen
+){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    let turnoDestino =
+    obtenerSiguienteTurnoV48(turnoOrigen);
+
+    let salida=[];
+
+    for(let ambosBase of ambos){
+
+        ambosBase=
+        String(ambosBase)
+        .padStart(2,"0");
+
+        let unidad=
+        ambosBase[1];
+
+        let mejor=
+        ambosBase;
+
+        let mejorPeso=-1;
+
+        for(let d=0;d<=9;d++){
+
+            let candidato=
+            String(d)+unidad;
+
+            let peso=0;
+
+            for(let i=0;i<historial.length-1;i++){
+
+                let actual=historial[i];
+                let siguiente=historial[i+1];
+
+                if(actual.turno!==turnoOrigen)
+                    continue;
+
+                if(siguiente.turno!==turnoDestino)
+                    continue;
+
+                if(
+                    String(siguiente.numero)
+                    .slice(-2)===candidato
+                ){
+                    peso++;
+                }
+
+            }
+
+            if(peso>mejorPeso){
+
+                mejorPeso=peso;
+                mejor=candidato;
+
+            }
+
+        }
+
+        salida.push(mejor);
+
+    }
+
+    return [...new Set(salida)];
+
+}
+//////////////////////////////////////////////////////
+// CORRECTOR FINAL DE PATRÓN V57.1 SEGURO
+//////////////////////////////////////////////////////
+
+async function aplicarCorrectorPatronV57(
+    ambos,
+    turnoOrigen
+){
+
+    try{
+
+        let datos =
+        await leerV48(
+            STORES_V48.historico
+        );
+
+
+        if(!Array.isArray(datos) || datos.length===0)
+            return ambos;
+
+
+
+        let salida=[];
+
+
+        for(let numero of ambos){
+
+
+            numero=
+            String(numero)
+            .padStart(2,"0");
+
+
+
+            let votos={};
+
+
+
+            for(let i=0;i<datos.length-1;i++){
+
+
+                let actual=
+                String(datos[i].numero)
+                .slice(-2);
+
+
+
+                if(actual!==numero)
+                    continue;
+
+
+
+                let siguiente=
+                String(datos[i+1].numero)
+                .slice(-2);
+
+
+
+                votos[siguiente]=
+                (votos[siguiente]||0)+1;
+
+            }
+
+
+
+            let mejor=numero;
+            let mayor=0;
+
+
+
+            for(let n in votos){
+
+                if(votos[n]>mayor){
+
+                    mayor=votos[n];
+                    mejor=n;
+
+                }
+
+            }
+
+
+
+            // SOLO cambia si hay patrón muy fuerte
+
+            if(mayor>=5){
+
+                salida.push(mejor);
+
+            }else{
+
+                salida.push(numero);
+
+            }
+
+
+        }
+
+
+
+        return [...new Set(salida)];
+
+
+    }catch(e){
+
+
+        console.log(
+            "ERROR V57:",
+            e
+        );
+
+
+        return ambos;
+
+    }
+
+}
+    //////////////////////////////////////////////////////
+// MOTOR IA V60
+// BLOQUE 1
+// MEMORIA HISTÓRICA GLOBAL
+//////////////////////////////////////////////////////
+
+let MEMORIA_V60 = {
+
+    transiciones:{},
+
+    frecuencia:{},
+
+    unidades:{},
+
+    decenas:{},
+
+    decenaPorUnidad:{},
+
+    total:0
+
+};
+
+//////////////////////////////////////////////////////
+// CONSTRUIR MEMORIA GLOBAL
+//////////////////////////////////////////////////////
+async function construirMemoriaHistoricaV60(){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    if (!Array.isArray(historial) || historial.length < 2) {
+        MEMORIA_V60 = {
+            transiciones:{},
+            frecuencia:{},
+            unidades:{},
+            decenas:{},
+            decenaPorUnidad:{},
+            total:0
+        };
+        return MEMORIA_V60;
+    }
+
+    MEMORIA_V60 = {
+
+        transiciones:{},
+        frecuencia:{},
+        unidades:{},
+        decenas:{},
+        decenaPorUnidad:{},
+        total:historial.length
+
+    };
+
+
+    for(let i=0;i<historial.length-1;i++){
+
+        let actual = historial[i];
+        let siguiente = historial[i+1];
+
+        if (!actual || !siguiente) {
+            continue;
+        }
+    
+        let origen =
+        String(actual.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+        let destino =
+        String(siguiente.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+        let clave =
+        actual.turno+"->"+siguiente.turno;
+
+
+        if(!MEMORIA_V60.transiciones[clave])
+            MEMORIA_V60.transiciones[clave]={};
+
+
+        if(!MEMORIA_V60.transiciones[clave][origen])
+            MEMORIA_V60.transiciones[clave][origen]={};
+
+
+        MEMORIA_V60.transiciones[clave][origen][destino] =
+        (MEMORIA_V60.transiciones[clave][origen][destino]||0)+1;
+
+
+        MEMORIA_V60.frecuencia[destino] =
+        (MEMORIA_V60.frecuencia[destino]||0)+1;
+        
+        // MEMORIA DECENA Y UNIDAD V60
+
+let decena = destino[0];
+let unidad = destino[1];
+
+
+// frecuencia de unidades
+
+MEMORIA_V60.unidades[unidad] =
+(MEMORIA_V60.unidades[unidad]||0)+1;
+
+
+// frecuencia de decenas
+
+MEMORIA_V60.decenas[decena] =
+(MEMORIA_V60.decenas[decena]||0)+1;
+
+
+// relación decena por unidad
+
+if(!MEMORIA_V60.decenaPorUnidad[unidad]){
+    MEMORIA_V60.decenaPorUnidad[unidad]={};
+}
+
+
+MEMORIA_V60.decenaPorUnidad[unidad][decena] =
+(
+MEMORIA_V60.decenaPorUnidad[unidad][decena] || 0
+)+1;
+
+    }
+
+
+    console.log(
+        "MEMORIA V60 OK",
+        MEMORIA_V60.total
+    );
+
+
+    return MEMORIA_V60;
+
+}
+
+    
+    //////////////////////////////////////////////////////
+// MOTOR IA V60
+// BLOQUE 2
+// TRANSICIÓN HISTÓRICA GLOBAL
+//////////////////////////////////////////////////////
+
+function aplicarMotorHistoricoV60(
+    ranking,
+    base,
+    turnoOrigen,
+    turnoDestino
+){
+
+    let clave =
+    turnoOrigen + "->" + turnoDestino;
+
+    if(
+        !MEMORIA_V60.transiciones[clave]
+    ){
+        return ranking;
+    }
+
+    if(
+        !MEMORIA_V60.transiciones[clave][base]
+    ){
+        return ranking;
+    }
+
+    let historial =
+    MEMORIA_V60.transiciones[clave][base];
+
+    for(let numero in historial){
+
+        if(!ranking[numero]){
+            ranking[numero]=0;
+        }
+
+        // Peso histórico V60
+        ranking[numero] +=
+        historial[numero] * 10;
+
+    }
+
+    return ranking;
+
+    }
+
+    //////////////////////////////////////////////////////
+// MOTOR IA V60
+// BLOQUE 3
+// DETECTOR DE ACOMPAÑANTES HISTÓRICOS
+//////////////////////////////////////////////////////
+
+function aplicarAcompanantesV60(
+    ranking,
+    base,
+    turnoOrigen,
+    turnoDestino
+){
+
+    let clave =
+    turnoOrigen + "->" + turnoDestino;
+
+    if(
+        !MEMORIA_V60.transiciones[clave]
+    ) return ranking;
+
+    let historialBase =
+    MEMORIA_V60.transiciones[clave][base];
+
+    if(!historialBase)
+        return ranking;
+
+    let lista =
+    Object.keys(historialBase)
+    .sort(
+        (a,b)=>
+        historialBase[b]-
+        historialBase[a]
+    );
+
+    let limite =
+    Math.min(5,lista.length);
+
+    for(let i=0;i<limite;i++){
+
+        let numero =
+        lista[i];
+
+        if(!ranking[numero])
+            ranking[numero]=0;
+
+        // Premio fuerte a los acompañantes
+        ranking[numero]+=20-i;
+
+    }
+
+    return ranking;
+
+}
+    //////////////////////////////////////////////////////
+// MOTOR IA V60
+// BLOQUE 4
+// ORIENTADOR INTELIGENTE
+//////////////////////////////////////////////////////
+
+function aplicarOrientadorV60(
+    ranking
+){
+
+    let nuevo = {};
+
+    for(let numero in ranking){
+
+        numero =
+        String(numero)
+        .padStart(2,"0");
+
+        let peso =
+        ranking[numero];
+
+        let decena =
+        numero[0];
+
+        let unidad =
+        numero[1];
+
+        // Unidad
+
+peso +=
+(MEMORIA_V60.unidades[unidad]||0)*0.5;
+
+// Decena global
+
+peso +=
+(MEMORIA_V60.decenas[decena]||0)*0.2;
+
+// Decena histórica para esa unidad
+
+if(
+
+    MEMORIA_V60.decenaPorUnidad[unidad] &&
+
+    MEMORIA_V60.decenaPorUnidad[unidad][decena]
+
+){
+
+    peso +=
+    MEMORIA_V60
+    .decenaPorUnidad[unidad][decena]
+    *1.5;
+
+}
+
+        nuevo[numero] = peso;
+
+    }
+
+    return nuevo;
+
+    }
+
+    async function reevaluarDecenaFinalV60(ranking){
+
+    let historial =
+    await leerV48(STORES_V48.historico);
+
+    let frecuencia = {};
+
+    for(let r of historial){
+
+        let ambos =
+        String(r.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        frecuencia[ambos] =
+        (frecuencia[ambos]||0)+1;
+
+    }
+
+    let candidatos =
+    Object.keys(ranking)
+    .sort((a,b)=>ranking[b]-ranking[a])
+    .slice(0,10);
+
+    for(let numero of candidatos){
+
+        let unidad = numero[1];
+
+        for(let d=0; d<=9; d++){
+
+            let posible = d + unidad;
+
+            if(frecuencia[posible]){
+
+                ranking[posible] =
+                (ranking[posible]||0) +
+                frecuencia[posible]*0.20;
+
+            }
+
+        }
+
+    }
+
+    return ranking;
+
+    }
+
+    async function aplicarMotorV60(
+    ranking,
+    bases,
+    turnoOrigen,
+    turnoDestino
+){
+
+    if(MEMORIA_V60.total===0){
+
+        await construirMemoriaHistoricaV60();
+
+    }
+
+
+    // MOTOR HISTÓRICO ORIGINAL
+
+    for(let base of bases){
+
+        ranking =
+        aplicarMotorHistoricoV60(
+            ranking,
+            base,
+            turnoOrigen,
+            turnoDestino
+        );
+
+
+        ranking =
+        aplicarAcompanantesV60(
+            ranking,
+            base,
+            turnoOrigen,
+            turnoDestino
+        );
+
+    }
+
+
+
+    // Orientación inteligente
+ranking =
+aplicarOrientadorV60(
+    ranking
+);
+
+
+// CORRECCIÓN PRECISIÓN AMBOS
+ranking =
+await corregirAmbosExactosV60(
+    ranking
+);
+
+
+
+    //////////////////////////////////////////////////
+    // NUEVO CORRECTOR DE DECENA V60
+    //////////////////////////////////////////////////
+
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+    let pesoDecenas={};
+
+
+    for(let r of historial){
+
+        let n =
+        String(r.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+        let unidad=n[1];
+
+
+        if(!pesoDecenas[unidad])
+            pesoDecenas[unidad]={};
+
+
+        let decena=n[0];
+
+
+        pesoDecenas[unidad][decena]=
+        (pesoDecenas[unidad][decena]||0)+1;
+
+    }
+
+
+
+    // Ajustar ranking por unidad
+
+    for(let numero in ranking){
+
+        let unidad =
+        numero[1];
+
+
+        let decena =
+        numero[0];
+
+
+        if(
+            pesoDecenas[unidad] &&
+            pesoDecenas[unidad][decena]
+        ){
+
+            ranking[numero] +=
+            pesoDecenas[unidad][decena] * 0.15;
+
+        }
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+// SELECCIÓN INTELIGENTE DECENA + UNIDAD
+//////////////////////////////////////////////////
+
+let rankingDecena={};
+let rankingUnidad={};
+
+// construir ranking separado
+for(let numero in ranking){
+
+    numero=String(numero).padStart(2,"0");
+
+    let d=numero[0];
+    let u=numero[1];
+
+    rankingDecena[d]=(rankingDecena[d]||0)+ranking[numero];
+    rankingUnidad[u]=(rankingUnidad[u]||0)+ranking[numero];
+
+}
+
+// mejores decenas
+let mejoresDecenas=
+Object.keys(rankingDecena)
+.sort((a,b)=>rankingDecena[b]-rankingDecena[a])
+.slice(0,3);
+
+// mejores unidades
+let mejoresUnidades=
+Object.keys(rankingUnidad)
+.sort((a,b)=>rankingUnidad[b]-rankingUnidad[a])
+.slice(0,3);
+
+// generar combinaciones
+let candidatos=[];
+
+for(let d of mejoresDecenas){
+
+    for(let u of mejoresUnidades){
+
+        let numero=d+u;
+
+        candidatos.push({
+
+            numero:numero,
+
+            puntaje:
+            (ranking[numero]||0)+
+            rankingDecena[d]+
+            rankingUnidad[u]
+
+        });
+
+    }
+
+}
+
+// ordenar candidatos
+candidatos.sort(
+(a,b)=>b.puntaje-a.puntaje
+);
+
+// resultado final
+let ambos=[];
+
+for(let c of candidatos){
+
+    if(!ambos.includes(c.numero))
+        ambos.push(c.numero);
+
+    if(ambos.length==3)
+        break;
+
+}
+
+// orden para el resto del motor
+let orden=
+candidatos.map(x=>x.numero);
+
+
+    return {
+
+        ranking,
+
+        orden,
+
+        ambos
+
+    };
+
+    }
+    
+
+    //////////////////////////////////////////////////
+// CORRECTOR PRECISIÓN AMBOS V60
+//////////////////////////////////////////////////
+
+async function corregirAmbosExactosV60(ranking){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+    let exactos={};
+    let unidades={};
+    let decenas={};
+
+
+    for(let r of historial){
+
+        let n=
+        String(r.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+        exactos[n]=(exactos[n]||0)+1;
+
+
+        decenas[n[0]]=
+        (decenas[n[0]]||0)+1;
+
+
+        unidades[n[1]]=
+        (unidades[n[1]]||0)+1;
+
+    }
+
+
+
+    for(let n in ranking){
+
+        let peso=ranking[n];
+
+
+        // Premio si salió exacto antes
+        if(exactos[n]){
+
+            peso += exactos[n]*2;
+
+        }
+
+
+
+        // Penalizar si solamente coincide unidad
+        let unidad=n[1];
+
+        if(unidades[unidad] && !exactos[n]){
+
+            peso -= unidades[unidad]*0.05;
+
+        }
+
+
+
+        // Penalizar números invertidos
+        let inv =
+        n[1]+n[0];
+
+
+        if(exactos[inv] && !exactos[n]){
+
+            peso -= exactos[inv]*0.5;
+
+        }
+
+
+
+        ranking[n]=peso;
+
+    }
+
+
+    return ranking;
+
+}
+    //////////////////////////////////////////////////
+// TERCER AMBOS HISTÓRICO V60
+//////////////////////////////////////////////////
+
+async function obtenerTercerAmbosHistoricoV60(
+    bases,
+    turnoOrigen,
+    turnoDestino,
+    usados
+){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    let ranking={};
+
+    for(let base of bases){
+
+        let candidatos =
+        await analizarTransicionTurnoV48(
+            base,
+            turnoOrigen,
+            historial
+        );
+
+        for(let n of candidatos){
+
+            n=String(n).padStart(2,"0");
+
+            if(usados.includes(n))
+                continue;
+
+            ranking[n]=
+            (ranking[n]||0)+1;
+
+        }
+
+    }
+
+    let orden=
+    Object.keys(ranking)
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    );
+
+    return orden.length
+        ? orden[0]
+        : null;
+
+}
+    
+//////////////////////////////////////////////////
+// CORRECTOR INTELIGENTE DE DECENA V60
+//////////////////////////////////////////////////
+
+async function corregirDecenaHistoricaV60(
+    ambos,
+    turnoOrigen,
+    turnoDestino
+){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    for(let i=0;i<2;i++){
+
+        let numero =
+        String(ambos[i])
+        .padStart(2,"0");
+
+        let unidad =
+        numero[1];
+
+        let pesos={};
+
+        for(let j=0;j<historial.length-1;j++){
+
+            let actual=historial[j];
+            let siguiente=historial[j+1];
+
+            if(
+                actual.turno!==turnoOrigen
+            ) continue;
+
+            if(
+                siguiente.turno!==turnoDestino
+            ) continue;
+
+            let salida=
+            String(siguiente.numero)
+            .slice(-2)
+            .padStart(2,"0");
+
+            if(
+                salida[1]!==unidad
+            ) continue;
+
+            pesos[salida]=
+            (pesos[salida]||0)+1;
+
+        }
+
+        let mejor=numero;
+        let mejorPeso=0;
+
+        for(let n in pesos){
+
+            if(pesos[n]>mejorPeso){
+
+                mejorPeso=pesos[n];
+                mejor=n;
+
+            }
+
+        }
+
+        ambos[i]=mejor;
+
+    }
+
+    return ambos;
+
+    }
+    
+//////////////////////////////////////////////////
+// GENERADOR IA V60
+// BLOQUE 1
+//////////////////////////////////////////////////
+
+    
+async function generarResultadoIA(){
+    
+await ejecutarBloque11IA();
+    
+await construirBloque12V60();
+
+
+let elemento =
+document.getElementById("turnoCarga");
+
+    
+let turnoOrigen =
+elemento.value;
+
+let turnoDestino =
+obtenerSiguienteTurnoV48(
+    turnoOrigen
+);
+
+// Leer el histórico UNA sola vez
+let historico =
+await leerV48(
+    STORES_V48.historico
+);
+
+// Ranking inicial
+let ranking = {};
+
+// Obtener bases desde las provincias
+let bases =
+obtenerBases7Provincias();
+
+// Si no hay bases cargadas,
+// usar las últimas 100 del histórico
+if(!bases || bases.length===0){
+
+    bases =
+    historico
+    .slice(-100)
+    .map(x=>
+        String(x.numero)
+        .slice(-2)
+    );
+
+}
+
+    //////////////////////////////////////////////////
+// BLOQUE 2
+// MOTOR TRANSICIÓN + MATRIZ + V60
+//////////////////////////////////////////////////
+
+// Analizar cada base histórica
+
+for(let base of bases){
+
+    let candidatos =
+    await analizarTransicionTurnoV48(
+        base,
+        turnoOrigen
+    );
+
+
+    if(!candidatos)
+        continue;
+
+
+    for(let salida of candidatos){
+
+        salida =
+        String(salida)
+        .padStart(2,"0");
+
+
+        if(!ranking[salida])
+            ranking[salida]=0;
+
+
+        ranking[salida]+=30;
+
+    }
+
+
+}
+
+
+// Apoyo de matriz histórica
+
+let destinoMatriz =
+
+MATRIZ_HISTORICA_V48[turnoOrigen]
+&&
+MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino];
+
+
+if(destinoMatriz){
+
+    for(let provincia in destinoMatriz){
+
+        let datos =
+        destinoMatriz[provincia];
+
+
+        for(let salida in datos){
+
+            if(!ranking[salida])
+                ranking[salida]=0;
+
+
+            ranking[salida]+=datos[salida];
+
+        }
+
+    }
+
+}
+
+
+ranking =
+await aplicarCorrectorDesviacionV55_2(
+    ranking,
+    historico
+);
+
+
+//////////////////////////////////////////////////
+// BLOQUE 12 ACTIVO
+//////////////////////////////////////////////////
+
+if(typeof aplicarDiagnosticoBloque12V60 === "function"){
+
+    ranking =
+    await aplicarDiagnosticoBloque12V60(
+        ranking
+    );
+
+    console.log(
+    "BLOQUE 12 APLICADO AL RANKING",
+    ranking
+    );
+
+}
+
+
+// MOTOR V60 REAL
+
+let motorV60 =
+await aplicarMotorV60(
+    ranking,
+    bases,
+    turnoOrigen,
+    turnoDestino
+);
+
+
+ranking =
+motorV60.ranking;
+
+
+let orden =
+motorV60.orden;
+
+
+let ambos =
+motorV60.ambos;
+    
+ambos =
+await corregirDecenaHistoricaV60(
+
+    ambos,
+
+    turnoOrigen,
+
+    turnoDestino
+
+);
+    
+ let terceroHistorico =
+await obtenerTercerAmbosHistoricoV60(
+
+    bases,
+
+    turnoOrigen,
+
+    turnoDestino,
+
+    [ambos[0],ambos[1]]
+
+);
+
+if(terceroHistorico){
+
+    ambos[2]=terceroHistorico;
+
+}   
+
+    //////////////////////////////////////////////////
+// BLOQUE 3
+// CORRECTORES FINALES
+//////////////////////////////////////////////////
+
+// Corrector de decena
+
+ambos =
+await aplicarCorrectorDecenaV56(
+    ambos,
+    turnoOrigen
+);
+
+
+// Corrector patrón seguro
+
+ambos =
+await aplicarCorrectorPatronV57(
+    ambos,
+    turnoOrigen
+);
+    // ASEGURAR 3 AMBOS SIEMPRE
+
+if(ambos.length < 3){
+
+    for(let n of orden){
+
+        n =
+        String(n)
+        .padStart(2,"0");
+
+
+        if(!ambos.includes(n)){
+
+            ambos.push(n);
+
+        }
+
+
+        if(ambos.length===3)
+            break;
+
+    }
+
+}
+
+
+// Asegurar formato
+
+ambos =
+ambos.map(n=>
+    String(n)
+    .padStart(2,"0")
+);
+
+
+// Si por algún motivo queda vacío,
+// recuperar del ranking
+
+if(!ambos.length){
+
+    ambos =
+    orden
+    .slice(0,3)
+    .map(n=>
+        String(n)
+        .padStart(2,"0")
+    );
+
+}
+
+
+console.log(
+"V60 RESULTADO AMBOS",
+ambos
+);
+    //////////////////////////////////////////////////
+// BLOQUE 4
+// GENERADOR TERNO Y CUATERNO CORREGIDO
+//////////////////////////////////////////////////
+
+let principal =
+String(ambos[0])
+.padStart(2,"0");
+
+
+let ternos = [];
+let cuaternos = [];
+
+
+for(let i=1;i<ambos.length;i++){
+
+    let apoyo =
+    String(ambos[i])
+    .padStart(2,"0");
+
+
+    // TERNO
+    ternos.push(
+        principal +
+        apoyo[1]
+    );
+
+
+    // CUATERNO
+    cuaternos.push(
+        principal +
+        apoyo
+    );
+
+}
+
+
+// asegurar máximo 2
+
+ternos =
+ternos.slice(0,2);
+
+
+cuaternos =
+cuaternos.slice(0,2);
+
+
+console.log(
+"GENERADO:",
+{
+ambos,
+ternos,
+cuaternos
+}
+);
+
+
+    //////////////////////////////////////////////////
+// BLOQUE 5
+// GUARDADO Y SALIDA FINAL V60
+//////////////////////////////////////////////////
+
+// Guardar predicción
+
+await guardarV48(
+
+    STORES_V48.predicciones,
+
+    {
+
+        fecha:new Date(),
+
+        turnoOrigen:turnoOrigen,
+
+        turnoDestino:turnoDestino,
+
+        ambos:ambos,
+
+        ternos:ternos,
+
+        cuaternos:cuaternos,
+
+        origen:"MOTOR_IA_V60"
+
+    }
+
+);
+
+
+
+// Actualizar memoria actual
+
+PREDICCION_ACTUAL_V49 = {
+
+    fecha:new Date()
+    .toISOString(),
+
+    turno:turnoOrigen,
+
+    ambos:ambos,
+
+    ternos:ternos,
+
+    cuaternos:cuaternos
+
+};
+
+
+
+console.log(
+"V60 PREDICCION FINAL",
+PREDICCION_ACTUAL_V49
+);
+
+
+
+// Mostrar resultado
+
+mostrarV48(
+
+`
+🧠 MOTOR IA V60 ACTIVO
+
+Turno:
+${turnoOrigen} → ${turnoDestino}
+
+
+AMBOS:
+
+${ambos.join("\n")}
+
+
+TERNOS:
+
+${ternos.join("\n")}
+
+
+CUATERNOS:
+
+${cuaternos.join("\n")}
+
+
+Motor:
+MEMORIA HISTÓRICA + TRANSICIÓN + ACOMPAÑANTES
+`
+
+);
+
+
+}
+
+    
+    //////////////////////////////////////////////////
+// GUARDAR / CARGAR APRENDIZAJE PT V51
+//////////////////////////////////////////////////
+
+async function guardarAprendizajePTV51(){
+
+    try{
+
+        await guardarV48(
+            STORES_V48.aprendizaje,
+            {
+                tipo:"APRENDIZAJE_PT_V51",
+                fecha:new Date().toISOString(),
+                datos:APRENDIZAJE_PT_V51
+            }
+        );
+
+    }catch(e){
+
+        console.log("No se pudo guardar V51",e);
+
+    }
+
+}
+
+async function cargarAprendizajePTV51(){
+
+    let datos =
+    await leerV48(
+        STORES_V48.aprendizaje
+    );
+
+    for(let i=datos.length-1;i>=0;i--){
+
+        if(datos[i].tipo==="APRENDIZAJE_PT_V51"){
+
+            APRENDIZAJE_PT_V51=
+            datos[i].datos || {};
+
+            console.log(
+                "Aprendizaje PT V51 cargado",
+                APRENDIZAJE_PT_V51
+            );
+
+            break;
+
+        }
+
+    }
+
+}
+    //////////////////////////////////////////////////
+// MEMORIA DE PREDICCIONES V49
+//////////////////////////////////////////////////
+
+async function guardarPrediccionV49(
+    turno,
+    ambos
+){
+
+    PREDICCION_ACTUAL_V49={
+
+        fecha:new Date()
+        .toISOString()
+        .slice(0,10),
+
+        turno:turno,
+
+        ambos:ambos
+
+    };
+
+
+    await guardarV48(
+
+        STORES_V48.predicciones,
+
+        PREDICCION_ACTUAL_V49
+
+    );
+
+
+    console.log(
+        "PREDICCIÓN GUARDADA V49",
+        PREDICCION_ACTUAL_V49
+    );
+}
+
+    //////////////////////////////////////////////////
+// CARGAR APRENDIZAJE AL INICIAR V49
+//////////////////////////////////////////////////
+
+async function cargarAprendizajeV49(){
+
+
+let datos =
+await leerV48(
+STORES_V48.aprendizaje
+);
+
+
+
+if(datos.length===0)
+return;
+
+
+
+let ultimo =
+datos[datos.length-1];
+
+
+
+if(
+ultimo.datos
+){
+
+APRENDIZAJE_V49 =
+ultimo.datos;
+
+}
+
+
+
+console.log(
+"MEMORIA IA V49 CARGADA",
+APRENDIZAJE_V49
+);
+
+
+}
+
+
+window.addEventListener(
+"load",
+async()=>{
+
+console.log("ARRANQUE LOAD OK");
+
+try{
+
+await inicializarV48();
+
+console.log("INICIALIZAR V48 TERMINO OK");
+
+}catch(e){
+
+console.error(
+"FALLO INICIALIZAR V48",
+e
+);
+
+alert(
+"FALLO V48: "+e.message
+);
+
+}
+
+});
+    
+    //////////////////////////////////////////////////////
+// MOTOR IA PARA BACKTESTING
+// USA LA MISMA LÓGICA DE TRANSICIÓN
+//////////////////////////////////////////////////////
+
+async function generarPrediccionBacktestV50(
+    historial,
+    turno
+){
+
+    let ranking = {};
+
+
+    let bases =
+    historial
+    .slice(-30)
+    .map(
+        x=>String(x.numero).slice(-2)
+    );
+
+
+
+    for(let base of bases){
+        
+        console.log("ANTES", base);
+
+let candidatos =
+await analizarTransicionTurnoV48(
+    base,
+    turno,
+    historial
+);
+        
+console.log("DESPUES", base);
+
+
+
+
+
+        for(let salida of candidatos){
+
+
+            ranking[salida] =
+            (ranking[salida] || 0)
+            +
+            PESOS_IA_V50.transicion;
+
+
+        }
+
+    }
+
+
+
+    ranking =
+    aplicarFiltroFinalV491(
+        ranking
+    );
+
+
+
+    return Object.keys(ranking)
+
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    )
+
+    .slice(0,3);
+
+
+    }
+
+    //////////////////////////////////////////////////////
+// EVALUADOR INTELIGENTE V55.1
+//////////////////////////////////////////////////////
+
+function evaluarPrediccionV55_1(
+prediccion,
+real
+){
+
+let resultado={
+
+directo:false,
+invertido:false,
+cerca1:false,
+cerca2:false,
+mismaDecena:false,
+mismaUnidad:false
+
+};
+
+
+real=
+String(real)
+.padStart(2,"0");
+
+
+for(let p of prediccion){
+
+p=
+String(p)
+.padStart(2,"0");
+
+
+if(p===real){
+
+resultado.directo=true;
+
+}
+
+
+if(
+p[1]+p[0]===real
+){
+
+resultado.invertido=true;
+
+}
+
+
+if(
+p[0]===real[0]
+){
+
+resultado.mismaDecena=true;
+
+}
+
+
+if(
+p[1]===real[1]
+){
+
+resultado.mismaUnidad=true;
+
+}
+
+
+let diferencia =
+Math.abs(
+parseInt(p)-parseInt(real)
+);
+
+
+if(diferencia===1){
+
+resultado.cerca1=true;
+
+}
+
+
+if(diferencia===2){
+
+resultado.cerca2=true;
+
+}
+
+
+}
+
+
+return resultado;
+
+}
+    
+
+    
+//////////////////////////////////////////////////////
+// EMI TESLA PRO V49
+// SISTEMA DE BACKTESTING IA
+//////////////////////////////////////////////////////
+
+async function ejecutarBacktestingV49(){
+
+console.log("1 - ENTRE A EJECUTAR BACKTEST");
+
+
+let historial = await leerV48(
+    STORES_V48.historico
+);
+
+
+console.log(
+"2 - HISTORIAL CARGADO",
+historial.length
+);
+
+    
+
+    if(!historial || historial.length < 200){
+
+        return {
+            error:"No hay suficiente historial"
+        };
+
+    }
+
+
+    let resultado = {
+
+        total:0,
+
+        directo:0,
+
+        invertido:0,
+
+        cerca:0,
+
+        fallo:0
+
+    };
+    
+    console.log("3 - EMPIEZA LOOP");
+
+
+
+    // empieza después de tener datos suficientes
+
+    for(
+        
+let i = 100;
+i < 300;
+i++
+){
+
+
+        // datos disponibles hasta ese momento
+
+        let entrenamiento =
+        historial.slice(0,i);
+
+
+
+        // genera una predicción usando
+        // la lógica actual de la app
+
+        let turnoBacktest =
+
+historial[i-1].turno
+||
+historial[i-1].sorteo
+||
+"NOCTURNA";
+
+
+
+let prediccion =
+await generarPrediccionBacktestV50(
+    entrenamiento,
+    turnoBacktest
+);
+        
+        console.log(
+"4 - PREDICCION",
+prediccion
+);
+
+        let real =
+        String(
+            historial[i].numero
+        ).slice(-2);
+
+
+
+        resultado.total++;
+
+
+
+        ////////////////////////////////////////////////
+// EVALUACION V55.1
+////////////////////////////////////////////////
+
+let evaluacion =
+evaluarPrediccionV55_1(
+    prediccion,
+    real
+);
+
+
+console.log(
+"EVALUACION V55.1",
+evaluacion
+);
+
+
+if(evaluacion.directo){
+
+resultado.directo++;
+
+}
+
+else if(evaluacion.invertido){
+
+resultado.invertido++;
+
+}
+
+else if(
+evaluacion.cerca1 ||
+evaluacion.cerca2 ||
+evaluacion.mismaDecena ||
+evaluacion.mismaUnidad
+){
+
+resultado.cerca++;
+
+}
+
+else{
+
+resultado.fallo++;
+
+}
+
+    }
+
+
+
+    resultado.porcentajeAcierto =
+
+    (
+        resultado.directo /
+        resultado.total * 100
+
+    ).toFixed(2);
+
+
+
+    return resultado;
+
+}
+
+
+
+
+
+//////////////////////////////////////////////////////
+// GENERADOR PARA BACKTEST
+// USA EL MOTOR ACTUAL DE LA APP
+//////////////////////////////////////////////////////
+
+function generarPrediccionBacktestV49(
+    historial
+){
+
+
+    let ranking={};
+
+
+
+    for(let dato of historial){
+
+
+        let n =
+        String(dato.numero)
+        .slice(-2);
+
+
+
+        if(!ranking[n]){
+
+            ranking[n]=0;
+
+        }
+
+
+        ranking[n]++;
+
+
+    }
+
+
+
+    return Object.keys(ranking)
+
+    .sort(
+        (a,b)=>
+        ranking[b]-ranking[a]
+    )
+
+    .slice(0,3);
+
+    }
+    
+    async function iniciarAuditoriaV49(){
+
+    alert("ENTRO AL BACKTEST");
+
+    try{
+
+        let datos =
+        await ejecutarBacktestingV49();
+
+
+        console.log(
+            "RESULTADO BACKTEST",
+            datos
+        );
+
+
+        alert(
+        `
+        BACKTEST TESLA PRO V49
+
+        Pruebas:
+        ${datos.total}
+
+        Directos:
+        ${datos.directo}
+
+        Invertidos:
+        ${datos.invertido}
+
+        Cerca:
+        ${datos.cerca}
+
+        Fallos:
+        ${datos.fallo}
+
+        Acierto:
+        ${datos.porcentajeAcierto}%
+
+        `
+        );
+
+
+    }catch(error){
+
+        console.log(
+            "ERROR BACKTEST:",
+            error
+        );
+
+
+        alert(
+        "ERROR:\n"+
+        error
+        );
+
+    }
+
+            }
+    
+
+    //////////////////////////////////////////////////////////
+// BLOQUE 1
+// IA CEREBRO V60
+//////////////////////////////////////////////////////////
+
+const IA_CEREBRO_V60={
+
+    version:"60.0",
+
+    activa:false,
+
+    entrenando:false,
+
+    registros:0,
+
+    ultimoEntrenamiento:null,
+
+    memoria:{
+
+        provincias:{},
+
+        turnos:{},
+
+        historico:{},
+
+        transiciones:{},
+
+        invertidos:{},
+
+        cercanos:{},
+
+        estrategias:{},
+
+        confianza:{}
+
+    },
+
+    pesos:{
+
+        tesla:1,
+
+        memoria:1,
+
+        historico:1,
+
+        provincias:1,
+
+        turnos:1,
+
+        transiciones:1,
+
+        invertidos:1,
+
+        cercanos:1
+
+    },
+
+    ruido:{
+
+        tesla:0,
+
+        memoria:0,
+
+        historico:0,
+
+        provincias:0,
+
+        turnos:0,
+
+        transiciones:0,
+
+        invertidos:0,
+
+        cercanos:0
+
+    },
+
+    estadisticas:{
+
+        aciertos:0,
+
+        invertidos:0,
+
+        cercanos:0,
+
+        errores:0
+
+    }
+
+};
+
+//////////////////////////////////////////////////////////
+
+function iniciarIACerebroV60(){
+
+    IA_CEREBRO_V60.activa=true;
+
+    IA_CEREBRO_V60.entrenando=false;
+
+    IA_CEREBRO_V60.ultimoEntrenamiento=new Date();
+
+    console.log("IA CEREBRO V60 ACTIVA");
+
+}
+
+//////////////////////////////////////////////////////////
+
+function reiniciarIAV60(){
+
+    IA_CEREBRO_V60.memoria={
+
+        provincias:{},
+
+        turnos:{},
+
+        historico:{},
+
+        transiciones:{},
+
+        invertidos:{},
+
+        cercanos:{},
+
+        estrategias:{},
+
+        confianza:{}
+
+    };
+
+}
+
+//////////////////////////////////////////////////////////
+
+function confianzaGlobalV60(){
+
+    let s=IA_CEREBRO_V60.estadisticas;
+
+    let total=s.aciertos+s.invertidos+s.cercanos+s.errores;
+
+    if(total===0) return 0;
+
+    return (
+
+        s.aciertos+
+
+        s.invertidos*0.75+
+
+        s.cercanos*0.40
+
+    )/total*100;
+
+}
+
+//////////////////////////////////////////////////////////
+
+function estadoIAV60(){
+
+    console.table({
+
+        Estado:IA_CEREBRO_V60.activa,
+
+        Registros:IA_CEREBRO_V60.registros,
+
+        Confianza:confianzaGlobalV60().toFixed(2)+"%",
+
+        Entrenando:IA_CEREBRO_V60.entrenando,
+
+        Version:IA_CEREBRO_V60.version
+
+    });
+
+}
+    //////////////////////////////////////////////////////////
+// BLOQUE 2
+// APRENDIZAJE MASIVO IA CEREBRO V60
+//////////////////////////////////////////////////////////
+
+async function aprenderHistoricoV60(){
+
+    IA_CEREBRO_V60.entrenando=true;
+
+    let datos=await leerV48(
+        STORES_V48.historico
+    );
+
+    IA_CEREBRO_V60.registros=datos.length;
+
+    for(const r of datos){
+
+        const provincia=(r.provincia||"").toUpperCase();
+
+        const turno=(r.turno||"").toUpperCase();
+
+        const numero=String(r.numero||"")
+            .padStart(4,"0");
+
+        //////////////////////////////////////////////////
+        // PROVINCIAS
+        //////////////////////////////////////////////////
+
+        if(!IA_CEREBRO_V60.memoria.provincias[provincia]){
+
+            IA_CEREBRO_V60.memoria.provincias[provincia]={
+
+                total:0,
+
+                numeros:{}
+
+            };
+
+        }
+
+        IA_CEREBRO_V60
+            .memoria
+            .provincias[provincia]
+            .total++;
+
+        let p=
+        IA_CEREBRO_V60
+        .memoria
+        .provincias[provincia]
+        .numeros;
+
+        p[numero]=(p[numero]||0)+1;
+
+        //////////////////////////////////////////////////
+        // TURNOS
+        //////////////////////////////////////////////////
+
+        if(!IA_CEREBRO_V60.memoria.turnos[turno]){
+
+            IA_CEREBRO_V60.memoria.turnos[turno]={
+
+                total:0,
+
+                numeros:{}
+
+            };
+
+        }
+
+        IA_CEREBRO_V60
+        .memoria
+        .turnos[turno]
+        .total++;
+
+        let t=
+        IA_CEREBRO_V60
+        .memoria
+        .turnos[turno]
+        .numeros;
+
+        t[numero]=(t[numero]||0)+1;
+
+        //////////////////////////////////////////////////
+        // PROVINCIA + TURNO
+        //////////////////////////////////////////////////
+
+        const clave=provincia+"_"+turno;
+
+        if(!IA_CEREBRO_V60.memoria.historico[clave]){
+
+            IA_CEREBRO_V60.memoria.historico[clave]={
+
+                total:0,
+
+                numeros:{}
+
+            };
+
+        }
+
+        IA_CEREBRO_V60
+        .memoria
+        .historico[clave]
+        .total++;
+
+        IA_CEREBRO_V60
+        .memoria
+        .historico[clave]
+        .numeros[numero]=
+        (
+            IA_CEREBRO_V60
+            .memoria
+            .historico[clave]
+            .numeros[numero]||0
+        )+1;
+
+    }
+
+    IA_CEREBRO_V60.entrenando=false;
+
+    IA_CEREBRO_V60.ultimoEntrenamiento=new Date();
+
+    console.log(
+        "IA APRENDIÓ",
+        IA_CEREBRO_V60.registros,
+        "REGISTROS"
+    );
+
+    }
+    //////////////////////////////////////////////////////////
+// BLOQUE 3
+// IA CEREBRO V60
+// PATRONES: INVERTIDOS - CERCANOS - TRANSICIONES
+//////////////////////////////////////////////////////////
+
+
+function aprenderPatronesV60(datos){
+
+
+    for(let i=0;i<datos.length;i++){
+
+
+        let actual=datos[i];
+
+
+        let numeroA=String(actual.numero||"")
+        .padStart(4,"0");
+
+
+        let ambosA=numeroA.slice(-2);
+
+
+
+        //////////////////////////////////////////////////
+        // APRENDIZAJE DE INVERTIDOS
+        //////////////////////////////////////////////////
+
+
+        let invertido=
+        ambosA[1]+ambosA[0];
+
+
+        if(!IA_CEREBRO_V60.memoria.invertidos[ambosA]){
+
+
+            IA_CEREBRO_V60.memoria.invertidos[ambosA]={};
+
+        }
+
+
+        IA_CEREBRO_V60
+        .memoria
+        .invertidos[ambosA][invertido]=
+        (
+            IA_CEREBRO_V60
+            .memoria
+            .invertidos[ambosA][invertido]||0
+        )+1;
+
+
+
+        //////////////////////////////////////////////////
+        // APRENDIZAJE DE CERCANOS
+        //////////////////////////////////////////////////
+
+
+        let base=Number(ambosA);
+
+
+        let cercanos=[];
+
+
+        if(base>0)
+        cercanos.push(
+            String(base-1).padStart(2,"0")
+        );
+
+
+        if(base<99)
+        cercanos.push(
+            String(base+1).padStart(2,"0")
+        );
+
+
+        if(base>1)
+        cercanos.push(
+            String(base-2).padStart(2,"0")
+        );
+
+
+        if(base<98)
+        cercanos.push(
+            String(base+2).padStart(2,"0")
+        );
+
+
+
+        if(!IA_CEREBRO_V60.memoria.cercanos[ambosA]){
+
+
+            IA_CEREBRO_V60.memoria.cercanos[ambosA]={};
+
+        }
+
+
+        cercanos.forEach(c=>{
+
+
+            IA_CEREBRO_V60
+            .memoria
+            .cercanos[ambosA][c]=
+
+            (
+                IA_CEREBRO_V60
+                .memoria
+                .cercanos[ambosA][c]||0
+            )+1;
+
+
+        });
+
+
+
+        //////////////////////////////////////////////////
+        // TRANSICIÓN ENTRE TURNOS
+        //////////////////////////////////////////////////
+
+
+        if(i < datos.length-1){
+
+
+            let siguiente=datos[i+1];
+
+
+            let turnoA=
+            actual.turno||"";
+
+
+            let turnoB=
+            siguiente.turno||"";
+
+
+            let clave=
+            turnoA+"->"+turnoB;
+
+
+
+            if(!IA_CEREBRO_V60.memoria.transiciones[clave]){
+
+
+                IA_CEREBRO_V60.memoria.transiciones[clave]={};
+
+            }
+
+
+
+            IA_CEREBRO_V60
+            .memoria
+            .transiciones[clave][ambosA]=
+
+            (
+                IA_CEREBRO_V60
+                .memoria
+                .transiciones[clave][ambosA]||0
+
+            )+1;
+
+
+        }
+
+
+    }
+
+
+    console.log(
+        "PATRONES IA V60 APRENDIDOS"
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// CARGAR PATRONES DESDE HISTORIAL
+//////////////////////////////////////////////////////////
+
+async function cargarPatronesIAV60(){
+
+
+    let datos=
+    await leerV48(
+        STORES_V48.historico
+    );
+
+
+    aprenderPatronesV60(datos);
+
+
+                }
+
+    //////////////////////////////////////////////////////////
+// BLOQUE 4
+// IA CEREBRO V60
+// CONTROL DE PESOS - RUIDO - ADAPTACIÓN
+//////////////////////////////////////////////////////////
+
+
+function evaluarModuloV60(
+    modulo,
+    aciertos,
+    errores
+){
+
+    let total=
+    aciertos+errores;
+
+
+    if(total===0)
+    return;
+
+
+    let rendimiento=
+    aciertos/total;
+
+
+
+    // Guardar rendimiento
+
+    IA_CEREBRO_V60.memoria.confianza[modulo]=
+    rendimiento*100;
+
+
+
+    //////////////////////////////////////////////////
+    // SUBIR O BAJAR PESO
+    //////////////////////////////////////////////////
+
+
+    if(rendimiento>=0.70){
+
+        IA_CEREBRO_V60.pesos[modulo]+=0.10;
+
+    }
+
+
+    else if(rendimiento<=0.40){
+
+
+        IA_CEREBRO_V60.pesos[modulo]-=0.10;
+
+
+    }
+
+
+
+    // límites de seguridad
+
+    if(IA_CEREBRO_V60.pesos[modulo]<0.10)
+
+    IA_CEREBRO_V60.pesos[modulo]=0.10;
+
+
+
+    if(IA_CEREBRO_V60.pesos[modulo]>3)
+
+    IA_CEREBRO_V60.pesos[modulo]=3;
+
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// DETECTAR RUIDO
+//////////////////////////////////////////////////////////
+
+
+function detectarRuidoV60(){
+
+
+    for(let modulo in IA_CEREBRO_V60.pesos){
+
+
+        let peso=
+        IA_CEREBRO_V60.pesos[modulo];
+
+
+
+        if(peso<0.50){
+
+
+            IA_CEREBRO_V60.ruido[modulo]=
+            "ALTO";
+
+
+        }
+
+
+        else if(peso<1){
+
+
+            IA_CEREBRO_V60.ruido[modulo]=
+            "MEDIO";
+
+
+        }
+
+
+        else{
+
+
+            IA_CEREBRO_V60.ruido[modulo]=
+            "BAJO";
+
+
+        }
+
+
+    }
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// AJUSTE AUTOMÁTICO GENERAL
+//////////////////////////////////////////////////////////
+
+
+function ajustarInteligenciaV60(){
+
+
+    detectarRuidoV60();
+
+
+    IA_CEREBRO_V60.confianzaGlobal=
+    confianzaGlobalV60();
+
+
+
+    IA_CEREBRO_V60.ultimoEntrenamiento=
+    new Date();
+
+
+
+    console.log(
+        "IA V60 AJUSTADA",
+        IA_CEREBRO_V60.pesos,
+        IA_CEREBRO_V60.ruido
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// INFORME DEL CEREBRO
+//////////////////////////////////////////////////////////
+
+
+function informeCerebroV60(){
+
+
+    console.table({
+
+        Tesla:
+        IA_CEREBRO_V60.pesos.tesla,
+
+        Historico:
+        IA_CEREBRO_V60.pesos.historico,
+
+        Invertidos:
+        IA_CEREBRO_V60.pesos.invertidos,
+
+        Cercanos:
+        IA_CEREBRO_V60.pesos.cercanos,
+
+        Transiciones:
+        IA_CEREBRO_V60.pesos.transiciones,
+
+        Confianza:
+        IA_CEREBRO_V60.confianzaGlobal+"%"
+
+
+    });
+
+
+    }
+
+    //////////////////////////////////////////////////////////
+// BLOQUE 5
+// IA CEREBRO V60
+// MOTOR DE DECISIÓN INTELIGENTE
+//////////////////////////////////////////////////////////
+
+
+function puntuarNumeroV60(
+    numero,
+    provincia,
+    turno
+){
+
+    let puntos=0;
+
+
+    //////////////////////////////////////////////////
+    // PESO HISTÓRICO
+    //////////////////////////////////////////////////
+
+
+    let clave=
+    provincia+"_"+turno;
+
+
+    if(
+        IA_CEREBRO_V60
+        .memoria
+        .historico[clave]
+    ){
+
+        let cantidad=
+
+        IA_CEREBRO_V60
+        .memoria
+        .historico[clave]
+        .numeros[numero] || 0;
+
+
+
+        puntos +=
+
+        cantidad *
+
+        IA_CEREBRO_V60
+        .pesos
+        .historico;
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // PESO PROVINCIA
+    //////////////////////////////////////////////////
+
+
+    if(
+        IA_CEREBRO_V60
+        .memoria
+        .provincias[provincia]
+    ){
+
+        let cantidad=
+
+        IA_CEREBRO_V60
+        .memoria
+        .provincias[provincia]
+        .numeros[numero] || 0;
+
+
+
+        puntos +=
+
+        cantidad *
+
+        IA_CEREBRO_V60
+        .pesos
+        .provincias;
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // PESO TURNO
+    //////////////////////////////////////////////////
+
+
+    if(
+        IA_CEREBRO_V60
+        .memoria
+        .turnos[turno]
+    ){
+
+        let cantidad=
+
+        IA_CEREBRO_V60
+        .memoria
+        .turnos[turno]
+        .numeros[numero] || 0;
+
+
+
+        puntos +=
+
+        cantidad *
+
+        IA_CEREBRO_V60
+        .pesos
+        .turnos;
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // PESO INVERTIDO
+    //////////////////////////////////////////////////
+
+
+    let ambos=
+
+    String(numero)
+    .slice(-2);
+
+
+    let inv=
+
+    ambos[1]+ambos[0];
+
+
+
+    if(
+        IA_CEREBRO_V60
+        .memoria
+        .invertidos[ambos]
+        &&
+        IA_CEREBRO_V60
+        .memoria
+        .invertidos[ambos][inv]
+    ){
+
+
+        puntos +=
+
+        IA_CEREBRO_V60
+        .memoria
+        .invertidos[ambos][inv]
+
+        *
+
+        IA_CEREBRO_V60
+        .pesos
+        .invertidos;
+
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // PESO CERCANOS
+    //////////////////////////////////////////////////
+
+
+    if(
+        IA_CEREBRO_V60
+        .memoria
+        .cercanos[ambos]
+    ){
+
+
+        let cerca=
+
+        IA_CEREBRO_V60
+        .memoria
+        .cercanos[ambos][ambos] || 0;
+
+
+
+        puntos +=
+
+        cerca *
+
+        IA_CEREBRO_V60
+        .pesos
+        .cercanos;
+
+
+    }
+
+
+
+    return puntos;
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// ORDENAR CANDIDATOS
+//////////////////////////////////////////////////////////
+
+
+function ordenarCandidatosV60(
+    lista,
+    provincia,
+    turno
+){
+
+
+    return lista.map(n=>{
+
+
+        return {
+
+            numero:n,
+
+            puntaje:
+            puntuarNumeroV60(
+                n,
+                provincia,
+                turno
+            )
+
+        };
+
+
+    })
+
+    .sort(
+        (a,b)=>
+        b.puntaje-a.puntaje
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// DECISIÓN PRINCIPAL
+//////////////////////////////////////////////////////////
+
+
+function decidirEstrategiaV60(
+    provincia,
+    turno,
+    candidatos
+){
+
+
+    let ranking=
+
+    ordenarCandidatosV60(
+        candidatos,
+        provincia,
+        turno
+    );
+
+
+    return {
+
+
+        provincia,
+
+        turno,
+
+        mejor:
+        ranking.slice(0,10),
+
+
+        confianza:
+        confianzaGlobalV60()
+
+
+    };
+
+
+            }
+
+    //////////////////////////////////////////////////////////
+// BLOQUE 6
+// IA CEREBRO V60
+// GENERADOR DE AMBOS - TERNOS - CUATERNOS
+//////////////////////////////////////////////////////////
+
+
+function generarSalidaIAV60(
+    provincia,
+    turno,
+    candidatos
+){
+
+    let ranking =
+    ordenarCandidatosV60(
+        candidatos,
+        provincia,
+        turno
+    );
+
+
+    //////////////////////////////////////////////////
+    // SELECCIONAR AMBOS
+    //////////////////////////////////////////////////
+
+
+    let ambos=[];
+
+
+    for(let i=0;i<ranking.length;i++){
+
+        let n=
+        String(ranking[i].numero)
+        .slice(-2);
+
+
+        if(!ambos.includes(n)){
+
+            ambos.push(n);
+
+        }
+
+
+        if(ambos.length===3)
+        break;
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // GENERAR TERNOS
+    //////////////////////////////////////////////////
+
+
+    let ternos=[];
+
+
+    ambos.forEach(a=>{
+
+
+        let base=
+        String(a)
+        .padStart(2,"0");
+
+
+        let terno=
+        base[0]+
+        base[1]+
+        base[0];
+
+
+        ternos.push(terno);
+
+
+    });
+
+
+
+    //////////////////////////////////////////////////
+    // GENERAR CUATERNOS
+    //////////////////////////////////////////////////
+
+
+    let cuaternos=[];
+
+
+    ambos.forEach(a=>{
+
+
+        let base=
+        String(a)
+        .padStart(2,"0");
+
+
+        let cuatro=
+
+        base[0]+
+        base[1]+
+        base[1]+
+        base[0];
+
+
+        cuaternos.push(cuatro);
+
+
+    });
+
+
+
+    //////////////////////////////////////////////////
+    // LIMITES PEDIDOS
+    //////////////////////////////////////////////////
+
+
+    return {
+
+        provincia,
+
+        turno,
+
+
+        ambos:
+        ambos.slice(0,3),
+
+
+        ternos:
+        ternos.slice(0,2),
+
+
+        cuaternos:
+        cuaternos.slice(0,2),
+
+
+
+        confianza:
+        confianzaGlobalV60(),
+
+
+
+        fecha:
+        new Date()
+
+    };
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// EXPLICACIÓN IA
+//////////////////////////////////////////////////////////
+
+
+function explicarDecisionV60(resultado){
+
+
+    return {
+
+        mensaje:
+
+        "La IA seleccionó estos números combinando memoria histórica, provincia, turno, invertidos y cercanos.",
+
+
+        provincia:
+        resultado.provincia,
+
+
+        turno:
+        resultado.turno,
+
+
+        confianza:
+        resultado.confianza+"%"
+
+    };
+
+
+            }
+    //////////////////////////////////////////////////////////
+// BLOQUE 7
+// IA CEREBRO V60
+// AUTOAPRENDIZAJE Y RETROALIMENTACIÓN
+//////////////////////////////////////////////////////////
+
+
+function compararResultadoIAV60(
+    prediccion,
+    resultadoReal
+){
+
+    let estado="ERROR";
+
+
+    let real=
+    String(resultadoReal)
+    .slice(-2);
+
+
+
+    //////////////////////////////////////////////////
+    // BUSCAR ACIERTO DIRECTO
+    //////////////////////////////////////////////////
+
+
+    if(
+        prediccion.ambos
+        .includes(real)
+    ){
+
+        estado="ACIERTO";
+
+        IA_CEREBRO_V60.estadisticas.aciertos++;
+
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // BUSCAR INVERTIDO
+    //////////////////////////////////////////////////
+
+
+    else{
+
+
+        let invertido=
+
+        real[1]+real[0];
+
+
+        if(
+            prediccion.ambos
+            .includes(invertido)
+        ){
+
+            estado="INVERTIDO";
+
+
+            IA_CEREBRO_V60
+            .estadisticas
+            .invertidos++;
+
+        }
+
+
+
+        //////////////////////////////////////////////////
+        // BUSCAR CERCANO
+        //////////////////////////////////////////////////
+
+
+        else{
+
+
+            for(let n of prediccion.ambos){
+
+
+                let diferencia=
+
+                Math.abs(
+                    Number(n)-
+                    Number(real)
+                );
+
+
+                if(
+                    diferencia<=2
+                ){
+
+                    estado="CERCANO";
+
+
+                    IA_CEREBRO_V60
+                    .estadisticas
+                    .cercanos++;
+
+
+                    break;
+
+                }
+
+            }
+
+
+        }
+
+
+    }
+
+
+
+    if(estado==="ERROR"){
+
+        IA_CEREBRO_V60
+        .estadisticas
+        .errores++;
+
+    }
+
+
+
+    return estado;
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// AJUSTE DE MÓDULOS SEGÚN RESULTADO
+//////////////////////////////////////////////////////////
+
+
+function aprenderDelResultadoV60(
+    estado
+){
+
+
+
+    if(estado==="ACIERTO"){
+
+
+        IA_CEREBRO_V60.pesos.historico+=0.05;
+
+        IA_CEREBRO_V60.pesos.memoria+=0.05;
+
+
+    }
+
+
+
+    else if(
+        estado==="INVERTIDO"
+    ){
+
+
+        IA_CEREBRO_V60.pesos.invertidos+=0.10;
+
+
+    }
+
+
+
+    else if(
+        estado==="CERCANO"
+    ){
+
+
+        IA_CEREBRO_V60.pesos.cercanos+=0.05;
+
+
+    }
+
+
+
+    else{
+
+
+        IA_CEREBRO_V60.pesos.tesla-=0.05;
+
+
+    }
+
+
+
+    ajustarLimitesPesosV60();
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// CONTROL DE LÍMITES
+//////////////////////////////////////////////////////////
+
+
+function ajustarLimitesPesosV60(){
+
+
+    for(
+        let p in IA_CEREBRO_V60.pesos
+    ){
+
+
+        if(
+            IA_CEREBRO_V60.pesos[p]<0.10
+        ){
+
+            IA_CEREBRO_V60.pesos[p]=0.10;
+
+        }
+
+
+        if(
+            IA_CEREBRO_V60.pesos[p]>3
+        ){
+
+            IA_CEREBRO_V60.pesos[p]=3;
+
+        }
+
+
+    }
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// CICLO COMPLETO DE APRENDIZAJE
+//////////////////////////////////////////////////////////
+
+
+function cicloAprendizajeV60(
+    prediccion,
+    resultado
+){
+
+
+    let estado=
+
+    compararResultadoIAV60(
+        prediccion,
+        resultado
+    );
+
+
+
+    aprenderDelResultadoV60(
+        estado
+    );
+
+
+
+    IA_CEREBRO_V60.ultimoEntrenamiento=
+    new Date();
+
+
+
+    console.log(
+        "IA V60 APRENDIÓ:",
+        estado
+    );
+
+
+    return estado;
+
+                }
+    //////////////////////////////////////////////////////////
+// BLOQUE 8
+// IA CEREBRO V60
+// MEMORIA PERSISTENTE INDEXEDDB
+//////////////////////////////////////////////////////////
+
+
+const STORE_IA_V60 = "memoriaIA_CEREBRO_V60";
+
+
+
+//////////////////////////////////////////////////////////
+// CREAR STORE IA
+//////////////////////////////////////////////////////////
+
+
+function crearStoreIAV60(db){
+
+
+    if(
+        !db.objectStoreNames
+        .contains(STORE_IA_V60)
+    ){
+
+
+        db.createObjectStore(
+            STORE_IA_V60,
+            {
+                keyPath:"id"
+            }
+        );
+
+
+    }
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// GUARDAR MEMORIA IA
+//////////////////////////////////////////////////////////
+
+
+async function guardarMemoriaIAV60(){
+
+
+    let registro={
+
+        id:"cerebro",
+
+        version:
+        IA_CEREBRO_V60.version,
+
+
+        memoria:
+        IA_CEREBRO_V60.memoria,
+
+
+        pesos:
+        IA_CEREBRO_V60.pesos,
+
+
+        ruido:
+        IA_CEREBRO_V60.ruido,
+
+
+        estadisticas:
+        IA_CEREBRO_V60.estadisticas,
+
+
+        registros:
+        IA_CEREBRO_V60.registros,
+
+
+        confianza:
+        confianzaGlobalV60(),
+
+
+        fecha:
+        new Date()
+
+    };
+
+
+
+    let db=
+    await abrirBaseV48();
+
+
+
+    let tx=
+    db.transaction(
+        STORE_IA_V60,
+        "readwrite"
+    );
+
+
+    tx.objectStore(
+        STORE_IA_V60
+    )
+    .put(registro);
+
+
+
+    console.log(
+        "MEMORIA IA V60 GUARDADA"
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// CARGAR MEMORIA IA
+//////////////////////////////////////////////////////////
+
+
+async function cargarMemoriaIAV60(){
+
+
+    let db=
+    await abrirBaseV48();
+
+
+
+    let tx=
+    db.transaction(
+        STORE_IA_V60,
+        "readonly"
+    );
+
+
+    let req=
+
+    tx.objectStore(
+        STORE_IA_V60
+    )
+    .get("cerebro");
+
+
+
+    req.onsuccess=function(){
+
+
+        let datos=req.result;
+
+
+
+        if(datos){
+
+
+            IA_CEREBRO_V60.memoria=
+            datos.memoria;
+
+
+            IA_CEREBRO_V60.pesos=
+            datos.pesos;
+
+
+            IA_CEREBRO_V60.ruido=
+            datos.ruido;
+
+
+            IA_CEREBRO_V60.estadisticas=
+            datos.estadisticas;
+
+
+            IA_CEREBRO_V60.registros=
+            datos.registros;
+
+
+
+            console.log(
+                "MEMORIA IA V60 RESTAURADA"
+            );
+
+
+        }
+
+
+    };
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// GUARDAR DESPUÉS DE APRENDER
+//////////////////////////////////////////////////////////
+
+
+async function guardarEvolucionIAV60(){
+
+
+    await guardarMemoriaIAV60();
+
+
+    IA_CEREBRO_V60.ultimoEntrenamiento=
+    new Date();
+
+
+    }
+    //////////////////////////////////////////////////////////
+// BLOQUE 9
+// IA CEREBRO V60
+// PANEL DE CONTROL Y DIAGNÓSTICO
+//////////////////////////////////////////////////////////
+
+
+function moduloDominanteV60(){
+
+    let mayor=0;
+    let modulo="";
+
+    for(let m in IA_CEREBRO_V60.pesos){
+
+        if(
+            IA_CEREBRO_V60.pesos[m]>mayor
+        ){
+
+            mayor=
+            IA_CEREBRO_V60.pesos[m];
+
+            modulo=m;
+
+        }
+
+    }
+
+    return modulo;
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// MÓDULO CON MÁS RUIDO
+//////////////////////////////////////////////////////////
+
+
+function moduloRuidoV60(){
+
+    let menor=999;
+    let modulo="";
+
+    for(let m in IA_CEREBRO_V60.pesos){
+
+        if(
+            IA_CEREBRO_V60.pesos[m]<menor
+        ){
+
+            menor=
+            IA_CEREBRO_V60.pesos[m];
+
+            modulo=m;
+
+        }
+
+    }
+
+    return modulo;
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// REPORTE GENERAL IA
+//////////////////////////////////////////////////////////
+
+
+function reporteCerebroV60(){
+
+
+    let reporte={
+
+
+        VERSION:
+        IA_CEREBRO_V60.version,
+
+
+        ESTADO:
+        IA_CEREBRO_V60.activa
+        ?
+        "ACTIVA"
+        :
+        "APAGADA",
+
+
+
+        REGISTROS:
+
+        IA_CEREBRO_V60.registros,
+
+
+
+        CONFIANZA:
+
+        confianzaGlobalV60()
+        .toFixed(2)
+        +"%",
+
+
+
+        MODULO_DOMINANTE:
+
+        moduloDominanteV60(),
+
+
+
+        MODULO_RUIDO:
+
+        moduloRuidoV60(),
+
+
+
+        ULTIMO_APRENDIZAJE:
+
+        IA_CEREBRO_V60
+        .ultimoEntrenamiento
+
+    };
+
+
+
+    console.table(reporte);
+
+
+    return reporte;
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// MOSTRAR PESOS ACTUALES
+//////////////////////////////////////////////////////////
+
+
+function verPesosIAV60(){
+
+
+    console.table(
+        IA_CEREBRO_V60.pesos
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// MOSTRAR MEMORIA
+//////////////////////////////////////////////////////////
+
+
+function resumenMemoriaV60(){
+
+
+    console.log({
+
+        Provincias:
+
+        Object.keys(
+            IA_CEREBRO_V60.memoria.provincias
+        ).length,
+
+
+        Turnos:
+
+        Object.keys(
+            IA_CEREBRO_V60.memoria.turnos
+        ).length,
+
+
+        Invertidos:
+
+        Object.keys(
+            IA_CEREBRO_V60.memoria.invertidos
+        ).length,
+
+
+        Cercanos:
+
+        Object.keys(
+            IA_CEREBRO_V60.memoria.cercanos
+        ).length
+
+
+    });
+
+
+    }
+
+    //////////////////////////////////////////////////////////
+// BLOQUE 10
+// IA CEREBRO V60
+// INTEGRACIÓN AUTOMÁTICA DEL CEREBRO
+//////////////////////////////////////////////////////////
+
+
+async function ejecutarCerebroCompletoV60(){
+
+
+    console.log(
+        "INICIANDO IA CEREBRO V60..."
+    );
+
+
+    //////////////////////////////////////////////////
+    // 1 - ACTIVAR IA
+    //////////////////////////////////////////////////
+
+    iniciarIACerebroV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 2 - CARGAR MEMORIA ANTERIOR
+    //////////////////////////////////////////////////
+
+    await cargarMemoriaIAV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 3 - APRENDER HISTORIAL COMPLETO
+    //////////////////////////////////////////////////
+
+    await aprenderHistoricoV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 4 - APRENDER PATRONES
+    //////////////////////////////////////////////////
+
+    await cargarPatronesIAV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 5 - AJUSTAR INTELIGENCIA
+    //////////////////////////////////////////////////
+
+    ajustarInteligenciaV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 6 - GUARDAR EVOLUCIÓN
+    //////////////////////////////////////////////////
+
+    await guardarEvolucionIAV60();
+
+
+
+    //////////////////////////////////////////////////
+    // 7 - REPORTE
+    //////////////////////////////////////////////////
+
+    reporteCerebroV60();
+
+
+
+    console.log(
+        "IA CEREBRO V60 LISTA"
+    );
+
+
+}
+
+
+
+//////////////////////////////////////////////////////////
+// AUTOARRANQUE CON LA APP
+//////////////////////////////////////////////////////////
+
+
+async function conectarIAInicioV60(){
+
+
+    try{
+
+
+        await ejecutarCerebroCompletoV60();
+
+
+    }
+
+
+    catch(error){
+
+
+        console.error(
+            "ERROR IA V60:",
+            error
+        );
+
+
+    }
+
+
+            }
+
+   //////////////////////////////////////////////////
+// BLOQUE 11.1
+// MATRIZ DE ERRORES INTELIGENTE IA
+//////////////////////////////////////////////////
+
+let MATRIZ_ERRORES_IA = {
+
+    directo:0,
+
+    invertido:0,
+
+    cercano:0,
+
+    primerDigito:0,
+
+    ultimoDigito:0,
+
+    desordenado:0,
+
+    errorCompleto:0
+
+};
+
+
+
+function analizarErrorIA(real,prediccion){
+
+    real = String(real).slice(-2);
+    prediccion = String(prediccion).slice(-2);
+
+
+    let resultado = "";
+
+
+    // acierto directo
+    if(real === prediccion){
+
+        MATRIZ_ERRORES_IA.directo++;
+
+        resultado="DIRECTO";
+
+    }
+
+
+    // invertido
+    else if(
+        real === prediccion[1]+prediccion[0]
+    ){
+
+        MATRIZ_ERRORES_IA.invertido++;
+
+        resultado="INVERTIDO";
+
+    }
+
+
+    // cerca por uno
+    else if(
+        Math.abs(
+            Number(real)-Number(prediccion)
+        )===1
+    ){
+
+        MATRIZ_ERRORES_IA.cercano++;
+
+        resultado="CERCA POR 1";
+
+    }
+
+
+    // mismo primer número
+    else if(
+        real[0]===prediccion[0]
+    ){
+
+        MATRIZ_ERRORES_IA.primerDigito++;
+
+        resultado="MISMO PRIMER DIGITO";
+
+    }
+
+
+    // mismo último número
+    else if(
+        real[1]===prediccion[1]
+    ){
+
+        MATRIZ_ERRORES_IA.ultimoDigito++;
+
+        resultado="MISMO ULTIMO DIGITO";
+
+    }
+
+
+    // mismos números desordenados
+    else if(
+        real.includes(prediccion[0]) ||
+        real.includes(prediccion[1])
+    ){
+
+        MATRIZ_ERRORES_IA.desordenado++;
+
+        resultado="DESORDENADO";
+
+    }
+
+
+    else{
+
+        MATRIZ_ERRORES_IA.errorCompleto++;
+
+        resultado="ERROR COMPLETO";
+
+    }
+
+
+    return resultado;
+
+}
+
+
+
+function mostrarDiagnosticoErroresIA(){
+
+
+let texto = 
+"🧠 DIAGNÓSTICO ERRORES IA\n\n"+
+
+"Directos: "+
+MATRIZ_ERRORES_IA.directo+
+"\n\nInvertidos: "+
+MATRIZ_ERRORES_IA.invertido+
+
+"\nCerca por 1: "+
+MATRIZ_ERRORES_IA.cercano+
+
+"\nMismo primer dígito: "+
+MATRIZ_ERRORES_IA.primerDigito+
+
+"\nMismo último dígito: "+
+MATRIZ_ERRORES_IA.ultimoDigito+
+
+"\nDesordenados: "+
+MATRIZ_ERRORES_IA.desordenado+
+
+"\nErrores completos: "+
+MATRIZ_ERRORES_IA.errorCompleto;
+
+
+mostrarV48(texto);
+
+
+    }
+    
+  //////////////////////////////////////////////////
+// BLOQUE 11.2
+// DIAGNÓSTICO AUTOMÁTICO IA
+//////////////////////////////////////////////////
+
+
+let DIAGNOSTICO_IA = {
+
+    problemaPrincipal:"",
+    moduloAjustar:"",
+    accion:""
+
+};
+
+
+
+function diagnosticoAutomaticoIA(){
+
+
+let e = MATRIZ_ERRORES_IA;
+
+
+
+// Muchos invertidos
+if(
+e.invertido >
+e.directo &&
+e.invertido >
+e.errorCompleto
+){
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "La IA encuentra los números pero falla la posición";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "ACOMPAÑANTE / ORIENTACIÓN";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Aumentar peso de invertidos";
+
+
+}
+
+
+
+// Muchos cercanos
+else if(
+
+e.cercano >
+e.directo
+
+){
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "La IA está cerca pero no cierra";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "VECINOS / TRANSICIÓN";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Buscar desplazamiento +1 -1";
+
+
+}
+
+
+
+// Mismo último dígito
+else if(
+
+e.ultimoDigito >
+e.primerDigito
+
+){
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "Acierta unidad pero falla decena";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "NÚCLEO DOMINANTE";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Revisar primer dígito";
+
+
+}
+
+
+
+// Mismo primer dígito
+else if(
+
+e.primerDigito >
+e.ultimoDigito
+
+){
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "Acierta decena pero falla unidad";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "ACOMPAÑANTE";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Buscar segundo dígito correcto";
+
+
+}
+
+
+
+// Muchos errores completos
+else if(
+
+e.errorCompleto >
+e.directo
+
+){
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "El patrón actual no está funcionando";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "TRANSICIÓN HISTÓRICA";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Buscar nuevo patrón";
+
+
+}
+
+
+else{
+
+
+    DIAGNOSTICO_IA.problemaPrincipal =
+    "Sistema estable";
+
+
+    DIAGNOSTICO_IA.moduloAjustar =
+    "NINGUNO";
+
+
+    DIAGNOSTICO_IA.accion =
+    "Mantener configuración";
+
+
+}
+
+
+return DIAGNOSTICO_IA;
+
+}
+
+
+
+
+
+function mostrarDiagnosticoAutomaticoIA(){
+
+
+let d = diagnosticoAutomaticoIA();
+
+
+
+mostrarV48(
+
+"🧠 DIAGNÓSTICO AUTOMÁTICO IA\n\n"+
+
+"Problema:\n"+
+d.problemaPrincipal+
+
+"\n\nMódulo:\n"+
+d.moduloAjustar+
+
+"\n\nAcción:\n"+
+d.accion
+
+);
+
+
+}
+  //////////////////////////////////////////////////
+// BLOQUE 11.3
+// RAZONAMIENTO IA Y AJUSTE AUTOMÁTICO
+//////////////////////////////////////////////////
+
+
+let PESOS_CEREBRO_IA = {
+
+    transicion:30,
+
+    tesla:20,
+
+    acompanante:20,
+
+    nucleo:20,
+
+    vecinos:10
+
+};
+
+
+
+
+function ajustarPesosCerebroIA(){
+
+
+let d = diagnosticoAutomaticoIA();
+
+
+
+switch(d.moduloAjustar){
+
+
+
+case "ACOMPAÑANTE / ORIENTACIÓN":
+
+
+PESOS_CEREBRO_IA.acompanante++;
+
+PESOS_CEREBRO_IA.tesla--;
+
+break;
+
+
+
+
+case "VECINOS / TRANSICIÓN":
+
+
+PESOS_CEREBRO_IA.vecinos++;
+
+PESOS_CEREBRO_IA.transicion++;
+
+break;
+
+
+
+
+case "NÚCLEO DOMINANTE":
+
+
+PESOS_CEREBRO_IA.nucleo++;
+
+break;
+
+
+
+
+case "TRANSICIÓN HISTÓRICA":
+
+
+PESOS_CEREBRO_IA.transicion++;
+
+PESOS_CEREBRO_IA.tesla--;
+
+break;
+
+
+
+}
+
+
+
+Object.keys(PESOS_CEREBRO_IA)
+.forEach(k=>{
+
+
+if(PESOS_CEREBRO_IA[k]<5){
+
+PESOS_CEREBRO_IA[k]=5;
+
+}
+
+
+
+if(PESOS_CEREBRO_IA[k]>50){
+
+PESOS_CEREBRO_IA[k]=50;
+
+}
+
+
+
+});
+
+
+return PESOS_CEREBRO_IA;
+
+
+}
+
+
+
+
+
+function mostrarRazonamientoIA(){
+
+
+let p=ajustarPesosCerebroIA();
+
+
+mostrarV48(
+
+"🧠 RAZONAMIENTO IA\n\n"+
+
+"Transición: "+p.transicion+
+
+"\nTesla: "+p.tesla+
+
+"\nAcompañante: "+p.acompanante+
+
+"\nNúcleo: "+p.nucleo+
+
+"\nVecinos: "+p.vecinos
+
+);
+
+
+}
+//////////////////////////////////////////////////
+// BLOQUE 11.4
+// AUTOAPRENDIZAJE CEREBRO CENTRAL IA
+//////////////////////////////////////////////////
+
+
+let CEREBRO_IA = {
+
+
+decisiones:[],
+
+historialErrores:[],
+
+evolucion:[]
+
+
+};
+
+
+
+
+async function guardarExperienciaIA(tipo,datos){
+
+
+CEREBRO_IA[tipo].push({
+
+fecha:new Date(),
+
+datos:datos
+
+
+});
+
+
+
+await guardarV48(
+
+STORES_V48.aprendizaje,
+
+{
+
+tipo:"CEREBRO_IA",
+
+fecha:new Date(),
+
+contenido:CEREBRO_IA
+
+}
+
+);
+
+
+}
+
+
+
+
+async function aprenderDelErrorIA(
+real,
+prediccion
+){
+
+
+let tipo = analizarErrorIA(
+real,
+prediccion
+);
+
+
+
+let experiencia={
+
+
+real:real,
+
+
+prediccion:prediccion,
+
+
+error:tipo,
+
+
+diagnostico:
+diagnosticoAutomaticoIA(),
+
+
+pesos:
+PESOS_CEREBRO_IA
+
+
+};
+
+
+
+await guardarExperienciaIA(
+
+"historialErrores",
+
+experiencia
+
+);
+
+
+
+ajustarPesosCerebroIA();
+
+
+
+return experiencia;
+
+
+}
+
+
+
+
+async function cargarCerebroIA(){
+
+
+let datos =
+await leerV48(
+STORES_V48.aprendizaje
+);
+
+
+
+let memoria =
+datos.filter(
+x=>x.tipo==="CEREBRO_IA"
+);
+
+
+
+if(memoria.length>0){
+
+
+let ultima =
+memoria[memoria.length-1];
+
+
+CEREBRO_IA =
+ultima.contenido;
+
+
+}
+
+
+return CEREBRO_IA;
+
+
+}
+    
+  //////////////////////////////////////////////////
+// BLOQUE 11.5
+// SUPERVISOR INTELIGENTE DEL CEREBRO IA
+//////////////////////////////////////////////////
+
+
+let SUPERVISOR_IA = {
+
+    estado:"ACTIVO",
+
+    cambios:0,
+
+    ultimoAnalisis:null
+
+};
+
+
+
+
+
+function analizarRendimientoModulosIA(){
+
+
+let pesos = PESOS_CEREBRO_IA;
+
+
+let moduloFuerte="";
+let moduloDebil="";
+
+
+let mayor=0;
+let menor=999;
+
+
+
+for(let m in pesos){
+
+
+if(pesos[m]>mayor){
+
+mayor=pesos[m];
+
+moduloFuerte=m;
+
+}
+
+
+
+if(pesos[m]<menor){
+
+menor=pesos[m];
+
+moduloDebil=m;
+
+}
+
+
+}
+
+
+
+return {
+
+fuerte:moduloFuerte,
+
+debil:moduloDebil,
+
+valorFuerte:mayor,
+
+valorDebil:menor
+
+};
+
+
+}
+
+
+
+
+
+function supervisorAutomaticoIA(){
+
+
+let analisis =
+analizarRendimientoModulosIA();
+
+
+let diagnostico =
+diagnosticoAutomaticoIA();
+
+
+
+let accion="";
+
+
+
+// Si hay demasiados errores completos
+if(
+MATRIZ_ERRORES_IA.errorCompleto >
+MATRIZ_ERRORES_IA.directo
+){
+
+
+PESOS_CEREBRO_IA.transicion +=2;
+
+PESOS_CEREBRO_IA.tesla -=1;
+
+
+accion =
+"Buscando nuevo patrón histórico";
+
+
+}
+
+
+
+// Si falla orden pero encuentra números
+else if(
+
+MATRIZ_ERRORES_IA.invertido >
+MATRIZ_ERRORES_IA.directo
+
+){
+
+
+PESOS_CEREBRO_IA.acompanante +=2;
+
+
+accion =
+"Corrigiendo orientación acompañante";
+
+
+}
+
+
+
+// Si está cerca
+else if(
+
+MATRIZ_ERRORES_IA.cercano > 0
+
+){
+
+
+PESOS_CEREBRO_IA.vecinos +=1;
+
+
+accion =
+"Analizando desplazamiento por cercanía";
+
+
+}
+
+
+
+// Mantener límites
+
+for(let p in PESOS_CEREBRO_IA){
+
+
+if(PESOS_CEREBRO_IA[p]>50){
+
+PESOS_CEREBRO_IA[p]=50;
+
+}
+
+
+if(PESOS_CEREBRO_IA[p]<5){
+
+PESOS_CEREBRO_IA[p]=5;
+
+}
+
+
+}
+
+
+
+
+SUPERVISOR_IA.cambios++;
+
+
+SUPERVISOR_IA.ultimoAnalisis={
+
+
+fecha:new Date(),
+
+
+diagnostico:diagnostico,
+
+
+moduloFuerte:
+analisis.fuerte,
+
+
+moduloDebil:
+analisis.debil,
+
+
+accion:accion,
+
+
+pesos:
+PESOS_CEREBRO_IA
+
+
+};
+
+
+
+guardarV48(
+
+STORES_V48.aprendizaje,
+
+{
+
+tipo:"SUPERVISOR_IA",
+
+contenido:
+SUPERVISOR_IA.ultimoAnalisis
+
+}
+
+);
+
+
+
+return SUPERVISOR_IA.ultimoAnalisis;
+
+
+}
+
+
+
+
+
+function mostrarSupervisorIA(){
+
+
+let s =
+supervisorAutomaticoIA();
+
+
+
+mostrarV48(
+
+"🤖 SUPERVISOR IA\n\n"+
+
+"Diagnóstico:\n"+
+s.diagnostico.problemaPrincipal+
+
+"\n\nMódulo fuerte:\n"+
+s.moduloFuerte+
+
+"\n\nMódulo débil:\n"+
+s.moduloDebil+
+
+"\n\nAcción tomada:\n"+
+s.accion+
+
+"\n\nCambios realizados: "+
+SUPERVISOR_IA.cambios
+
+);
+
+
+    }
+    //////////////////////////////////////////////////
+// BLOQUE 11.6
+// SIMULADOR DE SOLUCIONES IA
+//////////////////////////////////////////////////
+
+
+let SIMULADOR_IA = {
+
+
+pruebas:0,
+
+solucionesEncontradas:0,
+
+mejorSolucion:null
+
+
+};
+
+
+
+
+// Analiza diferentes formas de corregir un fallo
+
+function probarSolucionesIA(
+prediccion,
+real
+){
+
+
+let opciones=[];
+
+
+// solución directa
+
+if(prediccion===real){
+
+
+opciones.push({
+
+tipo:"DIRECTO",
+
+resultado:true
+
+});
+
+
+}
+
+
+
+// solución invertida
+
+if(
+prediccion[1]+prediccion[0]===real
+){
+
+
+opciones.push({
+
+tipo:"INVERTIDO",
+
+resultado:true
+
+});
+
+
+}
+
+
+
+// solución por cercanía
+
+let diferencia =
+Math.abs(
+Number(prediccion)-Number(real)
+);
+
+
+
+if(diferencia===1){
+
+
+opciones.push({
+
+tipo:"CERCA",
+
+resultado:true
+
+});
+
+
+}
+
+
+
+// cambio primer dígito
+
+if(
+prediccion[1]+real[1]===real
+){
+
+
+opciones.push({
+
+tipo:"AJUSTE_DECENA",
+
+resultado:true
+
+});
+
+
+}
+
+
+
+// cambio segundo dígito
+
+if(
+prediccion[0]+real[0]===real
+){
+
+
+opciones.push({
+
+tipo:"AJUSTE_UNIDAD",
+
+resultado:true
+
+});
+
+
+}
+
+
+
+return opciones;
+
+
+}
+
+
+
+
+
+async function cerebroBuscaSolucionIA(
+predicciones,
+real
+){
+
+
+
+let soluciones=[];
+
+
+
+for(let p of predicciones){
+
+
+let resultado =
+probarSolucionesIA(
+p,
+real
+);
+
+
+
+if(resultado.length>0){
+
+
+soluciones.push({
+
+prediccion:p,
+
+solucion:resultado
+
+
+});
+
+
+}
+
+
+}
+
+
+
+SIMULADOR_IA.pruebas++;
+
+
+
+if(soluciones.length>0){
+
+
+SIMULADOR_IA.solucionesEncontradas++;
+
+
+SIMULADOR_IA.mejorSolucion =
+soluciones[0];
+
+
+}
+
+
+
+await guardarV48(
+
+STORES_V48.aprendizaje,
+
+{
+
+tipo:"SIMULACION_IA",
+
+fecha:new Date(),
+
+resultado:soluciones
+
+}
+
+);
+
+
+
+return soluciones;
+
+
+}
+
+
+
+
+
+function mostrarSimulacionIA(){
+
+
+mostrarV48(
+
+"🧠 SIMULADOR IA\n\n"+
+
+"Pruebas realizadas: "+
+SIMULADOR_IA.pruebas+
+
+"\nSoluciones encontradas: "+
+SIMULADOR_IA.solucionesEncontradas+
+
+"\n\nÚltima solución:\n"+
+JSON.stringify(
+SIMULADOR_IA.mejorSolucion,
+null,
+2
+)
+
+);
+
+
+    }
+  //////////////////////////////////////////////////
+// BLOQUE 11.7
+// CEREBRO DE DECISIÓN FINAL IA
+//////////////////////////////////////////////////
+
+
+let DECISION_FINAL_IA = {
+
+    ultimaDecision:null,
+
+    confianza:0,
+
+    modo:"APRENDIENDO"
+
+};
+
+
+
+
+
+function calcularConfianzaIA(){
+
+
+let pesos = PESOS_CEREBRO_IA;
+
+
+let suma = 0;
+
+let cantidad = 0;
+
+
+for(let p in pesos){
+
+suma += pesos[p];
+
+cantidad++;
+
+}
+
+
+
+return Math.round(
+(suma/(cantidad*50))*100
+);
+
+
+}
+
+
+
+
+
+function decidirModoIA(){
+
+
+
+let diagnostico =
+diagnosticoAutomaticoIA();
+
+
+
+let modo="NORMAL";
+
+
+
+if(
+diagnostico.problemaPrincipal
+.includes("INVERTIDO")
+){
+
+
+modo="CORREGIR_ORIENTACION";
+
+
+}
+
+
+
+else if(
+diagnostico.problemaPrincipal
+.includes("CERCA")
+){
+
+
+modo="BUSCAR_VECINOS";
+
+
+}
+
+
+
+else if(
+diagnostico.problemaPrincipal
+.includes("POSICION")
+){
+
+
+modo="AJUSTAR_ACOMPAÑANTE";
+
+
+}
+
+
+
+DECISION_FINAL_IA.modo=modo;
+
+
+
+return modo;
+
+
+}
+
+
+
+
+
+function cerebroDecisionFinalIA(
+candidatos
+){
+
+
+let modo =
+decidirModoIA();
+
+
+
+let seleccion=[];
+
+
+
+for(let c of candidatos){
+
+
+let peso=0;
+
+
+
+// núcleo
+
+peso +=
+PESOS_CEREBRO_IA.nucleo;
+
+
+
+// Tesla
+
+peso +=
+PESOS_CEREBRO_IA.tesla;
+
+
+
+// acompañante
+
+peso +=
+PESOS_CEREBRO_IA.acompanante;
+
+
+
+
+if(modo==="CORREGIR_ORIENTACION"){
+
+
+if(c.invertido){
+
+peso+=10;
+
+}
+
+
+}
+
+
+
+if(modo==="BUSCAR_VECINOS"){
+
+
+if(c.cercano){
+
+peso+=8;
+
+}
+
+
+}
+
+
+
+seleccion.push({
+
+numero:c.numero,
+
+peso:peso,
+
+modo:modo
+
+});
+
+
+}
+
+
+
+
+seleccion.sort(
+(a,b)=>b.peso-a.peso
+);
+
+
+
+DECISION_FINAL_IA.ultimaDecision =
+seleccion.slice(0,3);
+
+
+
+DECISION_FINAL_IA.confianza =
+calcularConfianzaIA();
+
+
+
+return DECISION_FINAL_IA;
+
+
+}
+
+
+
+
+
+function mostrarDecisionFinalIA(){
+
+
+let d =
+DECISION_FINAL_IA;
+
+
+
+mostrarV48(
+
+"🧠 CEREBRO DECISIÓN FINAL\n\n"+
+
+"Modo actual: "+
+d.modo+
+
+"\nConfianza IA: "+
+d.confianza+
+"%\n\n"+
+
+JSON.stringify(
+d.ultimaDecision,
+null,
+2
+)
+
+);
+
+
+    }
+    //////////////////////////////////////////////////
+// BLOQUE 11.8 FINAL
+// MEMORIA EVOLUTIVA HISTÓRICA IA
+//////////////////////////////////////////////////
+
+
+let MEMORIA_EVOLUTIVA_IA = {
+
+    patrones:{},
+
+    solucionesExitosas:0,
+
+    ultimaRevision:null
+
+};
+
+
+
+
+
+function registrarEvolucionIA(
+error,
+solucion,
+resultado
+){
+
+
+let clave =
+error+"_"+solucion;
+
+
+
+if(!MEMORIA_EVOLUTIVA_IA.patrones[clave]){
+
+
+MEMORIA_EVOLUTIVA_IA.patrones[clave]={
+
+veces:0,
+
+aciertos:0,
+
+fallos:0
+
+};
+
+
+}
+
+
+
+MEMORIA_EVOLUTIVA_IA.patrones[clave].veces++;
+
+
+
+if(resultado===true){
+
+
+MEMORIA_EVOLUTIVA_IA.patrones[clave].aciertos++;
+
+MEMORIA_EVOLUTIVA_IA.solucionesExitosas++;
+
+
+}
+
+else{
+
+
+MEMORIA_EVOLUTIVA_IA.patrones[clave].fallos++;
+
+
+}
+
+
+
+MEMORIA_EVOLUTIVA_IA.ultimaRevision =
+new Date();
+
+
+}
+
+
+
+
+
+function buscarMejorCorreccionIA(
+tipoError
+){
+
+
+let mejor=null;
+
+let porcentaje=0;
+
+
+
+for(let p in MEMORIA_EVOLUTIVA_IA.patrones){
+
+
+if(!p.includes(tipoError))
+continue;
+
+
+
+let dato =
+MEMORIA_EVOLUTIVA_IA.patrones[p];
+
+
+
+let efectividad =
+(dato.aciertos /
+Math.max(dato.veces,1))*100;
+
+
+
+if(efectividad>porcentaje){
+
+
+porcentaje=efectividad;
+
+mejor={
+
+patron:p,
+
+efectividad:Math.round(efectividad)
+
+};
+
+
+}
+
+
+}
+
+
+
+return mejor;
+
+
+}
+
+
+
+
+
+async function actualizarCerebroEvolutivoIA(){
+
+
+let historial =
+await leerV48(
+STORES_V48.aprendizaje
+);
+
+
+
+for(let h of historial){
+
+
+if(
+h.tipo==="SIMULACION_IA"
+){
+
+
+for(let r of h.resultado){
+
+
+registrarEvolucionIA(
+
+"ERROR",
+
+r.solucion[0].tipo,
+
+true
+
+);
+
+
+}
+
+
+}
+
+
+}
+
+
+
+await guardarV48(
+
+STORES_V48.aprendizaje,
+
+{
+
+tipo:"MEMORIA_EVOLUTIVA",
+
+fecha:new Date(),
+
+memoria:
+MEMORIA_EVOLUTIVA_IA
+
+}
+
+);
+
+
+
+return MEMORIA_EVOLUTIVA_IA;
+
+
+}
+
+
+
+
+
+function mostrarMemoriaEvolutivaIA(){
+
+
+mostrarV48(
+
+"🧠 MEMORIA EVOLUTIVA IA\n\n"+
+
+"Soluciones exitosas: "+
+MEMORIA_EVOLUTIVA_IA.solucionesExitosas+
+
+"\n\nPatrones aprendidos:\n"+
+
+JSON.stringify(
+
+MEMORIA_EVOLUTIVA_IA.patrones,
+
+null,
+
+2
+
+)
+
+);
+
+
+    }
+    
+    //////////////////////////////////////////////////
+// ACTIVADOR AUTOMÁTICO BLOQUE 11
+//////////////////////////////////////////////////
+
+async function ejecutarBloque11IA(){
+
+    await cargarCerebroIA();
+
+    diagnosticoAutomaticoIA();
+
+    ajustarPesosCerebroIA();
+
+    supervisorAutomaticoIA();
+
+    await actualizarCerebroEvolutivoIA();
+
+    console.log("BLOQUE 11 EJECUTADO");
+}
+    
+    //////////////////////////////////////////////////
+// VERIFICADOR BLOQUE 11 IA
+//////////////////////////////////////////////////
+
+function verificarBloque11(){
+
+let estado="";
+
+
+estado += "🧠 VERIFICACIÓN BLOQUE 11\n\n";
+
+
+if(typeof MEMORIA_EVOLUTIVA_IA !== "undefined"){
+
+estado += "✅ Memoria evolutiva: ACTIVA\n";
+
+}else{
+
+estado += "❌ Memoria evolutiva: NO CARGADA\n";
+
+}
+
+
+
+if(typeof registrarEvolucionIA === "function"){
+
+estado += "✅ Registro de evolución: ACTIVO\n";
+
+}else{
+
+estado += "❌ Registro evolución: NO CARGADO\n";
+
+}
+
+
+
+if(typeof buscarMejorCorreccionIA === "function"){
+
+estado += "✅ Buscador de corrección: ACTIVO\n";
+
+}else{
+
+estado += "❌ Buscador corrección: NO CARGADO\n";
+
+}
+
+
+
+if(typeof actualizarCerebroEvolutivoIA === "function"){
+
+estado += "✅ Cerebro evolutivo: ACTIVO\n";
+
+}else{
+
+estado += "❌ Cerebro evolutivo: NO CARGADO\n";
+
+}
+
+
+
+estado += "\n🚀 BLOQUE 11 INSTALADO";
+
+
+mostrarV48(estado);
+
+
+    }
+
+    async function construirBloque12V60(){
+        
+     console.log("ENTRO AL BLOQUE 12");   
+
+    await construirMultiventanaV60();
+
+    await construirEstadisticasV60();
+
+    await compararVentanasV60();
+
+    await generarDiagnosticoV60();
+
+    await generarRecomendacionesV60();
+
+    await guardarMemoriaEvolutivaV60();
+
+    console.log("BLOQUE 12 ACTIVO");
+        
+   
+
+    }
+    //////////////////////////////////////////////////
+// BLOQUE 12.1
+// MOTOR MULTIVENTANA IA V60
+//////////////////////////////////////////////////
+
+let MULTIVENTANA_V60={
+
+    historial:[],
+
+    ultimos100:[],
+
+    ultimos200:[],
+
+    ultimos300:[],
+
+    ultimos500:[]
+
+};
+
+async function construirMultiventanaV60(){
+
+    let datos=await leerV48(STORES_V48.historico);
+
+    if(!datos || datos.length===0){
+
+        console.log("SIN HISTORIAL");
+
+        return false;
+
+    }
+
+    MULTIVENTANA_V60.historial=[...datos];
+
+    MULTIVENTANA_V60.ultimos100=
+    datos.slice(-100);
+
+    MULTIVENTANA_V60.ultimos200=
+    datos.slice(-200);
+
+    MULTIVENTANA_V60.ultimos300=
+    datos.slice(-300);
+
+    MULTIVENTANA_V60.ultimos500=
+    datos.slice(-500);
+
+    console.log("MULTIVENTANA IA");
+
+    console.log(
+        "Historial:",
+        MULTIVENTANA_V60.historial.length
+    );
+
+    console.log(
+        "100:",
+        MULTIVENTANA_V60.ultimos100.length
+    );
+
+    console.log(
+        "200:",
+        MULTIVENTANA_V60.ultimos200.length
+    );
+
+    console.log(
+        "300:",
+        MULTIVENTANA_V60.ultimos300.length
+    );
+
+    console.log(
+        "500:",
+        MULTIVENTANA_V60.ultimos500.length
+    );
+
+    return MULTIVENTANA_V60;
+
+}
+
+async function mostrarEstadoMultiventanaV60(){
+
+    if(!MULTIVENTANA_V60.historial.length){
+
+        await construirMultiventanaV60();
+
+    }
+    
+
+    let texto="🧠 BLOQUE 12.1 MULTIVENTANA\n\n";
+
+    texto+="Historial Completo : "+MULTIVENTANA_V60.historial.length+"\n";
+
+    texto+="Últimos 100 : "+MULTIVENTANA_V60.ultimos100.length+"\n";
+
+    texto+="Últimos 200 : "+MULTIVENTANA_V60.ultimos200.length+"\n";
+
+    texto+="Últimos 300 : "+MULTIVENTANA_V60.ultimos300.length+"\n";
+
+    texto+="Últimos 500 : "+MULTIVENTANA_V60.ultimos500.length+"\n";
+
+    mostrarV48(texto);
+
+}
+    //////////////////////////////////////////////////
+// BLOQUE 12.2
+// ANALIZADOR ESTADÍSTICO MULTIVENTANA V60
+//////////////////////////////////////////////////
+
+let ESTADISTICAS_V60={};
+
+function crearEstadisticaV60(){
+
+    return{
+
+        total:0,
+
+        frecuencia:{},
+
+        unidades:{},
+
+        decenas:{},
+
+        invertidos:0,
+
+        repetidos:0,
+
+        consecutivos:0,
+
+        cambiosPosicion:0
+
+    };
+
+}
+
+function analizarVentanaV60(lista){
+
+    let e=crearEstadisticaV60();
+
+    if(!lista || lista.length===0)
+        return e;
+
+    e.total=lista.length;
+
+    for(let i=0;i<lista.length;i++){
+
+        let numero=
+        String(lista[i].numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        let d=numero[0];
+
+        let u=numero[1];
+
+        e.frecuencia[numero]=
+        (e.frecuencia[numero]||0)+1;
+
+        e.decenas[d]=
+        (e.decenas[d]||0)+1;
+
+        e.unidades[u]=
+        (e.unidades[u]||0)+1;
+
+        if(i==0) continue;
+
+        let anterior=
+        String(lista[i-1].numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        if(numero===anterior)
+            e.repetidos++;
+
+        if(numero===anterior[1]+anterior[0])
+            e.invertidos++;
+
+        if(
+            Math.abs(
+                Number(numero)-
+                Number(anterior)
+            )===1
+        )
+            e.consecutivos++;
+
+        if(
+            numero[0]===anterior[1] &&
+            numero[1]===anterior[0]
+        )
+            e.cambiosPosicion++;
+
+    }
+
+    return e;
+
+}
+
+async function construirEstadisticasV60(){
+
+    if(!MULTIVENTANA_V60.historial.length){
+
+        await construirMultiventanaV60();
+
+    }
+
+    ESTADISTICAS_V60.historial=
+    analizarVentanaV60(
+    MULTIVENTANA_V60.historial);
+
+    ESTADISTICAS_V60.v100=
+    analizarVentanaV60(
+    MULTIVENTANA_V60.ultimos100);
+
+    ESTADISTICAS_V60.v200=
+    analizarVentanaV60(
+    MULTIVENTANA_V60.ultimos200);
+
+    ESTADISTICAS_V60.v300=
+    analizarVentanaV60(
+    MULTIVENTANA_V60.ultimos300);
+
+    ESTADISTICAS_V60.v500=
+    analizarVentanaV60(
+    MULTIVENTANA_V60.ultimos500);
+
+    console.log(
+        "ESTADISTICAS V60",
+        ESTADISTICAS_V60
+    );
+
+    return ESTADISTICAS_V60;
+
+}
+
+function mostrarEstadisticasV60(){
+
+    let h=ESTADISTICAS_V60.historial;
+
+    let texto="📊 BLOQUE 12.2\n\n";
+
+    texto+="Historial: "+h.total+"\n";
+
+    texto+="Invertidos: "+h.invertidos+"\n";
+
+    texto+="Repetidos: "+h.repetidos+"\n";
+
+    texto+="Consecutivos: "+h.consecutivos+"\n";
+
+    texto+="Cambios Posición: "+h.cambiosPosicion+"\n";
+
+    mostrarV48(texto);
+
+    }
+    //////////////////////////////////////////////////
+// BLOQUE 12.3
+// COMPARADOR HISTÓRICO MULTIVENTANA V60
+//////////////////////////////////////////////////
+
+let COMPARADOR_V60={};
+
+function compararFrecuenciasV60(reciente,historico){
+
+    let resultado={
+
+        creciendo:[],
+
+        cayendo:[],
+
+        estables:[],
+
+        nuevos:[],
+
+        desapareciendo:[]
+
+    };
+
+    let numeros=new Set([
+
+        ...Object.keys(historico.frecuencia),
+
+        ...Object.keys(reciente.frecuencia)
+
+    ]);
+
+    for(let numero of numeros){
+
+        let h=historico.frecuencia[numero]||0;
+
+        let r=reciente.frecuencia[numero]||0;
+
+        let ph=h/Math.max(historico.total,1);
+
+        let pr=r/Math.max(reciente.total,1);
+
+        let diferencia=pr-ph;
+
+        if(h===0 && r>0){
+
+            resultado.nuevos.push(numero);
+
+            continue;
+
+        }
+
+        if(h>0 && r===0){
+
+            resultado.desapareciendo.push(numero);
+
+            continue;
+
+        }
+
+        if(diferencia>0.02){
+
+            resultado.creciendo.push({
+
+                numero:numero,
+
+                diferencia:diferencia
+
+            });
+
+        }
+
+        else if(diferencia<-0.02){
+
+            resultado.cayendo.push({
+
+                numero:numero,
+
+                diferencia:diferencia
+
+            });
+
+        }
+
+        else{
+
+            resultado.estables.push(numero);
+
+        }
+
+    }
+
+    resultado.creciendo.sort(
+        (a,b)=>b.diferencia-a.diferencia
+    );
+
+    resultado.cayendo.sort(
+        (a,b)=>a.diferencia-b.diferencia
+    );
+
+    return resultado;
+
+}
+
+async function compararVentanasV60(){
+
+    if(!ESTADISTICAS_V60.historial){
+
+        await construirEstadisticasV60();
+
+    }
+
+    COMPARADOR_V60.v100=
+    compararFrecuenciasV60(
+
+        ESTADISTICAS_V60.v100,
+
+        ESTADISTICAS_V60.historial
+
+    );
+
+    COMPARADOR_V60.v200=
+    compararFrecuenciasV60(
+
+        ESTADISTICAS_V60.v200,
+
+        ESTADISTICAS_V60.historial
+
+    );
+
+    COMPARADOR_V60.v300=
+    compararFrecuenciasV60(
+
+        ESTADISTICAS_V60.v300,
+
+        ESTADISTICAS_V60.historial
+
+    );
+
+    COMPARADOR_V60.v500=
+    compararFrecuenciasV60(
+
+        ESTADISTICAS_V60.v500,
+
+        ESTADISTICAS_V60.historial
+
+    );
+
+    console.log(
+
+        "COMPARADOR V60",
+
+        COMPARADOR_V60
+
+    );
+
+    return COMPARADOR_V60;
+
+}
+
+function mostrarComparadorV60(){
+
+    let c=COMPARADOR_V60.v100;
+
+    let texto="📈 BLOQUE 12.3\n\n";
+
+    texto+="VENTANA 100\n\n";
+
+    texto+="Creciendo : "+c.creciendo.length+"\n";
+
+    texto+="Cayendo : "+c.cayendo.length+"\n";
+
+    texto+="Estables : "+c.estables.length+"\n";
+
+    texto+="Nuevos : "+c.nuevos.length+"\n";
+
+    texto+="Desapareciendo : "+c.desapareciendo.length+"\n\n";
+
+    if(c.creciendo.length){
+
+        texto+="TOP CRECIENDO\n";
+
+        c.creciendo.slice(0,5).forEach(x=>{
+
+            texto+=x.numero+"\n";
+
+        });
+
+    }
+
+    mostrarV48(texto);
+
+        }
+
+   //////////////////////////////////////////////////
+// BLOQUE 12.4
+// DIAGNÓSTICO INTELIGENTE IA V60
+//////////////////////////////////////////////////
+
+let DIAGNOSTICO_V60={};
+
+async function generarDiagnosticoV60(){
+
+    if(!COMPARADOR_V60.v100){
+
+        await compararVentanasV60();
+
+    }
+
+    DIAGNOSTICO_V60={
+
+        fortalezas:[],
+
+        debilidades:[],
+
+        alertas:[],
+
+        resumen:""
+
+    };
+
+    let h=ESTADISTICAS_V60.historial;
+
+    let r=ESTADISTICAS_V60.v100;
+
+    if(r.invertidos>h.invertidos/r.total*h.total){
+
+        DIAGNOSTICO_V60.alertas.push(
+        "AUMENTARON LOS INVERTIDOS");
+
+    }
+
+    if(r.consecutivos>h.consecutivos/r.total*h.total){
+
+        DIAGNOSTICO_V60.alertas.push(
+        "AUMENTARON LOS ERRORES ±1");
+
+    }
+
+    if(
+        COMPARADOR_V60.v100.creciendo.length>
+        COMPARADOR_V60.v100.cayendo.length
+    ){
+
+        DIAGNOSTICO_V60.fortalezas.push(
+        "LOS PATRONES RECIENTES SON ESTABLES");
+
+    }else{
+
+        DIAGNOSTICO_V60.debilidades.push(
+        "LOS PATRONES HISTÓRICOS ESTÁN CAMBIANDO");
+
+    }
+
+    if(r.repetidos>0){
+
+        DIAGNOSTICO_V60.fortalezas.push(
+        "EXISTEN REPETICIONES RECIENTES");
+
+    }
+
+    if(COMPARADOR_V60.v100.desapareciendo.length>10){
+
+        DIAGNOSTICO_V60.debilidades.push(
+        "MUCHOS PATRONES DESAPARECIERON");
+
+    }
+
+    DIAGNOSTICO_V60.resumen=
+
+    "FORTALEZAS: "+DIAGNOSTICO_V60.fortalezas.length+
+
+    " | DEBILIDADES: "+DIAGNOSTICO_V60.debilidades.length+
+
+    " | ALERTAS: "+DIAGNOSTICO_V60.alertas.length;
+
+    return DIAGNOSTICO_V60;
+
+}
+
+//////////////////////////////////////////////////
+// BLOQUE 12.5
+// MOTOR DE RECOMENDACIONES IA V60
+//////////////////////////////////////////////////
+
+let RECOMENDACIONES_V60=[];
+
+async function generarRecomendacionesV60(){
+
+    if(!DIAGNOSTICO_V60.resumen){
+
+        await generarDiagnosticoV60();
+
+    }
+
+    RECOMENDACIONES_V60=[];
+
+    for(let alerta of DIAGNOSTICO_V60.alertas){
+
+        if(alerta.includes("INVERTIDOS")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ REFORZAR EL MÓDULO DE INVERTIDOS");
+
+        }
+
+        if(alerta.includes("±1")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ AUMENTAR EL PESO DEL ANÁLISIS ±1");
+
+        }
+
+    }
+
+    for(let debilidad of DIAGNOSTICO_V60.debilidades){
+
+        if(debilidad.includes("CAMBIANDO")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ DAR MAYOR PESO A LOS ÚLTIMOS 100 REGISTROS");
+
+        }
+
+        if(debilidad.includes("DESAPARECIERON")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ REDUCIR EL PESO DEL HISTORIAL MUY ANTIGUO");
+
+        }
+
+    }
+
+    for(let fortaleza of DIAGNOSTICO_V60.fortalezas){
+
+        if(fortaleza.includes("ESTABLES")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ MANTENER LOS PESOS ACTUALES");
+
+        }
+
+        if(fortaleza.includes("REPETICIONES")){
+
+            RECOMENDACIONES_V60.push(
+            "✓ CONSERVAR EL ANÁLISIS DE REPETICIONES");
+
+        }
+
+    }
+
+    RECOMENDACIONES_V60=[
+        ...new Set(RECOMENDACIONES_V60)
+    ];
+
+    return RECOMENDACIONES_V60;
+
+}
+
+function mostrarDiagnosticoV60(){
+
+    let texto="🧠 DIAGNÓSTICO IA V60\n\n";
+
+    texto+="FORTALEZAS\n";
+
+    DIAGNOSTICO_V60.fortalezas.forEach(x=>{
+
+        texto+="✓ "+x+"\n";
+
+    });
+
+    texto+="\nDEBILIDADES\n";
+
+    DIAGNOSTICO_V60.debilidades.forEach(x=>{
+
+        texto+="⚠ "+x+"\n";
+
+    });
+
+    texto+="\nALERTAS\n";
+
+    DIAGNOSTICO_V60.alertas.forEach(x=>{
+
+        texto+="• "+x+"\n";
+
+    });
+
+    texto+="\nRECOMENDACIONES\n";
+
+    RECOMENDACIONES_V60.forEach(x=>{
+
+        texto+=x+"\n";
+
+    });
+
+    mostrarV48(texto);
+
+        }
+    //////////////////////////////////////////////////
+// BLOQUE 12.6
+// MEMORIA EVOLUTIVA IA V60
+//////////////////////////////////////////////////
+
+let MEMORIA_EVOLUTIVA_V60=[];
+
+async function guardarMemoriaEvolutivaV60(){
+
+    if(!DIAGNOSTICO_V60.resumen){
+
+        await generarDiagnosticoV60();
+
+    }
+
+    if(RECOMENDACIONES_V60.length===0){
+
+        await generarRecomendacionesV60();
+
+    }
+
+    let memoria={
+
+        fecha:new Date().toISOString(),
+
+        historial:ESTADISTICAS_V60.historial.total,
+
+        fortalezas:[...DIAGNOSTICO_V60.fortalezas],
+
+        debilidades:[...DIAGNOSTICO_V60.debilidades],
+
+        alertas:[...DIAGNOSTICO_V60.alertas],
+
+        recomendaciones:[...RECOMENDACIONES_V60]
+
+    };
+
+    MEMORIA_EVOLUTIVA_V60.push(memoria);
+
+    try{
+
+        await guardarV48(
+
+            STORES_V48.memoriaEvolutiva,
+
+            memoria
+
+        );
+
+    }catch(e){
+
+        console.log("MEMORIA LOCAL");
+
+    }
+
+    return memoria;
+
+}
+
+async function cargarMemoriaEvolutivaV60(){
+
+    try{
+
+        let datos=await leerV48(
+
+            STORES_V48.memoriaEvolutiva
+
+        );
+
+        MEMORIA_EVOLUTIVA_V60=datos||[];
+
+    }catch(e){
+
+        console.log("SIN MEMORIA");
+
+    }
+
+    return MEMORIA_EVOLUTIVA_V60;
+
+}
+
+function obtenerUltimaMemoriaV60(){
+
+    if(MEMORIA_EVOLUTIVA_V60.length===0)
+
+        return null;
+
+    return MEMORIA_EVOLUTIVA_V60[
+        MEMORIA_EVOLUTIVA_V60.length-1
+    ];
+
+}
+
+function mostrarMemoriaEvolutivaV60(){
+
+    let ultima=obtenerUltimaMemoriaV60();
+
+    if(!ultima){
+
+        mostrarV48(
+        "SIN MEMORIA EVOLUTIVA");
+
+        return;
+
+    }
+
+    let texto="🧠 MEMORIA EVOLUTIVA\n\n";
+
+    texto+="Fecha:\n";
+
+    texto+=ultima.fecha+"\n\n";
+
+    texto+="Historial:\n";
+
+    texto+=ultima.historial+"\n\n";
+
+    texto+="Fortalezas:\n";
+
+    ultima.fortalezas.forEach(x=>{
+
+        texto+="✓ "+x+"\n";
+
+    });
+
+    texto+="\nDebilidades:\n";
+
+    ultima.debilidades.forEach(x=>{
+
+        texto+="⚠ "+x+"\n";
+
+    });
+
+    texto+="\nAlertas:\n";
+
+    ultima.alertas.forEach(x=>{
+
+        texto+="• "+x+"\n";
+
+    });
+
+    texto+="\nRecomendaciones:\n";
+
+    ultima.recomendaciones.forEach(x=>{
+
+        texto+=x+"\n";
+
+    });
+
+    mostrarV48(texto);
+
+            }
+    
+//////////////////////////////////////////////////
+// BLOQUE 12.7
+// APRENDIZAJE EVOLUTIVO REAL
+//////////////////////////////////////////////////
+
+async function aplicarDiagnosticoBloque12V60(ranking){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    if(!historial || historial.length<2)
+        return ranking;
+
+    let aprendizaje={};
+
+    for(let i=1;i<historial.length;i++){
+
+        let anterior=
+        String(historial[i-1].numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        let actual=
+        String(historial[i].numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        if(!aprendizaje[anterior])
+            aprendizaje[anterior]={};
+
+        aprendizaje[anterior][actual]=
+        (aprendizaje[anterior][actual]||0)+1;
+
+    }
+
+    for(let base in ranking){
+
+        if(!aprendizaje[base])
+            continue;
+
+        let cambios=
+        aprendizaje[base];
+
+        for(let destino in cambios){
+
+            if(!ranking[destino])
+                ranking[destino]=0;
+
+            ranking[destino]+=
+            cambios[destino];
+
+        }
+
+    }
+
+    console.log(
+    "BLOQUE 12 APRENDIZAJE REAL APLICADO"
+    );
+
+    return ranking;
+
+}
+    
+    //////////////////////////////////////////////////
+// AUDITORÍA COMPLETA MOTOR IA
+//////////////////////////////////////////////////
+
+async function verificarMotorIA(){
+
+alert("VERIFICACIÓN FUNCIONANDO");
+
+    
+    
+let texto="";
+
+texto+="========== AUDITORÍA IA ==========\n\n";
+
+// Histórico
+
+let historico=
+await leerV48(
+STORES_V48.historico
+);
+
+texto+="Registros históricos: "
++historico.length+"\n\n";
+
+
+// BLOQUE 11
+
+texto+="BLOQUE 11\n";
+
+texto+="Memoria: "
++(SISTEMA_V48.memoria?"OK":"NO")+"\n";
+
+texto+="Matriz Histórica: "
++(MATRIZ_HISTORICA_V48?"OK":"NO")+"\n";
+
+texto+="Matriz Provincias: "
++(MATRIZ_PROVINCIAS_V48?"OK":"NO")+"\n";
+
+texto+="Patrones IA: "
++(typeof cargarPatronesIAV60==="function"?"OK":"NO")+"\n\n";
+
+
+// BLOQUE 12
+
+texto+="BLOQUE 12\n";
+
+texto+="Constructor: "
++(typeof construirBloque12V60==="function"?"OK":"NO")+"\n";
+
+texto+="Aplicador: "
++(typeof aplicarDiagnosticoBloque12V60==="function"?"OK":"NO")+"\n";
+
+texto+="Diagnóstico: "
++(typeof DIAGNOSTICO_BLOQUE12_V60!="undefined"
+?"CREADO":"NO")+"\n";
+
+
+// MOTOR
+
+texto+="\nMOTOR V60\n";
+
+texto+="Motor: "
++(typeof aplicarMotorV60==="function"
+?"OK":"NO")+"\n";
+
+texto+="Generador IA: "
++(typeof generarResultadoIA==="function"
+?"OK":"NO")+"\n";
+
+alert(texto);
+
+console.log(texto);
+
+}
+   
+    
+</script> 
+    
+</body>
+</html>

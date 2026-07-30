@@ -4811,9 +4811,9 @@ async function obtenerTercerAmbosHistoricoV60(
         : null;
 
 }
-    
 //////////////////////////////////////////////////
-// CORRECTOR INTELIGENTE DE DECENA V60
+// CORRECTOR DE DECENA ACOMPAÑANTE V60.1
+// SOLO CORRIGE DECENA - NO TOCA UNIDAD
 //////////////////////////////////////////////////
 
 async function corregirDecenaHistoricaV60(
@@ -4827,65 +4827,113 @@ async function corregirDecenaHistoricaV60(
         STORES_V48.historico
     );
 
-    for(let i=0;i<2;i++){
+
+    for(let i=0;i<ambos.length;i++){
 
         let numero =
         String(ambos[i])
         .padStart(2,"0");
 
-        let unidad =
-        numero[1];
 
-        let pesos={};
+        // LA UNIDAD QUEDA FIJA
+        let unidad = numero[1];
+
+
+        let pesoDecenas = {};
+
 
         for(let j=0;j<historial.length-1;j++){
 
-            let actual=historial[j];
-            let siguiente=historial[j+1];
+
+            let actual =
+            historial[j];
+
+
+            let siguiente =
+            historial[j+1];
+
 
             if(
-                actual.turno!==turnoOrigen
-            ) continue;
+                actual.turno !== turnoOrigen
+            )
+            continue;
+
 
             if(
-                siguiente.turno!==turnoDestino
-            ) continue;
+                siguiente.turno !== turnoDestino
+            )
+            continue;
 
-            let salida=
+
+
+            let salida =
             String(siguiente.numero)
             .slice(-2)
             .padStart(2,"0");
 
-            if(
-                salida[1]!==unidad
-            ) continue;
 
-            pesos[salida]=
-            (pesos[salida]||0)+1;
+            // BUSCA SOLO MISMA UNIDAD
+            if(
+                salida[1] !== unidad
+            )
+            continue;
+
+
+
+            let decena =
+            salida[0];
+
+
+            if(!pesoDecenas[decena])
+                pesoDecenas[decena]=0;
+
+
+            // premio por aparición real
+            pesoDecenas[decena]++;
 
         }
 
-        let mejor=numero;
-        let mejorPeso=0;
 
-        for(let n in pesos){
 
-            if(pesos[n]>mejorPeso){
+        let mejorDecena =
+        numero[0];
 
-                mejorPeso=pesos[n];
-                mejor=n;
+
+        let mayorPeso = 0;
+
+
+        for(let d in pesoDecenas){
+
+
+            if(
+                pesoDecenas[d] > mayorPeso
+            ){
+
+                mayorPeso =
+                pesoDecenas[d];
+
+
+                mejorDecena =
+                d;
 
             }
 
         }
 
-        ambos[i]=mejor;
+
+
+        // REEMPLAZA SOLO LA DECENA
+        ambos[i] =
+        mejorDecena + unidad;
+
 
     }
+
 
     return ambos;
 
-    }
+}
+    
     
 //////////////////////////////////////////////////
 // GENERADOR IA V60

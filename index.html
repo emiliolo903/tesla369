@@ -10535,6 +10535,433 @@ console.log(texto);
 
 }
    
+ //////////////////////////////////////////////////////
+// BLOQUE 13
+// LABORATORIO IA 71
+// COMPETENCIA DE MOTORES
+//////////////////////////////////////////////////////
+
+let LABORATORIO_IA71 = {
+
+    motores:{},
+
+    ranking:[],
+
+    mejorMotor:null,
+
+    ultimaActualizacion:null
+
+};
+
+const MOTORES_IA71 = [
+
+    "TRANSICION",
+
+    "MEMORIA_HISTORICA",
+
+    "TESLA",
+
+    "ACOMPANANTES",
+
+    "MATRIZ",
+
+    "V60"
+
+];
+
+function iniciarLaboratorioIA71(){
+
+    LABORATORIO_IA71.motores={};
+
+    for(let motor of MOTORES_IA71){
+
+        LABORATORIO_IA71.motores[motor]={
+
+            pruebas:0,
+
+            aciertos:0,
+
+            invertidos:0,
+
+            cercanos:0,
+
+            errores:0,
+
+            peso:0
+
+        };
+
+    }
+
+}
+
+function registrarResultadoMotorIA71(
+motor,
+resultado
+){
+
+    let m=
+    LABORATORIO_IA71.motores[motor];
+
+    if(!m) return;
+
+    m.pruebas++;
+
+    switch(resultado){
+
+        case "ACIERTO":
+
+            m.aciertos++;
+            break;
+
+        case "INVERTIDO":
+
+            m.invertidos++;
+            break;
+
+        case "CERCANO":
+
+            m.cercanos++;
+            break;
+
+        default:
+
+            m.errores++;
+
+    }
+
+    m.peso=
+
+    (
+
+        m.aciertos*5+
+
+        m.invertidos*3+
+
+        m.cercanos-
+
+        m.errores
+
+    )/
+
+    Math.max(m.pruebas,1);
+
+}
+
+function actualizarRankingIA71(){
+
+    LABORATORIO_IA71.ranking=
+
+    Object.entries(
+        LABORATORIO_IA71.motores
+    )
+
+    .sort(
+
+        (a,b)=>
+
+        b[1].peso-a[1].peso
+
+    );
+
+    if(
+
+        LABORATORIO_IA71.ranking.length
+
+    ){
+
+        LABORATORIO_IA71.mejorMotor=
+
+        LABORATORIO_IA71
+        .ranking[0][0];
+
+    }
+
+    LABORATORIO_IA71
+    .ultimaActualizacion=
+
+    new Date()
+    .toISOString();
+
+}
+
+async function guardarLaboratorioIA71(){
+
+    await guardarV48(
+
+        STORES_V48.aprendizaje,
+
+        {
+
+            fecha:new Date(),
+
+            tipo:"LABORATORIO_IA71",
+
+            datos:LABORATORIO_IA71
+
+        }
+
+    );
+
+}
+
+async function ejecutarLaboratorioIA71(){
+
+    iniciarLaboratorioIA71();
+
+    // En los bloques siguientes
+    // cada motor irá agregando
+    // sus propios resultados.
+
+    actualizarRankingIA71();
+
+    await guardarLaboratorioIA71();
+
+    console.log(
+
+        "LABORATORIO IA71",
+
+        LABORATORIO_IA71
+
+    );
+
+    return LABORATORIO_IA71;
+
+}
+
+  //////////////////////////////////////////////////////
+// BLOQUE 14
+// SIMULADOR HISTÓRICO IA 71
+//////////////////////////////////////////////////////
+
+async function ejecutarSimuladorIA71(){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    if(!historial || historial.length < 2){
+
+        console.log(
+            "IA71: Historial insuficiente."
+        );
+
+        return;
+    }
+
+    iniciarLaboratorioIA71();
+
+    for(let i=0; i<historial.length-1; i++){
+
+        let actual = historial[i];
+        let siguiente = historial[i+1];
+
+        let real =
+        String(siguiente.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        let motores = {
+
+            TRANSICION:
+            String(actual.numero)
+            .slice(-2)
+            .split("")
+            .reverse()
+            .join(""),
+
+            MEMORIA_HISTORICA:
+            String(actual.numero)
+            .slice(-2),
+
+            TESLA:
+            (typeof generarTesla=="function")
+            ? String(generarTesla()).slice(-2)
+            : "00",
+
+            ACOMPANANTES:
+            String(actual.numero)
+            .slice(-2),
+
+            MATRIZ:
+            String(actual.numero)
+            .slice(-2),
+
+            V60:
+            PREDICCION_ACTUAL_V49 &&
+            PREDICCION_ACTUAL_V49.ambos
+            ?
+            PREDICCION_ACTUAL_V49.ambos[0]
+            :
+            "00"
+
+        };
+
+        for(let nombre in motores){
+
+            let pred =
+            String(motores[nombre])
+            .padStart(2,"0");
+
+            let estado="ERROR";
+
+            if(pred===real){
+
+                estado="ACIERTO";
+
+            }
+
+            else if(
+                pred[0]===real[1] &&
+                pred[1]===real[0]
+            ){
+
+                estado="INVERTIDO";
+
+            }
+
+            else if(
+                Math.abs(
+                    Number(pred)-Number(real)
+                )<=2
+            ){
+
+                estado="CERCANO";
+
+            }
+
+            registrarResultadoMotorIA71(
+                nombre,
+                estado
+            );
+
+        }
+
+    }
+
+    actualizarRankingIA71();
+
+    await guardarLaboratorioIA71();
+
+    console.table(
+        LABORATORIO_IA71.ranking
+    );
+
+    console.log(
+        "MEJOR MOTOR:",
+        LABORATORIO_IA71.mejorMotor
+    );
+
+    return LABORATORIO_IA71;
+
+    }
+
+    //////////////////////////////////////////////////////
+// BLOQUE 15
+// CEREBRO COMPETITIVO IA 71
+//////////////////////////////////////////////////////
+
+let MOTOR_ACTIVO_IA71 = "V60";
+
+function seleccionarMotorIA71(){
+
+    if(
+        !LABORATORIO_IA71.ranking ||
+        LABORATORIO_IA71.ranking.length===0
+    ){
+
+        MOTOR_ACTIVO_IA71="V60";
+        return MOTOR_ACTIVO_IA71;
+
+    }
+
+    MOTOR_ACTIVO_IA71=
+    LABORATORIO_IA71.ranking[0][0];
+
+    console.log(
+        "MOTOR GANADOR:",
+        MOTOR_ACTIVO_IA71
+    );
+
+    return MOTOR_ACTIVO_IA71;
+
+}
+
+function obtenerMotorActivoIA71(){
+
+    return MOTOR_ACTIVO_IA71;
+
+}
+
+async function actualizarCerebroIA71(){
+
+    await ejecutarSimuladorIA71();
+
+    seleccionarMotorIA71();
+
+    mostrarV48(
+
+        "🧠 CEREBRO IA 71\n\n"+
+        "Motor activo:\n"+
+        MOTOR_ACTIVO_IA71
+
+    );
+
+        }
+
+    //////////////////////////////////////////////////////
+// BLOQUE 16
+// APRENDIZAJE CONTINUO IA 71
+//////////////////////////////////////////////////////
+
+async function aprendizajeContinuoIA71(){
+
+    console.log(
+        "ACTUALIZANDO IA..."
+    );
+
+    await ejecutarSimuladorIA71();
+
+    seleccionarMotorIA71();
+
+    await guardarV48(
+
+        STORES_V48.aprendizaje,
+
+        {
+
+            fecha:new Date(),
+
+            tipo:"APRENDIZAJE_IA71",
+
+            motor:
+            MOTOR_ACTIVO_IA71,
+
+            ranking:
+            LABORATORIO_IA71.ranking
+
+        }
+
+    );
+
+    console.log(
+
+        "IA ACTUALIZADA",
+
+        MOTOR_ACTIVO_IA71
+
+    );
+
+}
+
+async function actualizarIALuegoDelSorteo(){
+
+    await aprendizajeContinuoIA71();
+
+    return MOTOR_ACTIVO_IA71;
+
+}
     
 </script> 
     

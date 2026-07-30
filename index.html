@@ -2703,12 +2703,16 @@ try{
     console.error("ERROR BLOQUE 12 V60", e);
 }
 
-    
-    SISTEMA_V48.memoria=true;
+  if(
+SISTEMA_V48.memoria
+){
 
 document.getElementById(
 "estadoMemoria"
 ).innerText="LISTA";
+
+  }  
+    
 
 document.getElementById(
 "estadoMatriz"
@@ -2736,18 +2740,35 @@ document.getElementById(
 
 catch(e){
 
-console.log(
+let mensaje =
+
+"❌ ERROR INICIO V48\n\n"+
+"Mensaje:\n"+
+e.message+
+"\n\nDetalle:\n"+
+e.stack;
+
+
+alert(mensaje);
+
+
+let auditoria =
+document.getElementById("auditoria");
+
+
+if(auditoria){
+
+    auditoria.innerText =
+    mensaje;
+
+}
+
+
+console.error(
 "ERROR INICIO V48",
 e
 );
 
-}
-console.log(await leerV48(STORES_V48.historico));
-    
-    document.getElementById(
-"estadoMemoria"
-).innerText="LISTA";
-    
 }
 
 

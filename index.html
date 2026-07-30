@@ -10962,6 +10962,365 @@ async function actualizarIALuegoDelSorteo(){
     return MOTOR_ACTIVO_IA71;
 
 }
+
+    //////////////////////////////////////////////////////
+// BLOQUE 17
+// AUTOAJUSTE INTELIGENTE DE PESOS
+//////////////////////////////////////////////////////
+
+let PESOS_MOTORES_IA71 = {
+
+    TRANSICION:1.00,
+
+    MEMORIA_HISTORICA:1.00,
+
+    TESLA:1.00,
+
+    ACOMPANANTES:1.00,
+
+    MATRIZ:1.00,
+
+    V60:1.00
+
+};
+
+async function actualizarPesosMotoresIA71(){
+
+    if(
+        !LABORATORIO_IA71.ranking ||
+        LABORATORIO_IA71.ranking.length===0
+    ){
+        return;
+    }
+
+    for(let motor in PESOS_MOTORES_IA71){
+
+        let datos =
+        LABORATORIO_IA71.motores[motor];
+
+        if(!datos) continue;
+
+        let precision =
+
+        (
+
+            datos.aciertos*5 +
+
+            datos.invertidos*3 +
+
+            datos.cercanos
+
+        )
+
+        /
+
+        Math.max(datos.pruebas,1);
+
+        PESOS_MOTORES_IA71[motor] =
+
+        Number(
+
+            Math.max(
+                0.20,
+                Math.min(
+                    3.00,
+                    precision
+                )
+            ).toFixed(2)
+
+        );
+
+    }
+
+    await guardarV48(
+
+        STORES_V48.aprendizaje,
+
+        {
+
+            fecha:new Date(),
+
+            tipo:"PESOS_IA71",
+
+            pesos:PESOS_MOTORES_IA71
+
+        }
+
+    );
+
+    console.table(
+        PESOS_MOTORES_IA71
+    );
+
+}
+
+function obtenerPesoMotorIA71(motor){
+
+    return PESOS_MOTORES_IA71[motor] || 1;
+
+}
+
+async function aplicarPesosRankingIA71(ranking){
+
+    let motor =
+    obtenerMotorActivoIA71();
+
+    let peso =
+    obtenerPesoMotorIA71(motor);
+
+    for(let numero in ranking){
+
+        ranking[numero] *= peso;
+
+    }
+
+    return ranking;
+
+}
+
+async function actualizarSistemaIA71(){
+
+    await ejecutarSimuladorIA71();
+
+    await actualizarPesosMotoresIA71();
+
+    seleccionarMotorIA71();
+
+    console.log(
+
+        "PESOS ACTUALIZADOS",
+
+        PESOS_MOTORES_IA71
+
+    );
+
+}
+//////////////////////////////////////////////////////
+// BLOQUE 18
+// CEREBRO COMPETITIVO IA
+//////////////////////////////////////////////////////
+
+let CEREBRO_IA_V61 = {
+
+    motorActivo: "V60",
+
+    motores: {
+
+        V60: { puntos: 0, pruebas: 0, precision: 0 },
+
+        TESLA: { puntos: 0, pruebas: 0, precision: 0 },
+
+        TRANSICION: { puntos: 0, pruebas: 0, precision: 0 },
+
+        HISTORICO: { puntos: 0, pruebas: 0, precision: 0 }
+
+    }
+
+};
+
+function actualizarPrecisionMotoresV61(){
+
+    for(let nombre in CEREBRO_IA_V61.motores){
+
+        let m = CEREBRO_IA_V61.motores[nombre];
+
+        if(m.pruebas>0){
+
+            m.precision =
+
+            (m.puntos/m.pruebas)*100;
+
+        }
+
+    }
+
+}
+
+function elegirMotorGanadorV61(){
+
+    actualizarPrecisionMotoresV61();
+
+    let ganador="V60";
+
+    let mejor=-1;
+
+    for(let nombre in CEREBRO_IA_V61.motores){
+
+        if(
+            CEREBRO_IA_V61.motores[nombre].precision
+            > mejor
+        ){
+
+            mejor =
+            CEREBRO_IA_V61.motores[nombre].precision;
+
+            ganador = nombre;
+
+        }
+
+    }
+
+    CEREBRO_IA_V61.motorActivo = ganador;
+
+    return ganador;
+
+}
+
+function obtenerMotorActivoV61(){
+
+    return CEREBRO_IA_V61.motorActivo;
+
+}
+
+function mostrarEstadoCerebroV61(){
+
+    console.table(CEREBRO_IA_V61.motores);
+
+    console.log(
+
+        "Motor activo:",
+
+        CEREBRO_IA_V61.motorActivo
+
+    );
+
+    }
+    
+   //////////////////////////////////////////////////////
+// BLOQUE 19
+// APRENDIZAJE CONTINUO IA
+//////////////////////////////////////////////////////
+
+async function aprendizajeContinuoV61(){
+
+    let historial =
+    await leerV48(STORES_V48.aprendizaje);
+
+    if(historial.length===0){
+
+        return;
+
+    }
+
+    let ultimo =
+    historial[historial.length-1];
+
+    if(!ultimo.resultado){
+
+        return;
+
+    }
+
+    let motor =
+    CEREBRO_IA_V61.motorActivo;
+
+    let datos =
+    CEREBRO_IA_V61.motores[motor];
+
+    datos.pruebas++;
+
+    datos.puntos +=
+
+        (ultimo.resultado.acierto||0)*3+
+
+        (ultimo.resultado.invertido||0)*2+
+
+        (ultimo.resultado.cerca||0);
+
+    actualizarPrecisionMotoresV61();
+
+    elegirMotorGanadorV61();
+
+    await guardarV48(
+
+        STORES_V48.aprendizaje,
+
+        {
+
+            fecha:new Date(),
+
+            cerebro:CEREBRO_IA_V61
+
+        }
+
+    );
+
+}
+
+async function ejecutarCicloIA_V61(){
+
+    await aprendizajeContinuoV61();
+
+    mostrarEstadoCerebroV61();
+
+    }
+//////////////////////////////////////////////////////
+// BLOQUE 20
+// ORQUESTADOR GENERAL IA V61
+//////////////////////////////////////////////////////
+
+async function ejecutarSistemaInteligenteV61(){
+
+    console.log("================================");
+    console.log("INICIANDO SISTEMA IA V61");
+    console.log("================================");
+
+    // 1. Reconstruir memoria
+    await construirMemoriaHistoricaV60();
+
+    // 2. Actualizar matrices si existen
+    if(typeof construirMemoriaV48==="function")
+        await construirMemoriaV48();
+
+    if(typeof construirMatrizTurnosV48==="function")
+        await construirMatrizTurnosV48();
+
+    if(typeof construirMatrizHistoricaV48==="function")
+        await construirMatrizHistoricaV48();
+
+    if(typeof construirMatrizProvinciasV48==="function")
+        await construirMatrizProvinciasV48();
+
+    // 3. Aprendizaje automático
+    if(typeof aprendizajeContinuoV61==="function")
+        await aprendizajeContinuoV61();
+
+    // 4. Elegir el mejor motor
+    let motor = elegirMotorGanadorV61();
+
+    console.log("Motor seleccionado:", motor);
+
+    // 5. Generar predicción
+    await generarResultadoIA();
+
+    // 6. Mostrar estado del cerebro
+    mostrarEstadoCerebroV61();
+
+    console.log("================================");
+    console.log("IA LISTA");
+    console.log("================================");
+
+}
+
+//////////////////////////////////////////////////////
+// EJECUCIÓN AUTOMÁTICA DESPUÉS DEL OCR
+//////////////////////////////////////////////////////
+
+async function finalizarOCR_V61(){
+
+    await ejecutarSistemaInteligenteV61();
+
+}
+
+//////////////////////////////////////////////////////
+// EJECUCIÓN AUTOMÁTICA DESPUÉS DE CARGA MANUAL
+//////////////////////////////////////////////////////
+
+async function finalizarCargaManual_V61(){
+
+    await ejecutarSistemaInteligenteV61();
+
+    }
     
 </script> 
     

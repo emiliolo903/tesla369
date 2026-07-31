@@ -4581,83 +4581,49 @@ await corregirAmbosExactosV60(
 
 
 
-    //////////////////////////////////////////////////
-// SELECCIÓN INTELIGENTE DECENA + UNIDAD
+//////////////////////////////////////////////////
+// SELECCIÓN IA V60.2
+// PRIORIZA EL RANKING REAL DEL NÚMERO
 //////////////////////////////////////////////////
 
-let rankingDecena={};
-let rankingUnidad={};
+let candidatos =
+Object.keys(ranking)
+.map(numero=>({
 
-// construir ranking separado
-for(let numero in ranking){
+    numero:String(numero).padStart(2,"0"),
 
-    numero=String(numero).padStart(2,"0");
+    puntaje:ranking[numero]
 
-    let d=numero[0];
-    let u=numero[1];
+}))
+.sort((a,b)=>b.puntaje-a.puntaje);
 
-    rankingDecena[d]=(rankingDecena[d]||0)+ranking[numero];
-    rankingUnidad[u]=(rankingUnidad[u]||0)+ranking[numero];
 
-}
+// Ambos finales
 
-// mejores decenas
-let mejoresDecenas=
-Object.keys(rankingDecena)
-.sort((a,b)=>rankingDecena[b]-rankingDecena[a])
-.slice(0,3);
+let ambos=[];
 
-// mejores unidades
-let mejoresUnidades=
-Object.keys(rankingUnidad)
-.sort((a,b)=>rankingUnidad[b]-rankingUnidad[a])
-.slice(0,3);
+for(let c of candidatos){
 
-// generar combinaciones
-let candidatos=[];
+    if(!ambos.includes(c.numero)){
 
-for(let d of mejoresDecenas){
+        ambos.push(c.numero);
 
-    for(let u of mejoresUnidades){
+    }
 
-        let numero=d+u;
+    if(ambos.length==4){
 
-        candidatos.push({
-
-            numero:numero,
-
-            puntaje:
-            (ranking[numero]||0)+
-            rankingDecena[d]+
-            rankingUnidad[u]
-
-        });
+        break;
 
     }
 
 }
 
-// ordenar candidatos
-candidatos.sort(
-(a,b)=>b.puntaje-a.puntaje
-);
 
-// resultado final
-let ambos=[];
+// Orden completo
 
-for(let c of candidatos){
-
-    if(!ambos.includes(c.numero))
-        ambos.push(c.numero);
-
-    if(ambos.length==3)
-        break;
-
-}
-
-// orden para el resto del motor
-let orden=
+let orden =
 candidatos.map(x=>x.numero);
+
 
 
     return {

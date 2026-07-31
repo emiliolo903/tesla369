@@ -4812,123 +4812,65 @@ async function obtenerTercerAmbosHistoricoV60(
 
 }
 //////////////////////////////////////////////////
-// CORRECTOR DE DECENA ACOMPAÑANTE V60.1
-// SOLO CORRIGE DECENA - NO TOCA UNIDAD
+// CORRECTOR INTELIGENTE DE DECENA V60.2
+// NO SE CASA CON UNA SOLA DECENA
 //////////////////////////////////////////////////
 
 async function corregirDecenaHistoricaV60(
     ambos,
     turnoOrigen,
-    turnoDestino
+    turnoDestino,
+    ranking
 ){
-
-    let historial =
-    await leerV48(
-        STORES_V48.historico
-    );
-
 
     for(let i=0;i<ambos.length;i++){
 
         let numero =
-        String(ambos[i])
-        .padStart(2,"0");
+        String(ambos[i]).padStart(2,"0");
 
-
-        // LA UNIDAD QUEDA FIJA
         let unidad = numero[1];
 
+        let mejorNumero = numero;
+        let mejorPeso = -999999;
 
-        let pesoDecenas = {};
+        // Probar todas las decenas posibles
+        for(let d=0; d<=9; d++){
 
+            let candidato = d + unidad;
 
-        for(let j=0;j<historial.length-1;j++){
+            let peso = 0;
 
+            // Puntaje del ranking
+            if(ranking[candidato]){
+                peso += ranking[candidato];
+            }
 
-            let actual =
-            historial[j];
+            // Premio por frecuencia histórica exacta
+            if(MEMORIA_V60.frecuencia[candidato]){
+                peso += MEMORIA_V60.frecuencia[candidato] * 2;
+            }
 
-
-            let siguiente =
-            historial[j+1];
-
-
+            // Premio por relación decena-unidad
             if(
-                actual.turno !== turnoOrigen
-            )
-            continue;
-
-
-            if(
-                siguiente.turno !== turnoDestino
-            )
-            continue;
-
-
-
-            let salida =
-            String(siguiente.numero)
-            .slice(-2)
-            .padStart(2,"0");
-
-
-            // BUSCA SOLO MISMA UNIDAD
-            if(
-                salida[1] !== unidad
-            )
-            continue;
-
-
-
-            let decena =
-            salida[0];
-
-
-            if(!pesoDecenas[decena])
-                pesoDecenas[decena]=0;
-
-
-            // premio por aparición real
-            pesoDecenas[decena]++;
-
-        }
-
-
-
-        let mejorDecena =
-        numero[0];
-
-
-        let mayorPeso = 0;
-
-
-        for(let d in pesoDecenas){
-
-
-            if(
-                pesoDecenas[d] > mayorPeso
+                MEMORIA_V60.decenaPorUnidad[unidad] &&
+                MEMORIA_V60.decenaPorUnidad[unidad][String(d)]
             ){
+                peso +=
+                MEMORIA_V60.decenaPorUnidad[unidad][String(d)] * 4;
+            }
 
-                mayorPeso =
-                pesoDecenas[d];
+            if(peso > mejorPeso){
 
-
-                mejorDecena =
-                d;
+                mejorPeso = peso;
+                mejorNumero = candidato;
 
             }
 
         }
 
-
-
-        // REEMPLAZA SOLO LA DECENA
-        ambos[i] =
-        mejorDecena + unidad;
-
+        ambos[i] = mejorNumero;
 
     }
-
 
     return ambos;
 
@@ -5103,18 +5045,12 @@ let orden =
 motorV60.orden;
 
 
-let ambos =
-motorV60.ambos;
-    
 ambos =
 await corregirDecenaHistoricaV60(
-
     ambos,
-
     turnoOrigen,
-
-    turnoDestino
-
+    turnoDestino,
+    ranking
 );
     
  let terceroHistorico =

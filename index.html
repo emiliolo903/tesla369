@@ -5040,10 +5040,11 @@ await aplicarMotorV60(
 ranking =
 motorV60.ranking;
 
-
 let orden =
 motorV60.orden;
 
+let ambos =
+motorV60.ambos;
 
 ambos =
 await corregirDecenaHistoricaV60(
@@ -5052,6 +5053,7 @@ await corregirDecenaHistoricaV60(
     turnoDestino,
     ranking
 );
+
     
  let terceroHistorico =
 await obtenerTercerAmbosHistoricoV60(

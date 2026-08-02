@@ -12027,47 +12027,77 @@ console.log(
     }
    //////////////////////////////////////////////////
 // 🎯 IA POCEADA CORRENTINA V1
-// BLOQUE 7 - INTERFAZ
+// INTERFAZ COMPLETA
 //////////////////////////////////////////////////
 
 
 function abrirPoceadaIA(){
-
 
 mostrarV48(`
 
 🎯 POCEADA CORRENTINA IA
 
 
-Opciones:
-
-📄 Cargar histórico
-
-🧠 Analizar memoria
-
-🎯 Generar 5 números
-
-📊 Controlar resultado
+<button onclick="generarPoceadaIA()">
+🎯 GENERAR 5 NÚMEROS
+</button>
 
 
-Motor independiente activo
+<button onclick="abrirCargaPDFPoceada()">
+📄 CARGAR PDF
+</button>
+
+
+<button onclick="analizarCerebroPoceada()">
+🧠 ANALIZAR MEMORIA
+</button>
+
+
+
+Motor:
+
+Memoria histórica
++
+Simulación
++
+Ranking
 
 
 `);
-
 
 }
 
 
 
 
-function generarJugadaPoceadaBoton(){
+//////////////////////////////////////////////////
+// ABRIR CARGA PDF
+//////////////////////////////////////////////////
+
+function abrirCargaPDFPoceada(){
 
 
-generarPoceadaIA();
+mostrarV48(`
+
+📄 CARGAR PDF POCEADA
 
 
-    }
+<input 
+type="file"
+id="pdfPoceada"
+accept=".pdf"
+/>
+
+
+<button onclick="leerPDFPoceada()">
+PROCESAR PDF
+</button>
+
+
+`);
+
+}
+    
     //////////////////////////////////////////////////
 // 🎯 IA POCEADA CORRENTINA V1
 // BLOQUE 8 - BASE PERMANENTE + REGISTROS

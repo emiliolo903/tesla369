@@ -11920,7 +11920,7 @@ final
 
 
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 🎯 IA POCEADA CORRENTINA
 
@@ -12064,7 +12064,7 @@ console.log(
 
 function abrirPoceadaIA(){
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 🎯 POCEADA CORRENTINA IA
 
@@ -12123,7 +12123,7 @@ document
 if(!archivo){
 
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 📄 No seleccionaste ningún PDF
 
@@ -12181,7 +12181,7 @@ archivo
 if(!texto){
 
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 ❌ No se pudo leer el PDF
 
@@ -12207,7 +12207,7 @@ texto
 if(datos){
 
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 ✅ PDF PROCESADO
 
@@ -12250,7 +12250,7 @@ generarPoceadaIA();
 
 
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 🎯 IA POCEADA CORRENTINA
 
@@ -12287,7 +12287,7 @@ Ranking
 function abrirCargaPDFPoceada(){
 
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 📄 CARGAR PDF POCEADA
 
@@ -12604,7 +12604,7 @@ document.getElementById(
 
 if(!input.files.length){
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 📄 Seleccioná un PDF primero
 
@@ -12621,7 +12621,7 @@ input.files[0];
 
 
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 📄 Procesando PDF...
 
@@ -12647,7 +12647,7 @@ archivo
 if(!texto){
 
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 ❌ No se pudo leer el PDF
 
@@ -12671,7 +12671,7 @@ if(!numeros ||
 numeros.length!==10){
 
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 ❌ No se encontró tabla Correntina 1 al 10
 
@@ -12697,7 +12697,7 @@ numeros
 
 
 
-mostrarV48(`
+mostrarPanelPoceada(
 
 ✅ PDF CARGADO
 
@@ -13038,6 +13038,13 @@ html;
 
 }
     
+ function mostrarPanelPoceada(contenido){
+
+document.getElementById(
+"panelPoceada"
+).innerHTML = contenido;
+
+    }   
 </script> 
     
 </body>

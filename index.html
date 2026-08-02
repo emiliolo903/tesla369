@@ -12913,6 +12913,152 @@ return null;
 
 
 }
+
+    //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 10 - PANTALLA PROPIA
+//////////////////////////////////////////////////
+
+
+function abrirPantallaPoceada(){
+
+
+let panel =
+document.getElementById(
+"panelPoceada"
+);
+
+
+
+panel.innerHTML = `
+
+<h3>
+🎯 POCEADA CORRENTINA IA
+</h3>
+
+
+<input 
+type="file"
+id="archivoPDFPoceada"
+accept=".pdf"
+/>
+
+
+<br><br>
+
+
+<button onclick="procesarArchivoPoceada()">
+📄 PROCESAR PDF
+</button>
+
+
+<button onclick="generarNumerosPoceada()">
+🎯 GENERAR 5 NÚMEROS
+</button>
+
+
+<button onclick="mostrarRegistroPoceada()">
+📋 VER REGISTRO
+</button>
+
+
+<div id="resultadoPoceada">
+
+</div>
+
+
+`;
+
+
+
+    }
+    //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 11 - REGISTRO
+//////////////////////////////////////////////////
+
+
+async function mostrarRegistroPoceada(){
+
+
+let datos =
+await leerHistoricoPoceada();
+
+
+
+let html = `
+
+<h3>
+📋 REGISTRO POCEADA
+</h3>
+
+`;
+
+
+
+datos.forEach(
+(s)=>{
+
+
+html += `
+
+<div>
+
+Fecha:
+${s.fecha}
+
+<br>
+
+Día:
+${s.dia}
+
+<br>
+
+Turno:
+${s.turno}
+
+<br>
+
+`;
+
+
+
+s.puestos.forEach(
+(p)=>{
+
+
+html +=
+"Posición "
++p.posicion+
+": "
++p.numero+
+"<br>";
+
+
+}
+);
+
+
+
+html +=
+"</div><hr>";
+
+
+
+}
+);
+
+
+
+document.getElementById(
+"resultadoPoceada"
+)
+.innerHTML =
+html;
+
+
+
+}
     
 </script> 
     

@@ -11328,1396 +11328,441 @@ async function finalizarCargaManual_V61(){
 
 
 
-    
-    //////////////////////////////////////////////////
-// 🎯 IA POCEADA CORRENTINA V1
-// BLOQUE 1 - BASE INDEPENDIENTE
+   //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 1 - MEMORIA
 //////////////////////////////////////////////////
 
-let MEMORIA_POCEADA = {
-
+const MEMORIA_POCEADA = {
     sorteos: [],
-
+    analisis: {},
     predicciones: [],
-
-    resultados: [],
-
-    estadistica: {}
-
+    aprendizaje: []
 };
 
-
-
-let MOTOR_POCEADA_ACTIVO = true;
-
+function limpiarMemoriaPoceada() {
+    MEMORIA_POCEADA.sorteos = [];
+    MEMORIA_POCEADA.analisis = {};
+    MEMORIA_POCEADA.predicciones = [];
+    MEMORIA_POCEADA.aprendizaje = [];
+    } 
 
 
 //////////////////////////////////////////////////
-// INICIALIZAR MEMORIA
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 2 - CARGA HISTÓRICA
 //////////////////////////////////////////////////
 
-function iniciarMemoriaPoceada(){
+function agregarSorteoPoceada(fecha, numeros) {
 
+    if (!Array.isArray(numeros)) return false;
 
-if(!MEMORIA_POCEADA.sorteos){
+    if (numeros.length !== 10) return false;
 
-    MEMORIA_POCEADA.sorteos=[];
+    let registro = {
+        fecha: fecha,
+        turno: "NOCTURNA",
+        provincia: "CORRIENTES",
+        numeros: numeros.map(n => String(n).padStart(2, "0"))
+    };
 
+    MEMORIA_POCEADA.sorteos.push(registro);
+
+    console.log("Sorteo agregado:", registro);
+
+    return true;
 }
 
-
-console.log(
-"MEMORIA POCEADA INICIADA"
-);
-
-
+function cantidadSorteosPoceada() {
+    return MEMORIA_POCEADA.sorteos.length;
 }
-
-
-
-
+    
 //////////////////////////////////////////////////
-// GUARDAR SORTEO POCEADA
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 3 - ANÁLISIS
 //////////////////////////////////////////////////
 
-function guardarSorteoPoceada(datos){
+function analizarPoceada() {
 
+    let frecuencia = {};
 
-MEMORIA_POCEADA
-.sorteos
-.push(datos);
+    let atraso = {};
 
+    // Inicializar 00-99
+    for (let i = 0; i < 100; i++) {
 
+        let n = String(i).padStart(2, "0");
 
-console.log(
-"SORTEO POCEADA GUARDADO",
-datos
-);
+        frecuencia[n] = 0;
 
-
+        atraso[n] = 0;
 
     }
 
-    //////////////////////////////////////////////////
-// 🎯 IA POCEADA CORRENTINA V1
-// BLOQUE 2 - CARGA DE SORTEOS
-//////////////////////////////////////////////////
+    // Frecuencia
+    MEMORIA_POCEADA.sorteos.forEach(sorteo => {
 
+        sorteo.numeros.forEach(numero => {
 
-function cargarSorteoPoceadaCorrentina(
-fecha,
-dia,
-numeros
-){
+            frecuencia[numero]++;
 
+        });
 
-dia = dia.toLowerCase();
+    });
 
+    // Atraso
+    for (let i = MEMORIA_POCEADA.sorteos.length - 1; i >= 0; i--) {
 
+        let sorteo = MEMORIA_POCEADA.sorteos[i];
 
-let diasValidos = [
-"martes",
-"jueves",
-"sabado",
-"sábado"
-];
+        sorteo.numeros.forEach(numero => {
 
+            atraso[numero] = 0;
 
+        });
 
-if(!diasValidos.includes(dia)){
+        for (let j = 0; j < 100; j++) {
 
+            let n = String(j).padStart(2, "0");
 
-console.log(
-"Día no válido para Poceada"
-);
+            if (!sorteo.numeros.includes(n)) {
 
+                atraso[n]++;
 
-return;
+            }
 
-
-}
-
-
-
-if(numeros.length !== 10){
-
-
-console.log(
-"Poceada necesita 10 números"
-);
-
-
-return;
-
-
-}
-
-
-
-let sorteo = {
-
-
-fecha:fecha,
-
-
-dia:dia,
-
-
-provincia:"CORRIENTES",
-
-
-turno:"NOCTURNA",
-
-
-
-numeros:
-
-numeros.map((n,pos)=>({
-
-
-posicion:pos+1,
-
-
-numero:String(n)
-.padStart(2,"0")
-
-
-}))
-
-
-
-};
-
-
-
-guardarSorteoPoceada(
-sorteo
-);
-
-
-
-console.log(
-"SORTEO POCEADA CARGADO",
-sorteo
-);
-
-
+        }
 
     }
 
+    MEMORIA_POCEADA.analisis = {
+
+        frecuencia,
+
+        atraso
+
+    };
+
+    console.log("Análisis Poceada listo");
+
+}
     //////////////////////////////////////////////////
-// 🎯 IA POCEADA CORRENTINA V1
-// BLOQUE 3 - CEREBRO POCEADA
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 4 - GENERADOR IA
 //////////////////////////////////////////////////
 
+function generarPoceadaIA() {
 
-let ANALISIS_POCEADA = {
+    if (MEMORIA_POCEADA.sorteos.length === 0) {
 
-frecuencia:{},
+        mostrarPanelPoceada(`
+<h3>⚠️ POCEADA</h3>
 
-atraso:{},
+No hay historial cargado.
 
-parejas:{}
+Primero cargá un PDF.
+`);
 
-};
-
-
-
-//////////////////////////////////////////////////
-// ANALIZAR HISTÓRICO
-//////////////////////////////////////////////////
-
-function analizarCerebroPoceada(){
-
-
-ANALISIS_POCEADA = {
-
-frecuencia:{},
-
-atraso:{},
-
-parejas:{}
-
-};
-
-
-
-let sorteos =
-MEMORIA_POCEADA.sorteos;
-
-
-
-for(let sorteo of sorteos){
-
-
-let numeros =
-sorteo.numeros
-.map(x=>x.numero);
-
-
-
-// frecuencia
-
-for(let n of numeros){
-
-
-ANALISIS_POCEADA
-.frecuencia[n] =
-(ANALISIS_POCEADA.frecuencia[n]||0)+1;
-
-
-}
-
-
-
-// parejas
-
-for(let a of numeros){
-
-
-for(let b of numeros){
-
-
-if(a!==b){
-
-
-let clave =
-[a,b]
-.sort()
-.join("-");
-
-
-
-ANALISIS_POCEADA
-.parejas[clave] =
-(ANALISIS_POCEADA.parejas[clave]||0)+1;
-
-
-}
-
-
-}
-
-
-}
-
-
-
-}
-
-
-// atraso
-
-for(let i=0;i<=99;i++){
-
-
-let n =
-String(i)
-.padStart(2,"0");
-
-
-
-let atraso=0;
-
-
-for(let x=sorteos.length-1;x>=0;x--){
-
-
-let salio =
-sorteos[x]
-.numeros
-.some(
-(a)=>a.numero===n
-);
-
-
-
-if(salio)
-break;
-
-
-atraso++;
-
-
-}
-
-
-
-ANALISIS_POCEADA
-.atraso[n]=atraso;
-
-
-
-}
-
-
-
-console.log(
-"CEREBRO POCEADA",
-ANALISIS_POCEADA
-);
-
-
-
-return ANALISIS_POCEADA;
-
+        return [];
 
     }
-    //////////////////////////////////////////////////
-// 🎯 IA POCEADA CORRENTINA V1
-// BLOQUE 4 - SIMULADOR DE JUGADAS
+
+    analizarPoceada();
+
+    let ranking = [];
+
+    for (let i = 0; i < 100; i++) {
+
+        let numero = String(i).padStart(2, "0");
+
+        let puntos =
+
+            MEMORIA_POCEADA.analisis.frecuencia[numero] * 3 +
+
+            MEMORIA_POCEADA.analisis.atraso[numero];
+
+        ranking.push({
+
+            numero,
+
+            puntos
+
+        });
+
+    }
+
+    ranking.sort((a, b) => b.puntos - a.puntos);
+
+    let resultado = ranking.slice(0, 5).map(x => x.numero);
+
+    MEMORIA_POCEADA.predicciones = resultado;
+
+    mostrarPanelPoceada(`
+<h3>🎯 POCEADA CORRENTINA IA</h3>
+
+<b>5 Números:</b><br><br>
+
+${resultado.join("<br>")}
+`);
+
+    return resultado;
+
+        }
+    
+//////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 5 - APRENDIZAJE
 //////////////////////////////////////////////////
 
+function aprenderPoceada(resultado){
 
-function puntuarCombinacionPoceada(
-combinacion
-){
+if(!Array.isArray(resultado)) return;
 
+let aciertos=[];
 
-let puntos=0;
+MEMORIA_POCEADA.predicciones.forEach(n=>{
 
+if(resultado.includes(n)){
 
-
-for(let n of combinacion){
-
-
-puntos +=
-ANALISIS_POCEADA
-.frecuencia[n] || 0;
-
-
-
-puntos +=
-(ANALISIS_POCEADA
-.atraso[n] || 0)
-*0.5;
-
-
+aciertos.push(n);
 
 }
-
-
-
-// analizar parejas
-
-for(let i=0;i<combinacion.length;i++){
-
-
-for(let j=i+1;j<combinacion.length;j++){
-
-
-let clave =
-[
-combinacion[i],
-combinacion[j]
-]
-.sort()
-.join("-");
-
-
-
-puntos +=
-(
-ANALISIS_POCEADA
-.parejas[clave] || 0
-)
-*2;
-
-
-
-}
-
-
-}
-
-
-
-return puntos;
-
-
-
-}
-
-
-
-
-//////////////////////////////////////////////////
-// GENERAR COMBINACIÓN ALEATORIA
-//////////////////////////////////////////////////
-
-function crearCombinacionPoceada(){
-
-
-let numeros=[];
-
-
-
-while(numeros.length<5){
-
-
-let n =
-Math.floor(
-Math.random()*100
-)
-.toString()
-.padStart(2,"0");
-
-
-
-if(!numeros.includes(n)){
-
-
-numeros.push(n);
-
-
-}
-
-
-
-}
-
-
-
-return numeros;
-
-
-
-}
-
-
-
-
-
-//////////////////////////////////////////////////
-// SIMULADOR MASIVO
-//////////////////////////////////////////////////
-
-function simularPoceada(){
-
-
-let mejores=[];
-
-
-
-for(let i=0;i<5000;i++){
-
-
-
-let jugada =
-crearCombinacionPoceada();
-
-
-
-let puntaje =
-puntuarCombinacionPoceada(
-jugada
-);
-
-
-
-mejores.push({
-
-numeros:jugada,
-
-puntaje:puntaje
-
 
 });
 
+MEMORIA_POCEADA.aprendizaje.push({
 
-}
+fecha:new Date().toLocaleString(),
 
+prediccion:[...MEMORIA_POCEADA.predicciones],
 
+resultado:[...resultado],
 
-mejores.sort(
-(a,b)=>
-b.puntaje-a.puntaje
-);
+aciertos:[...aciertos]
 
+});
 
-
-console.log(
-"MEJORES SIMULACIONES",
-mejores.slice(0,10)
-);
-
-
-
-return mejores;
-
-
-}
-    //////////////////////////////////////////////////
-// 🎯 IA POCEADA CORRENTINA V1
-// BLOQUE 5 - RANKING FINAL
-//////////////////////////////////////////////////
-
-
-let PREDICCION_POCEADA = [];
-
-
-
-function generarPoceadaIA(){
-
-
-
-analizarCerebroPoceada();
-
-
-
-let simulaciones =
-simularPoceada();
-
-
-
-let ranking={};
-
-
-
-for(let jugada of simulaciones.slice(0,100)){
-
-
-
-for(let n of jugada.numeros){
-
-
-
-ranking[n]=
-(ranking[n]||0)
-+
-jugada.puntaje;
-
-
-
-}
-
-
-
-}
-
-
-
-let final =
-
-Object.keys(ranking)
-.sort(
-(a,b)=>
-ranking[b]-ranking[a]
-)
-.slice(0,5);
-
-
-
-PREDICCION_POCEADA =
-final;
-
-
-
-console.log(
-"🎯 POCEADA IA FINAL",
-final
-);
-
-
-
-mostrarPanelPoceada(
-
-🎯 IA POCEADA CORRENTINA
-
-5 NÚMEROS PARA JUGAR:
-
-${final.join("\n")}
-
-
-Motor:
-Frecuencia +
-Atraso +
-Parejas +
-Simulación
-
-
-`);
-
-
-
-return final;
-
-
-}
-    
-
-    //////////////////////////////////////////////////
-// 🎯 IA POCEADA CORRENTINA V1
-// BLOQUE 6 - APRENDIZAJE REAL
-//////////////////////////////////////////////////
-
-
-let HISTORIAL_APRENDIZAJE_POCEADA=[];
-
-
-
-function controlarResultadoPoceada(
-numerosReales
-){
-
-
-let aciertos=0;
-
-
-
-for(let n of PREDICCION_POCEADA){
-
-
-if(
-numerosReales.includes(n)
-){
-
-aciertos++;
-
-}
-
-
-}
-
-
-
-let registro={
-
-fecha:new Date(),
-
-prediccion:
-PREDICCION_POCEADA,
-
-resultado:
-numerosReales,
-
-aciertos:aciertos
-
-};
-
-
-
-HISTORIAL_APRENDIZAJE_POCEADA
-.push(registro);
-
-
-
-console.log(
-"CONTROL POCEADA",
-registro
-);
-
-
+console.log("Aprendizaje:",aciertos);
 
 return aciertos;
 
-
-
 }
-
-
-
-
-
-//////////////////////////////////////////////////
-// AJUSTAR MEMORIA
+    //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 6 - CONTROL
 //////////////////////////////////////////////////
 
-function aprenderPoceadaResultado(
-numerosReales
-){
+function controlarPoceada(resultado){
 
+let aciertos=aprenderPoceada(resultado);
 
+mostrarPanelPoceada(`
 
-for(let n of numerosReales){
+<h3>📊 CONTROL POCEADA</h3>
 
+Predicción:
 
+${MEMORIA_POCEADA.predicciones.join(" - ")}
 
-if(
-ANALISIS_POCEADA.frecuencia[n]
-!==undefined
-){
+<br><br>
 
+Resultado:
 
-ANALISIS_POCEADA.frecuencia[n]
-+=2;
+${resultado.join(" - ")}
 
+<br><br>
 
-}
+<b>Aciertos:
+${aciertos.length}</b>
 
+<br><br>
 
-}
-
-
-
-console.log(
-"APRENDIZAJE ACTUALIZADO"
-);
-
-
-    }
-   //////////////////////////////////////////////////
-// 🎯 IA POCEADA CORRENTINA V1
-// INTERFAZ COMPLETA
-//////////////////////////////////////////////////
-
-
-function abrirPoceadaIA(){
-
-mostrarPanelPoceada(
-
-🎯 POCEADA CORRENTINA IA
-
-
-<button onclick="generarPoceadaIA()">
-🎯 GENERAR 5 NÚMEROS
-</button>
-
-
-<button onclick="abrirCargaPDFPoceada()">
-📄 CARGAR PDF
-</button>
-
-
-<button onclick="analizarCerebroPoceada()">
-🧠 ANALIZAR MEMORIA
-</button>
-
-
-
-Motor:
-
-Memoria histórica
-+
-Simulación
-+
-Ranking
-
+${aciertos.join(" - ")}
 
 `);
 
 }
 
-
+    //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 7 - INTERFAZ
 //////////////////////////////////////////////////
-// 🎯 IA POCEADA CORRENTINA V1
-// ÚLTIMO BLOQUE - PDF + GENERADOR
+
+function abrirPoceadaIA(){
+
+mostrarPanelPoceada(`
+
+<h3>🎯 POCEADA CORRENTINA IA</h3>
+
+<button onclick="abrirCargaPDFPoceada()">
+📄 Cargar PDF
+</button>
+
+<br><br>
+
+<button onclick="generarPoceadaIA()">
+🎯 Generar 5 Números
+</button>
+
+<br><br>
+
+<button onclick="mostrarRegistroPoceada()">
+📋 Registro
+</button>
+
+<br><br>
+
+<button onclick="analizarPoceada()">
+🧠 Analizar Memoria
+</button>
+
+`);
+
+    }
+  //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 8 - BASE PERMANENTE
 //////////////////////////////////////////////////
 
+const DB_POCEADA="POCEADA_DB";
 
-//////////////////////////////////////////////////
-// PROCESAR ARCHIVO PDF
+async function guardarPoceadaLocal(){
+
+localStorage.setItem(
+
+DB_POCEADA,
+
+JSON.stringify(MEMORIA_POCEADA)
+
+);
+
+}
+
+function cargarPoceadaLocal(){
+
+let datos=
+
+localStorage.getItem(DB_POCEADA);
+
+if(datos){
+
+Object.assign(
+
+MEMORIA_POCEADA,
+
+JSON.parse(datos)
+
+);
+
+}
+
+}
+    //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 9 - LECTOR PDF
 //////////////////////////////////////////////////
 
 async function leerPDFPoceada(){
 
+const input=document.getElementById("pdfPoceada");
 
-let archivo =
+if(!input || input.files.length===0){
 
-document
-.getElementById("pdfPoceada")
-.files[0];
+mostrarPanelPoceada(`
+<h3>📄 POCEADA</h3>
 
-
-
-if(!archivo){
-
-
-mostrarPanelPoceada(
-
-📄 No seleccionaste ningún PDF
-
+Seleccione un PDF primero.
 `);
 
 return;
 
-
 }
 
+const archivo=input.files[0];
 
-
-mostrarPanelPoceada(
-
-📄 Leyendo PDF...
-
-Espere...
-
-`);
-
-
-
-// Leer archivo
-
-let texto="";
-
-
-
-if(
-archivo.type==="text/plain"
-){
-
-
-texto =
-await archivo.text();
-
-
-}else{
-
-
-// Aquí se conecta el lector PDF
-// de la app si ya existe
-
-
-texto =
-await extraerTextoPDF(
-archivo
-);
-
-
-}
-
-
+const texto=await leerTextoPDF(archivo);
 
 if(!texto){
 
+mostrarPanelPoceada(`
+<h3>❌ Error</h3>
 
-mostrarPanelPoceada(
-
-❌ No se pudo leer el PDF
-
+No se pudo leer el PDF.
 `);
 
 return;
 
 }
 
+let numeros=extraerCorrentinaNocturna(texto);
 
+if(!numeros || numeros.length!==10){
 
+mostrarPanelPoceada(`
+<h3>⚠️ Atención</h3>
 
-// Enviar al filtro Correntina
+No se encontró la tabla
 
-let datos =
-
-await procesarPDFPoceadaCorrentina(
-texto
-);
-
-
-
-if(datos){
-
-
-mostrarPanelPoceada(
-
-✅ PDF PROCESADO
-
-
-Corrientes:
-OK
-
-Nocturna:
-OK
-
-Posiciones:
-1 al 10
-
-
-Memoria actualizada
-
-
-`);
-
-}
-
-
-
-}
-
-
-
-
-//////////////////////////////////////////////////
-// BOTÓN GENERAR 5 NÚMEROS
-//////////////////////////////////////////////////
-
-function generarNumerosPoceada(){
-
-
-
-let numeros =
-
-generarPoceadaIA();
-
-
-
-mostrarPanelPoceada(
-
-🎯 IA POCEADA CORRENTINA
-
-
-NÚMEROS PARA JUGAR:
-
-
-${numeros.join("\n")}
-
-
-
-Motor:
-
-Memoria
-+
-Parejas
-+
-Simulación
-+
-Ranking
-
-
-`);
-
-
-
-    }
-    
-
-//////////////////////////////////////////////////
-// ABRIR CARGA PDF
-//////////////////////////////////////////////////
-
-function abrirCargaPDFPoceada(){
-
-
-mostrarPanelPoceada(
-
-📄 CARGAR PDF POCEADA
-
-
-<input 
-type="file"
-id="pdfPoceada"
-accept=".pdf"
-/>
-
-
-<button onclick="leerPDFPoceada()">
-PROCESAR PDF
-</button>
-
-
-`);
-
-}
-    
-    //////////////////////////////////////////////////
-// 🎯 IA POCEADA CORRENTINA V1
-// BLOQUE 8 - BASE PERMANENTE + REGISTROS
-//////////////////////////////////////////////////
-
-
-const DB_POCEADA = "POCEADA_CORRENTINA_DB";
-
-const STORE_POCEADA = "historico";
-
-
-
-//////////////////////////////////////////////////
-// CREAR BASE DE DATOS
-//////////////////////////////////////////////////
-
-function iniciarDBPoceada(){
-
-
-return new Promise((resolve,reject)=>{
-
-
-let request =
-indexedDB.open(
-DB_POCEADA,
-1
-);
-
-
-
-request.onupgradeneeded=function(e){
-
-
-let db=e.target.result;
-
-
-
-if(!db.objectStoreNames.contains(STORE_POCEADA)){
-
-
-db.createObjectStore(
-STORE_POCEADA,
-{
-keyPath:"id",
-autoIncrement:true
-}
-);
-
-
-}
-
-
-
-};
-
-
-
-request.onsuccess=function(e){
-
-
-resolve(
-e.target.result
-);
-
-
-};
-
-
-
-request.onerror=function(e){
-
-
-reject(e);
-
-
-};
-
-
-
-});
-
-
-}
-
-
-
-
-
-//////////////////////////////////////////////////
-// GUARDAR SORTEO PERMANENTE
-//////////////////////////////////////////////////
-
-async function guardarPoceadaDB(
-registro
-){
-
-
-let db =
-await iniciarDBPoceada();
-
-
-
-let tx =
-db.transaction(
-STORE_POCEADA,
-"readwrite"
-);
-
-
-
-tx.objectStore(
-STORE_POCEADA
-)
-.add(
-registro
-);
-
-
-
-console.log(
-"POCEADA GUARDADA",
-registro
-);
-
-
-
-}
-
-
-
-
-
-//////////////////////////////////////////////////
-// LEER TODO EL HISTÓRICO
-//////////////////////////////////////////////////
-
-async function leerHistoricoPoceada(){
-
-
-let db =
-await iniciarDBPoceada();
-
-
-
-return new Promise(resolve=>{
-
-
-let tx =
-db.transaction(
-STORE_POCEADA,
-"readonly"
-);
-
-
-
-let request =
-tx.objectStore(
-STORE_POCEADA
-)
-.getAll();
-
-
-
-request.onsuccess=function(){
-
-resolve(
-request.result
-);
-
-
-};
-
-
-
-});
-
-
-
-}
-
-
-
-
-
-//////////////////////////////////////////////////
-// GUARDAR SOLO CORRIENTES 1 AL 10
-//////////////////////////////////////////////////
-
-async function guardarCorrentinaNocturna(
-
-fecha,
-
-dia,
-
-numeros
-
-){
-
-
-
-if(numeros.length!==10){
-
-
-console.log(
-"ERROR: deben ser 10 números"
-);
-
-
-return;
-
-
-}
-
-
-
-
-let registro={
-
-
-fecha:fecha,
-
-
-dia:dia,
-
-
-provincia:
-"CORRIENTES",
-
-
-turno:
-"NOCTURNA",
-
-
-puestos:
-
-
-numeros.map(
-(n,i)=>({
-
-posicion:i+1,
-
-numero:
-String(n)
-.padStart(2,"0")
-
-})
-
-)
-
-
-
-};
-
-
-
-
-await guardarPoceadaDB(
-registro
-);
-
-
-
-MEMORIA_POCEADA.sorteos.push(
-registro
-);
-
-
-
-console.log(
-"REGISTRO CORRENTINA GUARDADO",
-registro
-);
-
-
-
-    }
-
-
-
-//////////////////////////////////////////////////
-// 🎯 IA POCEADA CORRENTINA V1
-// BLOQUE 9 - CONECTOR PDF REAL
-//////////////////////////////////////////////////
-
-
-async function cargarPDFPoceada(){
-
-let input =
-document.getElementById(
-"pdfPoceada"
-);
-
-
-
-if(!input.files.length){
-
-mostrarPanelPoceada(
-
-📄 Seleccioná un PDF primero
-
+Corrientes
+Nocturna
+Posición 1 al 10
 `);
 
 return;
 
 }
 
+agregarSorteoPoceada(
 
-
-let archivo =
-input.files[0];
-
-
-
-mostrarPanelPoceada(
-
-📄 Procesando PDF...
-
-Buscando:
-
-CORRIENTES
-NOCTURNA
-POSICIONES 1 AL 10
-
-`);
-
-
-
-// Necesita la librería PDF.js
-
-let texto =
-await leerTextoPDF(
-archivo
-);
-
-
-
-if(!texto){
-
-
-mostrarPanelPoceada(
-
-❌ No se pudo leer el PDF
-
-`);
-
-return;
-
-}
-
-
-
-
-let numeros =
-extraerCorrentinaNocturna(
-texto
-);
-
-
-
-if(!numeros ||
-numeros.length!==10){
-
-
-mostrarPanelPoceada(
-
-❌ No se encontró tabla Correntina 1 al 10
-
-`);
-
-return;
-
-}
-
-
-
-
-await guardarCorrentinaNocturna(
-
-new Date()
-.toISOString(),
-
-"",
+new Date().toLocaleDateString(),
 
 numeros
 
 );
 
+guardarPoceadaLocal();
 
+mostrarPanelPoceada(`
+<h3>✅ PDF CARGADO</h3>
 
-mostrarPanelPoceada(
+Se guardó correctamente.
 
-✅ PDF CARGADO
-
-
-Corrientes:
-OK
-
-Nocturna:
-OK
-
-Posiciones:
-1 al 10
-
-
-Memoria actualizada
-
-Ya puede generar 5 números
-
-
+${numeros.join(" - ")}
 `);
+
+}
+//////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA
+// BLOQUE 10 - REGISTRO
+//////////////////////////////////////////////////
+
+function mostrarRegistroPoceada(){
+
+let html=`
+<h3>📋 REGISTRO POCEADA</h3>
+`;
+
+MEMORIA_POCEADA.sorteos.forEach((s,index)=>{
+
+html+=`
+
+<b>Sorteo ${index+1}</b>
+
+<br>
+
+${s.fecha}
+
+<br>
+
+${s.numeros.join(" - ")}
+
+<hr>
+
+`;
+
+});
+
+mostrarPanelPoceada(html);
 
 }
 
@@ -12727,324 +11772,29 @@ Ya puede generar 5 números
 // EXTRAER CORRIENTES NOCTURNA
 //////////////////////////////////////////////////
 
-function extraerCorrentinaNocturna(
-texto
-){
+function extraerCorrentinaNocturna(texto){
 
+texto=texto.toUpperCase();
 
-texto =
-texto.toUpperCase();
+let inicio=texto.indexOf("CORRIENTES");
 
+if(inicio<0) return null;
 
+let bloque=texto.substring(inicio);
 
-let inicio =
-texto.indexOf(
-"CORRIENTES"
-);
+let nocturna=bloque.indexOf("NOCTURNA");
 
+if(nocturna<0) return null;
 
+bloque=bloque.substring(nocturna);
 
-if(inicio<0)
-return null;
+let numeros=bloque.match(/\b\d{2}\b/g);
 
-
-
-let zona =
-texto.substring(
-inicio
-);
-
-
-
-let nocturna =
-zona.indexOf(
-"NOCTURNA"
-);
-
-
-
-if(nocturna<0)
-return null;
-
-
-
-zona =
-zona.substring(
-nocturna
-);
-
-
-
-let numeros =
-zona.match(
-/\b\d{2}\b/g
-);
-
-
-
-if(!numeros)
-return null;
-
-
+if(!numeros) return null;
 
 return numeros.slice(0,10);
 
-
-}
-    
-//////////////////////////////////////////////////
-// 🎯 IA POCEADA CORRENTINA V1
-// BLOQUE 10 - LECTOR PDF REAL
-//////////////////////////////////////////////////
-
-
-
-async function leerTextoPDF(
-archivo
-){
-
-
-try{
-
-
-let arrayBuffer =
-await archivo.arrayBuffer();
-
-
-
-let pdf =
-await pdfjsLib
-.getDocument({
-data:arrayBuffer
-})
-.promise;
-
-
-
-let textoCompleto="";
-
-
-
-for(
-let pagina=1;
-pagina<=pdf.numPages;
-pagina++
-){
-
-
-let page =
-await pdf.getPage(
-pagina
-);
-
-
-
-let contenido =
-await page.getTextContent();
-
-
-
-let textoPagina =
-
-contenido.items
-.map(
-item=>item.str
-)
-.join(" ");
-
-
-
-textoCompleto +=
-textoPagina + "\n";
-
-
-
-}
-
-
-
-console.log(
-"PDF LEÍDO",
-textoCompleto
-);
-
-
-
-return textoCompleto;
-
-
-
-}catch(e){
-
-
-console.log(
-"ERROR PDF",
-e
-);
-
-
-return null;
-
-
-}
-
-
-
-}
-
-    //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA
-// BLOQUE 10 - PANTALLA PROPIA
-//////////////////////////////////////////////////
-
-
-function abrirPantallaPoceada(){
-
-
-let panel =
-document.getElementById(
-"panelPoceada"
-);
-
-
-
-panel.innerHTML = `
-
-<h3>
-🎯 POCEADA CORRENTINA IA
-</h3>
-
-
-<input 
-type="file"
-id="archivoPDFPoceada"
-accept=".pdf"
-/>
-
-
-<br><br>
-
-
-<button onclick="procesarArchivoPoceada()">
-📄 PROCESAR PDF
-</button>
-
-
-<button onclick="generarNumerosPoceada()">
-🎯 GENERAR 5 NÚMEROS
-</button>
-
-
-<button onclick="mostrarRegistroPoceada()">
-📋 VER REGISTRO
-</button>
-
-
-<div id="resultadoPoceada">
-
-</div>
-
-
-`;
-
-
-
-    }
-    //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA
-// BLOQUE 11 - REGISTRO
-//////////////////////////////////////////////////
-
-
-async function mostrarRegistroPoceada(){
-
-
-let datos =
-await leerHistoricoPoceada();
-
-
-
-let html = `
-
-<h3>
-📋 REGISTRO POCEADA
-</h3>
-
-`;
-
-
-
-datos.forEach(
-(s)=>{
-
-
-html += `
-
-<div>
-
-Fecha:
-${s.fecha}
-
-<br>
-
-Día:
-${s.dia}
-
-<br>
-
-Turno:
-${s.turno}
-
-<br>
-
-`;
-
-
-
-s.puestos.forEach(
-(p)=>{
-
-
-html +=
-"Posición "
-+p.posicion+
-": "
-+p.numero+
-"<br>";
-
-
-}
-);
-
-
-
-html +=
-"</div><hr>";
-
-
-
-}
-);
-
-
-
-document.getElementById(
-"resultadoPoceada"
-)
-.innerHTML =
-html;
-
-
-
-}
-    
- function mostrarPanelPoceada(contenido){
-
-document.getElementById(
-"panelPoceada"
-).innerHTML = contenido;
-
-    }   
+    }  
 </script> 
     
 </body>

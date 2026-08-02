@@ -11712,14 +11712,14 @@ JSON.parse(datos)
 }
 
 }
+    
     //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA
-// BLOQUE 9 - LECTOR PDF
+// 📄 LEER PDF POCEADA
 //////////////////////////////////////////////////
 
 async function leerPDFPoceada(){
 
-const input=document.getElementById("pdfPoceada");
+const input = document.getElementById("pdfPoceada");
 
 if(!input || input.files.length===0){
 
@@ -11733,9 +11733,16 @@ return;
 
 }
 
-const archivo=input.files[0];
+const archivo = input.files[0];
 
-const texto=await leerTextoPDF(archivo);
+mostrarPanelPoceada(`
+<h3>📄 Procesando PDF...</h3>
+
+Leyendo archivo...
+
+`);
+
+const texto = await leerTextoPDF(archivo);
 
 if(!texto){
 
@@ -11749,18 +11756,19 @@ return;
 
 }
 
-let numeros=extraerCorrentinaNocturna(texto);
+const numeros = extraerCorrentinaNocturna(texto);
 
 if(!numeros || numeros.length!==10){
 
 mostrarPanelPoceada(`
 <h3>⚠️ Atención</h3>
 
-No se encontró la tabla
+No se encontró:
 
-Corrientes
-Nocturna
-Posición 1 al 10
+• Corrientes
+• Nocturna
+• Posiciones 1 al 10
+
 `);
 
 return;
@@ -11768,24 +11776,36 @@ return;
 }
 
 agregarSorteoPoceada(
-
 new Date().toLocaleDateString(),
-
 numeros
-
 );
 
 guardarPoceadaLocal();
 
+actualizarEstadoPoceada(
+1,
+MEMORIA_POCEADA.sorteos.length
+);
+
 mostrarPanelPoceada(`
 <h3>✅ PDF CARGADO</h3>
 
-Se guardó correctamente.
+<b>10 posiciones guardadas</b>
+
+<br><br>
 
 ${numeros.join(" - ")}
+
+<br><br>
+
+Total histórico:
+
+${MEMORIA_POCEADA.sorteos.length}
+
 `);
 
 }
+    
 //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA
 // BLOQUE 10 - REGISTRO

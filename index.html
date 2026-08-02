@@ -235,7 +235,9 @@ OFF
 🎯 GENERAR 5 NÚMEROS
 </button>
 
-
+<button onclick="cargarPDFPoceada()">
+📄 CARGAR PDF
+</button>
 
 <div class="card">
 
@@ -12552,7 +12554,215 @@ registro
 
 
     }
+
+
+
+//////////////////////////////////////////////////
+// 🎯 IA POCEADA CORRENTINA V1
+// BLOQUE 9 - CONECTOR PDF REAL
+//////////////////////////////////////////////////
+
+
+async function cargarPDFPoceada(){
+
+let input =
+document.getElementById(
+"pdfPoceada"
+);
+
+
+
+if(!input.files.length){
+
+mostrarV48(`
+
+📄 Seleccioná un PDF primero
+
+`);
+
+return;
+
+}
+
+
+
+let archivo =
+input.files[0];
+
+
+
+mostrarV48(`
+
+📄 Procesando PDF...
+
+Buscando:
+
+CORRIENTES
+NOCTURNA
+POSICIONES 1 AL 10
+
+`);
+
+
+
+// Necesita la librería PDF.js
+
+let texto =
+await leerTextoPDF(
+archivo
+);
+
+
+
+if(!texto){
+
+
+mostrarV48(`
+
+❌ No se pudo leer el PDF
+
+`);
+
+return;
+
+}
+
+
+
+
+let numeros =
+extraerCorrentinaNocturna(
+texto
+);
+
+
+
+if(!numeros ||
+numeros.length!==10){
+
+
+mostrarV48(`
+
+❌ No se encontró tabla Correntina 1 al 10
+
+`);
+
+return;
+
+}
+
+
+
+
+await guardarCorrentinaNocturna(
+
+new Date()
+.toISOString(),
+
+"",
+
+numeros
+
+);
+
+
+
+mostrarV48(`
+
+✅ PDF CARGADO
+
+
+Corrientes:
+OK
+
+Nocturna:
+OK
+
+Posiciones:
+1 al 10
+
+
+Memoria actualizada
+
+Ya puede generar 5 números
+
+
+`);
+
+}
+
+
+
+//////////////////////////////////////////////////
+// EXTRAER CORRIENTES NOCTURNA
+//////////////////////////////////////////////////
+
+function extraerCorrentinaNocturna(
+texto
+){
+
+
+texto =
+texto.toUpperCase();
+
+
+
+let inicio =
+texto.indexOf(
+"CORRIENTES"
+);
+
+
+
+if(inicio<0)
+return null;
+
+
+
+let zona =
+texto.substring(
+inicio
+);
+
+
+
+let nocturna =
+zona.indexOf(
+"NOCTURNA"
+);
+
+
+
+if(nocturna<0)
+return null;
+
+
+
+zona =
+zona.substring(
+nocturna
+);
+
+
+
+let numeros =
+zona.match(
+/\b\d{2}\b/g
+);
+
+
+
+if(!numeros)
+return null;
+
+
+
+return numeros.slice(0,10);
+
+
+}
     
+
 </script> 
     
 </body>

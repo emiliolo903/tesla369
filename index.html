@@ -11862,6 +11862,69 @@ document.getElementById("ultimaCargaPoceada").innerHTML=
 new Date().toLocaleString();
 
     }
+ //////////////////////////////////////////////////
+// 📄 CARGAR PDF POCEADA
+//////////////////////////////////////////////////
+
+function abrirCargaPDFPoceada(){
+
+mostrarPanelPoceada(`
+
+<h3>📄 CARGAR PDF</h3>
+
+<input
+type="file"
+id="pdfPoceada"
+accept=".pdf"
+/>
+
+<br><br>
+
+<button onclick="leerPDFPoceada()">
+
+📄 PROCESAR PDF
+
+</button>
+
+`);
+
+    }
+  //////////////////////////////////////////////////
+// 🎯 GENERAR 5 NÚMEROS
+//////////////////////////////////////////////////
+
+function generarNumerosPoceada(){
+
+let numeros = generarPoceadaIA();
+
+mostrarPanelPoceada(`
+
+<h3>🎯 5 NÚMEROS IA</h3>
+
+<b>${numeros.join(" - ")}</b>
+
+`);
+
+}
+ //////////////////////////////////////////////////
+// 📋 REGISTRO
+//////////////////////////////////////////////////
+
+function mostrarRegistroPoceada(){
+
+let total = MEMORIA_POCEADA.sorteos.length;
+
+mostrarPanelPoceada(`
+
+<h3>📋 REGISTRO</h3>
+
+Sorteos guardados:
+
+<b>${total}</b>
+
+`);
+
+}
     
 </script> 
     

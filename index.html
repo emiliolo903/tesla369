@@ -11755,31 +11755,34 @@ procesarCorrentinaPoceadaV2(texto);
 
 }
     
-    //////////////////////////////////////////////////
-// 🎯 POCEADA V2
-// LECTOR PDF CON PROGRESO
+//////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA V2
+//  CORREGIDO
+// LECTOR PDF IMAGEN + OCR + PROGRESO
 //////////////////////////////////////////////////
 
+
 async function leerPDFPoceadaV2ConProgreso(archivo){
+
 
 try{
 
 
 estadoPoceadaV2(`
+
 📄 Archivo:
 ${archivo.name}
 
-⏳ Preparando lectura...
+
+⏳ Preparando OCR...
+
 `);
+
+
 
 
 let arrayBuffer =
 await archivo.arrayBuffer();
-
-
-estadoPoceadaV2(`
-📖 Abriendo PDF...
-`);
 
 
 
@@ -11792,7 +11795,7 @@ data:arrayBuffer
 
 
 
-let textoCompleto="";
+let textoCompleto = "";
 
 
 
@@ -11803,39 +11806,133 @@ pagina++
 ){
 
 
+
 estadoPoceadaV2(`
 
 📖 Leyendo página:
 
 ${pagina} / ${pdf.numPages}
 
-🔎 Buscando Corrientes Nocturna...
+
+🧠 OCR buscando tabla...
 
 `);
 
 
 
+
 let page =
-await pdf.getPage(pagina);
+await pdf.getPage(
+pagina
+);
 
 
 
-let contenido =
-await page.getTextContent();
+let viewport =
+page.getViewport({
+scale:2
+});
 
 
 
-let textoPagina =
-contenido.items
-.map(item=>item.str)
-.join(" ");
+let canvas =
+document.createElement(
+"canvas"
+);
 
 
 
-textoCompleto += textoPagina+"\n";
+let context =
+canvas.getContext(
+"2d"
+);
+
+
+
+canvas.width =
+viewport.width;
+
+
+canvas.height =
+viewport.height;
+
+
+
+await page.render({
+
+canvasContext:
+context,
+
+viewport:
+viewport
+
+}).promise;
+
+
+
+
+estadoPoceadaV2(`
+
+👁️ Analizando imagen...
+
+Página:
+${pagina}/${pdf.numPages}
+
+`);
+
+
+
+
+
+let resultadoOCR =
+
+await Tesseract.recognize(
+
+canvas,
+
+"spa",
+
+{
+
+logger:
+m=>{
+
+
+if(m.status==="recognizing text"){
+
+
+estadoPoceadaV2(`
+
+🧠 OCR trabajando...
+
+Progreso:
+${Math.round(m.progress*100)} %
+
+`);
+
+}
 
 
 }
+
+}
+
+);
+
+
+
+
+
+textoCompleto +=
+
+resultadoOCR.data.text
++
+"\n";
+
+
+
+}
+
 
 
 
@@ -11843,9 +11940,11 @@ estadoPoceadaV2(`
 
 ✅ Lectura terminada
 
-🔎 Analizando Corrientes...
+
+🔎 Buscando CORRENTINA...
 
 `);
+
 
 
 
@@ -11856,9 +11955,10 @@ return textoCompleto;
 }catch(error){
 
 
+
 estadoPoceadaV2(`
 
-❌ Error leyendo PDF
+❌ Error OCR PDF
 
 ${error}
 
@@ -11871,6 +11971,62 @@ return null;
 }
 
 }
+
+
+
+//////////////////////////////////////////////////
+// EXTRAER CORRENTINA 1 AL 10
+//////////////////////////////////////////////////
+
+
+function extraerCorrentinaPoceadaV2(texto){
+
+
+
+texto =
+texto.toUpperCase();
+
+
+
+texto =
+texto.replace(
+/O/g,
+"0"
+);
+
+
+
+let numeros =
+
+texto.match(
+/\b\d{4}\b/g
+);
+
+
+
+if(!numeros){
+
+
+return null;
+
+
+}
+
+
+
+// tomar primeros 10
+// de columna Correntina
+
+
+return numeros.slice(
+0,
+10
+);
+
+
+
+    }
+
     
 
  //////////////////////////////////////////////////

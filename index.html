@@ -11727,7 +11727,7 @@ estadoPoceadaV2(`
 
 Buscando:
 
-CORRIENTES
+CORRENTINA
 
 NOCTURNA
 
@@ -11736,7 +11736,14 @@ POSICIÓN 1 AL 10
 `);
 
 
-await procesarCorrentinaMasivaPoceadaV2(texto);
+
+let texto =
+
+await leerPDFPoceadaV2ConProgreso(
+archivo
+);
+
+
 
 if(!texto){
 
@@ -11751,10 +11758,15 @@ return;
 }
 
 
-procesarCorrentinaPoceadaV2(texto);
+
+
+await procesarCorrentinaMasivaPoceadaV2(
+texto
+);
 
 
 }
+
     
 //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2

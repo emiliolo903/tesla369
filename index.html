@@ -378,7 +378,10 @@ Sin auditoría todavía
 🛡️ Auditoría
 </button>
 
-
+<button onclick="abrirCargaManualPoceadaV2()">
+✍️ Carga Manual
+</button>
+    
 
 <!-- ESTADO -->
 
@@ -12029,113 +12032,270 @@ return numeros.slice(
 
     
 
- //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA V2
-// BLOQUE 6 - FILTRO INTELIGENTE
 //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA V2
+// BLOQUE 6 - FILTRO CORRENTINA CORREGIDO
+//////////////////////////////////////////////////
+
 
 function procesarCorrentinaPoceadaV2(texto){
 
 
-texto =
-texto.toUpperCase();
+texto = texto.toUpperCase();
 
 
-
-let corrientes =
-texto.indexOf(
-"CORRIENTES"
-);
-
-
-
-if(corrientes < 0){
 
 mostrarPoceadaV2(`
 
-❌ No se encontró Corrientes
+🧠 Analizando datos OCR...
+
+Buscando:
+
+CORRENTINA
+NOCTURNA
+POSICIONES 1 AL 10
+
+`);
+
+
+
+// Normalizar texto OCR
+
+let limpio = texto
+.replace(/\n/g," ")
+.replace(/\s+/g," ");
+
+
+
+
+// Buscar Correntina flexible
+
+let encontrado =
+
+limpio.includes("CORRENTINA") ||
+
+limpio.includes("CORRENT") ||
+
+limpio.includes("CORRIENT");
+
+
+
+if(!encontrado){
+
+
+mostrarPoceadaV2(`
+
+❌ CORRENTINA NO DETECTADA
+
+
+El OCR leyó el PDF,
+pero no encontró la tabla.
 
 `);
 
 return;
+
+
+}
+
+
+
+
+// Buscar zona después de Correntina
+
+let inicio = limpio.indexOf("CORRENT");
+
+
+
+if(inicio < 0){
+
+inicio =
+limpio.indexOf("CORRIENT");
 
 }
 
 
 
 let zona =
-texto.substring(corrientes);
+limpio.substring(inicio);
 
 
+
+
+// Buscar nocturna
+
+let posNocturna =
+zona.indexOf("NOCT");
+
+
+
+if(posNocturna >=0){
+
+zona =
+zona.substring(posNocturna);
+
+}
+
+
+
+
+// Buscar números de 2 cifras
 
 let numeros =
-zona.match(/\b\d{4}\b/g);
+
+zona.match(
+/\b\d{2}\b/g
+);
 
 
 
-if(!numeros || numeros.length < 10){
+if(!numeros){
 
 
 mostrarPoceadaV2(`
 
-❌ No encontró posiciones 1 al 10
+❌ No se encontraron números
 
 `);
 
 return;
 
+
 }
 
 
 
+
+// tomar primeros 10
+
 let primeros10 =
+
 numeros.slice(0,10);
 
 
 
-guardarPoceadaV2({
 
-provincia:"CORRIENTES",
+if(primeros10.length < 10){
 
-turno:"NOCTURNA",
 
-posiciones:primeros10
+mostrarPoceadaV2(`
 
-});
+⚠️ Correntina encontrada,
+pero faltan posiciones.
+
+
+Encontrados:
+
+${primeros10.length}
+
+`);
+
+return;
+
+
+}
+
+
+
+
+// Guardar registro
+
+let sorteo = {
+
+
+fecha:
+new Date().toLocaleString(),
+
+
+tipo:
+"PDF",
+
+
+provincia:
+"CORRENTINA",
+
+
+turno:
+"NOCTURNA",
+
+
+datos:{
+
+posiciones:
+primeros10
+
+}
+
+
+};
+
+
+
+
+POCEADA.historico.push(
+sorteo
+);
+
+
+
+
+// Aprender movimientos
+
+if(typeof aprenderTransicionesPoceadaV2 === "function"){
+
+aprenderTransicionesPoceadaV2(
+sorteo
+);
+
+}
+
+
+
+
+guardarPoceada();
+
+
+
+actualizarEstadoPoceadaV2();
 
 
 
 mostrarPoceadaV2(`
 
-<h3>✅ PDF PROCESADO</h3>
+<h3>
+✅ CORRENTINA DETECTADA
+</h3>
 
 
-Corrientes:
+Registros guardados:
 
-OK
-
-
-<br>
-
-Nocturna:
-
-OK
-
-
-<br>
-
-Posiciones:
-
-1 al 10
+${POCEADA.historico.length}
 
 
 <br><br>
 
-${primeros10.join("<br>")}
+
+Posiciones 1 al 10:
+
+<br>
+
+${primeros10.join(" - ")}
+
+
+<br><br>
+
+
+🧠 Memoria actualizada
+
 
 `);
 
+
+
 }
+
+
+
 
  //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
@@ -12941,6 +13101,277 @@ return seleccionados;
 
 
 }
+
+    //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA V2
+// BLOQUE 14 - CARGA MANUAL + MEMORIA
+//////////////////////////////////////////////////
+
+
+function abrirCargaManualPoceadaV2(){
+
+
+let html = `
+
+<h3>
+✍️ CARGA MANUAL ÚLTIMO SORTEO
+</h3>
+
+
+`;
+
+
+
+for(let i=1;i<=10;i++){
+
+
+html += `
+
+Posición ${i}
+
+<input 
+id="manualP${i}"
+type="number"
+min="0"
+max="99"
+placeholder="00"
+>
+
+<br><br>
+
+`;
+
+}
+
+
+
+html += `
+
+
+<button onclick="guardarManualPoceadaV2()">
+
+💾 GUARDAR SORTEO
+
+</button>
+
+
+
+`;
+
+
+
+mostrarPoceadaV2(html);
+
+
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// GUARDAR SORTEO MANUAL
+//////////////////////////////////////////////////
+
+
+async function guardarManualPoceadaV2(){
+
+
+let numeros=[];
+
+
+for(let i=1;i<=10;i++){
+
+
+let valor =
+document.getElementById(
+"manualP"+i
+).value;
+
+
+
+if(valor===""){
+
+
+mostrarPoceadaV2(`
+
+⚠️ Falta posición ${i}
+
+`);
+
+
+return;
+
+
+}
+
+
+
+numeros.push(
+
+String(valor)
+.padStart(2,"0")
+
+);
+
+
+}
+
+
+
+
+let sorteo={
+
+
+fecha:
+new Date().toLocaleString(),
+
+
+tipo:
+"MANUAL",
+
+
+provincia:
+"CORRENTINA",
+
+
+turno:
+"NOCTURNA",
+
+
+datos:{
+
+
+posiciones:
+numeros
+
+
+}
+
+
+
+};
+
+
+
+
+POCEADA.historico.push(
+sorteo
+);
+
+
+
+// Aprende movimiento
+
+aprenderTransicionesPoceadaV2(
+sorteo
+);
+
+
+
+// Guarda permanente
+
+guardarPoceada();
+
+
+
+actualizarEstadoPoceadaV2();
+
+
+
+mostrarPoceadaV2(`
+
+<h3>
+✅ SORTEO GUARDADO
+</h3>
+
+
+Números:
+
+<br><br>
+
+
+${numeros.join(" - ")}
+
+
+<br><br>
+
+
+🧠 Memoria actualizada
+
+<br>
+
+🔄 Transiciones aprendidas
+
+<br>
+
+🎯 Listo para generar 5 números
+
+
+`);
+
+
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// ACTUALIZAR ESTADO
+//////////////////////////////////////////////////
+
+
+function actualizarEstadoPoceadaV2(){
+
+
+let estado =
+document.getElementById(
+"estadoPoceadaV2"
+);
+
+
+
+if(!estado)
+return;
+
+
+
+estado.innerHTML = `
+
+
+<b>Estado:</b>
+
+<br>
+
+PDF / Manual cargados:
+
+${POCEADA.historico.length}
+
+
+<br>
+
+
+Registros:
+
+${POCEADA.auditoria.length || 0}
+
+
+<br>
+
+
+Última actualización:
+
+${new Date().toLocaleString()}
+
+
+
+`;
+
+
+
+    }
+    
     
 </script> 
     

@@ -355,7 +355,9 @@ Sin auditoría todavía
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    
 
 <script>
 
@@ -12762,7 +12764,106 @@ return numeros.slice(0,10);
 
 }
     
+//////////////////////////////////////////////////
+// 🎯 IA POCEADA CORRENTINA V1
+// BLOQUE 10 - LECTOR PDF REAL
+//////////////////////////////////////////////////
 
+
+
+async function leerTextoPDF(
+archivo
+){
+
+
+try{
+
+
+let arrayBuffer =
+await archivo.arrayBuffer();
+
+
+
+let pdf =
+await pdfjsLib
+.getDocument({
+data:arrayBuffer
+})
+.promise;
+
+
+
+let textoCompleto="";
+
+
+
+for(
+let pagina=1;
+pagina<=pdf.numPages;
+pagina++
+){
+
+
+let page =
+await pdf.getPage(
+pagina
+);
+
+
+
+let contenido =
+await page.getTextContent();
+
+
+
+let textoPagina =
+
+contenido.items
+.map(
+item=>item.str
+)
+.join(" ");
+
+
+
+textoCompleto +=
+textoPagina + "\n";
+
+
+
+}
+
+
+
+console.log(
+"PDF LEÍDO",
+textoCompleto
+);
+
+
+
+return textoCompleto;
+
+
+
+}catch(e){
+
+
+console.log(
+"ERROR PDF",
+e
+);
+
+
+return null;
+
+
+}
+
+
+
+}
+    
 </script> 
     
 </body>

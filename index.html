@@ -231,10 +231,9 @@ OFF
 📊 Ejecutar Backtesting V49
 </button>  
     
-  <button onclick="abrirPoceadaIA()">
-🎯 Poceada Correntina IA
-    </button>
-</div>
+<button onclick="generarNumerosPoceada()">
+🎯 GENERAR 5 NÚMEROS
+</button>
 
 
 
@@ -12068,7 +12067,186 @@ Ranking
 }
 
 
+//////////////////////////////////////////////////
+// 🎯 IA POCEADA CORRENTINA V1
+// ÚLTIMO BLOQUE - PDF + GENERADOR
+//////////////////////////////////////////////////
 
+
+//////////////////////////////////////////////////
+// PROCESAR ARCHIVO PDF
+//////////////////////////////////////////////////
+
+async function leerPDFPoceada(){
+
+
+let archivo =
+
+document
+.getElementById("pdfPoceada")
+.files[0];
+
+
+
+if(!archivo){
+
+
+mostrarV48(`
+
+📄 No seleccionaste ningún PDF
+
+`);
+
+return;
+
+
+}
+
+
+
+mostrarV48(`
+
+📄 Leyendo PDF...
+
+Espere...
+
+`);
+
+
+
+// Leer archivo
+
+let texto="";
+
+
+
+if(
+archivo.type==="text/plain"
+){
+
+
+texto =
+await archivo.text();
+
+
+}else{
+
+
+// Aquí se conecta el lector PDF
+// de la app si ya existe
+
+
+texto =
+await extraerTextoPDF(
+archivo
+);
+
+
+}
+
+
+
+if(!texto){
+
+
+mostrarV48(`
+
+❌ No se pudo leer el PDF
+
+`);
+
+return;
+
+}
+
+
+
+
+// Enviar al filtro Correntina
+
+let datos =
+
+await procesarPDFPoceadaCorrentina(
+texto
+);
+
+
+
+if(datos){
+
+
+mostrarV48(`
+
+✅ PDF PROCESADO
+
+
+Corrientes:
+OK
+
+Nocturna:
+OK
+
+Posiciones:
+1 al 10
+
+
+Memoria actualizada
+
+
+`);
+
+}
+
+
+
+}
+
+
+
+
+//////////////////////////////////////////////////
+// BOTÓN GENERAR 5 NÚMEROS
+//////////////////////////////////////////////////
+
+function generarNumerosPoceada(){
+
+
+
+let numeros =
+
+generarPoceadaIA();
+
+
+
+mostrarV48(`
+
+🎯 IA POCEADA CORRENTINA
+
+
+NÚMEROS PARA JUGAR:
+
+
+${numeros.join("\n")}
+
+
+
+Motor:
+
+Memoria
++
+Parejas
++
+Simulación
++
+Ranking
+
+
+`);
+
+
+
+    }
+    
 
 //////////////////////////////////////////////////
 // ABRIR CARGA PDF

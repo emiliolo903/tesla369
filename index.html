@@ -11734,7 +11734,7 @@ POSICIÓN 1 AL 10
 
 
 let texto =
-await leerTextoPDF(archivo);
+await leerPDFPoceadaV2ConProgreso(archivo);
 
 
 if(!texto){
@@ -11754,6 +11754,123 @@ procesarCorrentinaPoceadaV2(texto);
 
 
 }
+    //////////////////////////////////////////////////
+// 🎯 POCEADA V2
+// LECTOR PDF CON PROGRESO
+//////////////////////////////////////////////////
+
+async function leerPDFPoceadaV2ConProgreso(archivo){
+
+try{
+
+
+estadoPoceadaV2(`
+📄 Archivo:
+${archivo.name}
+
+⏳ Preparando lectura...
+`);
+
+
+let arrayBuffer =
+await archivo.arrayBuffer();
+
+
+estadoPoceadaV2(`
+📖 Abriendo PDF...
+`);
+
+
+
+let pdf =
+await pdfjsLib
+.getDocument({
+data:arrayBuffer
+})
+.promise;
+
+
+
+let textoCompleto="";
+
+
+
+for(
+let pagina=1;
+pagina<=pdf.numPages;
+pagina++
+){
+
+
+estadoPoceadaV2(`
+
+📖 Leyendo página:
+
+${pagina} / ${pdf.numPages}
+
+🔎 Buscando Corrientes Nocturna...
+
+`);
+
+
+
+let page =
+await pdf.getPage(pagina);
+
+
+
+let contenido =
+await page.getTextContent();
+
+
+
+let textoPagina =
+contenido.items
+.map(item=>item.str)
+.join(" ");
+
+
+
+textoCompleto += textoPagina+"\n";
+
+
+}
+
+
+
+estadoPoceadaV2(`
+
+✅ Lectura terminada
+
+🔎 Analizando Corrientes...
+
+`);
+
+
+
+return textoCompleto;
+
+
+
+}catch(error){
+
+
+estadoPoceadaV2(`
+
+❌ Error leyendo PDF
+
+${error}
+
+`);
+
+
+return null;
+
+
+}
+
+}
+    
 
  //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2

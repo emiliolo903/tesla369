@@ -365,14 +365,71 @@ Sin auditoría todavía
 <button onclick="mostrarRegistroPoceada()">
 📋 Registro
 </button>
+    
+  <div id="panelPoceada">
+
+</div>
+
+</div>  
+    
+<!-- ============================== -->
+<!-- PANEL POCEADA CORRENTINA IA -->
+<!-- ============================== -->
+
+<div class="card" id="panelPoceadaCard">
+
+<h3 style="color:#00ff99;">
+🖥️ PANEL POCEADA IA
+</h3>
+
+<div id="estadoPoceada"
+style="
+background:#111;
+padding:12px;
+border-radius:10px;
+margin-bottom:10px;
+">
+
+<b>Estado:</b><br>
+
+PDF cargados:
+<span id="pdfPoceadaTotal">0</span>
+
+<br>
+
+Registros:
+<span id="registrosPoceadaTotal">0</span>
+
+<br>
+
+Última carga:
+
+<span id="ultimaCargaPoceada">
+
+Sin datos
+
+</span>
+
+</div>
 
 
-<div id="panelPoceada">
+<div
+id="panelPoceada"
+style="
+background:#000;
+color:#fff;
+min-height:260px;
+padding:15px;
+border-radius:10px;
+overflow:auto;
+">
+
+POCEADA CORRENTINA IA LISTA...
 
 </div>
 
 </div>
-
+    
 
     
 
@@ -11792,7 +11849,20 @@ if(!numeros) return null;
 
 return numeros.slice(0,10);
 
-    }  
+    } 
+
+  function actualizarEstadoPoceada(pdfs,registros){
+
+document.getElementById("pdfPoceadaTotal").innerHTML=pdfs;
+
+document.getElementById("registrosPoceadaTotal").innerHTML=registros;
+
+document.getElementById("ultimaCargaPoceada").innerHTML=
+
+new Date().toLocaleString();
+
+    }
+    
 </script> 
     
 </body>

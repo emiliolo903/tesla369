@@ -346,90 +346,114 @@ Sin auditoría todavía
 
 
 </div>
+    
     <!-- ========================= -->
-<!-- 🎯 POCEADA CORRENTINA -->
+<!-- 🎯 POCEADA CORRENTINA IA V2 -->
+<!-- MÓDULO INDEPENDIENTE -->
 <!-- ========================= -->
 
 <div id="seccionPoceada">
 
-<h2>🎯 POCEADA CORRENTINA IA</h2>
+<h2>
+🎯 POCEADA CORRENTINA IA V2
+</h2>
 
-<button onclick="abrirCargaPDFPoceada()">
+
+<button onclick="abrirCargaPDFPoceadaV2()">
 📄 Cargar PDF
 </button>
 
-<button onclick="generarNumerosPoceada()">
+
+<button onclick="generarPoceadaInteligenteV2()">
 🎯 Generar 5 Números
 </button>
 
-<button onclick="mostrarRegistroPoceada()">
+
+<button onclick="verRegistroPoceadaV2()">
 📋 Registro
 </button>
-    
-  <div id="panelPoceada">
 
-</div>
 
-</div>  
-    
-<!-- ============================== -->
-<!-- PANEL POCEADA CORRENTINA IA -->
-<!-- ============================== -->
+<button onclick="auditoriaPoceadaV2()">
+🛡️ Auditoría
+</button>
 
-<div class="card" id="panelPoceadaCard">
 
-<h3 style="color:#00ff99;">
-🖥️ PANEL POCEADA IA
-</h3>
 
-<div id="estadoPoceada"
+<!-- ESTADO -->
+
+<div class="card"
 style="
+margin-top:15px;
+padding:15px;
 background:#111;
-padding:12px;
 border-radius:10px;
-margin-bottom:10px;
 ">
 
-<b>Estado:</b><br>
+
+<h3 style="color:#00ff99;">
+📊 ESTADO POCEADA
+</h3>
+
+
+<div id="estadoPoceadaV2">
+
+Estado:
+Esperando PDF...
+
+<br>
 
 PDF cargados:
-<span id="pdfPoceadaTotal">0</span>
+0
 
 <br>
 
 Registros:
-<span id="registrosPoceadaTotal">0</span>
+0
 
 <br>
 
 Última carga:
-
-<span id="ultimaCargaPoceada">
-
 Sin datos
 
-</span>
 
 </div>
 
 
-<div
-id="panelPoceada"
+</div>
+
+
+
+
+<!-- PANEL PROPIO -->
+
+<div class="card"
 style="
+margin-top:15px;
 background:#000;
-color:#fff;
+color:white;
 min-height:260px;
 padding:15px;
 border-radius:10px;
 overflow:auto;
 ">
 
-POCEADA CORRENTINA IA LISTA...
+
+<h3 style="color:#00ff99;">
+🖥️ PANEL POCEADA IA
+</h3>
+
+
+<div id="panelPoceadaV2">
+
+🎯 POCEADA CORRENTINA IA LISTA...
+
 
 </div>
 
+
 </div>
-    
+
 
     
 

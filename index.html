@@ -11736,9 +11736,7 @@ POSICIÓN 1 AL 10
 `);
 
 
-let texto =
-await leerPDFPoceadaV2ConProgreso(archivo);
-
+await procesarCorrentinaMasivaPoceadaV2(texto);
 
 if(!texto){
 
@@ -12032,13 +12030,16 @@ return numeros.slice(
 
     
 
+
+
+
 //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
-// BLOQUE 6 - FILTRO CORRENTINA CORREGIDO
+// BLOQUE 6 - CARGA MASIVA + APRENDIZAJE EN VIVO
 //////////////////////////////////////////////////
 
 
-function procesarCorrentinaPoceadaV2(texto){
+async function procesarCorrentinaMasivaPoceadaV2(texto){
 
 
 texto = texto.toUpperCase();
@@ -12047,10 +12048,9 @@ texto = texto.toUpperCase();
 
 mostrarPoceadaV2(`
 
-🧠 Analizando datos OCR...
+🧠 Analizando PDF...
 
 Buscando:
-
 CORRENTINA
 NOCTURNA
 POSICIONES 1 AL 10
@@ -12059,148 +12059,77 @@ POSICIONES 1 AL 10
 
 
 
-// Normalizar texto OCR
+// separar por fechas
+// (cada sorteo normalmente empieza con fecha)
 
-let limpio = texto
-.replace(/\n/g," ")
-.replace(/\s+/g," ");
-
-
-
-
-// Buscar Correntina flexible
-
-let encontrado =
-
-limpio.includes("CORRENTINA") ||
-
-limpio.includes("CORRENT") ||
-
-limpio.includes("CORRIENT");
+let bloques = texto.split(
+/(?=\d{2}\/\d{2}\/\d{4})/
+);
 
 
 
-if(!encontrado){
+let registrosGuardados = 0;
 
-
-mostrarPoceadaV2(`
-
-❌ CORRENTINA NO DETECTADA
-
-
-El OCR leyó el PDF,
-pero no encontró la tabla.
-
-`);
-
-return;
-
-
-}
+let aprendizajes = 0;
 
 
 
+for(
+let i=0;
+i<bloques.length;
+i++
+){
 
-// Buscar zona después de Correntina
-
-let inicio = limpio.indexOf("CORRENT");
 
 
+let bloque =
+bloques[i];
 
-if(inicio < 0){
 
-inicio =
-limpio.indexOf("CORRIENT");
+
+// validar Correntina
+
+if(
+!bloque.includes("CORRENT") &&
+!bloque.includes("CORRIENT")
+){
+
+continue;
 
 }
 
 
 
-let zona =
-limpio.substring(inicio);
+// buscar nocturna
+
+let zona = bloque;
 
 
-
-
-// Buscar nocturna
-
-let posNocturna =
-zona.indexOf("NOCT");
-
-
-
-if(posNocturna >=0){
-
-zona =
-zona.substring(posNocturna);
-
-}
-
-
-
-
-// Buscar números de 2 cifras
 
 let numeros =
-
 zona.match(
 /\b\d{2}\b/g
 );
 
 
 
-if(!numeros){
+if(!numeros ||
+numeros.length < 10
+){
 
-
-mostrarPoceadaV2(`
-
-❌ No se encontraron números
-
-`);
-
-return;
-
+continue;
 
 }
 
 
 
 
-// tomar primeros 10
-
-let primeros10 =
-
-numeros.slice(0,10);
+let diez = numeros.slice(0,10);
 
 
 
 
-if(primeros10.length < 10){
-
-
-mostrarPoceadaV2(`
-
-⚠️ Correntina encontrada,
-pero faltan posiciones.
-
-
-Encontrados:
-
-${primeros10.length}
-
-`);
-
-return;
-
-
-}
-
-
-
-
-// Guardar registro
-
-let sorteo = {
+let sorteo={
 
 
 fecha:
@@ -12221,8 +12150,7 @@ turno:
 
 datos:{
 
-posiciones:
-primeros10
+posiciones:diez
 
 }
 
@@ -12232,25 +12160,86 @@ primeros10
 
 
 
+// guardar registro
+
 POCEADA.historico.push(
 sorteo
 );
 
 
+registrosGuardados++;
 
 
-// Aprender movimientos
 
-if(typeof aprenderTransicionesPoceadaV2 === "function"){
+
+// aprender después del segundo registro
+
+if(
+registrosGuardados > 1 &&
+typeof aprenderTransicionesPoceadaV2==="function"
+){
+
 
 aprenderTransicionesPoceadaV2(
 sorteo
 );
 
+
+aprendizajes++;
+
+
 }
 
 
 
+
+// mostrar avance
+
+estadoPoceadaV2(`
+
+📄 Cargando PDF...
+
+Registro guardado:
+
+<b>
+${registrosGuardados}
+</b>
+
+
+<br><br>
+
+🧠 Aprendizaje:
+
+<b>
+${aprendizajes}
+</b>
+
+
+<br><br>
+
+Procesando bloque:
+
+${i+1}/${bloques.length}
+
+
+`);
+
+
+
+
+// pequeña pausa para actualizar pantalla
+
+await new Promise(
+r=>setTimeout(r,20)
+);
+
+
+
+}
+
+
+
+// guardar memoria final
 
 guardarPoceada();
 
@@ -12263,37 +12252,33 @@ actualizarEstadoPoceadaV2();
 mostrarPoceadaV2(`
 
 <h3>
-✅ CORRENTINA DETECTADA
+✅ PDF TERMINADO
 </h3>
 
 
-Registros guardados:
+📚 Registros guardados:
 
-${POCEADA.historico.length}
-
-
-<br><br>
-
-
-Posiciones 1 al 10:
-
-<br>
-
-${primeros10.join(" - ")}
+${registrosGuardados}
 
 
 <br><br>
 
+🧠 Aprendizajes:
 
-🧠 Memoria actualizada
+${aprendizajes}
+
+
+<br><br>
+
+🎯 Poceada lista para generar 5 números
 
 
 `);
 
 
 
-}
-
+    }
+    
 
 
 

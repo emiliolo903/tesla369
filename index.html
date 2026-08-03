@@ -12029,7 +12029,9 @@ ${total}
 //////////////////////////////////////////////////
 
 function procesarPaginaPoceadaV4(texto){
-
+    
+console.log("OCR PAGINA:");
+console.log(texto);
 
 if(!texto){
 
@@ -12037,6 +12039,15 @@ return false;
 
 }
 
+    mostrarPoceadaV4(`
+
+<h3>🔎 TEXTO OCR</h3>
+
+<pre style="white-space:pre-wrap">
+${texto}
+</pre>
+
+`);
 
 // LIMPIEZA OCR
 

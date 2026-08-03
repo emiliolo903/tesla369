@@ -12047,252 +12047,91 @@ return numeros.slice(
 
 //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
-// BLOQUE 6 - CARGA MASIVA + APRENDIZAJE EN VIVO
+// BLOQUE 6 - LECTOR NUEVO FORMATO POCEADA
 //////////////////////////////////////////////////
-
 
 async function procesarCorrentinaMasivaPoceadaV2(texto){
 
-
 texto = texto.toUpperCase();
 
-
-
-mostrarPoceadaV2(`
-
-🧠 Analizando PDF...
-
-Buscando:
-CORRENTINA
-NOCTURNA
-POSICIONES 1 AL 10
-
-`);
-
-
-
-// separar por fechas
-// (cada sorteo normalmente empieza con fecha)
-
-let bloques = texto.split(
-/(?=\d{2}\/\d{2}\/\d{4})/
-);
-
-
+let bloques = texto.split(/(?=SORTEO)/g);
 
 let registrosGuardados = 0;
-
 let aprendizajes = 0;
 
+for(let i=0;i<bloques.length;i++){
 
+    let bloque = bloques[i];
 
-for(
-let i=0;
-i<bloques.length;
-i++
-){
+    if(!bloque.includes("SORTEO")) continue;
 
+    let fecha = "";
 
+    let mFecha = bloque.match(/\d{2}\/\d{2}\/\d{4}/);
 
-let bloque =
-bloques[i];
+    if(mFecha) fecha = mFecha[0];
 
+    let numeros = bloque.match(/\b\d{2}\b/g);
 
+    if(!numeros) continue;
 
-// validar Correntina
+    if(numeros.length < 10) continue;
 
-if(
-!bloque.includes("CORRENT") &&
-!bloque.includes("CORRIENT")
-){
+    let posiciones = numeros.slice(-10);
 
-continue;
+    let registro = {
 
-}
+        fecha: fecha,
 
+        provincia:"CORRENTINA",
 
+        turno:"POCEADA",
 
-// buscar nocturna
+        posiciones: posiciones
 
-let zona = bloque;
+    };
 
+    POCEADA.historico.push(registro);
 
+    registrosGuardados++;
 
-let numeros =
-zona.match(
-/\b\d{2}\b/g
-);
+    if(registrosGuardados>1){
 
+        aprenderTransicionesPoceadaV2(registro);
 
+        aprendizajes++;
 
-if(!numeros ||
-numeros.length < 10
-){
+    }
 
-continue;
-
-}
-
-
-
-
-let diez = numeros.slice(0,10);
-
-
-
-
-let sorteo={
-
-
-fecha:
-new Date().toLocaleString(),
-
-
-tipo:
-"PDF",
-
-
-provincia:
-"CORRENTINA",
-
-
-turno:
-"NOCTURNA",
-
-
-datos:{
-
-posiciones:diez
-
-}
-
-
-};
-
-
-
-
-// guardar registro
-
-POCEADA.historico.push(
-sorteo
-);
-
-
-registrosGuardados++;
-
-
-
-
-// aprender después del segundo registro
-
-if(
-registrosGuardados > 1 &&
-typeof aprenderTransicionesPoceadaV2==="function"
-){
-
-
-aprenderTransicionesPoceadaV2(
-sorteo
-);
-
-
-aprendizajes++;
-
-
-}
-
-
-
-
-// mostrar avance
-
-estadoPoceadaV2(`
-
+    estadoPoceadaV2(`
 📄 Cargando PDF...
 
-Registro guardado:
+Registro guardado: ${registrosGuardados}
 
-<b>
-${registrosGuardados}
-</b>
-
-
-<br><br>
-
-🧠 Aprendizaje:
-
-<b>
-${aprendizajes}
-</b>
-
-
-<br><br>
-
-Procesando bloque:
-
-${i+1}/${bloques.length}
-
-
+Aprendizajes: ${aprendizajes}
 `);
 
-
-
-
-// pequeña pausa para actualizar pantalla
-
-await new Promise(
-r=>setTimeout(r,20)
-);
-
-
+    await new Promise(r=>setTimeout(r,10));
 
 }
-
-
-
-// guardar memoria final
 
 guardarPoceada();
 
-
-
 actualizarEstadoPoceadaV2();
 
-
-
 mostrarPoceadaV2(`
+<h3>✅ PDF CARGADO</h3>
 
-<h3>
-✅ PDF TERMINADO
-</h3>
-
-
-📚 Registros guardados:
-
+Registros guardados:
 ${registrosGuardados}
 
-
-<br><br>
-
-🧠 Aprendizajes:
-
+Aprendizajes:
 ${aprendizajes}
 
-
-<br><br>
-
-🎯 Poceada lista para generar 5 números
-
-
+Poceada lista.
 `);
 
-
-
-    }
-    
-
-
+}
 
  //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2

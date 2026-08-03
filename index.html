@@ -12034,13 +12034,11 @@ ${total}
 
 //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V4
-// BLOQUE 4 - EXTRACTOR OCR ROBUSTO
+// BLOQUE 4 - EXTRACTOR DEFINITIVO OCR
 //////////////////////////////////////////////////
 
 function procesarPaginaPoceadaV4(texto){
-    
-console.log("OCR PAGINA:");
-console.log(texto);
+
 
 if(!texto){
 
@@ -12048,15 +12046,6 @@ return false;
 
 }
 
-    mostrarPoceadaV4(`
-
-<h3>🔎 TEXTO OCR</h3>
-
-<pre style="white-space:pre-wrap">
-${texto}
-</pre>
-
-`);
 
 // LIMPIEZA OCR
 
@@ -12069,14 +12058,13 @@ texto = texto
 
 
 
-// BUSCAR TODOS LOS NÚMEROS DE DOS CIFRAS
+// SACAR TODOS LOS NÚMEROS DE 2 CIFRAS
 
-let encontrados =
-texto.match(/\b\d{2}\b/g);
-
+let numeros = texto.match(/\d{2}/g);
 
 
-if(!encontrados){
+
+if(!numeros){
 
 return false;
 
@@ -12084,10 +12072,9 @@ return false;
 
 
 
-// FILTRAR 00-99
+// FILTRAR 00 A 99
 
-encontrados =
-encontrados.filter(n=>{
+numeros = numeros.filter(n=>{
 
 let x=parseInt(n);
 
@@ -12097,30 +12084,29 @@ return x>=0 && x<=99;
 
 
 
-// BUSCAR GRUPOS DE 10 NÚMEROS
-// EL SORTEO TIENE 10 POSICIONES
+// BUSCAR GRUPO DE 10
 
-let diezNumeros = null;
-
-
-for(let i=0;i<=encontrados.length-10;i++){
+let diez = null;
 
 
-let grupo =
-encontrados.slice(i,i+10);
+for(let i=0;i<=numeros.length-10;i++){
 
 
-// evitar grupos con muchas repeticiones
-
-let unicos =
-new Set(grupo);
+let grupo = numeros.slice(i,i+10);
 
 
 
-if(unicos.size>=8){
+let repetidos =
+grupo.filter((n,pos)=>
+grupo.indexOf(n)!==pos
+);
 
 
-diezNumeros = grupo;
+
+if(repetidos.length <= 2){
+
+
+diez = grupo;
 
 break;
 
@@ -12132,7 +12118,7 @@ break;
 
 
 
-if(!diezNumeros){
+if(!diez){
 
 return false;
 
@@ -12140,14 +12126,14 @@ return false;
 
 
 
-// EVITAR DUPLICADOS
+// EVITAR DUPLICAR
 
 let existe =
 POCEADA.historico.some(s=>
 
 JSON.stringify(s.numeros)
 ===
-JSON.stringify(diezNumeros)
+JSON.stringify(diez)
 
 );
 
@@ -12161,10 +12147,9 @@ return false;
 
 
 
-// CREAR REGISTRO
+// CREAR SORTEO
 
 let registro={
-
 
 id:Date.now(),
 
@@ -12178,8 +12163,7 @@ provincia:"CORRIENTES",
 
 turno:"POCEADA",
 
-numeros:diezNumeros
-
+numeros:diez
 
 };
 
@@ -12190,13 +12174,8 @@ numeros:diezNumeros
 POCEADA.historico.push(registro);
 
 
-POCEADA.memoria.push({
+POCEADA.memoria.push(diez);
 
-fecha:registro.fecha,
-
-numeros:diezNumeros
-
-});
 
 
 POCEADA.estado.sorteos =
@@ -12204,14 +12183,6 @@ POCEADA.historico.length;
 
 
 POCEADA.estado.aprendizaje++;
-
-
-
-if(typeof aprenderPoceadaV4==="function"){
-
-aprenderPoceadaV4(registro);
-
-}
 
 
 
@@ -12223,7 +12194,6 @@ return true;
 
 
     }
-
 
 
 

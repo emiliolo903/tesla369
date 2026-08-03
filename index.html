@@ -11669,9 +11669,9 @@ ${JSON.stringify(r.datos)}
 mostrarPoceadaV2(html);
 
     }
-  //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA V2
-// BLOQUE 5 - CARGA PDF PROPIO
+//////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA V3
+// BLOQUE 5 - LECTOR PDF POR PÁGINA
 //////////////////////////////////////////////////
 
 function abrirCargaPDFPoceadaV2(){
@@ -11680,7 +11680,7 @@ mostrarPoceadaV2(`
 
 <h3>📄 CARGAR PDF POCEADA</h3>
 
-<input 
+<input
 type="file"
 id="pdfPoceadaV2"
 accept=".pdf"
@@ -11688,7 +11688,7 @@ accept=".pdf"
 
 <br><br>
 
-<button onclick="procesarPDFPoceadaV2()">
+<button onclick="procesarPDFPoceadaV3()">
 
 📥 PROCESAR PDF
 
@@ -11700,79 +11700,171 @@ accept=".pdf"
 
 
 
-async function procesarPDFPoceadaV2(){
+async function procesarPDFPoceadaV3(){
 
 let archivo =
-document.getElementById(
-"pdfPoceadaV2"
-).files[0];
-
+document.getElementById("pdfPoceadaV2").files[0];
 
 if(!archivo){
 
-mostrarPoceadaV2(`
-
-⚠️ Seleccione un PDF
-
-`);
+mostrarPoceadaV2("⚠️ Seleccione un PDF");
 
 return;
 
 }
+
+
+
+let arrayBuffer =
+await archivo.arrayBuffer();
+
+
+
+let pdf =
+await pdfjsLib.getDocument({
+data:arrayBuffer
+}).promise;
+
+
+
+POCEADA.historico=[];
+
+
+
+let registros=0;
+
+let aprendizaje=0;
+
+
+
+for(let pagina=1;pagina<=pdf.numPages;pagina++){
 
 
 estadoPoceadaV2(`
 
-📄 Leyendo PDF...
+📄 Página ${pagina} de ${pdf.numPages}
 
-Buscando:
+Registros:
+${registros}
 
-CORRENTINA
-
-NOCTURNA
-
-POSICIÓN 1 AL 10
+Aprendizaje:
+${aprendizaje}
 
 `);
 
 
 
-let texto =
 
-await leerPDFPoceadaV2ConProgreso(
-archivo
+let page=
+await pdf.getPage(pagina);
+
+
+
+let viewport=
+page.getViewport({scale:2});
+
+
+
+let canvas=
+document.createElement("canvas");
+
+
+
+canvas.width=viewport.width;
+
+canvas.height=viewport.height;
+
+
+
+await page.render({
+
+canvasContext:
+canvas.getContext("2d"),
+
+viewport
+
+}).promise;
+
+
+
+
+let ocr=
+await Tesseract.recognize(
+
+canvas,
+
+"spa"
+
 );
-    
-console.log(texto);
 
-mostrarPoceadaV2(`
-<pre style="font-size:12px;white-space:pre-wrap;">
-${texto.substring(0,3000)}
-</pre>
+
+
+
+let resultado=
+
+await procesarCorrentinaPaginaPoceadaV3(
+
+ocr.data.text
+
+);
+
+
+
+
+if(resultado){
+
+
+registros++;
+
+
+if(registros>1){
+
+aprendizaje++;
+
+}
+
+
+
+
+estadoPoceadaV2(`
+
+📄 Página ${pagina}/${pdf.numPages}
+
+✅ Registro guardado:
+${registros}
+
+🧠 Aprendizaje:
+${aprendizaje}
+
 `);
-return;
-    
 
-
-if(!texto){
-
-mostrarPoceadaV2(`
-
-❌ Error leyendo PDF
-
-`);
-
-return;
 
 }
 
 
 
-
-await procesarCorrentinaMasivaPoceadaV3(texto);
-
-
 }
+
+
+
+guardarPoceada();
+
+
+
+mostrarPoceadaV2(`
+
+<h3>✅ PDF FINALIZADO</h3>
+
+📚 Registros:
+${registros}
+
+🧠 Aprendizaje:
+${aprendizaje}
+
+`);
+
+    }
+
 
     
 //////////////////////////////////////////////////
@@ -12049,127 +12141,99 @@ return numeros.slice(
 
     
 
-
-
-
 //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V3
-// BLOQUE 6
-// NUEVO FORMATO PDF POCEADA
+// BLOQUE 6 - EXTRAER SOLO LOS 10 NÚMEROS
 //////////////////////////////////////////////////
 
-async function procesarCorrentinaMasivaPoceadaV3(texto){
+async function procesarCorrentinaPaginaPoceadaV3(texto){
 
 texto = texto.toUpperCase();
 
-let bloques = texto.split(/SORTEO\s+\d+/g);
 
-let registrosGuardados = 0;
-let aprendizajes = 0;
+// buscar desde NÚMERO
 
-for(let i=1;i<bloques.length;i++){
+let inicio = texto.indexOf("NÚMERO");
 
-    let bloque = bloques[i];
+if(inicio < 0){
 
-    // FECHA
-    let fecha = "";
-
-    let f = bloque.match(/\d{2}\/\d{2}\/\d{4}/);
-
-    if(f){
-
-        fecha = f[0];
-
-    }
-
-    // HORA
-    let hora = "";
-
-    let h = bloque.match(/\d{2}:\d{2}/);
-
-    if(h){
-
-        hora = h[0];
-
-    }
-
-    // NUMEROS
-    let numeros = bloque.match(/\b\d{2}\b/g);
-
-    if(!numeros) continue;
-
-    if(numeros.length<10) continue;
-
-    numeros = numeros.slice(0,10);
-
-    let registro={
-
-        fecha:fecha,
-
-        hora:hora,
-
-        provincia:"CORRENTINA",
-
-        turno:"POCEADA",
-
-        posiciones:numeros
-
-    };
-
-    POCEADA.historico.push(registro);
-
-    registrosGuardados++;
-
-    if(registrosGuardados>1){
-
-        if(typeof aprenderTransicionesPoceadaV2==="function"){
-
-            aprenderTransicionesPoceadaV2(registro);
-
-        }
-
-        aprendizajes++;
-
-    }
-
-    estadoPoceadaV2(`
-
-📄 Cargando PDF...
-
-Registro guardado:
-${registrosGuardados}
-
-🧠 Aprendizajes:
-${aprendizajes}
-
-Procesando:
-${registrosGuardados}
-
-`);
-
-    await new Promise(r=>setTimeout(r,5));
+    inicio = texto.indexOf("NUMERO");
 
 }
 
-guardarPoceada();
 
-actualizarEstadoPoceadaV2();
+if(inicio < 0){
 
-mostrarPoceadaV2(`
+    return false;
 
-<h3>✅ PDF TERMINADO</h3>
+}
 
-📚 Registros cargados:
-${registrosGuardados}
 
-🧠 Aprendizajes:
-${aprendizajes}
+// quedarnos con la parte de números
 
-🎯 Ya puede generar 5 números.
+let zona = texto.substring(inicio);
 
-`);
+
+// extraer números de 2 cifras
+
+let numeros =
+zona.match(/\b\d{2}\b/g);
+
+
+
+if(!numeros || numeros.length < 10){
+
+    return false;
+
+}
+
+
+// tomar solamente los primeros 10 después de NÚMERO
+
+let diez = numeros.slice(0,10);
+
+
+
+let registro = {
+
+fecha:
+new Date().toLocaleDateString(),
+
+hora:
+new Date().toLocaleTimeString(),
+
+provincia:
+"CORRIENTES",
+
+turno:
+"POCEADA",
+
+posiciones:
+diez
+
+};
+
+
+
+POCEADA.historico.push(registro);
+
+
+
+if(typeof aprenderTransicionesPoceadaV2==="function"){
+
+ aprenderTransicionesPoceadaV2(registro);
+
+}
+
+
+
+return true;
+
 
     }
+
+
+
 
  //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2

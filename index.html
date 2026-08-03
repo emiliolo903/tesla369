@@ -12631,100 +12631,81 @@ return resultado.slice(0,5);
 
 }
 
-   //////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V4
-// BLOQUE 8 - SIMULADOR HISTÓRICO
+// BLOQUE 8 - CEREBRO IA + APRENDIZAJE
 //////////////////////////////////////////////////
 
 
-function simularPoceadaV4(){
+function aprenderPoceadaV4(registro){
 
 
-if(POCEADA.historico.length < 5){
-
-
-mostrarPoceadaV4(`
-
-⚠️ Se necesitan más sorteos para simular.
-
-`);
-
-return;
-
-
-}
+let numeros =
+registro.numeros;
 
 
 
-let aciertosTotales=0;
+//////////////////////////////////////////////////
+// FRECUENCIAS
+//////////////////////////////////////////////////
 
-let pruebas=0;
-
-
-
-for(
-let i=5;
-i<POCEADA.historico.length;
-i++
-){
+numeros.forEach(numero=>{
 
 
+if(!POCEADA.frecuencias[numero]){
 
-let anteriores =
-
-POCEADA.historico.slice(0,i);
-
-
-
-let resultado =
-
-POCEADA.historico[i];
-
-
-
-let prediccion =
-
-generarSimulacionNumeroV4(
-anteriores
-);
-
-
-
-let aciertos=0;
-
-
-
-prediccion.forEach(numero=>{
-
-
-if(resultado.numeros.includes(numero)){
-
-
-aciertos++;
-
+POCEADA.frecuencias[numero]=0;
 
 }
+
+
+POCEADA.frecuencias[numero]++;
 
 
 });
 
 
 
-aciertosTotales += aciertos;
+//////////////////////////////////////////////////
+// TRANSICIONES
+//////////////////////////////////////////////////
 
-pruebas++;
+let anterior =
+
+POCEADA.historico[
+POCEADA.historico.length-2
+];
 
 
 
-POCEADA.simulaciones.push({
+if(anterior){
 
-fecha:resultado.fecha,
 
-prediccion:prediccion,
+anterior.numeros.forEach(numAnterior=>{
 
-resultado:resultado.numeros,
 
-aciertos:aciertos
+if(!POCEADA.transiciones[numAnterior]){
+
+POCEADA.transiciones[numAnterior]={};
+
+}
+
+
+
+numeros.forEach(numActual=>{
+
+
+if(!POCEADA.transiciones[numAnterior][numActual]){
+
+POCEADA.transiciones[numAnterior][numActual]=0;
+
+}
+
+
+POCEADA.transiciones[numAnterior][numActual]++;
+
+
+});
 
 
 });
@@ -12734,8 +12715,83 @@ aciertos:aciertos
 
 
 
-POCEADA.estado.simulaciones =
-POCEADA.simulaciones.length;
+//////////////////////////////////////////////////
+// ACOMPAÑANTES
+//////////////////////////////////////////////////
+
+numeros.forEach(a=>{
+
+
+if(!POCEADA.acompanantes[a]){
+
+POCEADA.acompanantes[a]={};
+
+}
+
+
+
+numeros.forEach(b=>{
+
+
+if(a!==b){
+
+
+if(!POCEADA.acompanantes[a][b]){
+
+POCEADA.acompanantes[a][b]=0;
+
+}
+
+
+POCEADA.acompanantes[a][b]++;
+
+
+}
+
+
+});
+
+
+});
+
+
+
+//////////////////////////////////////////////////
+// CALCULAR PUNTAJE GENERAL
+//////////////////////////////////////////////////
+
+let puntos={};
+
+
+
+Object.keys(
+POCEADA.frecuencias
+)
+
+.forEach(numero=>{
+
+
+puntos[numero] =
+
+POCEADA.frecuencias[numero] *
+
+POCEADA.motor.pesoHistorico;
+
+
+});
+
+
+
+//////////////////////////////////////////////////
+// GUARDAR RESULTADO
+//////////////////////////////////////////////////
+
+POCEADA.puntajes =
+puntos;
+
+
+
+POCEADA.estado.aprendizaje++;
 
 
 
@@ -12743,177 +12799,108 @@ guardarPoceada();
 
 
 
+}
+
+
+
+//////////////////////////////////////////////////
+// ANALIZAR CEREBRO IA
+//////////////////////////////////////////////////
+
+function analizarCerebroPoceadaV4(){
+
+
+let ranking =
+
+Object.entries(
+POCEADA.puntajes
+)
+
+.sort(
+(a,b)=>b[1]-a[1]
+);
+
+
+
 mostrarPoceadaV4(`
 
 <h3>
-🧠 SIMULACIÓN IA FINALIZADA
+🧠 CEREBRO IA POCEADA
 </h3>
 
 
-Pruebas:
+Números con mayor puntaje:
 
-${pruebas}
+<br><br>
 
 
-<br>
+${
 
-Aciertos acumulados:
+ranking
+.slice(0,10)
+.map(x=>
 
-${aciertosTotales}
+x[0]+" ➜ "+x[1]
+
+)
+.join("<br>")
+
+}
 
 
 `);
 
-}
 
 
-
-function generarSimulacionNumeroV4(historial){
-
-
-let contador={};
-
-
-
-historial.forEach(sorteo=>{
-
-
-sorteo.numeros.forEach(n=>{
-
-
-if(!contador[n]){
-
-contador[n]=0;
-
-}
-
-
-contador[n]++;
-
-
-});
-
-
-});
-
-
-
-return Object.entries(contador)
-
-.sort((a,b)=>b[1]-a[1])
-
-.slice(0,5)
-
-.map(x=>x[0]);
+return ranking;
 
 
     }
+    
 
-   //////////////////////////////////////////////////
+
+
+
+
+//////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V4
-// BLOQUE 9 - AJUSTE DE PUNTAJES
+// BLOQUE 9 - GENERADOR INTELIGENTE 5 NÚMEROS
 //////////////////////////////////////////////////
 
-
-function calcularPuntajeInteligenteV4(){
-
-
-let puntos={};
+function generarPoceadaV4(){
 
 
-
-Object.keys(POCEADA.frecuencias)
-
-.forEach(numero=>{
+if(POCEADA.historico.length===0){
 
 
-puntos[numero]=0;
+mostrarPoceadaV4(`
+
+<h3>⚠️ POCEADA IA</h3>
+
+Primero cargue sorteos históricos.
+
+`);
 
 
+return [];
 
-// frecuencia histórica
-
-puntos[numero] +=
-
-POCEADA.frecuencias[numero]
-
-*
-
-POCEADA.motor.pesoHistorico;
-
-
-
-});
-
-
-
-
-
-// sumar transiciones
-
-
-Object.keys(
-POCEADA.transiciones
-)
-
-.forEach(numero=>{
-
-
-let siguientes =
-
-buscarTransicionPoceadaV4(numero);
-
-
-
-siguientes.forEach(item=>{
-
-
-let n=item[0];
-
-
-if(!puntos[n]){
-
-puntos[n]=0;
 
 }
 
 
-puntos[n]+=
 
-item[1]
-
-*
-
-POCEADA.motor.pesoTransicion;
+let puntos = {};
 
 
 
-});
+//////////////////////////////////////////////////
+// 1 - FRECUENCIA HISTÓRICA
+//////////////////////////////////////////////////
+
+POCEADA.historico.forEach(sorteo=>{
 
 
-});
-
-
-
-
-
-// sumar acompañantes
-
-
-Object.keys(
-POCEADA.acompanantes
-)
-
-.forEach(par=>{
-
-
-let datos =
-par.split("-");
-
-
-let numero =
-datos[1];
-
+sorteo.numeros.forEach(numero=>{
 
 
 if(!puntos[numero]){
@@ -12923,107 +12910,197 @@ puntos[numero]=0;
 }
 
 
+puntos[numero] += 
+POCEADA.motor.pesoHistorico;
 
-puntos[numero]+=
 
-POCEADA.acompanantes[par]
-
-*
-
-POCEADA.motor.pesoAcompanante;
-
+});
 
 
 });
 
 
 
-POCEADA.puntajes=puntos;
-
-
-
-guardarPoceada();
-
-
-
-return puntos;
-
-
-
-    }
-   //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA V4
-// BLOQUE 10 - GENERADOR INTELIGENTE
+//////////////////////////////////////////////////
+// 2 - NÚMEROS RECIENTES
 //////////////////////////////////////////////////
 
+let ultimos =
 
-function generarPoceadaV4(){
-
-
-if(
-POCEADA.historico.length===0
-){
+POCEADA.historico.slice(
+-POCEADA.motor.ultimosSorteos
+);
 
 
-mostrarPoceadaV4(`
 
-⚠️ Primero cargue datos históricos.
-
-`);
+ultimos.forEach(sorteo=>{
 
 
-return;
+sorteo.numeros.forEach(numero=>{
+
+
+if(!puntos[numero]){
+
+puntos[numero]=0;
+
+}
+
+
+puntos[numero] +=
+POCEADA.motor.pesoReciente;
+
+
+});
+
+
+});
+
+
+
+//////////////////////////////////////////////////
+// 3 - TRANSICIONES
+//////////////////////////////////////////////////
+
+Object.keys(
+POCEADA.transiciones || {}
+)
+
+.forEach(numero=>{
+
+
+let siguientes =
+POCEADA.transiciones[numero];
+
+
+Object.keys(siguientes || {})
+.forEach(sig=>{
+
+
+if(!puntos[sig]){
+
+puntos[sig]=0;
+
+}
+
+
+puntos[sig] +=
+
+siguientes[sig] *
+POCEADA.motor.pesoTransicion;
+
+
+});
+
+
+});
+
+
+
+//////////////////////////////////////////////////
+// 4 - ACOMPAÑANTES
+//////////////////////////////////////////////////
+
+Object.keys(
+POCEADA.acompanantes || {}
+)
+
+.forEach(numero=>{
+
+
+let lista =
+POCEADA.acompanantes[numero];
+
+
+Object.keys(lista || {})
+.forEach(sig=>{
+
+
+if(!puntos[sig]){
+
+puntos[sig]=0;
+
+}
+
+
+puntos[sig] +=
+
+lista[sig] *
+POCEADA.motor.pesoAcompanante;
+
+
+});
+
+
+});
+
+
+
+//////////////////////////////////////////////////
+// 5 - SIMULACIÓN
+//////////////////////////////////////////////////
+
+if(POCEADA.puntajes){
+
+
+Object.keys(
+POCEADA.puntajes
+)
+
+.forEach(numero=>{
+
+
+if(!puntos[numero]){
+
+puntos[numero]=0;
+
+}
+
+
+puntos[numero]+=
+
+POCEADA.puntajes[numero] *
+POCEADA.motor.pesoSimulacion;
+
+
+});
 
 
 }
 
 
 
-
-
-calcularFrecuenciasPoceadaV4();
-
-
-
-aprenderTransicionesPoceadaV4();
-
-
-
-aprenderAcompanantesPoceadaV4();
-
-
-
-let puntos =
-
-calcularPuntajeInteligenteV4();
-
-
-
-
+//////////////////////////////////////////////////
+// ORDENAR
+//////////////////////////////////////////////////
 
 let ranking =
 
 Object.entries(puntos)
 
-.sort(
-(a,b)=>b[1]-a[1]
-);
+.sort((a,b)=>b[1]-a[1]);
 
 
 
+//////////////////////////////////////////////////
+// SELECCIÓN INTELIGENTE
+//////////////////////////////////////////////////
+
+let seleccionados=[];
 
 
-let seleccion=[];
+ranking.forEach(n=>{
 
 
-
-ranking.forEach(numero=>{
-
-
-if(seleccion.length<5){
+if(seleccionados.length<5){
 
 
-seleccion.push(numero[0]);
+if(!seleccionados.includes(n[0])){
+
+
+seleccionados.push(n[0]);
+
+
+}
 
 
 }
@@ -13033,23 +13110,19 @@ seleccion.push(numero[0]);
 
 
 
-
-
 POCEADA.predicciones =
-seleccion;
+seleccionados;
 
 
 
 guardarPoceada();
-
-
 
 
 
 mostrarPoceadaV4(`
 
 <h2>
-🎯 POCEADA IA V4
+🎯 POCEADA CORRENTINA IA
 </h2>
 
 
@@ -13061,17 +13134,17 @@ mostrarPoceadaV4(`
 <br><br>
 
 
-${seleccion.join(" - ")}
+<h2>
 
+${seleccionados.join(" - ")}
 
-<br><br>
+</h2>
 
-
-Motor:
 
 <br>
 
-🧠 Histórico
+
+🧠 Memoria histórica
 
 <br>
 
@@ -13083,18 +13156,297 @@ Motor:
 
 <br>
 
-📊 Puntaje IA
+📊 Simulación
 
 
 `);
 
 
 
+return seleccionados;
 
-return seleccion;
+
+         }
+
+
+   //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA V4
+// BLOQUE 10 - AUDITORÍA + CONTROL DE RESULTADOS
+//////////////////////////////////////////////////
+
+
+function auditoriaPoceadaV4(){
+
+
+let html = `
+
+<h3>
+🛡️ AUDITORÍA POCEADA IA
+</h3>
+
+
+Predicción actual:
+
+<br><br>
+
+
+<b>
+
+${
+POCEADA.predicciones.length > 0
+
+?
+
+POCEADA.predicciones.join(" - ")
+
+:
+
+"Sin predicción"
+
+}
+
+</b>
+
+
+<br><br>
+
+
+📚 Sorteos aprendidos:
+
+<b>
+${POCEADA.historico.length}
+</b>
+
+
+<br><br>
+
+
+🧠 Aprendizaje:
+
+<b>
+${POCEADA.estado.aprendizaje}
+</b>
+
+
+<br><br>
+
+
+🎯 Simulaciones:
+
+<b>
+${POCEADA.estado.simulaciones}
+</b>
+
+
+`;
+
+
+
+mostrarPoceadaV4(html);
+
+
+}
+
+
+
+//////////////////////////////////////////////////
+// CONTROLAR RESULTADO REAL
+//////////////////////////////////////////////////
+
+
+function controlarResultadoPoceadaV4(resultado){
+
+
+let aciertos=[];
+
+
+
+POCEADA.predicciones.forEach(numero=>{
+
+
+if(resultado.includes(numero)){
+
+
+aciertos.push(numero);
+
+
+}
+
+
+});
+
+
+
+let registro={
+
+
+fecha:
+new Date().toLocaleString(),
+
+
+jugada:
+POCEADA.predicciones,
+
+
+resultado:
+resultado,
+
+
+aciertos:
+aciertos
+
+
+};
+
+
+
+POCEADA.auditoria.push(registro);
+
+
+
+// Premio al aprendizaje
+
+if(aciertos.length>0){
+
+
+POCEADA.estado.aprendizaje++;
+
+
+}
+
+
+
+// Guardar
+
+guardarPoceada();
+
+
+
+mostrarPoceadaV4(`
+
+<h3>
+📊 CONTROL RESULTADO
+</h3>
+
+
+Números acertados:
+
+<br><br>
+
+
+<b>
+
+${aciertos.length}
+
+</b>
+
+
+<br><br>
+
+
+${
+
+aciertos.length > 0
+
+?
+
+aciertos.join(" - ")
+
+:
+
+"Sin aciertos"
+
+}
+
+
+<br><br>
+
+
+🧠 Memoria actualizada
+
+
+`);
+
+
+
+}
+
+
+
+//////////////////////////////////////////////////
+// MOSTRAR HISTORIAL DE AUDITORÍA
+//////////////////////////////////////////////////
+
+
+function verAuditoriaCompletaPoceadaV4(){
+
+
+let html = `
+
+<h3>
+📋 HISTORIAL DE PRUEBAS IA
+</h3>
+
+`;
+
+
+
+POCEADA.auditoria.forEach((dato)=>{
+
+
+html += `
+
+
+<hr>
+
+
+Fecha:
+
+${dato.fecha}
+
+
+<br>
+
+
+Jugado:
+
+${dato.jugada.join(" - ")}
+
+
+<br>
+
+
+Resultado:
+
+${dato.resultado.join(" - ")}
+
+
+<br>
+
+
+Aciertos:
+
+<b>
+${dato.aciertos.length}
+</b>
+
+
+<br>
+
+
+`;
+
+
+});
+
+
+
+mostrarPoceadaV4(html);
 
 
     }
+
+    
    //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V4
 // BLOQUE 11 - CARGA MANUAL
@@ -13459,48 +13811,303 @@ return tendencia;
 
 
     }
-   //////////////////////////////////////////////////
+    
+//////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V4
-// BLOQUE 14 - INICIO FINAL
+// BLOQUE 14 - CARGA MANUAL + ENTRENAMIENTO IA
 //////////////////////////////////////////////////
 
 
-function iniciarPoceadaV4Final(){
+function abrirCargaManualPoceadaV4(){
 
 
-iniciarPoceada();
+let html = `
+
+<h3>
+✍️ CARGA MANUAL SORTEO POCEADA
+</h3>
+
+Ingrese los 10 números del sorteo:
+
+<br><br>
+
+`;
+
+
+for(let i=1;i<=10;i++){
+
+
+html += `
+
+Número ${i}
+
+<input
+
+id="manualP${i}"
+
+type="number"
+
+min="0"
+
+max="99"
+
+placeholder="00"
+
+>
+
+<br><br>
+
+`;
+
+}
 
 
 
-actualizarMemoriaAvanzadaV4();
+html += `
 
 
+<button onclick="guardarManualPoceadaV4()">
 
-actualizarEstadoPoceadaV4();
+💾 GUARDAR SORTEO
+
+</button>
 
 
+`;
 
-console.log(
-"POCEADA IA V4 ACTIVA"
-);
 
+mostrarPoceadaV4(html);
 
 
 }
 
 
 
-window.addEventListener(
+//////////////////////////////////////////////////
+// GUARDAR SORTEO MANUAL
+//////////////////////////////////////////////////
 
-"load",
-
-()=>{
+function guardarManualPoceadaV4(){
 
 
-iniciarPoceadaV4Final();
+let numeros=[];
 
+
+
+for(let i=1;i<=10;i++){
+
+
+let valor =
+
+document.getElementById(
+"manualP"+i
+).value;
+
+
+
+if(valor===""){
+
+
+mostrarPoceadaV4(`
+
+⚠️ Falta cargar número ${i}
+
+`);
+
+
+return;
+
+
+}
+
+
+
+numeros.push(
+
+String(valor).padStart(2,"0")
+
+);
+
+
+}
+
+
+
+// CREAR REGISTRO
+
+let registro={
+
+
+id:Date.now(),
+
+
+fecha:new Date().toLocaleDateString(),
+
+
+hora:new Date().toLocaleTimeString(),
+
+
+tipo:"MANUAL",
+
+
+provincia:"CORRIENTES",
+
+
+turno:"POCEADA",
+
+
+numeros:numeros
+
+
+};
+
+
+
+// GUARDAR HISTORIAL
+
+POCEADA.historico.push(registro);
+
+
+
+// MEMORIA
+
+POCEADA.memoria.push({
+
+fecha:registro.fecha,
+
+numeros:numeros
 
 });
+
+
+
+
+// APRENDIZAJE
+
+if(typeof aprenderPoceadaV4==="function"){
+
+aprenderPoceadaV4(registro);
+
+}
+
+
+
+
+// CONTADORES
+
+POCEADA.estado.sorteos =
+POCEADA.historico.length;
+
+
+POCEADA.estado.aprendizaje++;
+
+
+
+guardarPoceada();
+
+
+
+let cantidad =
+POCEADA.historico.length;
+
+
+
+let mensaje = `
+
+
+<h3>
+✅ SORTEO GUARDADO
+</h3>
+
+
+Números:
+
+<br><br>
+
+<b>
+
+${numeros.join(" - ")}
+
+</b>
+
+
+<br><br>
+
+
+📚 Sorteos cargados:
+
+${cantidad}
+
+
+
+<br><br>
+
+`;
+
+
+
+// ACTIVAR SIMULACIÓN CON 20
+
+if(cantidad>=20){
+
+
+mensaje += `
+
+🧠 IA ENTRENADA
+
+
+<br>
+
+✅ Simulación habilitada
+
+
+<br>
+
+🎯 Puede generar predicción
+
+
+`;
+
+
+
+if(typeof simularPoceadaV4==="function"){
+
+simularPoceadaV4();
+
+}
+
+
+
+}else{
+
+
+mensaje += `
+
+
+⏳ Faltan:
+
+${20-cantidad}
+
+sorteos para activar simulación
+
+
+`;
+
+}
+
+
+
+mostrarPoceadaV4(mensaje);
+
+
+actualizarEstadoPoceadaV4();
+
+
+
+    }
+
+
+
     
 </script> 
     

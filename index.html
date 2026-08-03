@@ -13446,169 +13446,173 @@ mostrarPoceadaV4(html);
 
     }
 
-    
-   //////////////////////////////////////////////////
+  //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V4
-// BLOQUE 11 - CARGA MANUAL
+// BLOQUE 11 - SIMULADOR HISTÓRICO INTELIGENTE
 //////////////////////////////////////////////////
 
-function abrirCargaManualPoceadaV4(){
+function simularPoceadaV4(){
 
+if(POCEADA.historico.length < 3){
 
-let html = `
+mostrarPoceadaV4(`
 
-<h3>
-✍️ CARGAR SORTEO MANUAL
-</h3>
+<h3>⚠️ SIMULACIÓN IA</h3>
 
+Se necesitan al menos 3 sorteos.
 
-`;
-
-
-
-for(let i=1;i<=10;i++){
-
-
-html += `
-
-Número ${i}
-
-<input
-
-id="manualV4_${i}"
-
-type="number"
-
-min="0"
-
-max="99"
-
-placeholder="00"
-
->
-
-<br><br>
-
-`;
-
-}
-
-
-
-html += `
-
-
-<button onclick="guardarManualPoceadaV4()">
-
-💾 GUARDAR SORTEO
-
-</button>
-
-
-`;
-
-
-
-mostrarPoceadaV4(html);
-
-
-}
-
-
-
-
-function guardarManualPoceadaV4(){
-
-
-let numeros=[];
-
-
-
-for(let i=1;i<=10;i++){
-
-
-let valor =
-
-document.getElementById(
-"manualV4_"+i
-).value;
-
-
-
-if(valor===""){
-
-
-alert("Falta número "+i);
+`);
 
 return;
 
+}
+
+
+
+let puntajes = {};
+
+
+
+for(let i=0;i<POCEADA.historico.length-1;i++){
+
+
+let actual =
+POCEADA.historico[i];
+
+
+let siguiente =
+POCEADA.historico[i+1];
+
+
+
+actual.numeros.forEach(numero=>{
+
+
+if(!puntajes[numero]){
+
+puntajes[numero]=0;
 
 }
 
 
 
-numeros.push(
+// ACERTÓ EN EL SIGUIENTE SORTEO
 
-String(valor).padStart(2,"0")
+if(
+siguiente.numeros.includes(numero)
+){
 
-);
+puntajes[numero]+=5;
+
+}else{
+
+puntajes[numero]+=1;
+
+}
+
+
+});
 
 
 }
 
 
 
-let registro={
+//////////////////////////////////////////////////
+// PESO EXTRA A LOS ÚLTIMOS 10 SORTEOS
+//////////////////////////////////////////////////
 
+let recientes =
 
-id:Date.now(),
-
-
-fecha:new Date().toLocaleDateString(),
-
-
-hora:new Date().toLocaleTimeString(),
-
-
-tipo:"MANUAL",
-
-
-numeros:numeros
-
-
-};
+POCEADA.historico.slice(-10);
 
 
 
-POCEADA.historico.push(registro);
+recientes.forEach(sorteo=>{
+
+
+sorteo.numeros.forEach(numero=>{
+
+
+if(!puntajes[numero]){
+
+puntajes[numero]=0;
+
+}
+
+
+puntajes[numero]+=3;
+
+
+});
+
+
+});
 
 
 
-aprenderPoceadaV4(registro);
+//////////////////////////////////////////////////
+// GUARDAR PUNTAJES
+//////////////////////////////////////////////////
 
+POCEADA.puntajes = puntajes;
+
+
+POCEADA.estado.simulaciones++;
 
 
 guardarPoceada();
 
 
 
-actualizarEstadoPoceadaV4();
+//////////////////////////////////////////////////
+// RANKING
+//////////////////////////////////////////////////
+
+let ranking =
+
+Object.entries(puntajes)
+
+.sort((a,b)=>b[1]-a[1])
+
+.slice(0,10);
 
 
 
 mostrarPoceadaV4(`
 
-<h3>✅ SORTEO GUARDADO</h3>
+<h2>
+🧠 SIMULACIÓN FINALIZADA
+</h2>
 
-${numeros.join(" - ")}
+
+Simulación N°
+
+<b>
+${POCEADA.estado.simulaciones}
+</b>
+
 
 <br><br>
 
-🧠 Memoria actualizada
+
+Top 10 números más fuertes:
+
+
+<br><br>
+
+
+${ranking
+.map(x=>x[0]+" ➜ "+x[1]+" pts")
+.join("<br>")}
+
 
 `);
 
-    }
+
+
+    }  
+   
   //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V4
 // BLOQUE 12 - AUDITORÍA

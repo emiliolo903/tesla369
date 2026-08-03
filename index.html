@@ -12061,93 +12061,134 @@ return ranking;
 
     //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V3
-// BLOQUE 9 - GENERADOR PREDICTIVO
+// BLOQUE 9 - GENERADOR ESTABLE
 //////////////////////////////////////////////////
 
 function generarPoceadaV2(){
 
-    if(POCEADA.historico.length === 0){
 
-        mostrarPoceadaV2(`
-
-        <h3>⚠️ POCEADA IA</h3>
-
-        Primero cargue un PDF histórico.
-
-        `);
-
-        return [];
-
-    }
+if(!POCEADA.historico ||
+POCEADA.historico.length===0){
 
 
-    // Usar motor inteligente predictivo
+mostrarPoceadaV2(`
 
-    let prediccion = generarPoceadaInteligenteV3();
+<h3>⚠️ POCEADA IA</h3>
 
+Cargue primero sorteos.
 
-    if(prediccion.length < 5){
-
-        mostrarPoceadaV2(`
-
-        ⚠️ No hay suficiente memoria para predecir.
-
-        `);
-
-        return [];
-
-    }
+`);
 
 
-    POCEADA.predicciones = prediccion;
-
-
-    guardarPoceada();
-
-
-
-    mostrarPoceadaV2(`
-
-    <h2>🎯 POCEADA CORRENTINA IA</h2>
-
-
-    <b>PREDICCIÓN PRÓXIMO SORTEO</b>
-
-    <br><br>
-
-
-    ${prediccion.join(" - ")}
-
-
-    <br><br>
-
-
-    Motor:
-
-    <br>
-
-    🧠 Memoria histórica
-
-    <br>
-
-    🔄 Transiciones
-
-    <br>
-
-    🤝 Acompañantes
-
-    <br>
-
-    📈 Tendencia reciente
-
-
-    `);
-
-
-    return prediccion;
+return [];
 
 }
 
+
+
+
+let resultado=[];
+
+
+// usar motor predictivo si existe
+
+if(typeof generarPoceadaInteligenteV3 === "function"){
+
+resultado =
+generarPoceadaInteligenteV3();
+
+}
+
+
+
+// respaldo si falla
+
+if(!resultado || resultado.length<5){
+
+
+let frecuencia={};
+
+
+
+POCEADA.historico.forEach(sorteo=>{
+
+
+let numeros =
+sorteo.datos?.posiciones || [];
+
+
+numeros.forEach(n=>{
+
+
+if(!frecuencia[n]){
+
+frecuencia[n]=0;
+
+}
+
+
+frecuencia[n]++;
+
+
+});
+
+
+});
+
+
+
+resultado =
+Object.entries(frecuencia)
+
+.sort((a,b)=>b[1]-a[1])
+
+.slice(0,5)
+
+.map(x=>x[0]);
+
+
+}
+
+
+
+
+POCEADA.predicciones =
+resultado;
+
+
+guardarPoceada();
+
+
+
+mostrarPoceadaV2(`
+
+<h2>🎯 POCEADA CORRENTINA IA</h2>
+
+<b>5 NÚMEROS GENERADOS</b>
+
+<br><br>
+
+${resultado.join(" - ")}
+
+<br><br>
+
+🧠 Memoria
+
+<br>
+📈 Tendencia
+
+<br>
+🔄 Análisis histórico
+
+`);
+
+
+
+return resultado;
+
+
+    }
+    
     //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 10 - AUDITORÍA
@@ -12688,13 +12729,12 @@ return seleccionados;
 
 
     }
-   //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA V2
-// BLOQUE 14 - CARGA MANUAL + MEMORIA
+//////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA V3
+// BLOQUE 14 - CARGA MANUAL ESTABLE
 //////////////////////////////////////////////////
 
-function abrirCargaManualPoceadaV2(){
-
+function abrirCargaManualPoceadaV3(){
 
 let html = `
 
@@ -12702,25 +12742,20 @@ let html = `
 ✍️ CARGA MANUAL ÚLTIMO SORTEO
 </h3>
 
-
 `;
 
-
-
 for(let i=1;i<=10;i++){
-
 
 html += `
 
 Posición ${i}
 
-<input 
+<input
 id="manualP${i}"
 type="number"
 min="0"
 max="99"
-placeholder="00"
->
+placeholder="00">
 
 <br><br>
 
@@ -12729,170 +12764,122 @@ placeholder="00"
 }
 
 
-
 html += `
 
-
-<button onclick="guardarManualPoceadaV2()">
+<button onclick="guardarManualPoceadaV3()">
 
 💾 GUARDAR SORTEO
 
 </button>
 
-
-
 `;
-
 
 
 mostrarPoceadaV2(html);
 
-            }
+}
 
-    //////////////////////////////////////////////////
-// GUARDAR SORTEO MANUAL
-//////////////////////////////////////////////////
 
-async function guardarManualPoceadaV2(){
+
+function guardarManualPoceadaV3(){
 
 
 let numeros=[];
-
 
 
 for(let i=1;i<=10;i++){
 
 
 let valor =
-document.getElementById(
-"manualP"+i
-).value;
-
+document.getElementById("manualP"+i).value;
 
 
 if(valor===""){
 
-
-mostrarPoceadaV2(`
-
-⚠️ Falta posición ${i}
-
-`);
-
+mostrarPoceadaV2("⚠️ Falta posición "+i);
 
 return;
 
-
 }
 
 
 
-numeros.push(
+let numero =
+String(valor).padStart(2,"0");
 
-String(valor)
-.padStart(2,"0")
 
-);
+numeros.push(numero);
 
 
 }
-
 
 
 
 let sorteo={
 
+fecha:new Date().toLocaleString(),
 
-fecha:
-new Date().toLocaleString(),
+tipo:"MANUAL",
 
+provincia:"CORRIENTES",
 
-tipo:
-"MANUAL",
-
-
-provincia:
-"CORRENTINA",
-
-
-turno:
-"NOCTURNA",
-
+turno:"POCEADA",
 
 datos:{
 
-
-posiciones:
-numeros
-
+posiciones:numeros
 
 }
-
-
 
 };
 
 
 
-
-POCEADA.historico.push(
-sorteo
-);
+POCEADA.historico.push(sorteo);
 
 
 
-// Aprende movimiento
-
-aprenderTransicionesPoceadaV2(
-sorteo
-);
+POCEADA.estado.registrosGuardados =
+POCEADA.historico.length;
 
 
+POCEADA.estado.ultimaCarga =
+new Date().toLocaleString();
 
-// Guarda permanente
+
+POCEADA.estado.listo=true;
+
+
 
 guardarPoceada();
 
 
 
-actualizarEstadoPoceadaV2();
-
-
-
 mostrarPoceadaV2(`
 
-<h3>
-✅ SORTEO GUARDADO
-</h3>
-
+<h3>✅ SORTEO GUARDADO</h3>
 
 Números:
 
 <br><br>
 
-
+<b>
 ${numeros.join(" - ")}
-
+</b>
 
 <br><br>
-
 
 🧠 Memoria actualizada
 
 <br>
 
-🔄 Transiciones aprendidas
-
-<br>
-
-🎯 Listo para generar 5 números
-
+🎯 Listo para generar
 
 `);
 
 
-
     }
+    
 
     
 </script> 

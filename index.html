@@ -11408,7 +11408,6 @@ async function finalizarCargaManual_V61(){
 
     }
 
-
 //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 1 - BASE DEL MÓDULO
@@ -11442,6 +11441,7 @@ const POCEADA = {
 
 };
 
+
 //////////////////////////////////////////////////
 // INICIALIZAR
 //////////////////////////////////////////////////
@@ -11458,6 +11458,7 @@ function iniciarPoceada(){
 
 }
 
+
 //////////////////////////////////////////////////
 // GUARDAR
 //////////////////////////////////////////////////
@@ -11465,14 +11466,12 @@ function iniciarPoceada(){
 function guardarPoceada(){
 
     localStorage.setItem(
-
         "POCEADA_V2",
-
         JSON.stringify(POCEADA)
-
     );
 
 }
+
 
 //////////////////////////////////////////////////
 // LIMPIAR MEMORIA
@@ -11502,7 +11501,7 @@ function limpiarPoceada(){
 
     }
     
-  //////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 2 - INTERFAZ PROPIA
 //////////////////////////////////////////////////
@@ -11558,8 +11557,7 @@ Esperando PDF...
 `;
 
     }
-
-  //////////////////////////////////////////////////
+ //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 3 - PANEL PROPIO
 //////////////////////////////////////////////////
@@ -11581,7 +11579,6 @@ panel.innerHTML = mensaje;
 }
 
 
-
 function estadoPoceadaV2(mensaje){
 
 let estado =
@@ -11596,8 +11593,7 @@ estado.innerHTML = mensaje;
 
 }
 
-}
-
+    }
  //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 4 - REGISTRO PROPIO
@@ -11620,7 +11616,6 @@ POCEADA.registros.length;
 
 
 guardarPoceada();
-
 
 }
 
@@ -11669,6 +11664,7 @@ ${JSON.stringify(r.datos)}
 mostrarPoceadaV2(html);
 
     }
+    
 //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V3
 // BLOQUE 5 - LECTOR PDF POR PÁGINA
@@ -11705,6 +11701,7 @@ async function procesarPDFPoceadaV3(){
 let archivo =
 document.getElementById("pdfPoceadaV2").files[0];
 
+
 if(!archivo){
 
 mostrarPoceadaV2("⚠️ Seleccione un PDF");
@@ -11722,7 +11719,9 @@ await archivo.arrayBuffer();
 
 let pdf =
 await pdfjsLib.getDocument({
+
 data:arrayBuffer
+
 }).promise;
 
 
@@ -11755,24 +11754,31 @@ ${aprendizaje}
 
 
 
-let page=
+let page =
 await pdf.getPage(pagina);
 
 
 
-let viewport=
-page.getViewport({scale:2});
+let viewport =
+page.getViewport({
+
+scale:2
+
+});
 
 
 
-let canvas=
+let canvas =
 document.createElement("canvas");
 
 
 
-canvas.width=viewport.width;
+canvas.width =
+viewport.width;
 
-canvas.height=viewport.height;
+
+canvas.height =
+viewport.height;
 
 
 
@@ -11788,7 +11794,7 @@ viewport
 
 
 
-let ocr=
+let ocr =
 await Tesseract.recognize(
 
 canvas,
@@ -11800,7 +11806,7 @@ canvas,
 
 
 
-let resultado=
+let resultado =
 
 await procesarCorrentinaPaginaPoceadaV3(
 
@@ -11838,7 +11844,6 @@ ${aprendizaje}
 
 `);
 
-
 }
 
 
@@ -11864,283 +11869,6 @@ ${aprendizaje}
 `);
 
     }
-
-
-    
-//////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA V2
-//  CORREGIDO
-// LECTOR PDF IMAGEN + OCR + PROGRESO
-//////////////////////////////////////////////////
-
-
-async function leerPDFPoceadaV2ConProgreso(archivo){
-
-
-try{
-
-
-estadoPoceadaV2(`
-
-📄 Archivo:
-${archivo.name}
-
-
-⏳ Preparando OCR...
-
-`);
-
-
-
-
-let arrayBuffer =
-await archivo.arrayBuffer();
-
-
-
-let pdf =
-await pdfjsLib
-.getDocument({
-data:arrayBuffer
-})
-.promise;
-
-
-
-let textoCompleto = "";
-
-
-
-for(
-let pagina=1;
-pagina<=pdf.numPages;
-pagina++
-){
-
-
-
-estadoPoceadaV2(`
-
-📖 Leyendo página:
-
-${pagina} / ${pdf.numPages}
-
-
-🧠 OCR buscando tabla...
-
-`);
-
-
-
-
-let page =
-await pdf.getPage(
-pagina
-);
-
-
-
-let viewport =
-page.getViewport({
-scale:2
-});
-
-
-
-let canvas =
-document.createElement(
-"canvas"
-);
-
-
-
-let context =
-canvas.getContext(
-"2d"
-);
-
-
-
-canvas.width =
-viewport.width;
-
-
-canvas.height =
-viewport.height;
-
-
-
-await page.render({
-
-canvasContext:
-context,
-
-viewport:
-viewport
-
-}).promise;
-
-
-
-
-estadoPoceadaV2(`
-
-👁️ Analizando imagen...
-
-Página:
-${pagina}/${pdf.numPages}
-
-`);
-
-
-
-
-
-let resultadoOCR =
-
-await Tesseract.recognize(
-
-canvas,
-
-"spa",
-
-{
-
-logger:
-m=>{
-
-
-if(m.status==="recognizing text"){
-
-
-estadoPoceadaV2(`
-
-🧠 OCR trabajando...
-
-Progreso:
-${Math.round(m.progress*100)} %
-
-`);
-
-}
-
-
-}
-
-}
-
-);
-
-
-
-
-
-textoCompleto +=
-
-resultadoOCR.data.text
-+
-"\n";
-
-
-
-}
-
-
-
-
-estadoPoceadaV2(`
-
-✅ Lectura terminada
-
-
-🔎 Buscando CORRENTINA...
-
-`);
-
-
-
-
-return textoCompleto;
-
-
-
-}catch(error){
-
-
-
-estadoPoceadaV2(`
-
-❌ Error OCR PDF
-
-${error}
-
-`);
-
-
-return null;
-
-
-}
-
-}
-
-
-
-//////////////////////////////////////////////////
-// EXTRAER CORRENTINA 1 AL 10
-//////////////////////////////////////////////////
-
-
-function extraerCorrentinaPoceadaV2(texto){
-
-
-
-texto =
-texto.toUpperCase();
-
-
-
-texto =
-texto.replace(
-/O/g,
-"0"
-);
-
-
-
-let numeros =
-
-texto.match(
-/\b\d{4}\b/g
-);
-
-
-
-if(!numeros){
-
-
-return null;
-
-
-}
-
-
-
-// tomar primeros 10
-// de columna Correntina
-
-
-return numeros.slice(
-0,
-10
-);
-
-
-
-    }
-
-    
-
 //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V3
 // BLOQUE 6 - EXTRACTOR ROBUSTO 10 NÚMEROS
@@ -12159,7 +11887,7 @@ texto = texto
 .replace(/L/g,"1");
 
 
-// buscar todos los números de 2 cifras
+// buscar números de 2 cifras
 
 let numeros = texto.match(/\b\d{2}\b/g);
 
@@ -12183,15 +11911,14 @@ return x>=0 && x<=99;
 
 
 
-// tomar los últimos 10 números encontrados
-// (en tu imagen son la lista de la poceada)
-
 if(numeros.length < 10){
 
 return false;
 
 }
 
+
+// tomar últimos 10
 
 let diez = numeros.slice(-10);
 
@@ -12228,10 +11955,8 @@ aprenderTransicionesPoceadaV2(registro);
 return true;
 
 
-}
-
-
-
+    }
+    
  //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 7 - MEMORIA
@@ -12250,7 +11975,6 @@ datos:datos
 });
 
 
-
 POCEADA.estado.pdfCargados++;
 
 
@@ -12258,72 +11982,24 @@ POCEADA.estado.registrosGuardados =
 POCEADA.historico.length;
 
 
-
 POCEADA.estado.ultimaCarga =
 new Date().toLocaleString();
-
 
 
 POCEADA.memoria.push(datos);
 
 
-
 POCEADA.estado.listo=true;
-
 
 
 guardarPoceada();
 
 
-
 actualizarEstadoPoceadaV2();
 
 
-}
-
-
-
-function actualizarEstadoPoceadaV2(){
-
-
-let estado =
-document.getElementById(
-"estadoPoceadaV2"
-);
-
-
-
-if(!estado) return;
-
-
-
-estado.innerHTML = `
-
-📊 ESTADO POCEADA IA
-
-<br>
-
-PDF cargados:
-
-${POCEADA.estado.pdfCargados}
-
-<br>
-
-Registros:
-
-${POCEADA.estado.registrosGuardados}
-
-<br>
-
-Última carga:
-
-${POCEADA.estado.ultimaCarga}
-
-`;
-
     }
-
-  //////////////////////////////////////////////////
+   //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 8 - CEREBRO PROPIO
 //////////////////////////////////////////////////
@@ -12372,120 +12048,107 @@ Object.entries(frecuencia)
 );
 
 
-
 POCEADA.analisis = ranking;
 
 
-
 guardarPoceada();
-
 
 
 return ranking;
 
 
-  }
+}
 
- //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA V2
-// BLOQUE 9 - GENERADOR 5 NÚMEROS
+    //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA V3
+// BLOQUE 9 - GENERADOR PREDICTIVO
 //////////////////////////////////////////////////
 
 function generarPoceadaV2(){
 
+    if(POCEADA.historico.length === 0){
 
-if(
-POCEADA.historico.length===0
-){
+        mostrarPoceadaV2(`
 
+        <h3>⚠️ POCEADA IA</h3>
 
-mostrarPoceadaV2(`
+        Primero cargue un PDF histórico.
 
-<h3>⚠️ POCEADA</h3>
+        `);
 
-Primero cargue un PDF.
+        return [];
 
-`);
-
-return;
-
-}
+    }
 
 
+    // Usar motor inteligente predictivo
 
-let ranking =
-cerebroPoceadaV2();
-
-
-
-let numeros = [];
+    let prediccion = generarPoceadaInteligenteV3();
 
 
-ranking.forEach(n=>{
+    if(prediccion.length < 5){
+
+        mostrarPoceadaV2(`
+
+        ⚠️ No hay suficiente memoria para predecir.
+
+        `);
+
+        return [];
+
+    }
 
 
-if(numeros.length<5){
-
-numeros.push(n[0]);
-
-}
+    POCEADA.predicciones = prediccion;
 
 
-});
+    guardarPoceada();
 
 
 
-POCEADA.predicciones =
-numeros;
+    mostrarPoceadaV2(`
+
+    <h2>🎯 POCEADA CORRENTINA IA</h2>
 
 
+    <b>PREDICCIÓN PRÓXIMO SORTEO</b>
 
-guardarPoceada();
-
-
-
-mostrarPoceadaV2(`
-
-<h3>🎯 POCEADA CORRENTINA IA</h3>
+    <br><br>
 
 
-<b>5 NÚMEROS PARA JUGAR</b>
+    ${prediccion.join(" - ")}
 
 
-<br><br>
+    <br><br>
 
 
-${numeros.join(" - ")}
+    Motor:
+
+    <br>
+
+    🧠 Memoria histórica
+
+    <br>
+
+    🔄 Transiciones
+
+    <br>
+
+    🤝 Acompañantes
+
+    <br>
+
+    📈 Tendencia reciente
 
 
-<br><br>
+    `);
 
 
-Motor:
-
-<br>
-
-🧠 Memoria histórica
-
-<br>
-
-📊 Frecuencia
-
-<br>
-
-🔄 Aprendizaje
-
-
-`);
-
-
-
-return numeros;
-
+    return prediccion;
 
 }
 
-  //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 10 - AUDITORÍA
 //////////////////////////////////////////////////
@@ -12603,13 +12266,11 @@ ${aciertos.join(" - ")}
 
 `);
 
-}
-
-  //////////////////////////////////////////////////
+    }
+   //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 11 - INICIO FINAL
 //////////////////////////////////////////////////
-
 
 function iniciarModuloPoceadaV2(){
 
@@ -12653,12 +12314,11 @@ iniciarModuloPoceadaV2();
 
 });
 
-  //////////////////////////////////////////////////
+    //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 12 - MOTOR DE TRANSICIONES
 //////////////////////////////////////////////////
 
-// Memoria de movimientos
 
 if(!POCEADA.transiciones){
 
@@ -12667,15 +12327,13 @@ if(!POCEADA.transiciones){
 }
 
 
-//////////////////////////////////////////////////
-// APRENDER MOVIMIENTOS
-//////////////////////////////////////////////////
 
 function aprenderTransicionesPoceadaV2(nuevoSorteo){
 
 
 let historico =
 POCEADA.historico;
+
 
 
 if(historico.length < 2){
@@ -12686,14 +12344,10 @@ if(historico.length < 2){
 
 
 
-// Sorteo anterior
-
 let anterior =
 historico[historico.length-2];
 
 
-
-// Sorteo actual
 
 let actual =
 nuevoSorteo;
@@ -12753,15 +12407,13 @@ guardarPoceada();
 
 
 
-//////////////////////////////////////////////////
-// BUSCAR QUÉ VIENE DESPUÉS
-//////////////////////////////////////////////////
 
 function buscarSiguientePoceadaV2(numero){
 
 
 let datos =
 POCEADA.transiciones[numero];
+
 
 
 if(!datos){
@@ -12782,114 +12434,52 @@ return Object.entries(datos)
 
 
 
-}
-
-
-
-//////////////////////////////////////////////////
-// ANALIZAR MOVIMIENTO
-//////////////////////////////////////////////////
-
-function analizarMovimientoPoceadaV2(){
-
-
-let html=`
-
-<h3>
-🔄 MOVIMIENTOS POCEADA IA
-</h3>
-
-`;
-
-
-
-Object.keys(POCEADA.transiciones)
-
-.forEach(numero=>{
-
-
-html += `
-
-Número:
-<b>${numero}</b>
-
-<br>
-
-Después suele venir:
-
-<br>
-
-`;
-
-
-
-let lista =
-buscarSiguientePoceadaV2(numero);
-
-
-
-lista.forEach(x=>{
-
-
-html +=
-
-x[0]+" ("+x[1]+" veces) ";
-
-
-});
-
-
-html += "<hr>";
-
-
-
-});
-
-
-
-mostrarPoceadaV2(html);
-
-
     }
 
-  //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA V2
-// BLOQUE 13 - GENERADOR INTELIGENTE FINAL
+    //////////////////////////////////////////////////
+// 🎯 POCEADA CORRENTINA IA V3
+// BLOQUE 13 - MOTOR PREDICTIVO ADAPTATIVO
 //////////////////////////////////////////////////
 
-function generarPoceadaInteligenteV2(){
+function generarPoceadaInteligenteV3(){
 
 
 if(POCEADA.historico.length===0){
 
+    mostrarPoceadaV2(`
 
-mostrarPoceadaV2(`
+    <h3>⚠️ POCEADA IA</h3>
 
-<h3>⚠️ POCEADA IA</h3>
+    Falta cargar historial.
 
-Cargue primero un PDF histórico.
+    `);
 
-`);
-
-
-return [];
+    return [];
 
 }
 
 
 
-let puntos={};
+let puntos = {};
 
 
 
-//////////////////////////////////////////////////
-// 1 - FRECUENCIA HISTÓRICA
-//////////////////////////////////////////////////
+// =====================================
+// 1 - MEMORIA RECIENTE
+// =====================================
 
-POCEADA.historico.forEach(sorteo=>{
+let ultimos = POCEADA.historico.slice(-30);
 
 
-sorteo.datos.posiciones.forEach(numero=>{
+
+ultimos.forEach((sorteo,indice)=>{
+
+
+let numeros =
+sorteo.datos?.posiciones || [];
+
+
+numeros.forEach(numero=>{
 
 
 if(!puntos[numero]){
@@ -12899,7 +12489,9 @@ puntos[numero]=0;
 }
 
 
-puntos[numero]+=3;
+// más reciente = más peso
+
+puntos[numero] += 5 + indice;
 
 
 });
@@ -12909,34 +12501,70 @@ puntos[numero]+=3;
 
 
 
-//////////////////////////////////////////////////
-// 2 - TRANSICIONES
-//////////////////////////////////////////////////
+
+// =====================================
+// 2 - MEMORIA HISTÓRICA GENERAL
+// =====================================
+
+POCEADA.historico.forEach(sorteo=>{
+
+
+let numeros =
+sorteo.datos?.posiciones || [];
+
+
+numeros.forEach(numero=>{
+
+
+if(!puntos[numero]){
+
+puntos[numero]=0;
+
+}
+
+
+puntos[numero]+=1;
+
+
+});
+
+
+});
+
+
+
+
+// =====================================
+// 3 - TRANSICIONES
+// =====================================
 
 Object.keys(POCEADA.transiciones || {})
-
-.forEach(actual=>{
+.forEach(numero=>{
 
 
 let siguientes =
-buscarSiguientePoceadaV2(actual);
+buscarSiguientePoceadaV2(numero);
 
 
 
 siguientes.forEach(item=>{
 
 
-let numero=item[0];
+let siguiente=item[0];
+
+let fuerza=item[1];
 
 
-if(!puntos[numero]){
 
-puntos[numero]=0;
+if(!puntos[siguiente]){
+
+puntos[siguiente]=0;
 
 }
 
 
-puntos[numero]+=item[1]*2;
+
+puntos[siguiente]+=fuerza*3;
 
 
 
@@ -12947,9 +12575,10 @@ puntos[numero]+=item[1]*2;
 
 
 
-//////////////////////////////////////////////////
-// ORDENAR PUNTAJE
-//////////////////////////////////////////////////
+
+// =====================================
+// 4 - ORDENAR PUNTAJE
+// =====================================
 
 let ranking =
 
@@ -12961,26 +12590,43 @@ Object.entries(puntos)
 
 
 
-//////////////////////////////////////////////////
-// ELEGIR 5
-//////////////////////////////////////////////////
+
+// =====================================
+// 5 - SELECCIÓN INTELIGENTE
+// =====================================
 
 let seleccionados=[];
 
 
-ranking.forEach(n=>{
+
+for(let n of ranking){
 
 
-if(seleccionados.length<5){
+if(seleccionados.length>=5){
+
+break;
+
+}
 
 
-seleccionados.push(n[0]);
+
+let numero=n[0];
+
+
+
+// evitar repetidos
+
+if(!seleccionados.includes(numero)){
+
+
+seleccionados.push(numero);
 
 
 }
 
 
-});
+}
+
 
 
 
@@ -12993,12 +12639,14 @@ guardarPoceada();
 
 
 
+
 mostrarPoceadaV2(`
 
 <h2>🎯 POCEADA CORRENTINA IA</h2>
 
 
-<b>5 NÚMEROS GENERADOS</b>
+<b>PREDICCIÓN ADAPTATIVA</b>
+
 
 <br><br>
 
@@ -13009,11 +12657,15 @@ ${seleccionados.join(" - ")}
 <br><br>
 
 
-Motor usado:
+Motor:
 
 <br>
 
 🧠 Memoria histórica
+
+<br>
+
+📈 Tendencia últimos 30 sorteos
 
 <br>
 
@@ -13025,7 +12677,7 @@ Motor usado:
 
 <br>
 
-📊 Ranking
+⚖️ Peso adaptativo
 
 
 `);
@@ -13035,13 +12687,11 @@ Motor usado:
 return seleccionados;
 
 
-}
-
-    //////////////////////////////////////////////////
+    }
+   //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 14 - CARGA MANUAL + MEMORIA
 //////////////////////////////////////////////////
-
 
 function abrirCargaManualPoceadaV2(){
 
@@ -13097,22 +12747,17 @@ html += `
 
 mostrarPoceadaV2(html);
 
+            }
 
-
-}
-
-
-
-
-//////////////////////////////////////////////////
+    //////////////////////////////////////////////////
 // GUARDAR SORTEO MANUAL
 //////////////////////////////////////////////////
-
 
 async function guardarManualPoceadaV2(){
 
 
 let numeros=[];
+
 
 
 for(let i=1;i<=10;i++){
@@ -13247,66 +12892,8 @@ ${numeros.join(" - ")}
 
 
 
-}
-
-
-
-
-//////////////////////////////////////////////////
-// ACTUALIZAR ESTADO
-//////////////////////////////////////////////////
-
-
-function actualizarEstadoPoceadaV2(){
-
-
-let estado =
-document.getElementById(
-"estadoPoceadaV2"
-);
-
-
-
-if(!estado)
-return;
-
-
-
-estado.innerHTML = `
-
-
-<b>Estado:</b>
-
-<br>
-
-PDF / Manual cargados:
-
-${POCEADA.historico.length}
-
-
-<br>
-
-
-Registros:
-
-${POCEADA.auditoria.length || 0}
-
-
-<br>
-
-
-Última actualización:
-
-${new Date().toLocaleString()}
-
-
-
-`;
-
-
-
     }
-    
+
     
 </script> 
     

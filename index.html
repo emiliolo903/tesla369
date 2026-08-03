@@ -12860,38 +12860,28 @@ return ranking;
 
 
 
-
-
 //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA V4
-// BLOQUE 9 - GENERADOR INTELIGENTE 5 NÚMEROS
+// 🎯 POCEADA CORRENTINA IA V5
+// BLOQUE 9 - GENERADOR INTELIGENTE
 //////////////////////////////////////////////////
 
 function generarPoceadaV4(){
 
-
-if(POCEADA.historico.length===0){
-
+if(POCEADA.historico.length<3){
 
 mostrarPoceadaV4(`
 
-<h3>⚠️ POCEADA IA</h3>
+<h3>⚠️ IA POCEADA</h3>
 
-Primero cargue sorteos históricos.
+Debe cargar al menos 3 sorteos.
 
 `);
 
-
 return [];
-
 
 }
 
-
-
-let puntos = {};
-
-
+let puntos={};
 
 //////////////////////////////////////////////////
 // 1 - FRECUENCIA HISTÓRICA
@@ -12899,9 +12889,7 @@ let puntos = {};
 
 POCEADA.historico.forEach(sorteo=>{
 
-
 sorteo.numeros.forEach(numero=>{
-
 
 if(!puntos[numero]){
 
@@ -12909,35 +12897,27 @@ puntos[numero]=0;
 
 }
 
-
-puntos[numero] += 
-POCEADA.motor.pesoHistorico;
-
+puntos[numero]+=POCEADA.motor.pesoHistorico;
 
 });
 
-
 });
 
-
-
 //////////////////////////////////////////////////
-// 2 - NÚMEROS RECIENTES
+// 2 - ÚLTIMOS SORTEOS
 //////////////////////////////////////////////////
 
-let ultimos =
+let recientes=
 
 POCEADA.historico.slice(
+
 -POCEADA.motor.ultimosSorteos
+
 );
 
-
-
-ultimos.forEach(sorteo=>{
-
+recientes.forEach(sorteo=>{
 
 sorteo.numeros.forEach(numero=>{
-
 
 if(!puntos[numero]){
 
@@ -12945,108 +12925,89 @@ puntos[numero]=0;
 
 }
 
-
-puntos[numero] +=
-POCEADA.motor.pesoReciente;
-
+puntos[numero]+=POCEADA.motor.pesoReciente;
 
 });
 
-
 });
-
-
 
 //////////////////////////////////////////////////
 // 3 - TRANSICIONES
 //////////////////////////////////////////////////
 
 Object.keys(
-POCEADA.transiciones || {}
-)
 
-.forEach(numero=>{
+POCEADA.transiciones||{}
 
+).forEach(origen=>{
 
-let siguientes =
-POCEADA.transiciones[numero];
+Object.keys(
 
+POCEADA.transiciones[origen]
 
-Object.keys(siguientes || {})
-.forEach(sig=>{
+).forEach(destino=>{
 
+if(!puntos[destino]){
 
-if(!puntos[sig]){
-
-puntos[sig]=0;
+puntos[destino]=0;
 
 }
 
+puntos[destino]+=
 
-puntos[sig] +=
+POCEADA.transiciones[origen][destino]
 
-siguientes[sig] *
+*
+
 POCEADA.motor.pesoTransicion;
 
-
 });
 
-
 });
-
-
 
 //////////////////////////////////////////////////
 // 4 - ACOMPAÑANTES
 //////////////////////////////////////////////////
 
 Object.keys(
-POCEADA.acompanantes || {}
-)
 
-.forEach(numero=>{
+POCEADA.acompanantes||{}
 
+).forEach(numero=>{
 
-let lista =
-POCEADA.acompanantes[numero];
+Object.keys(
 
+POCEADA.acompanantes[numero]
 
-Object.keys(lista || {})
-.forEach(sig=>{
+).forEach(acom=>{
 
+if(!puntos[acom]){
 
-if(!puntos[sig]){
-
-puntos[sig]=0;
+puntos[acom]=0;
 
 }
 
+puntos[acom]+=
 
-puntos[sig] +=
+POCEADA.acompanantes[numero][acom]
 
-lista[sig] *
+*
+
 POCEADA.motor.pesoAcompanante;
 
+});
 
 });
 
-
-});
-
-
-
 //////////////////////////////////////////////////
-// 5 - SIMULACIÓN
+// 5 - SIMULACIÓN HISTÓRICA
 //////////////////////////////////////////////////
-
-if(POCEADA.puntajes){
-
 
 Object.keys(
-POCEADA.puntajes
-)
 
-.forEach(numero=>{
+POCEADA.puntajes||{}
+
+).forEach(numero=>{
 
 
 if(!puntos[numero]){
@@ -13058,49 +13019,43 @@ puntos[numero]=0;
 
 puntos[numero]+=
 
-POCEADA.puntajes[numero] *
+POCEADA.puntajes[numero]
+
+*
+
 POCEADA.motor.pesoSimulacion;
 
 
 });
 
 
-}
-
-
 
 //////////////////////////////////////////////////
-// ORDENAR
+// 6 - AJUSTE POR ÚLTIMOS RESULTADOS
 //////////////////////////////////////////////////
 
-let ranking =
-
-Object.entries(puntos)
-
-.sort((a,b)=>b[1]-a[1]);
+if(POCEADA.historico.length>0){
 
 
+let ultimo =
 
-//////////////////////////////////////////////////
-// SELECCIÓN INTELIGENTE
-//////////////////////////////////////////////////
+POCEADA.historico[
 
-let seleccionados=[];
+POCEADA.historico.length-1
 
-
-ranking.forEach(n=>{
+];
 
 
-if(seleccionados.length<5){
+
+ultimo.numeros.forEach(numero=>{
 
 
-if(!seleccionados.includes(n[0])){
+if(puntos[numero]){
 
 
-seleccionados.push(n[0]);
+// baja un poco para evitar repetir exactamente
 
-
-}
+puntos[numero]-=2;
 
 
 }
@@ -13110,8 +13065,158 @@ seleccionados.push(n[0]);
 
 
 
-POCEADA.predicciones =
-seleccionados;
+}
+
+
+
+//////////////////////////////////////////////////
+// 7 - NORMALIZAR PUNTAJES
+//////////////////////////////////////////////////
+
+Object.keys(puntos).forEach(numero=>{
+
+
+if(puntos[numero]<0){
+
+
+puntos[numero]=0;
+
+
+}
+
+
+});
+
+
+
+//////////////////////////////////////////////////
+// 8 - CREAR RANKING
+//////////////////////////////////////////////////
+
+let ranking =
+
+Object.entries(puntos)
+
+.sort((a,b)=>{
+
+
+return b[1]-a[1];
+
+
+});
+
+
+
+//////////////////////////////////////////////////
+// 9 - SELECCIÓN PRINCIPAL
+//////////////////////////////////////////////////
+
+let principal=[];
+
+
+ranking.forEach(numero=>{
+
+
+if(principal.length<5){
+
+
+principal.push(numero[0]);
+
+
+}
+
+
+});
+
+//////////////////////////////////////////////////
+// 10 - JUGADA RESPALDO
+//////////////////////////////////////////////////
+
+let respaldo=[];
+
+
+ranking.forEach(numero=>{
+
+
+if(
+respaldo.length<5
+&&
+!principal.includes(numero[0])
+){
+
+
+respaldo.push(numero[0]);
+
+
+}
+
+
+});
+
+
+
+//////////////////////////////////////////////////
+// 11 - CALCULAR CONFIANZA INTERNA
+//////////////////////////////////////////////////
+
+let confianza=0;
+
+
+if(ranking.length>=5){
+
+
+let suma=0;
+
+
+for(let i=0;i<5;i++){
+
+
+suma += ranking[i][1];
+
+
+}
+
+
+confianza = Math.min(
+
+100,
+
+Math.round(suma/5)
+
+);
+
+
+}
+
+
+
+//////////////////////////////////////////////////
+// 12 - GUARDAR PREDICCIÓN
+//////////////////////////////////////////////////
+
+POCEADA.predicciones={
+
+
+principal:principal,
+
+
+respaldo:respaldo,
+
+
+ranking:
+
+ranking.slice(0,20),
+
+
+confianza:confianza,
+
+
+fecha:
+
+new Date().toLocaleString()
+
+
+};
 
 
 
@@ -13119,15 +13224,20 @@ guardarPoceada();
 
 
 
+//////////////////////////////////////////////////
+// 13 - MOSTRAR RESULTADO
+//////////////////////////////////////////////////
+
 mostrarPoceadaV4(`
 
+
 <h2>
-🎯 POCEADA CORRENTINA IA
+🎯 POCEADA CORRENTINA IA V5
 </h2>
 
 
 <b>
-5 NÚMEROS GENERADOS
+JUGADA PRINCIPAL
 </b>
 
 
@@ -13136,37 +13246,102 @@ mostrarPoceadaV4(`
 
 <h2>
 
-${seleccionados.join(" - ")}
+${principal.join(" - ")}
 
 </h2>
 
 
+
+<hr>
+
+
+
+<b>
+JUGADA RESPALDO
+</b>
+
+
+<br><br>
+
+
+<h2>
+
+${respaldo.join(" - ")}
+
+</h2>
+
+
+
+<hr>
+
+
+📊 Confianza interna IA:
+
+<b>
+
+${confianza}%
+
+</b>
+
+
+
+<hr>
+
+
+🧠 TOP 10 PUNTAJES
+
+
+<br><br>
+
+
+${ranking.slice(0,10)
+
+.map((n,i)=>
+
+(i+1)+". "+n[0]+" → "+n[1]+" pts"
+
+)
+
+.join("<br>")
+
+}
+
+
+
+<hr>
+
+
+Motores utilizados:
+
 <br>
 
-
-🧠 Memoria histórica
-
-<br>
-
-🔄 Transiciones
+✅ Histórico
 
 <br>
 
-🤝 Acompañantes
+✅ Recientes
 
 <br>
 
-📊 Simulación
+✅ Transiciones
+
+<br>
+
+✅ Acompañantes
+
+<br>
+
+✅ Simulación aprendizaje
 
 
 `);
 
 
 
-return seleccionados;
+return principal;
 
 
-         }
+    }
 
 
    //////////////////////////////////////////////////

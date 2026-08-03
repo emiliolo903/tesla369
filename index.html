@@ -12143,7 +12143,7 @@ return numeros.slice(
 
 //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V3
-// BLOQUE 6 - EXTRAER SOLO LOS 10 NÚMEROS
+// BLOQUE 6 - EXTRACTOR ROBUSTO 10 NÚMEROS
 //////////////////////////////////////////////////
 
 async function procesarCorrentinaPaginaPoceadaV3(texto){
@@ -12151,65 +12151,63 @@ async function procesarCorrentinaPaginaPoceadaV3(texto){
 texto = texto.toUpperCase();
 
 
-// buscar desde NÚMERO
+// convertir errores comunes OCR
 
-let inicio = texto.indexOf("NÚMERO");
-
-if(inicio < 0){
-
-    inicio = texto.indexOf("NUMERO");
-
-}
+texto = texto
+.replace(/O/g,"0")
+.replace(/I/g,"1")
+.replace(/L/g,"1");
 
 
-if(inicio < 0){
+// buscar todos los números de 2 cifras
 
-    return false;
-
-}
+let numeros = texto.match(/\b\d{2}\b/g);
 
 
-// quedarnos con la parte de números
+if(!numeros){
 
-let zona = texto.substring(inicio);
-
-
-// extraer números de 2 cifras
-
-let numeros =
-zona.match(/\b\d{2}\b/g);
-
-
-
-if(!numeros || numeros.length < 10){
-
-    return false;
+return false;
 
 }
 
 
-// tomar solamente los primeros 10 después de NÚMERO
+// limpiar números imposibles
 
-let diez = numeros.slice(0,10);
+numeros = numeros.filter(n=>{
+
+let x=parseInt(n);
+
+return x>=0 && x<=99;
+
+});
 
 
 
-let registro = {
+// tomar los últimos 10 números encontrados
+// (en tu imagen son la lista de la poceada)
 
-fecha:
-new Date().toLocaleDateString(),
+if(numeros.length < 10){
 
-hora:
-new Date().toLocaleTimeString(),
+return false;
 
-provincia:
-"CORRIENTES",
+}
 
-turno:
-"POCEADA",
 
-posiciones:
-diez
+let diez = numeros.slice(-10);
+
+
+
+let registro={
+
+fecha:new Date().toLocaleDateString(),
+
+hora:new Date().toLocaleTimeString(),
+
+provincia:"CORRIENTES",
+
+turno:"POCEADA",
+
+posiciones:diez
 
 };
 
@@ -12221,7 +12219,7 @@ POCEADA.historico.push(registro);
 
 if(typeof aprenderTransicionesPoceadaV2==="function"){
 
- aprenderTransicionesPoceadaV2(registro);
+aprenderTransicionesPoceadaV2(registro);
 
 }
 
@@ -12230,8 +12228,7 @@ if(typeof aprenderTransicionesPoceadaV2==="function"){
 return true;
 
 
-    }
-
+}
 
 
 

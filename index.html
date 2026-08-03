@@ -11742,7 +11742,16 @@ let texto =
 await leerPDFPoceadaV2ConProgreso(
 archivo
 );
+    
+console.log(texto);
 
+mostrarPoceadaV2(`
+<pre style="font-size:12px;white-space:pre-wrap;">
+${texto.substring(0,3000)}
+</pre>
+`);
+return;
+    
 
 
 if(!texto){

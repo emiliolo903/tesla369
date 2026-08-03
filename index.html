@@ -12023,11 +12023,10 @@ ${total}
 
     }
 
-   //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA V4
-// BLOQUE 4 - EXTRACTOR Y MEMORIA HISTÓRICA
 //////////////////////////////////////////////////
-
+// 🎯 POCEADA CORRENTINA IA V4
+// BLOQUE 4 - EXTRACTOR PDF CORREGIDO
+//////////////////////////////////////////////////
 
 function procesarPaginaPoceadaV4(texto){
 
@@ -12039,29 +12038,52 @@ return false;
 }
 
 
-
-// Normalizar OCR
-
-texto = texto.toUpperCase();
-
-
+// NORMALIZAR OCR
 
 texto = texto
-
+.toUpperCase()
 .replace(/O/g,"0")
-
 .replace(/I/g,"1")
-
 .replace(/L/g,"1")
-
 .replace(/B/g,"8");
+
+
+
+// BUSCAR ZONA DESPUÉS DE NÚMERO
+
+let posicionNumero =
+texto.indexOf("NUMERO");
+
+
+if(posicionNumero === -1){
+
+posicionNumero =
+texto.indexOf("NÚMERO");
+
+}
+
+
+
+if(posicionNumero === -1){
+
+return false;
+
+}
+
+
+
+// Tomar solamente lo que viene después
+
+let zona =
+texto.substring(posicionNumero + 6);
 
 
 
 
 // Buscar números de dos cifras
 
-let numeros = texto.match(/\b\d{2}\b/g);
+let numeros =
+zona.match(/\b\d{2}\b/g);
 
 
 
@@ -12073,88 +12095,88 @@ return false;
 
 
 
-// Limpiar valores inválidos
+// Limpiar valores
 
-numeros = numeros.filter(numero=>{
+numeros = numeros.filter(n=>{
 
+let valor =
+parseInt(n);
 
-let n=parseInt(numero);
-
-
-return n>=0 && n<=99;
-
+return valor >=0 && valor <=99;
 
 });
 
 
 
-
-// Necesitamos los 10 números
+// Necesitamos exactamente los 10
 
 if(numeros.length < 10){
 
-
 return false;
-
 
 }
 
 
 
-// Tomar los primeros 10 encontrados
+// Tomar primeros 10 después de NÚMERO
 
 let diezNumeros =
-
 numeros.slice(0,10);
 
 
 
+// Evitar duplicar página
 
-// Crear registro
+let existe =
+POCEADA.historico.some(s=>
+
+JSON.stringify(s.numeros)
+===
+JSON.stringify(diezNumeros)
+
+);
+
+
+
+if(existe){
+
+return false;
+
+}
+
+
+
+// CREAR REGISTRO
 
 let registro = {
 
 
 id:
-
 Date.now(),
 
 
-
 fecha:
-
 new Date().toLocaleDateString(),
 
 
-
 hora:
-
 new Date().toLocaleTimeString(),
 
 
-
 tipo:
-
 "PDF",
 
 
-
 provincia:
-
 "CORRIENTES",
 
 
-
 turno:
-
 "POCEADA",
 
 
-
 numeros:
-
 diezNumeros
-
 
 
 };
@@ -12162,51 +12184,47 @@ diezNumeros
 
 
 
-
-// Guardar historial
+// GUARDAR HISTÓRICO
 
 POCEADA.historico.push(registro);
 
 
 
-
-// Actualizar memoria
+// MEMORIA IA
 
 POCEADA.memoria.push({
 
-fecha:registro.fecha,
+fecha:
+registro.fecha,
 
-numeros:diezNumeros
+numeros:
+diezNumeros
 
 });
 
 
 
-
+// CONTADORES
 
 POCEADA.estado.sorteos =
-
 POCEADA.historico.length;
-
 
 
 POCEADA.estado.aprendizaje++;
 
 
 
+// APRENDER SI EXISTE MOTOR
 
-// Preparar aprendizaje futuro
-
-if(typeof aprenderPoceadaV4==="function"){
-
+if(typeof aprenderPoceadaV4 === "function"){
 
 aprenderPoceadaV4(registro);
-
 
 }
 
 
 
+// GUARDAR
 
 guardarPoceada();
 
@@ -12215,16 +12233,13 @@ guardarPoceada();
 return true;
 
 
-
 }
-
 
 
 
 //////////////////////////////////////////////////
 // VER HISTORIAL
 //////////////////////////////////////////////////
-
 
 function verRegistroPoceadaV4(){
 
@@ -12235,13 +12250,11 @@ let html = `
 📋 HISTORIAL POCEADA IA
 </h3>
 
-
 Total sorteos:
 
 <b>
 ${POCEADA.historico.length}
 </b>
-
 
 <br><br>
 
@@ -12249,7 +12262,7 @@ ${POCEADA.historico.length}
 
 
 
-POCEADA.historico.forEach((sorteo)=>{
+POCEADA.historico.forEach(sorteo=>{
 
 
 html += `
@@ -12257,24 +12270,17 @@ html += `
 <hr>
 
 Fecha:
-
 ${sorteo.fecha}
 
-
 <br>
-
 
 Números:
 
 <b>
-
 ${sorteo.numeros.join(" - ")}
-
 </b>
 
-
 <br>
-
 
 `;
 
@@ -12287,8 +12293,11 @@ ${sorteo.numeros.join(" - ")}
 mostrarPoceadaV4(html);
 
 
+}
 
-    }
+
+
+
   //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V4
 // BLOQUE 5 - MOTOR DE FRECUENCIA Y PUNTAJE

@@ -11760,9 +11760,7 @@ return;
 
 
 
-await procesarCorrentinaMasivaPoceadaV2(
-texto
-);
+await procesarCorrentinaMasivaPoceadaV3(texto);
 
 
 }
@@ -12046,48 +12044,66 @@ return numeros.slice(
 
 
 //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA V2
-// BLOQUE 6 - LECTOR NUEVO FORMATO POCEADA
+// 🎯 POCEADA CORRENTINA IA V3
+// BLOQUE 6
+// NUEVO FORMATO PDF POCEADA
 //////////////////////////////////////////////////
 
-async function procesarCorrentinaMasivaPoceadaV2(texto){
+async function procesarCorrentinaMasivaPoceadaV3(texto){
 
 texto = texto.toUpperCase();
 
-let bloques = texto.split(/(?=SORTEO)/g);
+let bloques = texto.split(/SORTEO\s+\d+/g);
 
 let registrosGuardados = 0;
 let aprendizajes = 0;
 
-for(let i=0;i<bloques.length;i++){
+for(let i=1;i<bloques.length;i++){
 
     let bloque = bloques[i];
 
-    if(!bloque.includes("SORTEO")) continue;
-
+    // FECHA
     let fecha = "";
 
-    let mFecha = bloque.match(/\d{2}\/\d{2}\/\d{4}/);
+    let f = bloque.match(/\d{2}\/\d{2}\/\d{4}/);
 
-    if(mFecha) fecha = mFecha[0];
+    if(f){
 
+        fecha = f[0];
+
+    }
+
+    // HORA
+    let hora = "";
+
+    let h = bloque.match(/\d{2}:\d{2}/);
+
+    if(h){
+
+        hora = h[0];
+
+    }
+
+    // NUMEROS
     let numeros = bloque.match(/\b\d{2}\b/g);
 
     if(!numeros) continue;
 
-    if(numeros.length < 10) continue;
+    if(numeros.length<10) continue;
 
-    let posiciones = numeros.slice(-10);
+    numeros = numeros.slice(0,10);
 
-    let registro = {
+    let registro={
 
-        fecha: fecha,
+        fecha:fecha,
+
+        hora:hora,
 
         provincia:"CORRENTINA",
 
         turno:"POCEADA",
 
-        posiciones: posiciones
+        posiciones:numeros
 
     };
 
@@ -12097,21 +12113,32 @@ for(let i=0;i<bloques.length;i++){
 
     if(registrosGuardados>1){
 
-        aprenderTransicionesPoceadaV2(registro);
+        if(typeof aprenderTransicionesPoceadaV2==="function"){
+
+            aprenderTransicionesPoceadaV2(registro);
+
+        }
 
         aprendizajes++;
 
     }
 
     estadoPoceadaV2(`
+
 📄 Cargando PDF...
 
-Registro guardado: ${registrosGuardados}
+Registro guardado:
+${registrosGuardados}
 
-Aprendizajes: ${aprendizajes}
+🧠 Aprendizajes:
+${aprendizajes}
+
+Procesando:
+${registrosGuardados}
+
 `);
 
-    await new Promise(r=>setTimeout(r,10));
+    await new Promise(r=>setTimeout(r,5));
 
 }
 
@@ -12120,18 +12147,20 @@ guardarPoceada();
 actualizarEstadoPoceadaV2();
 
 mostrarPoceadaV2(`
-<h3>✅ PDF CARGADO</h3>
 
-Registros guardados:
+<h3>✅ PDF TERMINADO</h3>
+
+📚 Registros cargados:
 ${registrosGuardados}
 
-Aprendizajes:
+🧠 Aprendizajes:
 ${aprendizajes}
 
-Poceada lista.
+🎯 Ya puede generar 5 números.
+
 `);
 
-}
+    }
 
  //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2

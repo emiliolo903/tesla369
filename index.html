@@ -11502,49 +11502,73 @@ function limpiarPoceada(){
     }
     
 //////////////////////////////////////////////////
-// 🎯 POCEADA CORRENTINA IA V2
-// BLOQUE 2 - INTERFAZ PROPIA
+// 🎯 POCEADA CORRENTINA IA V3
+// BLOQUE 2 - INTERFAZ CORREGIDA
 //////////////////////////////////////////////////
 
 function abrirPoceadaV2(){
 
-let contenedor = document.getElementById("seccionPoceada");
+let contenedor =
+document.getElementById("seccionPoceada");
+
 
 if(!contenedor) return;
+
 
 
 contenedor.innerHTML = `
 
 <h2>
-🎯 POCEADA CORRENTINA IA V2
+🎯 POCEADA CORRENTINA IA
 </h2>
 
 
 <button onclick="abrirCargaPDFPoceadaV2()">
+
 📄 CARGAR PDF
+
 </button>
+
+
+
+<button onclick="abrirCargaManualPoceadaV3()">
+
+✍️ CARGA MANUAL
+
+</button>
+
 
 
 <button onclick="generarPoceadaV2()">
+
 🎯 GENERAR 5 NÚMEROS
+
 </button>
+
 
 
 <button onclick="verRegistroPoceadaV2()">
+
 📋 REGISTRO
+
 </button>
+
 
 
 <button onclick="auditoriaPoceadaV2()">
+
 🛡️ AUDITORÍA
+
 </button>
+
 
 
 <div id="estadoPoceadaV2">
 
-Esperando PDF...
+Esperando datos...
 
 </div>
+
 
 
 <div id="panelPoceadaV2">
@@ -11556,7 +11580,9 @@ Esperando PDF...
 
 `;
 
-    }
+}
+
+
  //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V2
 // BLOQUE 3 - PANEL PROPIO

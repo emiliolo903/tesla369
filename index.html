@@ -14046,33 +14046,44 @@ ${cantidad}
 
 
 
-// ACTIVAR SIMULACIÓN CON 20
+//////////////////////////////////////////////////
+// ACTIVAR SIMULACIÓN AUTOMÁTICA CADA 3 SORTEOS
+//////////////////////////////////////////////////
 
-if(cantidad>=20){
+let cantidad = POCEADA.historico.length;
+
+
+if(cantidad % 3 === 0){
 
 
 mensaje += `
 
-🧠 IA ENTRENADA
+🧠 SIMULACIÓN AUTOMÁTICA IA
 
+<br><br>
 
-<br>
-
-✅ Simulación habilitada
-
+✅ Aprendizaje actualizado
 
 <br>
 
-🎯 Puede generar predicción
+Sorteos analizados:
 
+<b>
+${cantidad}
+</b>
+
+
+<br>
 
 `;
 
 
 
-if(typeof simularPoceadaV4==="function"){
+if(typeof simularPoceadaV4 === "function"){
+
 
 simularPoceadaV4();
+
 
 }
 
@@ -14083,17 +14094,23 @@ simularPoceadaV4();
 
 mensaje += `
 
+⏳ Próxima simulación automática en:
 
-⏳ Faltan:
+<b>
+${3 - (cantidad % 3)}
+</b>
 
-${20-cantidad}
+sorteos
 
-sorteos para activar simulación
-
+<br>
 
 `;
 
-}
+
+    }
+
+
+
 
 
 

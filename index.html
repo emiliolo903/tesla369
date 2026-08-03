@@ -347,43 +347,83 @@ Sin auditoría todavía
 
 </div>
     
-    <!-- ========================= -->
-<!-- 🎯 POCEADA CORRENTINA IA V2 -->
+<!-- ========================= -->
+<!-- 🎯 POCEADA CORRENTINA IA V4 -->
 <!-- MÓDULO INDEPENDIENTE -->
 <!-- ========================= -->
 
+
 <div id="seccionPoceada">
 
-<h2>
-🎯 POCEADA CORRENTINA IA V2
+
+<h2 style="color:#00FFD5;">
+🎯 POCEADA CORRENTINA IA V4
 </h2>
 
 
-<button onclick="abrirCargaPDFPoceadaV2()">
-📄 Cargar PDF
+
+<button onclick="abrirCargaPDFPoceadaV4()">
+📄 CARGAR PDF HISTÓRICO
 </button>
 
 
-<button onclick="generarPoceadaInteligenteV2()">
-🎯 Generar 5 Números
+<br><br>
+
+
+<button onclick="abrirCargaManualPoceadaV4()">
+✍️ CARGA MANUAL
 </button>
 
 
-<button onclick="verRegistroPoceadaV2()">
-📋 Registro
+<br><br>
+
+
+<button onclick="generarPoceadaV4()">
+🎯 GENERAR 5 NÚMEROS
 </button>
 
 
-<button onclick="auditoriaPoceadaV2()">
-🛡️ Auditoría
+<br><br>
+
+
+<button onclick="simularPoceadaV4()">
+🧠 SIMULAR APRENDIZAJE
 </button>
 
-<button onclick="abrirCargaManualPoceadaV2()">
-✍️ Carga Manual
+
+<br><br>
+
+
+<button onclick="verRegistroPoceadaV4()">
+📋 HISTORIAL
 </button>
-    
+
+
+<br><br>
+
+
+<button onclick="auditoriaPoceadaV4()">
+🛡️ AUDITORÍA
+</button>
+
+
+
+<br><br>
+
+
+<button 
+onclick="limpiarPoceada()"
+style="
+background:#c62828;
+color:white;
+">
+🗑 REINICIAR IA
+</button>
+
+
 
 <!-- ESTADO -->
+
 
 <div class="card"
 style="
@@ -391,33 +431,24 @@ margin-top:15px;
 padding:15px;
 background:#111;
 border-radius:10px;
+color:white;
 ">
 
 
 <h3 style="color:#00ff99;">
-📊 ESTADO POCEADA
+📊 ESTADO POCEADA IA
 </h3>
 
 
-<div id="estadoPoceadaV2">
+
+<div id="estadoPoceadaV4">
+
 
 Estado:
-Esperando PDF...
 
 <br>
 
-PDF cargados:
-0
-
-<br>
-
-Registros:
-0
-
-<br>
-
-Última carga:
-Sin datos
+Esperando datos...
 
 
 </div>
@@ -429,6 +460,7 @@ Sin datos
 
 
 <!-- PANEL PROPIO -->
+
 
 <div class="card"
 style="
@@ -442,21 +474,27 @@ overflow:auto;
 ">
 
 
+
 <h3 style="color:#00ff99;">
 🖥️ PANEL POCEADA IA
 </h3>
 
 
-<div id="panelPoceadaV2">
 
-🎯 POCEADA CORRENTINA IA LISTA...
+<div id="panelPoceadaV4">
+
+
+🎯 POCEADA CORRENTINA IA LISTA
+
+
+</div>
+
 
 
 </div>
 
 
 </div>
-
 
     
 

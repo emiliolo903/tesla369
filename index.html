@@ -13827,7 +13827,7 @@ let html = `
 ✍️ CARGA MANUAL SORTEO POCEADA
 </h3>
 
-Ingrese los 10 números del sorteo:
+Ingrese los 10 números:
 
 <br><br>
 
@@ -13872,8 +13872,8 @@ html += `
 
 </button>
 
-
 `;
+
 
 
 mostrarPoceadaV4(html);
@@ -13887,6 +13887,7 @@ mostrarPoceadaV4(html);
 // GUARDAR SORTEO MANUAL
 //////////////////////////////////////////////////
 
+
 function guardarManualPoceadaV4(){
 
 
@@ -13897,15 +13898,14 @@ let numeros=[];
 for(let i=1;i<=10;i++){
 
 
-let valor =
-
+let campo =
 document.getElementById(
 "manualP"+i
-).value;
+);
 
 
 
-if(valor===""){
+if(!campo || campo.value===""){
 
 
 mostrarPoceadaV4(`
@@ -13917,8 +13917,11 @@ mostrarPoceadaV4(`
 
 return;
 
-
 }
+
+
+
+let valor = campo.value;
 
 
 
@@ -13981,19 +13984,19 @@ numeros:numeros
 
 
 
-
 // APRENDIZAJE
 
 if(typeof aprenderPoceadaV4==="function"){
 
+
 aprenderPoceadaV4(registro);
+
 
 }
 
 
 
-
-// CONTADORES
+// ACTUALIZAR ESTADO
 
 POCEADA.estado.sorteos =
 POCEADA.historico.length;
@@ -14013,7 +14016,6 @@ POCEADA.historico.length;
 
 
 let mensaje = `
-
 
 <h3>
 ✅ SORTEO GUARDADO
@@ -14036,8 +14038,11 @@ ${numeros.join(" - ")}
 
 📚 Sorteos cargados:
 
+<b>
+
 ${cantidad}
 
+</b>
 
 
 <br><br>
@@ -14047,10 +14052,8 @@ ${cantidad}
 
 
 //////////////////////////////////////////////////
-// ACTIVAR SIMULACIÓN AUTOMÁTICA CADA 3 SORTEOS
+// SIMULACIÓN AUTOMÁTICA CADA 3 SORTEOS
 //////////////////////////////////////////////////
-
-let cantidad = POCEADA.historico.length;
 
 
 if(cantidad % 3 === 0){
@@ -14069,17 +14072,19 @@ mensaje += `
 Sorteos analizados:
 
 <b>
+
 ${cantidad}
+
 </b>
 
 
-<br>
+<br><br>
 
 `;
 
 
 
-if(typeof simularPoceadaV4 === "function"){
+if(typeof simularPoceadaV4==="function"){
 
 
 simularPoceadaV4();
@@ -14094,23 +14099,24 @@ simularPoceadaV4();
 
 mensaje += `
 
-⏳ Próxima simulación automática en:
+⏳ Próxima simulación en:
 
 <b>
-${3 - (cantidad % 3)}
+
+${3-(cantidad%3)}
+
 </b>
 
 sorteos
 
-<br>
+
+<br><br>
 
 `;
 
 
-    }
 
-
-
+}
 
 
 
@@ -14121,8 +14127,7 @@ actualizarEstadoPoceadaV4();
 
 
 
-    }
-
+}
 
 
     

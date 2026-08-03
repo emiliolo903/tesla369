@@ -12025,7 +12025,7 @@ ${total}
 
 //////////////////////////////////////////////////
 // 🎯 POCEADA CORRENTINA IA V4
-// BLOQUE 4 - EXTRACTOR PDF CORREGIDO
+// BLOQUE 4 - EXTRACTOR OCR ROBUSTO
 //////////////////////////////////////////////////
 
 function procesarPaginaPoceadaV4(texto){
@@ -12038,7 +12038,7 @@ return false;
 }
 
 
-// NORMALIZAR OCR
+// LIMPIEZA OCR
 
 texto = texto
 .toUpperCase()
@@ -12049,22 +12049,14 @@ texto = texto
 
 
 
-// BUSCAR ZONA DESPUÉS DE NÚMERO
+// BUSCAR TODOS LOS NÚMEROS DE DOS CIFRAS
 
-let posicionNumero =
-texto.indexOf("NUMERO");
-
-
-if(posicionNumero === -1){
-
-posicionNumero =
-texto.indexOf("NÚMERO");
-
-}
+let encontrados =
+texto.match(/\b\d{2}\b/g);
 
 
 
-if(posicionNumero === -1){
+if(!encontrados){
 
 return false;
 
@@ -12072,45 +12064,55 @@ return false;
 
 
 
-// Tomar solamente lo que viene después
+// FILTRAR 00-99
 
-let zona =
-texto.substring(posicionNumero + 6);
+encontrados =
+encontrados.filter(n=>{
 
+let x=parseInt(n);
 
-
-
-// Buscar números de dos cifras
-
-let numeros =
-zona.match(/\b\d{2}\b/g);
-
-
-
-if(!numeros){
-
-return false;
-
-}
-
-
-
-// Limpiar valores
-
-numeros = numeros.filter(n=>{
-
-let valor =
-parseInt(n);
-
-return valor >=0 && valor <=99;
+return x>=0 && x<=99;
 
 });
 
 
 
-// Necesitamos exactamente los 10
+// BUSCAR GRUPOS DE 10 NÚMEROS
+// EL SORTEO TIENE 10 POSICIONES
 
-if(numeros.length < 10){
+let diezNumeros = null;
+
+
+for(let i=0;i<=encontrados.length-10;i++){
+
+
+let grupo =
+encontrados.slice(i,i+10);
+
+
+// evitar grupos con muchas repeticiones
+
+let unicos =
+new Set(grupo);
+
+
+
+if(unicos.size>=8){
+
+
+diezNumeros = grupo;
+
+break;
+
+
+}
+
+
+}
+
+
+
+if(!diezNumeros){
 
 return false;
 
@@ -12118,14 +12120,7 @@ return false;
 
 
 
-// Tomar primeros 10 después de NÚMERO
-
-let diezNumeros =
-numeros.slice(0,10);
-
-
-
-// Evitar duplicar página
+// EVITAR DUPLICADOS
 
 let existe =
 POCEADA.historico.some(s=>
@@ -12148,63 +12143,41 @@ return false;
 
 // CREAR REGISTRO
 
-let registro = {
+let registro={
 
 
-id:
-Date.now(),
+id:Date.now(),
 
+fecha:new Date().toLocaleDateString(),
 
-fecha:
-new Date().toLocaleDateString(),
+hora:new Date().toLocaleTimeString(),
 
+tipo:"PDF",
 
-hora:
-new Date().toLocaleTimeString(),
+provincia:"CORRIENTES",
 
+turno:"POCEADA",
 
-tipo:
-"PDF",
-
-
-provincia:
-"CORRIENTES",
-
-
-turno:
-"POCEADA",
-
-
-numeros:
-diezNumeros
+numeros:diezNumeros
 
 
 };
 
 
 
-
-// GUARDAR HISTÓRICO
+// GUARDAR
 
 POCEADA.historico.push(registro);
 
 
-
-// MEMORIA IA
-
 POCEADA.memoria.push({
 
-fecha:
-registro.fecha,
+fecha:registro.fecha,
 
-numeros:
-diezNumeros
+numeros:diezNumeros
 
 });
 
-
-
-// CONTADORES
 
 POCEADA.estado.sorteos =
 POCEADA.historico.length;
@@ -12214,17 +12187,13 @@ POCEADA.estado.aprendizaje++;
 
 
 
-// APRENDER SI EXISTE MOTOR
-
-if(typeof aprenderPoceadaV4 === "function"){
+if(typeof aprenderPoceadaV4==="function"){
 
 aprenderPoceadaV4(registro);
 
 }
 
 
-
-// GUARDAR
 
 guardarPoceada();
 
@@ -12233,67 +12202,7 @@ guardarPoceada();
 return true;
 
 
-}
-
-
-
-//////////////////////////////////////////////////
-// VER HISTORIAL
-//////////////////////////////////////////////////
-
-function verRegistroPoceadaV4(){
-
-
-let html = `
-
-<h3>
-📋 HISTORIAL POCEADA IA
-</h3>
-
-Total sorteos:
-
-<b>
-${POCEADA.historico.length}
-</b>
-
-<br><br>
-
-`;
-
-
-
-POCEADA.historico.forEach(sorteo=>{
-
-
-html += `
-
-<hr>
-
-Fecha:
-${sorteo.fecha}
-
-<br>
-
-Números:
-
-<b>
-${sorteo.numeros.join(" - ")}
-</b>
-
-<br>
-
-`;
-
-
-
-});
-
-
-
-mostrarPoceadaV4(html);
-
-
-}
+    }
 
 
 

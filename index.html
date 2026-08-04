@@ -5140,6 +5140,7 @@ if(typeof aplicarDiagnosticoBloque12V60 === "function"){
     );
 
 }
+   console.log("RANKING ANTES DEL MOTOR", ranking); 
 
 
 // MOTOR V60 REAL
@@ -5151,6 +5152,9 @@ await aplicarMotorV60(
     turnoOrigen,
     turnoDestino
 );
+    
+    console.log("ORDEN FINAL", motorV60.orden);
+console.log("AMBOS FINAL", motorV60.ambos);
 
 
 ranking =

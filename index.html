@@ -5182,6 +5182,10 @@ await corregirDecenaHistoricaV60(
     turnoDestino,
     ranking
 );
+    mostrarV48(
+"DESPUÉS corregirDecenaHistoricaV60\n" 
++ ambos.join(" - ")
+);
 
     
  let terceroHistorico =
@@ -5215,6 +5219,10 @@ await aplicarCorrectorDecenaV56(
     ambos,
     turnoOrigen
 );
+    mostrarV48(
+"DESPUÉS aplicarCorrectorDecenaV56\n"
++ ambos.join(" - ")
+);
 
 
 // Corrector patrón seguro
@@ -5223,6 +5231,10 @@ ambos =
 await aplicarCorrectorPatronV57(
     ambos,
     turnoOrigen
+);
+    mostrarV48(
+"DESPUÉS aplicarCorrectorPatronV57\n"
++ ambos.join(" - ")
 );
     // ASEGURAR 3 AMBOS SIEMPRE
 

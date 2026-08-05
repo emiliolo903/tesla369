@@ -4949,10 +4949,16 @@ async function corregirDecenaHistoricaV60(
         let mejorNumero = numero;
         let mejorPeso = -999999;
 
-        // Probar todas las decenas posibles
-        for(let d=0; d<=9; d++){
+        // Probar decena actual y vecinas solamente
+let decenaActual = parseInt(numero[0]);
 
-            let candidato = d + unidad;
+for(let d = decenaActual - 1; d <= decenaActual + 1; d++){
+
+    if(d < 0 || d > 9){
+        continue;
+    }
+
+    let candidato = d + unidad;
 
             let peso = 0;
 

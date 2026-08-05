@@ -5140,6 +5140,21 @@ if(typeof aplicarDiagnosticoBloque12V60 === "function"){
     );
 
 }
+    
+//////////////////////////////////////////////////
+// LIMPIEZA INTELIGENTE DEL RANKING
+//////////////////////////////////////////////////
+
+ranking = Object.fromEntries(
+
+Object.entries(ranking)
+
+.sort((a,b)=>b[1]-a[1])
+
+.slice(0,50)
+
+);
+    
    mostrarV48(`
 RANKING
 
@@ -5215,15 +5230,16 @@ if(terceroHistorico){
 // Corrector de decena
 
 // DESACTIVADO TEMPORALMENTE PARA PRUEBA
-// ambos = await aplicarCorrectorDecenaV56(
-//     ambos,
-//     turnoOrigen
-// );
+ ambos = 
+await aplicarCorrectorDecenaV56(
+    ambos,
+    turnoOrigen
+);
     
-//    mostrarV48(
-//"DESPUÉS aplicarCorrectorDecenaV56\n"
-//+ ambos.join(" - ")
-//);
+   mostrarV48(
+"DESPUÉS aplicarCorrectorDecenaV56\n"
++ ambos.join(" - ")
+);
 
 
 // Corrector patrón seguro

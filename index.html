@@ -4755,31 +4755,30 @@ Object.keys(ranking)
 .sort((a,b)=>b.puntaje-a.puntaje);
 
 
+//////////////////////////////////////////////////
+// NUEVA SELECCIÓN IA V60
+// SOLO 2 AMBOS DEL RANKING
+//////////////////////////////////////////////////
+
+let orden =
+candidatos.map(x=>x.numero);
+
 // Ambos finales
 
 let ambos=[];
 
-for(let c of candidatos){
-
-    if(!ambos.includes(c.numero)){
-
-        ambos.push(c.numero);
-
-    }
-
-    if(ambos.length==4){
-
-        break;
-
-    }
-
+// Primer ambos
+if(orden.length>0){
+    ambos.push(orden[0]);
 }
 
-
-// Orden completo
-
-let orden =
-candidatos.map(x=>x.numero);
+// Segundo ambos
+if(
+    orden.length>1 &&
+    !ambos.includes(orden[1])
+){
+    ambos.push(orden[1]);
+}
 
 
 

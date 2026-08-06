@@ -4633,30 +4633,152 @@ if(
     }
 
 
-    // MOTOR HISTÓRICO ORIGINAL
+//////////////////////////////////////////////////
+// MOTOR GANADOR IA71
+//////////////////////////////////////////////////
 
-    for(let base of bases){
+let motorActivo =
+obtenerMotorActivoIA71();
 
-        ranking =
-        aplicarMotorHistoricoV60(
-            ranking,
-            base,
-            turnoOrigen,
-            turnoDestino
-        );
+for(let base of bases){
 
+    switch(motorActivo){
 
-        ranking =
-        aplicarAcompanantesV60(
-            ranking,
-            base,
-            turnoOrigen,
-            turnoDestino
-        );
+        case "HISTORICO":
+        case "MEMORIA_HISTORICA":
+
+            ranking =
+            aplicarMotorHistoricoV60(
+                ranking,
+                base,
+                turnoOrigen,
+                turnoDestino
+            );
+
+        break;
+
+        case "ACOMPANANTES":
+
+            ranking =
+            aplicarAcompanantesV60(
+                ranking,
+                base,
+                turnoOrigen,
+                turnoDestino
+            );
+
+        break;
+
+        case "TRANSICION":
+
+            let candidatos =
+            await analizarTransicionTurnoV48(
+                base,
+                turnoOrigen
+            );
+
+            for(let n of candidatos){
+
+                if(!ranking[n])
+                    ranking[n]=0;
+
+                ranking[n]+=30;
+
+            }
+
+        break;
+
+        case "TESLA":
+
+            let tesla =
+            aplicarTeslaV48(base);
+
+            if(!ranking[tesla])
+                ranking[tesla]=0;
+
+            ranking[tesla]+=40;
+
+        break;
+
+        case "MATRIZ":
+
+            if(
+                MATRIZ_HISTORICA_V48[turnoOrigen] &&
+                MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino]
+            ){
+
+                let matriz =
+                MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino];
+
+                for(let provincia in matriz){
+
+                    for(let numero in matriz[provincia]){
+
+                        if(!ranking[numero])
+                            ranking[numero]=0;
+
+                        ranking[numero]+=matriz[provincia][numero];
+
+                    }
+
+                }
+
+            }
+
+        break;
+
+        default:
+
+            ranking =
+            aplicarMotorHistoricoV60(
+                ranking,
+                base,
+                turnoOrigen,
+                turnoDestino
+            );
+
+            ranking =
+            aplicarAcompanantesV60(
+                ranking,
+                base,
+                turnoOrigen,
+                turnoDestino
+            );
 
     }
 
+}
 
+console.log(
+"Motor activo IA71:",
+motorActivo
+);
+
+
+//////////////////////////////////////////////////
+// IA71 - APLICAR PESO DEL MOTOR GANADOR
+//////////////////////////////////////////////////
+
+if(typeof obtenerMotorActivoIA71 === "function" &&
+   typeof obtenerPesoMotorIA71 === "function"){
+
+    let motorActivo = obtenerMotorActivoIA71();
+    let pesoMotor = obtenerPesoMotorIA71(motorActivo);
+
+    for(let numero in ranking){
+
+        ranking[numero] *= pesoMotor;
+
+    }
+
+    console.log(
+        "Motor activo:",
+        motorActivo,
+        "Peso:",
+        pesoMotor
+    );
+
+    }
 
     // Orientación inteligente
 ranking =
@@ -5016,7 +5138,21 @@ async function generarResultadoIA(){
 await ejecutarBloque11IA();
     
 await construirBloque12V60();
+    
+//////////////////////////////////////////////////
+// IA71 - LABORATORIO
+//////////////////////////////////////////////////
 
+await ejecutarSimuladorIA71();
+
+await actualizarPesosMotoresIA71();
+
+seleccionarMotorIA71();
+
+console.log(
+"Motor IA71:",
+obtenerMotorActivoIA71()
+);
 
 let elemento =
 document.getElementById("turnoCarga");
@@ -5193,6 +5329,87 @@ AMBOS
 ${motorV60.ambos.join(" - ")}
 `);
 
+    //////////////////////////////////////////////////
+// APLICAR PESO DEL MOTOR GANADOR
+//////////////////////////////////////////////////
+
+ranking =
+await aplicarPesosRankingIA71(
+    ranking
+);
+    
+//////////////////////////////////////////////////
+// IA71 - USAR MOTOR GANADOR
+//////////////////////////////////////////////////
+
+await actualizarSistemaIA71();
+
+let motorActivo =
+obtenerMotorActivoIA71();
+
+console.log(
+"Motor IA activo:",
+motorActivo
+);
+
+switch(motorActivo){
+
+case "TESLA":
+
+    motorV60 =
+    await aplicarMotorTeslaV60(
+        ranking,
+        bases,
+        turnoOrigen,
+        turnoDestino
+    );
+
+break;
+
+case "TRANSICION":
+
+    motorV60 =
+    await aplicarMotorTransicionV60(
+        ranking,
+        bases,
+        turnoOrigen,
+        turnoDestino
+    );
+
+break;
+
+case "MEMORIA_HISTORICA":
+
+    motorV60 =
+    await aplicarMotorHistoricoCompletoV60(
+        ranking,
+        bases,
+        turnoOrigen,
+        turnoDestino
+    );
+
+break;
+
+case "MATRIZ":
+
+    motorV60 =
+    await aplicarMotorMatrizV60(
+        ranking,
+        bases,
+        turnoOrigen,
+        turnoDestino
+    );
+
+break;
+
+// Si gana V60 sigue igual
+
+default:
+
+break;
+
+    }
+    
 ranking =
 motorV60.ranking;
 
@@ -5437,7 +5654,14 @@ console.log(
 PREDICCION_ACTUAL_V49
 );
 
+await guardarLaboratorioIA71();
 
+console.table(LABORATORIO_IA71.ranking);
+
+console.log(
+"Motor ganador:",
+obtenerMotorActivoIA71()
+);
 
 // Mostrar resultado
 

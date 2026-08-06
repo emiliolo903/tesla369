@@ -5338,77 +5338,8 @@ await aplicarPesosRankingIA71(
     ranking
 );
     
-//////////////////////////////////////////////////
-// IA71 - USAR MOTOR GANADOR
-//////////////////////////////////////////////////
 
-await actualizarSistemaIA71();
 
-let motorActivo =
-obtenerMotorActivoIA71();
-
-console.log(
-"Motor IA activo:",
-motorActivo
-);
-
-switch(motorActivo){
-
-case "TESLA":
-
-    motorV60 =
-    await aplicarMotorTeslaV60(
-        ranking,
-        bases,
-        turnoOrigen,
-        turnoDestino
-    );
-
-break;
-
-case "TRANSICION":
-
-    motorV60 =
-    await aplicarMotorTransicionV60(
-        ranking,
-        bases,
-        turnoOrigen,
-        turnoDestino
-    );
-
-break;
-
-case "MEMORIA_HISTORICA":
-
-    motorV60 =
-    await aplicarMotorHistoricoCompletoV60(
-        ranking,
-        bases,
-        turnoOrigen,
-        turnoDestino
-    );
-
-break;
-
-case "MATRIZ":
-
-    motorV60 =
-    await aplicarMotorMatrizV60(
-        ranking,
-        bases,
-        turnoOrigen,
-        turnoDestino
-    );
-
-break;
-
-// Si gana V60 sigue igual
-
-default:
-
-break;
-
-    }
     
 ranking =
 motorV60.ranking;

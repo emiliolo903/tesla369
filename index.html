@@ -4641,31 +4641,63 @@ let motorActivo =
 obtenerMotorActivoIA71();
 
 for(let base of bases){
-
+    
+let motorActivo =
+obtenerMotorActivoIA71();
+    
     switch(motorActivo){
 
         case "HISTORICO":
         case "MEMORIA_HISTORICA":
 
-            ranking =
-            aplicarMotorHistoricoV60(
-                ranking,
-                base,
-                turnoOrigen,
-                turnoDestino
-            );
+            // Siempre ejecuta los dos motores base
+ranking =
+aplicarMotorHistoricoV60(
+    ranking,
+    base,
+    turnoOrigen,
+    turnoDestino
+);
 
-        break;
+ranking =
+aplicarAcompanantesV60(
+    ranking,
+    base,
+    turnoOrigen,
+    turnoDestino
+);
 
-        case "ACOMPANANTES":
+// Bonificación al motor ganador
+if(motorActivo=="TESLA"){
 
-            ranking =
-            aplicarAcompanantesV60(
-                ranking,
-                base,
-                turnoOrigen,
-                turnoDestino
-            );
+    let tesla =
+    aplicarTeslaV48(base);
+
+    if(!ranking[tesla])
+        ranking[tesla]=0;
+
+    ranking[tesla]+=50;
+
+}
+
+if(motorActivo=="TRANSICION"){
+
+    let candidatos =
+    await analizarTransicionTurnoV48(
+        base,
+        turnoOrigen
+    );
+
+    for(let n of candidatos){
+
+        if(!ranking[n])
+            ranking[n]=0;
+
+        ranking[n]+=20;
+
+    }
+
+}
 
         break;
 

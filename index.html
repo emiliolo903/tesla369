@@ -5171,15 +5171,6 @@ await ejecutarBloque11IA();
     
 await construirBloque12V60();
     
-//////////////////////////////////////////////////
-// IA71 - LABORATORIO
-//////////////////////////////////////////////////
-
-await ejecutarSimuladorIA71();
-
-await actualizarPesosMotoresIA71();
-
-seleccionarMotorIA71();
 
 console.log(
 "Motor IA71:",
@@ -5361,16 +5352,14 @@ AMBOS
 ${motorV60.ambos.join(" - ")}
 `);
 
-    //////////////////////////////////////////////////
-// APLICAR PESO DEL MOTOR GANADOR
-//////////////////////////////////////////////////
-
 ranking =
 await aplicarPesosRankingIA71(
-    ranking
-);
-    
 
+    ranking,
+
+    motorV60.orden
+
+);
 
     
 ranking =
@@ -5616,6 +5605,12 @@ console.log(
 "V60 PREDICCION FINAL",
 PREDICCION_ACTUAL_V49
 );
+
+ await ejecutarSimuladorIA71();
+
+await actualizarPesosMotoresIA71();
+
+seleccionarMotorIA71();   
 
 await guardarLaboratorioIA71();
 
@@ -11425,7 +11420,13 @@ function obtenerPesoMotorIA71(motor){
 
 }
 
-async function aplicarPesosRankingIA71(ranking){
+async function aplicarPesosRankingIA71(
+
+    ranking,
+
+    numerosMotor
+
+){
 
     let motor =
     obtenerMotorActivoIA71();
@@ -11433,15 +11434,22 @@ async function aplicarPesosRankingIA71(ranking){
     let peso =
     obtenerPesoMotorIA71(motor);
 
-    for(let numero in ranking){
+    for(let numero of numerosMotor){
 
-        ranking[numero] *= peso;
+        if(ranking[numero]){
+
+            ranking[numero] +=
+            ranking[numero] * (peso - 1);
+
+        }
 
     }
 
     return ranking;
 
 }
+
+
 
 async function actualizarSistemaIA71(){
 

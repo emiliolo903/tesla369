@@ -5014,7 +5014,7 @@ async function corregirDecenaHistoricaV60(
 
             // 2. Frecuencia histórica específica por coincidencia exacta
             if(MEMORIA_V60.frecuencia && MEMORIA_V60.frecuencia[candidato]){
-                peso += MEMORIA_V60.frecuencia[candidato] * 2.5;
+                peso += MEMORIA_V60.frecuencia[candidato] * 0.8;
             }
 
             // 3. Matriz global de transición por relación Decena-Unidad
@@ -5023,7 +5023,7 @@ async function corregirDecenaHistoricaV60(
                 MEMORIA_V60.decenaPorUnidad[unidad] &&
                 MEMORIA_V60.decenaPorUnidad[unidad][String(d)]
             ){
-                peso += MEMORIA_V60.decenaPorUnidad[unidad][String(d)] * 4;
+                peso += MEMORIA_V60.decenaPorUnidad[unidad][String(d)] * 1.5;
             }
 
             // 4. Peso por comportamiento en el turno específico de transición

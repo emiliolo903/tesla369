@@ -5090,7 +5090,6 @@ async function obtenerTercerAmbosHistoricoV60(
 // CORRECTOR INTELIGENTE DE DECENA V60.2
 // NO SE CASA CON UNA SOLA DECENA
 //////////////////////////////////////////////////
-
 async function corregirDecenaHistoricaV60(
     ambos,
     turnoOrigen,
@@ -5108,16 +5107,11 @@ async function corregirDecenaHistoricaV60(
         let mejorNumero = numero;
         let mejorPeso = -999999;
 
-        // Probar decena actual y vecinas solamente
-let decenaActual = parseInt(numero[0]);
+        // Probar TODAS las decenas
+        for(let d=0; d<=9; d++){
 
-for(let d = 0; d <= 9; d++)
-
-    if(d < 0 || d > 9){
-        continue;
-    }
-
-    let candidato = d + unidad;
+            let candidato =
+            String(d)+unidad;
 
             let peso = 0;
 
@@ -5126,12 +5120,12 @@ for(let d = 0; d <= 9; d++)
                 peso += ranking[candidato];
             }
 
-            // Premio por frecuencia histórica exacta
+            // Premio por frecuencia histórica
             if(MEMORIA_V60.frecuencia[candidato]){
                 peso += MEMORIA_V60.frecuencia[candidato] * 2;
             }
 
-            // Premio por relación decena-unidad
+            // Premio por relación unidad-decena
             if(
                 MEMORIA_V60.decenaPorUnidad[unidad] &&
                 MEMORIA_V60.decenaPorUnidad[unidad][String(d)]
@@ -5156,6 +5150,8 @@ for(let d = 0; d <= 9; d++)
     return ambos;
 
 }
+
+
     
     
 //////////////////////////////////////////////////

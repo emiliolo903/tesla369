@@ -5324,6 +5324,18 @@ RANKING
 ${JSON.stringify(ranking,null,2)}
 `);
 
+console.log(
+    "🔎 DIAGNÓSTICO ANTES MOTOR V60",
+    {
+        "40": ranking["40"],
+        "13": ranking["13"],
+        top10: Object.entries(ranking)
+            .sort((a,b)=>b[1]-a[1])
+            .slice(0,10)
+    }
+);
+    
+    
 // MOTOR V60 REAL
 
 let motorV60 =

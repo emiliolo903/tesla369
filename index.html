@@ -5020,72 +5020,206 @@ async function obtenerTercerAmbosHistoricoV60(
 
 }
 //////////////////////////////////////////////////
-// CORRECTOR INTELIGENTE DE DECENA V60.2
-// NO SE CASA CON UNA SOLA DECENA
+// CORRECTOR DE DECENA HISTÓRICA V60.1
+// CONSERVA EL RANKING Y CORRIGE SIN DESTRUIR
 //////////////////////////////////////////////////
+
 async function corregirDecenaHistoricaV60(
     ambos,
     turnoOrigen,
     turnoDestino,
     ranking
 ){
-    let historial = await leerV48(STORES_V48.historico);
 
-    for(let i = 0; i < ambos.length; i++){
-        let numero = String(ambos[i]).padStart(2, "0");
-        let unidad = numero[1];
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
 
-        let mejorNumero = numero;
-        let mejorPeso = -999999;
+    if(!Array.isArray(ambos))
+        return ambos;
 
-        // EVALUACIÓN GLOBAL DE DECENAS (0 A 9) EN LUGAR DE SOLO ±1
-        for(let d = 0; d <= 9; d++){
-            let candidato = String(d) + unidad;
-            let peso = 0;
+    if(!ranking)
+        ranking={};
 
-            // 1. Peso acumulado dentro del ranking general
-            if(ranking[candidato]){
-                peso += ranking[candidato];
+
+    let salida=[];
+
+
+    for(let i=0;i<ambos.length;i++){
+
+        let original =
+        String(ambos[i])
+        .slice(-2)
+        .padStart(2,"0");
+
+
+        let unidad =
+        original[1];
+
+
+        //////////////////////////////////////////////////
+        // CANDIDATO ORIGINAL
+        //////////////////////////////////////////////////
+
+        let mejor =
+        original;
+
+        let mejorPeso =
+        Number(ranking[original]||0);
+
+
+        //////////////////////////////////////////////////
+        // EVALUAR LAS 10 DECENAS
+        //////////////////////////////////////////////////
+
+        for(let d=0;d<=9;d++){
+
+            let candidato =
+            String(d)+unidad;
+
+
+            let peso =
+            Number(ranking[candidato]||0);
+
+
+            //////////////////////////////////////////////////
+            // HISTÓRICO EXACTO
+            //////////////////////////////////////////////////
+
+            if(
+                MEMORIA_V60.frecuencia &&
+                MEMORIA_V60.frecuencia[candidato]
+            ){
+
+                peso +=
+                MEMORIA_V60.frecuencia[candidato] * 0.50;
+
             }
 
-            // 2. Frecuencia histórica específica por coincidencia exacta
-            if(MEMORIA_V60.frecuencia && MEMORIA_V60.frecuencia[candidato]){
-                peso += MEMORIA_V60.frecuencia[candidato] * 0.8;
-            }
 
-            // 3. Matriz global de transición por relación Decena-Unidad
+            //////////////////////////////////////////////////
+            // RELACIÓN DECENA / UNIDAD
+            //////////////////////////////////////////////////
+
             if(
                 MEMORIA_V60.decenaPorUnidad &&
                 MEMORIA_V60.decenaPorUnidad[unidad] &&
                 MEMORIA_V60.decenaPorUnidad[unidad][String(d)]
             ){
-                peso += MEMORIA_V60.decenaPorUnidad[unidad][String(d)] * 1.5;
+
+                peso +=
+                MEMORIA_V60
+                .decenaPorUnidad[unidad][String(d)]
+                * 1.00;
+
             }
 
-            // 4. Peso por comportamiento en el turno específico de transición
-            for(let j = 0; j < historial.length - 1; j++){
-                let regAct = historial[j];
-                let regSig = historial[j+1];
 
-                if(regAct.turno === turnoOrigen && regSig.turno === turnoDestino){
-                    let salidaReal = String(regSig.numero).slice(-2).padStart(2, "0");
-                    if(salidaReal === candidato){
-                        peso += 5; // Premio fuerte por coincidencia exacta en el turno
-                    }
+            //////////////////////////////////////////////////
+            // TRANSICIÓN REAL DEL TURNO
+            //////////////////////////////////////////////////
+
+            let veces=0;
+
+
+            for(let j=0;j<historial.length-1;j++){
+
+                let actual =
+                historial[j];
+
+                let siguiente =
+                historial[j+1];
+
+
+                if(!actual || !siguiente)
+                    continue;
+
+
+                if(
+                    actual.turno!==turnoOrigen ||
+                    siguiente.turno!==turnoDestino
+                )
+                    continue;
+
+
+                let real =
+                String(siguiente.numero)
+                .slice(-2)
+                .padStart(2,"0");
+
+
+                if(real===candidato){
+
+                    veces++;
+
                 }
+
             }
 
-            if(peso > mejorPeso){
-                mejorPeso = peso;
-                mejorNumero = candidato;
+
+            peso +=
+            veces * 2;
+
+
+            //////////////////////////////////////////////////
+            // NO CAMBIAR POR UNA DIFERENCIA PEQUEÑA
+            //////////////////////////////////////////////////
+
+            if(
+                candidato!==original &&
+                peso <= mejorPeso + 5
+            ){
+
+                continue;
+
             }
+
+
+            //////////////////////////////////////////////////
+            // MEJOR CANDIDATO
+            //////////////////////////////////////////////////
+
+            if(peso>mejorPeso){
+
+                mejorPeso=peso;
+                mejor=candidato;
+
+            }
+
         }
 
-        ambos[i] = mejorNumero;
+
+        //////////////////////////////////////////////////
+        // EVITAR DUPLICADOS
+        //////////////////////////////////////////////////
+
+        if(salida.includes(mejor)){
+
+            // Mantener el original si la corrección
+            // produciría un duplicado.
+
+            mejor=original;
+
+        }
+
+
+        salida.push(mejor);
+
     }
 
-    return ambos;
-}
+
+    //////////////////////////////////////////////////
+    // FORMATO FINAL
+    //////////////////////////////////////////////////
+
+    return salida.map(n=>
+        String(n)
+        .slice(-2)
+        .padStart(2,"0")
+    );
+
+                }
 
   //////////////////////////////////////////////////
 // BLOQUE V61.1

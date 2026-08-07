@@ -4630,30 +4630,66 @@ if(motorActivo=="TRANSICION"){
 
         case "MATRIZ":
 
+    if(
+        MATRIZ_HISTORICA_V48[turnoOrigen] &&
+        MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino]
+    ){
+
+        let matriz =
+            MATRIZ_HISTORICA_V48
+            [turnoOrigen]
+            [turnoDestino];
+
+        for(let provincia in matriz){
+
+            let porBase =
+                matriz[provincia];
+
             if(
-                MATRIZ_HISTORICA_V48[turnoOrigen] &&
-                MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino]
+                !porBase ||
+                typeof porBase !== "object"
             ){
+                continue;
+            }
 
-                let matriz =
-                MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino];
+            for(let base in porBase){
 
-                for(let provincia in matriz){
+                let salidas =
+                    porBase[base];
 
-                    for(let numero in matriz[provincia]){
+                if(
+                    !salidas ||
+                    typeof salidas !== "object"
+                ){
+                    continue;
+                }
 
-                        if(!ranking[numero])
-                            ranking[numero]=0;
+                for(let numero in salidas){
 
-                        ranking[numero]+=matriz[provincia][numero];
+                    let cantidad =
+                        Number(salidas[numero]);
 
+                    if(!Number.isFinite(cantidad))
+                        continue;
+
+                    if(
+                        !ranking[numero] ||
+                        typeof ranking[numero] !== "number"
+                    ){
+                        ranking[numero]=0;
                     }
+
+                    ranking[numero] += cantidad;
 
                 }
 
             }
 
-        break;
+        }
+
+    }
+
+break;
 
         default:
 
@@ -5218,36 +5254,58 @@ for(let base of bases){
 }
 
 
-// Apoyo de matriz histórica
+//////////////////////////////////////////////////
+// MATRIZ HISTÓRICA V60 - LECTURA CORRECTA
+//////////////////////////////////////////////////
 
 let destinoMatriz =
-
-MATRIZ_HISTORICA_V48[turnoOrigen]
-&&
-MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino];
-
+    MATRIZ_HISTORICA_V48[turnoOrigen] &&
+    MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino];
 
 if(destinoMatriz){
 
     for(let provincia in destinoMatriz){
 
-        let datos =
-        destinoMatriz[provincia];
+        let porBase =
+            destinoMatriz[provincia];
 
+        if(!porBase || typeof porBase !== "object")
+            continue;
 
-        for(let salida in datos){
+        for(let base in porBase){
 
-            if(!ranking[salida])
-                ranking[salida]=0;
+            let salidas =
+                porBase[base];
 
+            if(!salidas || typeof salidas !== "object")
+                continue;
 
-            ranking[salida]+=datos[salida];
+            for(let salida in salidas){
+
+                let cantidad =
+                    Number(salidas[salida]);
+
+                if(!Number.isFinite(cantidad))
+                    continue;
+
+                if(!ranking[salida] ||
+                   typeof ranking[salida] !== "number"){
+
+                    ranking[salida]=0;
+
+                }
+
+                ranking[salida] += cantidad;
+
+            }
 
         }
 
     }
 
 }
+
+
 
 
 ranking =
@@ -5303,6 +5361,24 @@ if(typeof aplicarDiagnosticoBloque12V60 === "function"){
     );
 
 }
+
+//////////////////////////////////////////////////
+// SEGURIDAD: EL RANKING DEBE SER SOLO NUMÉRICO
+//////////////////////////////////////////////////
+
+for(let numero in ranking){
+
+    let valor =
+        Number(ranking[numero]);
+
+    if(!Number.isFinite(valor)){
+        delete ranking[numero];
+    }else{
+        ranking[numero]=valor;
+    }
+
+}    
+
     
 //////////////////////////////////////////////////
 // LIMPIEZA INTELIGENTE DEL RANKING

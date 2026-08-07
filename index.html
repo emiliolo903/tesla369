@@ -4102,10 +4102,10 @@ async function aplicarCorrectorDecenaV56(
 
         let mejorPeso=-1;
 
-        // Probar la decena ±2
+        // Probar solamente la decena actual y las vecinas
 let decenaActual = parseInt(ambosBase[0]);
 
-for(let d = decenaActual - 2; d <= decenaActual + 2; d++){
+for(let d = decenaActual - 1; d <= decenaActual + 1; d++){
 
     if(d < 0 || d > 9){
         continue;
@@ -4114,7 +4114,17 @@ for(let d = decenaActual - 2; d <= decenaActual + 2; d++){
     let candidato =
     String(d)+unidad;
 
-    let peso = 0;
+    let peso=0;
+
+    // PRIORIDAD CORRECCIÓN DECENA ±1
+if(d === decenaActual - 1){
+    peso += 2;
+}
+
+if(d === decenaActual + 1){
+    peso += 2;
+    }
+
 
     // Premio si está cerca de la decena original
     if(d===decenaActual) peso+=8;
@@ -4137,7 +4147,7 @@ for(let d = decenaActual - 2; d <= decenaActual + 2; d++){
                     String(siguiente.numero)
                     .slice(-2)===candidato
                 ){
-                    peso += 5;
+                    peso++;
                 }
 
             }

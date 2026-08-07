@@ -4993,61 +4993,63 @@ async function corregirDecenaHistoricaV60(
     turnoDestino,
     ranking
 ){
+    let historial = await leerV48(STORES_V48.historico);
 
-    for(let i=0;i<ambos.length;i++){
-
-        let numero =
-        String(ambos[i]).padStart(2,"0");
-
+    for(let i = 0; i < ambos.length; i++){
+        let numero = String(ambos[i]).padStart(2, "0");
         let unidad = numero[1];
 
         let mejorNumero = numero;
         let mejorPeso = -999999;
 
-        // Probar TODAS las decenas
-        for(let d=0; d<=9; d++){
-
-            let candidato =
-            String(d)+unidad;
-
+        // EVALUACIÓN GLOBAL DE DECENAS (0 A 9) EN LUGAR DE SOLO ±1
+        for(let d = 0; d <= 9; d++){
+            let candidato = String(d) + unidad;
             let peso = 0;
 
-            // Puntaje del ranking
+            // 1. Peso acumulado dentro del ranking general
             if(ranking[candidato]){
                 peso += ranking[candidato];
             }
 
-            // Premio por frecuencia histórica
-            if(MEMORIA_V60.frecuencia[candidato]){
-                peso += MEMORIA_V60.frecuencia[candidato] * 2;
+            // 2. Frecuencia histórica específica por coincidencia exacta
+            if(MEMORIA_V60.frecuencia && MEMORIA_V60.frecuencia[candidato]){
+                peso += MEMORIA_V60.frecuencia[candidato] * 2.5;
             }
 
-            // Premio por relación unidad-decena
+            // 3. Matriz global de transición por relación Decena-Unidad
             if(
+                MEMORIA_V60.decenaPorUnidad &&
                 MEMORIA_V60.decenaPorUnidad[unidad] &&
                 MEMORIA_V60.decenaPorUnidad[unidad][String(d)]
             ){
-                peso +=
-                MEMORIA_V60.decenaPorUnidad[unidad][String(d)] * 4;
+                peso += MEMORIA_V60.decenaPorUnidad[unidad][String(d)] * 4;
+            }
+
+            // 4. Peso por comportamiento en el turno específico de transición
+            for(let j = 0; j < historial.length - 1; j++){
+                let regAct = historial[j];
+                let regSig = historial[j+1];
+
+                if(regAct.turno === turnoOrigen && regSig.turno === turnoDestino){
+                    let salidaReal = String(regSig.numero).slice(-2).padStart(2, "0");
+                    if(salidaReal === candidato){
+                        peso += 5; // Premio fuerte por coincidencia exacta en el turno
+                    }
+                }
             }
 
             if(peso > mejorPeso){
-
                 mejorPeso = peso;
                 mejorNumero = candidato;
-
             }
-
         }
 
         ambos[i] = mejorNumero;
-
     }
 
     return ambos;
-
 }
-
 
   //////////////////////////////////////////////////
 // BLOQUE V61.1
@@ -5401,7 +5403,7 @@ if(terceroHistorico){
 // Corrector de decena
 
 // DESACTIVADO TEMPORALMENTE PARA PRUEBA
- ambos = 
+/* ambos = 
 await aplicarCorrectorDecenaV56(
     ambos,
     turnoOrigen
@@ -5411,7 +5413,7 @@ await aplicarCorrectorDecenaV56(
 "DESPUÉS aplicarCorrectorDecenaV56\n"
 + ambos.join(" - ")
 );
-
+*/
 
 // Corrector patrón seguro
 

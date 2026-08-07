@@ -5152,7 +5152,76 @@ async function corregirDecenaHistoricaV60(
 }
 
 
-    
+  //////////////////////////////////////////////////
+// BLOQUE V61.1
+// NÚCLEOS DOMINANTES SOBRE RANKING
+//////////////////////////////////////////////////
+
+async function aplicarNucleoDominanteV61(
+    ranking,
+    turnoOrigen
+){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    let contador = {};
+
+    // Últimos 50 sorteos del mismo turno
+    let ultimos = historial
+    .filter(x=>x.turno===turnoOrigen)
+    .slice(-50);
+
+    for(let r of ultimos){
+
+        let ambos =
+        String(r.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+        let decena =
+        ambos[0];
+
+        contador[decena] =
+        (contador[decena]||0)+1;
+
+    }
+
+    let nucleos =
+    Object.keys(contador)
+    .sort(
+        (a,b)=>contador[b]-contador[a]
+    )
+    .slice(0,2);
+
+    // PREMIAR LOS DOS NÚCLEOS
+    for(let numero in ranking){
+
+        numero =
+        String(numero).padStart(2,"0");
+
+        let decena =
+        numero[0];
+
+        if(decena===nucleos[0]){
+
+            ranking[numero]+=8;
+
+        }
+
+        if(decena===nucleos[1]){
+
+            ranking[numero]+=5;
+
+        }
+
+    }
+
+    return ranking;
+
+    }  
     
 //////////////////////////////////////////////////
 // GENERADOR IA V60
@@ -5301,6 +5370,12 @@ aplicarCorreccionErroresIA_V52(
     candidatosError
 );
 
+    ranking =
+await aplicarNucleoDominanteV61(
+    ranking,
+    turnoOrigen
+);
+    
 
 for(let n of corregidosError){
 

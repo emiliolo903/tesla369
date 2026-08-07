@@ -2884,7 +2884,6 @@ function obtenerSiguienteTurnoV48(turno){
     let destino =
     obtenerSiguienteTurnoV48(turnoOrigen);
 
-
     if(!datos){
 
         datos =
@@ -2894,240 +2893,140 @@ function obtenerSiguienteTurnoV48(turno){
 
     }
 
-
     base =
     String(base)
     .slice(-2)
     .padStart(2,"0");
 
+    let inversion =
+    base[1] + base[0];
 
     let pesos = {};
 
-
-    let inversion =
-    base[1]+base[0];
-
-
-    for(let i=0;i<datos.length;i++){
+    for(let i=0; i<datos.length; i++){
 
         let actual = datos[i];
 
-
-        if(!actual.numero)
+        if(!actual || !actual.numero)
             continue;
-
 
         if(actual.turno !== turnoOrigen)
             continue;
-
 
         let numeroActual =
         String(actual.numero)
         .slice(-2)
         .padStart(2,"0");
 
-
         if(
-            numeroActual!==base &&
-            numeroActual!==inversion
-        )
-        continue;
+            numeroActual !== base &&
+            numeroActual !== inversion
+        ){
+            continue;
+        }
 
-
-
-        for(let j=0;j<datos.length;j++){
+        // Buscar el siguiente turno de la misma provincia
+        for(let j=i+1; j<datos.length; j++){
 
             let siguiente = datos[j];
 
-
-            if(
-                siguiente.fecha !== actual.fecha
-            )
-            continue;
-
+            if(!siguiente || !siguiente.numero)
+                continue;
 
             if(
                 siguiente.provincia !== actual.provincia
-            )
-            continue;
-
+            ){
+                continue;
+            }
 
             if(
                 siguiente.turno !== destino
-            )
-            continue;
-
-
+            ){
+                continue;
+            }
 
             let salida =
             String(siguiente.numero)
             .slice(-2)
             .padStart(2,"0");
 
-
-
             if(
-                salida===base ||
-                salida===inversion
-            )
-            continue;
-
-
-
-            if(!pesos[salida])
-                pesos[salida]=0;
-
-
-
-            // HISTÓRICO
-            pesos[salida]+=30;
-
-
-
-            // NÚCLEOS
-
-            if(
-                typeof NUCLEO_V48 !== "undefined"
+                salida === base ||
+                salida === inversion
             ){
-
-                if(
-                    NUCLEO_V48.dominante &&
-                    salida===NUCLEO_V48.dominante
-                ){
-                    pesos[salida]+=20;
-                }
-
-
-                if(
-                    NUCLEO_V48.segundo &&
-                    salida===NUCLEO_V48.segundo
-                ){
-                    pesos[salida]+=12;
-                }
-
-
-                if(
-                    NUCLEO_V48.sobreviviente &&
-                    salida===NUCLEO_V48.sobreviviente
-                ){
-                    pesos[salida]+=6;
-                }
-
+                break;
             }
 
+            if(!pesos[salida]){
+                pesos[salida]=0;
+            }
 
+            // Peso principal
+            pesos[salida]+=40;
 
-            // TESLA
+            // Unidad igual
+            if(salida[1]===base[1]){
+                pesos[salida]+=5;
+            }
 
+            // Decena igual
+            if(salida[0]===base[0]){
+                pesos[salida]+=3;
+            }
+
+            // Tesla
             let tesla =
             aplicarTeslaV48(base);
 
-
-            if(
-                salida===tesla
-            ){
-
-                pesos[salida]+=15;
-
+            if(salida===tesla){
+                pesos[salida]+=10;
             }
 
-
-
-            // UNIDAD FUERTE
-
-            if(
-                salida[1]===base[1]
-            ){
-
-                pesos[salida]+=8;
-
-            }
-
-
-
-            // MISMA DECENA
-
-            if(
-                salida[0]===base[0]
-            ){
-
-                pesos[salida]+=6;
-
-            }
-
-
-
-            // PENALIZACIÓN INVERTIDA
-
-            if(
-                salida===inversion
-            ){
-
-                pesos[salida]-=5;
-
-            }
-
-
+            // Sólo tomar la primera transición encontrada
+            break;
         }
 
     }
-
-
 
     let orden =
     Object.keys(pesos)
     .sort(
-        (a,b)=>
-        pesos[b]-pesos[a]
+        (a,b)=>pesos[b]-pesos[a]
     );
 
+    // Respaldo
+    if(orden.length===0){
 
-
-    // SI NO HAY RESULTADO
-
-    if(
-        orden.length===0
-    ){
-
-        let todos={};
-
+        let frecuencia={};
 
         for(let d of datos){
 
             if(!d.numero)
-            continue;
+                continue;
 
-
-            let n =
+            let n=
             String(d.numero)
             .slice(-2)
             .padStart(2,"0");
 
-
-            todos[n]=
-            (todos[n]||0)+1;
+            frecuencia[n]=
+            (frecuencia[n]||0)+1;
 
         }
 
-
-        orden =
-        Object.keys(todos)
+        orden=
+        Object.keys(frecuencia)
         .sort(
-            (a,b)=>
-            todos[b]-todos[a]
+            (a,b)=>frecuencia[b]-frecuencia[a]
         );
 
     }
 
-
-
     return orden.slice(0,10);
 
-     
-
-                }
-
-                
+        }
+        
+                    
     
     
     //////////////////////////////////////////////////

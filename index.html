@@ -1351,6 +1351,11 @@ PREDICCION_ACTUAL_V49.ambos
             prediccion
 
         );
+
+        guardarErrorIA_V52(
+    prediccion,
+    numero.slice(-2)
+);
         
         console.log(
 "APRENDIZAJE ERROR IA",
@@ -5309,7 +5314,30 @@ await aplicarCorrectorDesviacionV55_2(
     historico
 );
 
+//////////////////////////////////////////////////
+// CORRECCIÓN ERRORES APRENDIDOS V52
+//////////////////////////////////////////////////
 
+let candidatosError =
+Object.keys(ranking);
+
+
+let corregidosError =
+aplicarCorreccionErroresIA_V52(
+    candidatosError
+);
+
+
+for(let n of corregidosError){
+
+    if(!ranking[n])
+        ranking[n]=0;
+
+
+    ranking[n]+=15;
+
+    }
+    
 //////////////////////////////////////////////////
 // BLOQUE 12 ACTIVO
 //////////////////////////////////////////////////

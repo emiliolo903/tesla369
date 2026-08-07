@@ -4077,7 +4077,6 @@ async function aplicarCorrectorDesviacionV55_2(
 //////////////////////////////////////////////////////
 // CORRECTOR DE DECENA INTELIGENTE V56
 //////////////////////////////////////////////////////
-
 async function aplicarCorrectorDecenaV56(
     ambos,
     turnoOrigen
@@ -4095,46 +4094,29 @@ async function aplicarCorrectorDecenaV56(
 
     for(let ambosBase of ambos){
 
-        ambosBase=
-        String(ambosBase)
-        .padStart(2,"0");
+        ambosBase =
+        String(ambosBase).padStart(2,"0");
 
-        let unidad=
+        let unidad =
         ambosBase[1];
 
-        let mejor=
+        let mejor =
         ambosBase;
 
-        let mejorPeso=-1;
+        let mejorPeso = -1;
 
-        // Probar solamente la decena actual y las vecinas
-let decenaActual = parseInt(ambosBase[0]);
+        // Probar TODAS las decenas
+        for(let d=0; d<=9; d++){
 
-for(let d = 0; d <= 9; d++)
+            let candidato =
+            String(d)+unidad;
 
-    if(d < 0 || d > 9){
-        continue;
-    }
-
-    let candidato =
-    String(d)+unidad;
-
-    let peso=0;
-
-    // PRIORIDAD CORRECCIÓN DECENA ±1
-if(d === decenaActual - 1){
-    peso += 2;
-}
-
-if(d === decenaActual + 1){
-    peso += 2;
-    }
-
+            let peso = 0;
 
             for(let i=0;i<historial.length-1;i++){
 
-                let actual=historial[i];
-                let siguiente=historial[i+1];
+                let actual = historial[i];
+                let siguiente = historial[i+1];
 
                 if(actual.turno!==turnoOrigen)
                     continue;
@@ -4144,7 +4126,8 @@ if(d === decenaActual + 1){
 
                 if(
                     String(siguiente.numero)
-                    .slice(-2)===candidato
+                    .slice(-2)
+                    .padStart(2,"0")===candidato
                 ){
                     peso++;
                 }
@@ -4153,8 +4136,8 @@ if(d === decenaActual + 1){
 
             if(peso>mejorPeso){
 
-                mejorPeso=peso;
-                mejor=candidato;
+                mejorPeso = peso;
+                mejor = candidato;
 
             }
 
@@ -4167,6 +4150,7 @@ if(d === decenaActual + 1){
     return [...new Set(salida)];
 
 }
+
 //////////////////////////////////////////////////////
 // CORRECTOR FINAL DE PATRÓN V57.1 SEGURO
 //////////////////////////////////////////////////////

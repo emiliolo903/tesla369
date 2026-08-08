@@ -2875,7 +2875,7 @@ function obtenerSiguienteTurnoV48(turno){
 ////////////////////////////////////////////////
 // MOTOR IA HISTÓRICO V49
 ////////////////////////////////////////////////
- async function analizarTransicionTurnoV48(
+async function analizarTransicionTurnoV48(
     base,
     turnoOrigen,
     datos = null
@@ -2904,10 +2904,6 @@ function obtenerSiguienteTurnoV48(turno){
     let pesos = {};
 
 
-    //////////////////////////////////////////////////
-    // BUSCAR TRANSICIONES REALES
-    //////////////////////////////////////////////////
-
     for(let i=0; i<datos.length; i++){
 
         let actual = datos[i];
@@ -2925,7 +2921,8 @@ function obtenerSiguienteTurnoV48(turno){
             .padStart(2,"0");
 
 
-        // Aceptar base o invertido
+        // La base puede coincidir directa
+        // o invertida.
         if(
             numeroActual !== base &&
             numeroActual !== inversion
@@ -2933,10 +2930,6 @@ function obtenerSiguienteTurnoV48(turno){
             continue;
         }
 
-
-        //////////////////////////////////////////////////
-        // BUSCAR DESTINO DE LA MISMA FECHA Y PROVINCIA
-        //////////////////////////////////////////////////
 
         for(let j=0; j<datos.length; j++){
 
@@ -2946,6 +2939,7 @@ function obtenerSiguienteTurnoV48(turno){
                 continue;
 
 
+            // MISMA FECHA
             if(
                 String(siguiente.fecha) !==
                 String(actual.fecha)
@@ -2954,6 +2948,7 @@ function obtenerSiguienteTurnoV48(turno){
             }
 
 
+            // MISMA PROVINCIA
             if(
                 siguiente.provincia !==
                 actual.provincia
@@ -2962,6 +2957,7 @@ function obtenerSiguienteTurnoV48(turno){
             }
 
 
+            // TURNO SIGUIENTE
             if(
                 siguiente.turno !==
                 destino
@@ -2976,101 +2972,83 @@ function obtenerSiguienteTurnoV48(turno){
                 .padStart(2,"0");
 
 
-            //////////////////////////////////////////////////
-            // NO PREMIAR COPIA EXACTA DE LA BASE
-            //////////////////////////////////////////////////
-
-            if(
-                salida === base ||
-                salida === inversion
-            ){
-                continue;
-            }
-
-
             if(!pesos[salida])
                 pesos[salida]=0;
 
 
             //////////////////////////////////////////////////
-            // PESO BASE
+            // 1. AMBOS COMPLETO
+            // PRIORIDAD MÁXIMA
             //////////////////////////////////////////////////
 
-            pesos[salida] += 10;
+            if(salida === base){
 
-
-            //////////////////////////////////////////////////
-            // AMBOS COMPLETO
-            //////////////////////////////////////////////////
-
-            if(
-                salida === base
-            ){
-
-                pesos[salida] += 20;
+                pesos[salida] += 100;
 
             }
 
 
             //////////////////////////////////////////////////
-            // DECENA + UNIDAD
-            // SEPARADAS PERO CON MENOR PESO
+            // 2. INVERTIDO
             //////////////////////////////////////////////////
 
-            if(
-                salida[0] === base[0]
-            ){
+            else if(salida === inversion){
 
-                pesos[salida] += 5;
+                pesos[salida] += 35;
 
             }
 
 
-            if(
+            //////////////////////////////////////////////////
+            // 3. MISMA UNIDAD
+            // APOYO, NO DOMINANTE
+            //////////////////////////////////////////////////
+
+            else if(
                 salida[1] === base[1]
             ){
 
+                pesos[salida] += 12;
+
+            }
+
+
+            //////////////////////////////////////////////////
+            // 4. MISMA DECENA
+            //////////////////////////////////////////////////
+
+            else if(
+                salida[0] === base[0]
+            ){
+
+                pesos[salida] += 10;
+
+            }
+
+
+            //////////////////////////////////////////////////
+            // 5. TRANSICIÓN NORMAL
+            //////////////////////////////////////////////////
+
+            else{
+
                 pesos[salida] += 5;
 
             }
 
 
             //////////////////////////////////////////////////
-            // INVERTIDO
-            //////////////////////////////////////////////////
-
-            if(
-                salida === inversion
-            ){
-
-                pesos[salida] += 6;
-
-            }
-
-
-            //////////////////////////////////////////////////
-            // TESLA
+            // 6. TESLA
             //////////////////////////////////////////////////
 
             let tesla =
                 aplicarTeslaV48(base);
 
+            if(salida === tesla){
 
-            if(
-                salida === tesla
-            ){
-
-                pesos[salida] += 8;
+                pesos[salida] += 15;
 
             }
-
-
-            //////////////////////////////////////////////////
-            // IMPORTANTE:
-            // SOLO UNA TRANSICIÓN POR REGISTRO DE ORIGEN
-            //////////////////////////////////////////////////
-
-            break;
 
         }
 
@@ -3078,7 +3056,7 @@ function obtenerSiguienteTurnoV48(turno){
 
 
     //////////////////////////////////////////////////
-    // ORDENAR
+    // ORDENAR POR AMBOS COMPLETO
     //////////////////////////////////////////////////
 
     let orden =
@@ -3097,24 +3075,20 @@ function obtenerSiguienteTurnoV48(turno){
 
         let frecuencia={};
 
-
         for(let d of datos){
 
             if(!d || !d.numero)
                 continue;
-
 
             let n =
                 String(d.numero)
                 .slice(-2)
                 .padStart(2,"0");
 
-
             frecuencia[n] =
                 (frecuencia[n] || 0) + 1;
 
         }
-
 
         orden =
             Object.keys(frecuencia)
@@ -3126,13 +3100,10 @@ function obtenerSiguienteTurnoV48(turno){
     }
 
 
-    //////////////////////////////////////////////////
-    // DEVOLVER TOP 10
-    //////////////////////////////////////////////////
-
     return orden.slice(0,10);
 
-        }
+            }
+    
     
     //////////////////////////////////////////////////
 // CORRECTOR IA V48.5
@@ -5510,7 +5481,7 @@ if(!bases || bases.length===0){
 //////////////////////////////////////////////////
 
 // Analizar cada base histórica
-
+/*
 for(let base of bases){
 
     let candidatos =
@@ -5541,7 +5512,7 @@ for(let base of bases){
 
 
 }
-
+*/
 
 //////////////////////////////////////////////////
 // MATRIZ HISTÓRICA V60 - LECTURA CORRECTA

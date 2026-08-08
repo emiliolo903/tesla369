@@ -2882,24 +2882,22 @@ function obtenerSiguienteTurnoV48(turno){
 ){
 
     let destino =
-    obtenerSiguienteTurnoV48(turnoOrigen);
+        obtenerSiguienteTurnoV48(turnoOrigen);
 
     if(!datos){
-
         datos =
-        await leerV48(
-            STORES_V48.historico
-        );
-
+            await leerV48(
+                STORES_V48.historico
+            );
     }
 
     base =
-    String(base)
-    .slice(-2)
-    .padStart(2,"0");
+        String(base)
+        .slice(-2)
+        .padStart(2,"0");
 
     let inversion =
-    base[1] + base[0];
+        base[1] + base[0];
 
     let pesos = {};
 
@@ -2914,9 +2912,9 @@ function obtenerSiguienteTurnoV48(turno){
             continue;
 
         let numeroActual =
-        String(actual.numero)
-        .slice(-2)
-        .padStart(2,"0");
+            String(actual.numero)
+            .slice(-2)
+            .padStart(2,"0");
 
         if(
             numeroActual !== base &&
@@ -2925,20 +2923,32 @@ function obtenerSiguienteTurnoV48(turno){
             continue;
         }
 
-        // Buscar el siguiente turno de la misma provincia
-        for(let j=i+1; j<datos.length; j++){
+        // Buscar solamente registros del mismo
+        // día y provincia
+        for(let j=0; j<datos.length; j++){
 
             let siguiente = datos[j];
 
             if(!siguiente || !siguiente.numero)
                 continue;
 
+            // MISMA FECHA
             if(
-                siguiente.provincia !== actual.provincia
+                String(siguiente.fecha) !==
+                String(actual.fecha)
             ){
                 continue;
             }
 
+            // MISMA PROVINCIA
+            if(
+                siguiente.provincia !==
+                actual.provincia
+            ){
+                continue;
+            }
+
+            // TURNO DESTINO
             if(
                 siguiente.turno !== destino
             ){
@@ -2946,88 +2956,92 @@ function obtenerSiguienteTurnoV48(turno){
             }
 
             let salida =
-            String(siguiente.numero)
-            .slice(-2)
-            .padStart(2,"0");
+                String(siguiente.numero)
+                .slice(-2)
+                .padStart(2,"0");
 
             if(
                 salida === base ||
                 salida === inversion
             ){
-                break;
+                continue;
             }
 
-            if(!pesos[salida]){
+            if(!pesos[salida])
                 pesos[salida]=0;
-            }
 
-            // Peso principal
-            pesos[salida]+=40;
+            // Peso histórico
+            pesos[salida] += 30;
+
+            // PREMIAR AMBOS COMPLETO
+            // cuando aparece exactamente
+            if(salida === base){
+                pesos[salida] += 10;
+            }
 
             // Unidad igual
-            if(salida[1]===base[1]){
-                pesos[salida]+=5;
+            if(
+                salida[1] === base[1]
+            ){
+                pesos[salida] += 3;
             }
 
             // Decena igual
-            if(salida[0]===base[0]){
-                pesos[salida]+=3;
+            if(
+                salida[0] === base[0]
+            ){
+                pesos[salida] += 3;
             }
 
             // Tesla
             let tesla =
-            aplicarTeslaV48(base);
+                aplicarTeslaV48(base);
 
-            if(salida===tesla){
-                pesos[salida]+=10;
+            if(salida === tesla){
+                pesos[salida] += 10;
             }
 
-            // Sólo tomar la primera transición encontrada
-            break;
         }
 
     }
 
     let orden =
-    Object.keys(pesos)
-    .sort(
-        (a,b)=>pesos[b]-pesos[a]
-    );
+        Object.keys(pesos)
+        .sort(
+            (a,b)=>
+            pesos[b]-pesos[a]
+        );
 
-    // Respaldo
+    // RESPALDO
     if(orden.length===0){
 
         let frecuencia={};
 
         for(let d of datos){
 
-            if(!d.numero)
+            if(!d || !d.numero)
                 continue;
 
-            let n=
-            String(d.numero)
-            .slice(-2)
-            .padStart(2,"0");
+            let n =
+                String(d.numero)
+                .slice(-2)
+                .padStart(2,"0");
 
-            frecuencia[n]=
-            (frecuencia[n]||0)+1;
-
+            frecuencia[n] =
+                (frecuencia[n]||0)+1;
         }
 
-        orden=
-        Object.keys(frecuencia)
-        .sort(
-            (a,b)=>frecuencia[b]-frecuencia[a]
-        );
-
+        orden =
+            Object.keys(frecuencia)
+            .sort(
+                (a,b)=>
+                frecuencia[b]-frecuencia[a]
+            );
     }
 
     return orden.slice(0,10);
 
-        }
-        
-                    
-    
+                }
     
     //////////////////////////////////////////////////
 // CORRECTOR IA V48.5
@@ -5023,7 +5037,6 @@ async function obtenerTercerAmbosHistoricoV60(
 // CORRECTOR DE DECENA HISTÓRICA V60.1
 // CONSERVA EL RANKING Y CORRIGE SIN DESTRUIR
 //////////////////////////////////////////////////
-
 async function corregirDecenaHistoricaV60(
     ambos,
     turnoOrigen,
@@ -5032,194 +5045,174 @@ async function corregirDecenaHistoricaV60(
 ){
 
     let historial =
-    await leerV48(
-        STORES_V48.historico
-    );
+        await leerV48(
+            STORES_V48.historico
+        );
 
-    if(!Array.isArray(ambos))
-        return ambos;
+    for(let i=0; i<ambos.length; i++){
 
-    if(!ranking)
-        ranking={};
+        let numero =
+            String(ambos[i])
+            .padStart(2,"0");
 
+        let mejorNumero = numero;
+        let mejorPeso = -999999;
 
-    let salida=[];
+        // Evaluar los 100 Ambos posibles
+        for(let d=0; d<=9; d++){
 
+            for(let u=0; u<=9; u++){
 
-    for(let i=0;i<ambos.length;i++){
+                let candidato =
+                    String(d) + String(u);
 
-        let original =
-        String(ambos[i])
-        .slice(-2)
-        .padStart(2,"0");
+                let peso = 0;
 
+                // 1. Ranking actual
+                if(
+                    ranking &&
+                    ranking[candidato]
+                ){
+                    peso += ranking[candidato];
+                }
 
-        let unidad =
-        original[1];
+                // 2. Frecuencia histórica exacta
+                if(
+                    MEMORIA_V60.frecuencia &&
+                    MEMORIA_V60.frecuencia[candidato]
+                ){
+                    peso +=
+                        MEMORIA_V60.frecuencia[candidato]
+                        * 2;
+                }
 
+                // 3. Relación histórica
+                // decena + unidad
+                if(
+                    MEMORIA_V60.decenaPorUnidad &&
+                    MEMORIA_V60.decenaPorUnidad[String(u)] &&
+                    MEMORIA_V60.decenaPorUnidad[String(u)][String(d)]
+                ){
 
-        //////////////////////////////////////////////////
-        // CANDIDATO ORIGINAL
-        //////////////////////////////////////////////////
+                    peso +=
+                        MEMORIA_V60
+                        .decenaPorUnidad[String(u)][String(d)]
+                        * 4;
+                }
 
-        let mejor =
-        original;
+                // 4. Transición REAL:
+                // mismo día + misma provincia
+                for(let j=0; j<historial.length; j++){
 
-        let mejorPeso =
-        Number(ranking[original]||0);
+                    let actual =
+                        historial[j];
 
+                    if(!actual || !actual.numero)
+                        continue;
 
-        //////////////////////////////////////////////////
-        // EVALUAR LAS 10 DECENAS
-        //////////////////////////////////////////////////
+                    if(
+                        actual.turno !==
+                        turnoOrigen
+                    ){
+                        continue;
+                    }
 
-        for(let d=0;d<=9;d++){
+                    // La base debe corresponder
+                    let baseHistorica =
+                        String(actual.numero)
+                        .slice(-2)
+                        .padStart(2,"0");
 
-            let candidato =
-            String(d)+unidad;
+                    if(
+                        baseHistorica !== numero
+                    ){
+                        continue;
+                    }
 
+                    for(let k=0; k<historial.length; k++){
 
-            let peso =
-            Number(ranking[candidato]||0);
+                        let siguiente =
+                            historial[k];
 
+                        if(
+                            !siguiente ||
+                            !siguiente.numero
+                        ){
+                            continue;
+                        }
 
-            //////////////////////////////////////////////////
-            // HISTÓRICO EXACTO
-            //////////////////////////////////////////////////
+                        // MISMA FECHA
+                        if(
+                            String(siguiente.fecha) !==
+                            String(actual.fecha)
+                        ){
+                            continue;
+                        }
 
-            if(
-                MEMORIA_V60.frecuencia &&
-                MEMORIA_V60.frecuencia[candidato]
-            ){
+                        // MISMA PROVINCIA
+                        if(
+                            siguiente.provincia !==
+                            actual.provincia
+                        ){
+                            continue;
+                        }
 
-                peso +=
-                MEMORIA_V60.frecuencia[candidato] * 0.50;
+                        // TURNO DESTINO
+                        if(
+                            siguiente.turno !==
+                            turnoDestino
+                        ){
+                            continue;
+                        }
 
-            }
+                        let real =
+                            String(siguiente.numero)
+                            .slice(-2)
+                            .padStart(2,"0");
 
+                        // Premio FUERTE al Ambos completo
+                        if(real === candidato){
+                            peso += 8;
+                        }
 
-            //////////////////////////////////////////////////
-            // RELACIÓN DECENA / UNIDAD
-            //////////////////////////////////////////////////
+                    }
 
-            if(
-                MEMORIA_V60.decenaPorUnidad &&
-                MEMORIA_V60.decenaPorUnidad[unidad] &&
-                MEMORIA_V60.decenaPorUnidad[unidad][String(d)]
-            ){
+                }
 
-                peso +=
-                MEMORIA_V60
-                .decenaPorUnidad[unidad][String(d)]
-                * 1.00;
-
-            }
-
-
-            //////////////////////////////////////////////////
-            // TRANSICIÓN REAL DEL TURNO
-            //////////////////////////////////////////////////
-
-            let veces=0;
-
-
-            for(let j=0;j<historial.length-1;j++){
-
-                let actual =
-                historial[j];
-
-                let siguiente =
-                historial[j+1];
-
-
-                if(!actual || !siguiente)
-                    continue;
-
+                // 5. No premiar artificialmente
+                // solamente porque coincide la unidad
+                // con el número original.
+                //
+                // El candidato debe ganar por
+                // evidencia completa.
 
                 if(
-                    actual.turno!==turnoOrigen ||
-                    siguiente.turno!==turnoDestino
-                )
-                    continue;
+                    peso > mejorPeso
+                ){
 
+                    mejorPeso =
+                        peso;
 
-                let real =
-                String(siguiente.numero)
-                .slice(-2)
-                .padStart(2,"0");
-
-
-                if(real===candidato){
-
-                    veces++;
-
+                    mejorNumero =
+                        candidato;
                 }
 
             }
 
-
-            peso +=
-            veces * 2;
-
-
-            //////////////////////////////////////////////////
-            // NO CAMBIAR POR UNA DIFERENCIA PEQUEÑA
-            //////////////////////////////////////////////////
-
-            if(
-                candidato!==original &&
-                peso <= mejorPeso + 5
-            ){
-
-                continue;
-
-            }
-
-
-            //////////////////////////////////////////////////
-            // MEJOR CANDIDATO
-            //////////////////////////////////////////////////
-
-            if(peso>mejorPeso){
-
-                mejorPeso=peso;
-                mejor=candidato;
-
-            }
-
         }
 
-
-        //////////////////////////////////////////////////
-        // EVITAR DUPLICADOS
-        //////////////////////////////////////////////////
-
-        if(salida.includes(mejor)){
-
-            // Mantener el original si la corrección
-            // produciría un duplicado.
-
-            mejor=original;
-
-        }
-
-
-        salida.push(mejor);
+        ambos[i] =
+            mejorNumero;
 
     }
 
-
-    //////////////////////////////////////////////////
-    // FORMATO FINAL
-    //////////////////////////////////////////////////
-
-    return salida.map(n=>
-        String(n)
-        .slice(-2)
-        .padStart(2,"0")
+    console.log(
+        "V60.1 DECENAS REEVALUADAS:",
+        ambos
     );
 
-                }
+    return ambos;
+            }
 
   //////////////////////////////////////////////////
 // BLOQUE V61.1

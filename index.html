@@ -4539,163 +4539,187 @@ if(
 ){
 
     if(MEMORIA_V60.total===0){
-
         await construirMemoriaHistoricaV60();
-
     }
 
+    //////////////////////////////////////////////////
+    // MOTOR IA71
+    //////////////////////////////////////////////////
 
-//////////////////////////////////////////////////
-// MOTOR GANADOR IA71
-//////////////////////////////////////////////////
+    let motorActivo =
+        obtenerMotorActivoIA71();
 
-let motorActivo = obtenerMotorActivoIA71();
+    for(let base of bases){
 
-for(let base of bases){
+        switch(motorActivo){
 
-    switch(motorActivo){
+            case "HISTORICO":
+            case "MEMORIA_HISTORICA":
+
+                ranking =
+                aplicarMotorHistoricoV60(
+                    ranking,
+                    base,
+                    turnoOrigen,
+                    turnoDestino
+                );
+
+                ranking =
+                aplicarAcompanantesV60(
+                    ranking,
+                    base,
+                    turnoOrigen,
+                    turnoDestino
+                );
+
+                break;
 
 
+            case "TRANSICION":
 
-        case "HISTORICO":
-        case "MEMORIA_HISTORICA":
+                let candidatosTransicion =
+                await analizarTransicionTurnoV48(
+                    base,
+                    turnoOrigen
+                );
 
-            // Siempre ejecuta los dos motores base
-ranking =
-aplicarMotorHistoricoV60(
-    ranking,
-    base,
-    turnoOrigen,
-    turnoDestino
-);
+                for(let n of candidatosTransicion){
 
-ranking =
-aplicarAcompanantesV60(
-    ranking,
-    base,
-    turnoOrigen,
-    turnoDestino
-);
+                    n =
+                    String(n)
+                    .slice(-2)
+                    .padStart(2,"0");
 
-// Bonificación al motor ganador
-if(motorActivo=="TESLA"){
+                    if(!ranking[n])
+                        ranking[n]=0;
 
-    let tesla =
-    aplicarTeslaV48(base);
+                    ranking[n]+=30;
 
-    if(!ranking[tesla])
-        ranking[tesla]=0;
+                }
 
-    ranking[tesla]+=50;
+                break;
 
-}
 
-if(motorActivo=="TRANSICION"){
+            case "TESLA":
 
-    let candidatos =
-    await analizarTransicionTurnoV48(
-        base,
-        turnoOrigen
-    );
+                let tesla =
+                aplicarTeslaV48(base);
 
-    for(let n of candidatos){
+                if(!ranking[tesla])
+                    ranking[tesla]=0;
 
-        if(!ranking[n])
-            ranking[n]=0;
+                ranking[tesla]+=40;
 
-        ranking[n]+=20;
+                break;
 
-    }
 
-}
-
-        break;
-
-        case "TRANSICION":
-
-            let candidatos =
-            await analizarTransicionTurnoV48(
-                base,
-                turnoOrigen
-            );
-
-            for(let n of candidatos){
-
-                if(!ranking[n])
-                    ranking[n]=0;
-
-                ranking[n]+=30;
-
-            }
-
-        break;
-
-        case "TESLA":
-
-            let tesla =
-            aplicarTeslaV48(base);
-
-            if(!ranking[tesla])
-                ranking[tesla]=0;
-
-            ranking[tesla]+=40;
-
-        break;
-
-        case "MATRIZ":
-
-    if(
-        MATRIZ_HISTORICA_V48[turnoOrigen] &&
-        MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino]
-    ){
-
-        let matriz =
-            MATRIZ_HISTORICA_V48
-            [turnoOrigen]
-            [turnoDestino];
-
-        for(let provincia in matriz){
-
-            let porBase =
-                matriz[provincia];
-
-            if(
-                !porBase ||
-                typeof porBase !== "object"
-            ){
-                continue;
-            }
-
-            for(let base in porBase){
-
-                let salidas =
-                    porBase[base];
+            case "MATRIZ":
 
                 if(
-                    !salidas ||
-                    typeof salidas !== "object"
+                    MATRIZ_HISTORICA_V48[turnoOrigen] &&
+                    MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino]
                 ){
-                    continue;
-                }
 
-                for(let numero in salidas){
+                    let matriz =
+                    MATRIZ_HISTORICA_V48
+                    [turnoOrigen]
+                    [turnoDestino];
 
-                    let cantidad =
-                        Number(salidas[numero]);
+                    for(let provincia in matriz){
 
-                    if(!Number.isFinite(cantidad))
-                        continue;
+                        let porBase =
+                        matriz[provincia];
 
-                    if(
-                        !ranking[numero] ||
-                        typeof ranking[numero] !== "number"
-                    ){
-                        ranking[numero]=0;
+                        if(
+                            !porBase ||
+                            typeof porBase !== "object"
+                        )
+                            continue;
+
+                        for(let baseKey in porBase){
+
+                            let salidas =
+                            porBase[baseKey];
+
+                            if(
+                                !salidas ||
+                                typeof salidas !== "object"
+                            )
+                                continue;
+
+                            for(let numero in salidas){
+
+                                let cantidad =
+                                Number(salidas[numero]);
+
+                                if(!Number.isFinite(cantidad))
+                                    continue;
+
+                                numero =
+                                String(numero)
+                                .slice(-2)
+                                .padStart(2,"0");
+
+                                if(!ranking[numero])
+                                    ranking[numero]=0;
+
+                                ranking[numero]+=cantidad;
+
+                            }
+
+                        }
+
                     }
 
-                    ranking[numero] += cantidad;
-
                 }
+
+                break;
+
+
+            default:
+
+                ranking =
+                aplicarMotorHistoricoV60(
+                    ranking,
+                    base,
+                    turnoOrigen,
+                    turnoDestino
+                );
+
+                ranking =
+                aplicarAcompanantesV60(
+                    ranking,
+                    base,
+                    turnoOrigen,
+                    turnoDestino
+                );
+
+        }
+
+    }
+
+
+    //////////////////////////////////////////////////
+    // PESO MOTOR GANADOR
+    //////////////////////////////////////////////////
+
+    if(
+        typeof obtenerMotorActivoIA71 === "function" &&
+        typeof obtenerPesoMotorIA71 === "function"
+    ){
+
+        let pesoMotor =
+        obtenerPesoMotorIA71(motorActivo);
+
+        if(
+            Number.isFinite(pesoMotor) &&
+            pesoMotor > 0
+        ){
+
+            for(let numero in ranking){
+
+                ranking[numero] *=
+                pesoMotor;
 
             }
 
@@ -4703,184 +4727,195 @@ if(motorActivo=="TRANSICION"){
 
     }
 
-break;
-
-        default:
-
-            ranking =
-            aplicarMotorHistoricoV60(
-                ranking,
-                base,
-                turnoOrigen,
-                turnoDestino
-            );
-
-            ranking =
-            aplicarAcompanantesV60(
-                ranking,
-                base,
-                turnoOrigen,
-                turnoDestino
-            );
-
-    }
-
-}
-
-console.log(
-"Motor activo IA71:",
-motorActivo
-);
-
-
-//////////////////////////////////////////////////
-// IA71 - APLICAR PESO DEL MOTOR GANADOR
-//////////////////////////////////////////////////
-
-if(typeof obtenerMotorActivoIA71 === "function" &&
-   typeof obtenerPesoMotorIA71 === "function"){
-
-    let motorActivo = obtenerMotorActivoIA71();
-    let pesoMotor = obtenerPesoMotorIA71(motorActivo);
-
-    for(let numero in ranking){
-
-        ranking[numero] *= pesoMotor;
-
-    }
-
-    console.log(
-        "Motor activo:",
-        motorActivo,
-        "Peso:",
-        pesoMotor
-    );
-
-    }
-
-    // Orientación inteligente
-ranking =
-aplicarOrientadorV60(
-    ranking
-);
-
-
-// CORRECCIÓN PRECISIÓN AMBOS
-ranking =
-await corregirAmbosExactosV60(
-    ranking
-);
-
-
 
     //////////////////////////////////////////////////
-    // NUEVO CORRECTOR DE DECENA V60
+    // ORIENTADOR
+    // SE MANTIENE, PERO NO SE VUELVE A CORREGIR
+    // LA DECENA DESPUÉS
     //////////////////////////////////////////////////
 
-
-    let historial =
-    await leerV48(
-        STORES_V48.historico
+    ranking =
+    aplicarOrientadorV60(
+        ranking
     );
 
 
-    let pesoDecenas={};
+    //////////////////////////////////////////////////
+    // PRECISIÓN DEL AMBOS COMPLETO
+    //////////////////////////////////////////////////
+
+    ranking =
+    await corregirAmbosExactosV60(
+        ranking
+    );
 
 
-    for(let r of historial){
+    //////////////////////////////////////////////////
+    // CONSTRUIR CANDIDATOS
+    //////////////////////////////////////////////////
 
-        let n =
-        String(r.numero)
+    let candidatos =
+    Object.keys(ranking)
+    .map(numero=>({
+
+        numero:
+        String(numero)
         .slice(-2)
-        .padStart(2,"0");
+        .padStart(2,"0"),
+
+        puntaje:
+        Number(ranking[numero]) || 0
+
+    }));
 
 
-        let unidad=n[1];
+    //////////////////////////////////////////////////
+    // ELIMINAR DUPLICADOS
+    //////////////////////////////////////////////////
+
+    candidatos =
+    candidatos.filter(
+        (item,index,array)=>
+        array.findIndex(
+            x=>x.numero===item.numero
+        )===index
+    );
 
 
-        if(!pesoDecenas[unidad])
-            pesoDecenas[unidad]={};
+    //////////////////////////////////////////////////
+    // ORDEN PRINCIPAL
+    //////////////////////////////////////////////////
+
+    candidatos.sort(
+        (a,b)=>
+        b.puntaje-a.puntaje
+    );
 
 
-        let decena=n[0];
+    //////////////////////////////////////////////////
+    // SELECCIÓN DE AMBOS
+    //
+    // IMPORTANTE:
+    // NO AGRUPAR POR UNIDAD.
+    // CADA NUMERO 00-99 ES UN CANDIDATO COMPLETO.
+    //////////////////////////////////////////////////
+
+    let orden =
+    candidatos.map(
+        x=>x.numero
+    );
 
 
-        pesoDecenas[unidad][decena]=
-        (pesoDecenas[unidad][decena]||0)+1;
+    let ambos=[];
+
+
+    //////////////////////////////////////////////////
+    // PRIMER AMBOS
+    //////////////////////////////////////////////////
+
+    if(orden.length>0){
+
+        ambos.push(
+            orden[0]
+        );
 
     }
 
 
+    //////////////////////////////////////////////////
+    // SEGUNDO AMBOS
+    //
+    // Buscamos otro NUMERO COMPLETO.
+    // No buscamos solamente otra unidad.
+    //////////////////////////////////////////////////
 
-    // Ajustar ranking por unidad
+    for(let i=1;i<orden.length;i++){
 
-    for(let numero in ranking){
+        if(
+            !ambos.includes(
+                orden[i]
+            )
+        ){
 
-        let unidad =
-        numero[1];
+            ambos.push(
+                orden[i]
+            );
+
+            break;
+
+        }
+
+    }
 
 
-        let decena =
-        numero[0];
+    //////////////////////////////////////////////////
+    // TERCER AMBOS
+    //////////////////////////////////////////////////
+
+    for(let i=0;i<orden.length;i++){
+
+        if(
+            ambos.length>=3
+        )
+            break;
 
 
         if(
-            pesoDecenas[unidad] &&
-            pesoDecenas[unidad][decena]
+            !ambos.includes(
+                orden[i]
+            )
         ){
 
-            ranking[numero] +=
-            pesoDecenas[unidad][decena] * 0.15;
+            ambos.push(
+                orden[i]
+            );
 
         }
 
     }
 
 
+    //////////////////////////////////////////////////
+    // GARANTIZAR FORMATO 00-99
+    //////////////////////////////////////////////////
 
-//////////////////////////////////////////////////
-// SELECCIÓN IA V60.2
-// PRIORIZA EL RANKING REAL DEL NÚMERO
-//////////////////////////////////////////////////
-
-let candidatos =
-Object.keys(ranking)
-.map(numero=>({
-
-    numero:String(numero).padStart(2,"0"),
-
-    puntaje:ranking[numero]
-
-}))
-.sort((a,b)=>b.puntaje-a.puntaje);
+    ambos =
+    ambos.map(
+        n=>
+        String(n)
+        .slice(-2)
+        .padStart(2,"0")
+    );
 
 
-//////////////////////////////////////////////////
-// NUEVA SELECCIÓN IA V60
-// SOLO 2 AMBOS DEL RANKING
-//////////////////////////////////////////////////
+    //////////////////////////////////////////////////
+    // DIAGNÓSTICO
+    //////////////////////////////////////////////////
 
-let orden =
-candidatos.map(x=>x.numero);
+    console.log(
+        "MOTOR V60 CORREGIDO"
+    );
 
-// Ambos finales
+    console.log(
+        "MOTOR ACTIVO:",
+        motorActivo
+    );
 
-let ambos=[];
+    console.log(
+        "TOP 20:",
+        candidatos
+        .slice(0,20)
+    );
 
-// Primer ambos
-if(orden.length>0){
-    ambos.push(orden[0]);
-}
-
-// Segundo ambos
-if(
-    orden.length>1 &&
-    !ambos.includes(orden[1])
-){
-    ambos.push(orden[1]);
-}
+    console.log(
+        "AMBOS COMPLETOS:",
+        ambos
+    );
 
 
+    //////////////////////////////////////////////////
+    // DEVOLVER
+    //////////////////////////////////////////////////
 
     return {
 
@@ -4892,8 +4927,7 @@ if(
 
     };
 
-    }
-    
+                    }
 
     //////////////////////////////////////////////////
 // CORRECTOR PRECISIÓN AMBOS V60

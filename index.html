@@ -5540,18 +5540,18 @@ if(destinoMatriz){
 }
 
 
-/*
+
 
 ranking =
 await aplicarCorrectorDesviacionV55_2(
     ranking,
     historico
 );
-*/
+
 //////////////////////////////////////////////////
 // CORRECCIÓN ERRORES APRENDIDOS V52
 //////////////////////////////////////////////////
-/*
+
 let candidatosError =
 Object.keys(ranking);
 
@@ -5560,7 +5560,7 @@ let corregidosError =
 aplicarCorreccionErroresIA_V52(
     candidatosError
 );
-/*
+
     ranking =
 await aplicarNucleoDominanteV61(
     ranking,
@@ -5577,7 +5577,7 @@ for(let n of corregidosError){
     ranking[n]+=40;
 
     }
-    */
+    
 //////////////////////////////////////////////////
 // BLOQUE 12 ACTIVO
 //////////////////////////////////////////////////
@@ -5685,7 +5685,7 @@ motorV60.orden;
 let ambos =
 motorV60.ambos;
 
-/*ambos =
+ambos =
 await corregirDecenaHistoricaV60(
     ambos,
     turnoOrigen,
@@ -5696,9 +5696,9 @@ await corregirDecenaHistoricaV60(
 "DESPUÉS corregirDecenaHistoricaV60\n" 
 + ambos.join(" - ")
 );
-*/
+
     
-/* let terceroHistorico =
+ let terceroHistorico =
 await obtenerTercerAmbosHistoricoV60(
 
     [ambos[0]],
@@ -5715,7 +5715,7 @@ if(terceroHistorico){
 
     ambos[2]=terceroHistorico;
 
-}  */ 
+}  
 
     //////////////////////////////////////////////////
 // BLOQUE 3
@@ -5725,7 +5725,7 @@ if(terceroHistorico){
 // Corrector de decena
 
 // DESACTIVADO TEMPORALMENTE PARA PRUEBA
-/* ambos = 
+ambos = 
 await aplicarCorrectorDecenaV56(
     ambos,
     turnoOrigen
@@ -5735,12 +5735,12 @@ await aplicarCorrectorDecenaV56(
 "DESPUÉS aplicarCorrectorDecenaV56\n"
 + ambos.join(" - ")
 );
-*/
+
 
 // Corrector patrón seguro
 
 
-/*ambos =
+ambos =
 await aplicarCorrectorPatronV57(
     ambos,
     turnoOrigen
@@ -5749,7 +5749,7 @@ await aplicarCorrectorPatronV57(
 "DESPUÉS aplicarCorrectorPatronV57\n"
 + ambos.join(" - ")
 );
-*/
+
     
     // ASEGURAR 3 AMBOS SIEMPRE
 

@@ -2878,231 +2878,242 @@ function obtenerSiguienteTurnoV48(turno){
 async function analizarTransicionTurnoV48(
     base,
     turnoOrigen,
-    datos = null
+    turnoDestino
 ){
 
-    let destino =
-        obtenerSiguienteTurnoV48(turnoOrigen);
+    let historial =
+        await leerV48(
+            STORES_V48.historico
+        );
 
-    if(!datos){
-
-        datos =
-            await leerV48(
-                STORES_V48.historico
-            );
-
-    }
+    let pesos = {};
 
     base =
         String(base)
         .slice(-2)
         .padStart(2,"0");
 
-    let inversion =
-        base[1] + base[0];
+    turnoOrigen =
+        String(turnoOrigen || "").trim();
 
-    let pesos = {};
+    turnoDestino =
+        String(turnoDestino || "").trim();
 
+    if(!Array.isArray(historial))
+        return [];
 
-    for(let i=0; i<datos.length; i++){
+    //////////////////////////////////////////////////////
+    // AGRUPAR POR FECHA + PROVINCIA
+    //////////////////////////////////////////////////////
 
-        let actual = datos[i];
+    let grupos = {};
 
-        if(!actual || !actual.numero)
+    for(let registro of historial){
+
+        if(!registro)
             continue;
 
-        if(actual.turno !== turnoOrigen)
-            continue;
+        let fecha =
+            String(
+                registro.fecha || ""
+            ).trim();
 
+        let provincia =
+            String(
+                registro.provincia || ""
+            ).trim();
 
-        let numeroActual =
-            String(actual.numero)
+        let turno =
+            String(
+                registro.turno || ""
+            ).trim();
+
+        let numero =
+            String(
+                registro.numero || ""
+            )
             .slice(-2)
             .padStart(2,"0");
 
-
-        // La base puede coincidir directa
-        // o invertida.
         if(
-            numeroActual !== base &&
-            numeroActual !== inversion
-        ){
+            !fecha ||
+            !provincia ||
+            !turno ||
+            !/^\d{2}$/.test(numero)
+        )
             continue;
-        }
 
+        let clave =
+            fecha +
+            "|" +
+            provincia;
 
-        for(let j=0; j<datos.length; j++){
+        if(!grupos[clave])
+            grupos[clave] = {};
 
-            let siguiente = datos[j];
+        if(!grupos[clave][turno])
+            grupos[clave][turno] = [];
 
-            if(!siguiente || !siguiente.numero)
-                continue;
-
-
-            // MISMA FECHA
-            if(
-                String(siguiente.fecha) !==
-                String(actual.fecha)
-            ){
-                continue;
-            }
-
-
-            // MISMA PROVINCIA
-            if(
-                siguiente.provincia !==
-                actual.provincia
-            ){
-                continue;
-            }
-
-
-            // TURNO SIGUIENTE
-            if(
-                siguiente.turno !==
-                destino
-            ){
-                continue;
-            }
-
-
-            let salida =
-                String(siguiente.numero)
-                .slice(-2)
-                .padStart(2,"0");
-
-
-            if(!pesos[salida])
-                pesos[salida]=0;
-
-
-            //////////////////////////////////////////////////
-            // 1. AMBOS COMPLETO
-            // PRIORIDAD MÁXIMA
-            //////////////////////////////////////////////////
-
-            if(salida === base){
-
-                pesos[salida] += 100;
-
-            }
-
-
-            //////////////////////////////////////////////////
-            // 2. INVERTIDO
-            //////////////////////////////////////////////////
-
-            else if(salida === inversion){
-
-                pesos[salida] += 35;
-
-            }
-
-
-            //////////////////////////////////////////////////
-            // 3. MISMA UNIDAD
-            // APOYO, NO DOMINANTE
-            //////////////////////////////////////////////////
-
-            else if(
-                salida[1] === base[1]
-            ){
-
-                pesos[salida] += 12;
-
-            }
-
-
-            //////////////////////////////////////////////////
-            // 4. MISMA DECENA
-            //////////////////////////////////////////////////
-
-            else if(
-                salida[0] === base[0]
-            ){
-
-                pesos[salida] += 10;
-
-            }
-
-
-            //////////////////////////////////////////////////
-            // 5. TRANSICIÓN NORMAL
-            //////////////////////////////////////////////////
-
-            else{
-
-                pesos[salida] += 5;
-
-            }
-
-
-            //////////////////////////////////////////////////
-            // 6. TESLA
-            //////////////////////////////////////////////////
-
-            let tesla =
-                aplicarTeslaV48(base);
-
-            if(salida === tesla){
-
-                pesos[salida] += 15;
-
-            }
-
-        }
-
-    }
-
-
-    //////////////////////////////////////////////////
-    // ORDENAR POR AMBOS COMPLETO
-    //////////////////////////////////////////////////
-
-    let orden =
-        Object.keys(pesos)
-        .sort(
-            (a,b)=>
-            pesos[b]-pesos[a]
+        grupos[clave][turno].push(
+            numero
         );
 
+    }
 
-    //////////////////////////////////////////////////
-    // RESPALDO
-    //////////////////////////////////////////////////
+    //////////////////////////////////////////////////////
+    // BUSCAR TRANSICIONES COMPLETAS
+    //
+    // IMPORTANTE:
+    // NO SE PREMIA UNIDAD.
+    // NO SE PREMIA DECENA.
+    // SOLO EL NUMERO COMPLETO.
+    //////////////////////////////////////////////////////
 
-    if(orden.length===0){
+    for(
+        let claveGrupo in grupos
+    ){
 
-        let frecuencia={};
+        let grupo =
+            grupos[claveGrupo];
 
-        for(let d of datos){
+        let origenes =
+            grupo[turnoOrigen];
 
-            if(!d || !d.numero)
-                continue;
+        let destinos =
+            grupo[turnoDestino];
 
-            let n =
-                String(d.numero)
+        if(
+            !Array.isArray(origenes) ||
+            !Array.isArray(destinos)
+        )
+            continue;
+
+        //////////////////////////////////////////////////
+        // EL BASE DEBE APARECER COMPLETO
+        //////////////////////////////////////////////////
+
+        if(
+            !origenes.includes(base)
+        )
+            continue;
+
+        //////////////////////////////////////////////////
+        // CADA DESTINO ES UN AMBOS COMPLETO
+        //////////////////////////////////////////////////
+
+        for(
+            let salida of destinos
+        ){
+
+            salida =
+                String(salida)
                 .slice(-2)
                 .padStart(2,"0");
 
-            frecuencia[n] =
-                (frecuencia[n] || 0) + 1;
+            if(
+                !/^\d{2}$/.test(salida)
+            )
+                continue;
+
+            if(!pesos[salida])
+                pesos[salida] = 0;
+
+            /*
+             * UNICO PUNTAJE:
+             *
+             * 42 -> 42
+             * 42 -> 52 NO RECIBE BONO
+             * 42 -> 32 NO RECIBE BONO
+             *
+             * Cada aparición del Ambos completo
+             * suma evidencia.
+             */
+
+            pesos[salida] += 1;
 
         }
 
-        orden =
-            Object.keys(frecuencia)
-            .sort(
-                (a,b)=>
-                frecuencia[b]-frecuencia[a]
-            );
-
     }
 
+    //////////////////////////////////////////////////////
+    // ORDENAR POR EVIDENCIA DEL AMBOS COMPLETO
+    //////////////////////////////////////////////////////
 
-    return orden.slice(0,10);
+    let candidatos =
+        Object.keys(pesos)
+        .map(numero => ({
 
-            }
+            numero:
+                String(numero)
+                .slice(-2)
+                .padStart(2,"0"),
+
+            peso:
+                Number(
+                    pesos[numero]
+                ) || 0
+
+        }));
+
+    candidatos.sort(
+        (a,b)=>
+            b.peso -
+            a.peso
+    );
+
+    //////////////////////////////////////////////////////
+    // DIAGNOSTICO
+    //////////////////////////////////////////////////////
+
+    console.log(
+        "========== TRANSICION V48 AMBOS EXACTO =========="
+    );
+
+    console.log(
+        "BASE:",
+        base
+    );
+
+    console.log(
+        "ORIGEN:",
+        turnoOrigen
+    );
+
+    console.log(
+        "DESTINO:",
+        turnoDestino
+    );
+
+    console.log(
+        "TOP AMBOS COMPLETOS:",
+        candidatos.slice(0,20)
+    );
+
+    console.log(
+        "NO SE USA UNIDAD"
+    );
+
+    console.log(
+        "NO SE USA DECENA"
+    );
+
+    console.log(
+        "================================================="
+    );
+
+    //////////////////////////////////////////////////////
+    // DEVOLVER SOLO NUMEROS COMPLETOS
+    //////////////////////////////////////////////////////
+
+    return candidatos.map(
+        x =>
+            String(x.numero)
+            .slice(-2)
+            .padStart(2,"0")
+    );
+
+    }
+                
     
     
     //////////////////////////////////////////////////

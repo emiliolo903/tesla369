@@ -775,7 +775,29 @@ resolve([]);
 }
 
 
+// Ejemplo de la función que se dispara con tu botón
+async function calcularPrediccionPrincipal() {
+    // 1. Cargas tu base de 17,000 registros cargados en IndexedDB
+    let historial = await leerV48(STORES_V48.historico);
 
+    if (!historial || historial.length < 2) {
+        alert("La base histórica está vacía o no tiene suficientes datos.");
+        return;
+    }
+
+    // 2. Tomas los últimos dos números salidos de la base de datos
+    // (Asegúrate de que la lista esté ordenada por fecha/turno más reciente al principio)
+    let ultimo = historial[0].numero;        // El último que salió
+    let penultimo = historial[1].numero;     // El anterior a ese
+
+    // 3. Ejecutas el nuevo motor
+    let prediccion = predecirAmbosExactoV17k(historial, ultimo, penultimo, "NACIONAL", "MATUTINA");
+
+    console.log("Los 10 Ambos Exactos con mayor probabilidad son:", prediccion);
+
+    // 4. Mostrar en pantalla (Ejemplo)
+    mostrarResultadosEnPantalla(prediccion);
+    }
 
 
 async function actualizarRegistrosV48(){
@@ -3115,6 +3137,74 @@ async function analizarTransicionTurnoV48(
     }
                 
     
+
+    // ... tus funciones anteriores (leerV48, etc.) ...
+
+// ==========================================
+// NUEVO MOTOR DE PREDICCIÓN 17K
+// ==========================================
+function predecirAmbosExactoV17k(historial, ultimoNumero, penultimoNumero, provinciaObjetivo, turnoObjetivo) {
+    let nActual = String(ultimoNumero).slice(-2).padStart(2, "0");
+    let nAnterior = String(penultimoNumero).slice(-2).padStart(2, "0");
+    let claveSecuencia = `${nAnterior}->${nActual}`;
+
+    let matriz2doOrden = {};
+    let frecuenciasAbsolutas = {};
+
+    for (let i = 2; i < historial.length; i++) {
+        let n0 = String(historial[i - 2].numero).slice(-2).padStart(2, "0");
+        let n1 = String(historial[i - 1].numero).slice(-2).padStart(2, "0");
+        let n2 = String(historial[i].numero).slice(-2).padStart(2, "0");
+
+        frecuenciasAbsolutas[n2] = (frecuenciasAbsolutas[n2] || 0) + 1;
+
+        let seq = `${n0}->${n1}`;
+        if (!matriz2doOrden[seq]) matriz2doOrden[seq] = {};
+        matriz2doOrden[seq][n2] = (matriz2doOrden[seq][n2] || 0) + 1;
+    }
+
+    let atrasosActuales = {};
+    for (let i = 0; i < 100; i++) {
+        let numStr = String(i).padStart(2, "0");
+        let indiceUltimo = historial.findIndex(r => String(r.numero).slice(-2).padStart(2, "0") === numStr);
+        atrasosActuales[numStr] = indiceUltimo === -1 ? historial.length : indiceUltimo;
+    }
+
+    let ranking = {};
+
+    if (matriz2doOrden[claveSecuencia]) {
+        let coincidencias = matriz2doOrden[claveSecuencia];
+        for (let ambos in coincidencias) {
+            let veces = coincidencias[ambos];
+            ranking[ambos] = (ranking[ambos] || 0) + (veces * 100);
+        }
+    }
+
+    for (let i = 0; i < 100; i++) {
+        let ambos = String(i).padStart(2, "0");
+        let freq = frecuenciasAbsolutas[ambos] || 0;
+        let atraso = atrasosActuales[ambos] || 0;
+
+        if (!ranking[ambos]) ranking[ambos] = 0;
+
+        ranking[ambos] += freq * 0.2;
+
+        if (atraso > 150) {
+            ranking[ambos] += (atraso - 150) * 1.5;
+        }
+    }
+
+    let resultado = Object.keys(ranking)
+        .sort((a, b) => ranking[b] - ranking[a])
+        .slice(0, 10)
+        .map(ambos => ({
+            ambosExacto: ambos,
+            score: Math.round(ranking[ambos]),
+            atrasoActual: atrasosActuales[ambos]
+        }));
+
+    return resultado;
+            }
     
     //////////////////////////////////////////////////
 // CORRECTOR IA V48.5

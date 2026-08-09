@@ -4600,18 +4600,24 @@ if(
     turnoDestino
 ){
 
-    if(MEMORIA_V60.total===0){
+    if(MEMORIA_V60.total === 0){
         await construirMemoriaHistoricaV60();
     }
-
-    //////////////////////////////////////////////////
-    // MOTOR IA71
-    //////////////////////////////////////////////////
 
     let motorActivo =
         obtenerMotorActivoIA71();
 
+    //////////////////////////////////////////////////
+    // APLICAR MOTOR
+    //////////////////////////////////////////////////
+
     for(let base of bases){
+
+        base =
+        String(base)
+        .slice(-2)
+        .padStart(2,"0");
+
 
         switch(motorActivo){
 
@@ -4637,32 +4643,55 @@ if(
                 break;
 
 
-            case "TRANSICION":
+            case "TRANSICION":{
 
-                let candidatosTransicion =
+                let candidatos =
                 await analizarTransicionTurnoV48(
                     base,
                     turnoOrigen
                 );
 
-                for(let n of candidatosTransicion){
+
+                for(let n of candidatos){
 
                     n =
                     String(n)
                     .slice(-2)
                     .padStart(2,"0");
 
+
                     if(!ranking[n])
                         ranking[n]=0;
 
-                    ranking[n]+=30;
+
+                    // PESO DE TRANSICIÓN
+                    ranking[n] += 15;
+
+
+                    // PREMIO EXTRA AL AMBOS COMPLETO
+                    if(n === base){
+
+                        ranking[n] += 40;
+
+                    }
+
+                    // INVERTIDO: apoyo, NO igual al Ambos
+                    if(
+                        n === base[1] + base[0] &&
+                        n !== base
+                    ){
+
+                        ranking[n] += 8;
+
+                    }
 
                 }
 
                 break;
+            }
 
 
-            case "TESLA":
+            case "TESLA":{
 
                 let tesla =
                 aplicarTeslaV48(base);
@@ -4670,12 +4699,13 @@ if(
                 if(!ranking[tesla])
                     ranking[tesla]=0;
 
-                ranking[tesla]+=40;
+                ranking[tesla] += 20;
 
                 break;
+            }
 
 
-            case "MATRIZ":
+            case "MATRIZ":{
 
                 if(
                     MATRIZ_HISTORICA_V48[turnoOrigen] &&
@@ -4686,6 +4716,7 @@ if(
                     MATRIZ_HISTORICA_V48
                     [turnoOrigen]
                     [turnoDestino];
+
 
                     for(let provincia in matriz){
 
@@ -4698,6 +4729,7 @@ if(
                         )
                             continue;
 
+
                         for(let baseKey in porBase){
 
                             let salidas =
@@ -4709,23 +4741,28 @@ if(
                             )
                                 continue;
 
+
                             for(let numero in salidas){
-
-                                let cantidad =
-                                Number(salidas[numero]);
-
-                                if(!Number.isFinite(cantidad))
-                                    continue;
 
                                 numero =
                                 String(numero)
                                 .slice(-2)
                                 .padStart(2,"0");
 
+
+                                let cantidad =
+                                Number(salidas[numero]);
+
+
+                                if(!Number.isFinite(cantidad))
+                                    continue;
+
+
                                 if(!ranking[numero])
                                     ranking[numero]=0;
 
-                                ranking[numero]+=cantidad;
+
+                                ranking[numero] += cantidad;
 
                             }
 
@@ -4736,6 +4773,7 @@ if(
                 }
 
                 break;
+            }
 
 
             default:
@@ -4762,16 +4800,17 @@ if(
 
 
     //////////////////////////////////////////////////
-    // PESO MOTOR GANADOR
+    // PESO MOTOR
     //////////////////////////////////////////////////
 
     if(
-        typeof obtenerMotorActivoIA71 === "function" &&
         typeof obtenerPesoMotorIA71 === "function"
     ){
 
         let pesoMotor =
-        obtenerPesoMotorIA71(motorActivo);
+        obtenerPesoMotorIA71(
+            motorActivo
+        );
 
         if(
             Number.isFinite(pesoMotor) &&
@@ -4792,8 +4831,6 @@ if(
 
     //////////////////////////////////////////////////
     // ORIENTADOR
-    // SE MANTIENE, PERO NO SE VUELVE A CORREGIR
-    // LA DECENA DESPUÉS
     //////////////////////////////////////////////////
 
     ranking =
@@ -4803,7 +4840,7 @@ if(
 
 
     //////////////////////////////////////////////////
-    // PRECISIÓN DEL AMBOS COMPLETO
+    // CORRECTOR DE AMBOS EXACTOS
     //////////////////////////////////////////////////
 
     ranking =
@@ -4813,7 +4850,7 @@ if(
 
 
     //////////////////////////////////////////////////
-    // CONSTRUIR CANDIDATOS
+    // CONVERTIR TODO EN PARES COMPLETOS
     //////////////////////////////////////////////////
 
     let candidatos =
@@ -4839,106 +4876,48 @@ if(
     candidatos.filter(
         (item,index,array)=>
         array.findIndex(
-            x=>x.numero===item.numero
-        )===index
+            x=>x.numero === item.numero
+        ) === index
     );
 
 
     //////////////////////////////////////////////////
-    // ORDEN PRINCIPAL
+    // ORDENAR SOLO POR PUNTAJE DEL AMBOS COMPLETO
     //////////////////////////////////////////////////
 
     candidatos.sort(
         (a,b)=>
-        b.puntaje-a.puntaje
+        b.puntaje - a.puntaje
     );
 
 
     //////////////////////////////////////////////////
-    // SELECCIÓN DE AMBOS
-    //
-    // IMPORTANTE:
-    // NO AGRUPAR POR UNIDAD.
-    // CADA NUMERO 00-99 ES UN CANDIDATO COMPLETO.
+    // 3 AMBOS COMPLETOS
     //////////////////////////////////////////////////
 
-    let orden =
-    candidatos.map(
-        x=>x.numero
-    );
+    let ambos = [];
+
+    for(let candidato of candidatos){
+
+        let numero =
+        candidato.numero;
 
 
-    let ambos=[];
+        if(!ambos.includes(numero)){
 
-
-    //////////////////////////////////////////////////
-    // PRIMER AMBOS
-    //////////////////////////////////////////////////
-
-    if(orden.length>0){
-
-        ambos.push(
-            orden[0]
-        );
-
-    }
-
-
-    //////////////////////////////////////////////////
-    // SEGUNDO AMBOS
-    //
-    // Buscamos otro NUMERO COMPLETO.
-    // No buscamos solamente otra unidad.
-    //////////////////////////////////////////////////
-
-    for(let i=1;i<orden.length;i++){
-
-        if(
-            !ambos.includes(
-                orden[i]
-            )
-        ){
-
-            ambos.push(
-                orden[i]
-            );
-
-            break;
+            ambos.push(numero);
 
         }
 
-    }
 
-
-    //////////////////////////////////////////////////
-    // TERCER AMBOS
-    //////////////////////////////////////////////////
-
-    for(let i=0;i<orden.length;i++){
-
-        if(
-            ambos.length>=3
-        )
+        if(ambos.length === 3)
             break;
 
-
-        if(
-            !ambos.includes(
-                orden[i]
-            )
-        ){
-
-            ambos.push(
-                orden[i]
-            );
-
-        }
-
     }
 
 
     //////////////////////////////////////////////////
-    // GARANTIZAR FORMATO 00-99
+    // FORMATO
     //////////////////////////////////////////////////
 
     ambos =
@@ -4951,45 +4930,40 @@ if(
 
 
     //////////////////////////////////////////////////
-    // DIAGNÓSTICO
+    // ORDEN FINAL
     //////////////////////////////////////////////////
 
-    console.log(
-        "MOTOR V60 CORREGIDO"
+    let orden =
+    candidatos.map(
+        x=>x.numero
     );
 
+
     console.log(
-        "MOTOR ACTIVO:",
+        "V60 MOTOR:",
         motorActivo
     );
 
     console.log(
-        "TOP 20:",
-        candidatos
-        .slice(0,20)
+        "V60 TOP 20:",
+        candidatos.slice(0,20)
     );
 
     console.log(
-        "AMBOS COMPLETOS:",
+        "V60 AMBOS COMPLETOS:",
         ambos
     );
 
-
-    //////////////////////////////////////////////////
-    // DEVOLVER
-    //////////////////////////////////////////////////
 
     return {
 
         ranking,
-
         orden,
-
         ambos
 
     };
 
-                    }
+    }
 
     //////////////////////////////////////////////////
 // CORRECTOR PRECISIÓN AMBOS V60

@@ -5612,7 +5612,49 @@ function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
 
 
 // =========================================================
-// FUNCIÓN PRINCIPAL DE CONTROL
+// 1. ANALIZADOR DE CENTENAS DOMINANTES (POSICIÓN A LA CABEZA)
+// =========================================================
+
+function obtenerCentenasDominantes(historial, turnoDestino) {
+    let tDestino = String(turnoDestino || "").toUpperCase().trim();
+    let regDestino = historial.filter(r => 
+        r && r.numero && String(r.turno || "").toUpperCase().trim() === tDestino
+    );
+    
+    if (regDestino.length === 0) regDestino = historial;
+
+    let frecs = {};
+    let ultimas = {};
+
+    regDestino.forEach((r, idx) => {
+        let numStr = String(r.numero).padStart(4, "0");
+        let centena = numStr.slice(-3, -2); // Captura el 3er dígito (Centena)
+        if (centena !== "") {
+            frecs[centena] = (frecs[centena] || 0) + 1;
+            ultimas[centena] = idx;
+        }
+    });
+
+    let total = regDestino.length;
+    let ranking = [];
+
+    for (let c = 0; c <= 9; c++) {
+        let cStr = String(c);
+        let freq = frecs[cStr] || 0;
+        let uIdx = ultimas[cStr] !== undefined ? ultimas[cStr] : -1;
+        let atraso = uIdx === -1 ? 30 : (total - 1 - uIdx);
+
+        let score = (freq * 4) + (atraso > 8 ? atraso * 1.5 : 0);
+        ranking.push({ centena: cStr, score: Math.round(score) });
+    }
+
+    ranking.sort((a, b) => b.score - a.score);
+    return ranking; // Devuelve las mejores centenas ordenadas
+}
+
+
+// =========================================================
+// 2. CONTROLADOR CON LUZ VERDE Y TERNO A LA CABEZA
 // =========================================================
 
 async function generarResultadoIA() {
@@ -5626,22 +5668,42 @@ async function generarResultadoIA() {
     let turnoOrigen = document.getElementById("turnoCarga").value;
     let turnoDestino = obtenerSiguienteTurnoV48(turnoOrigen);
 
-    let resultados = predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino);
+    // 1. Obtener Ambos Exactos (Usa el motor actual sin tocarlo)
+    let resultadosAmbos = predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino);
+    let topAmbos = resultadosAmbos.slice(0, 3).map(r => r.ambosExacto);
 
-    let topAmbos = resultados.slice(0, 3).map(r => r.ambosExacto);
+    // 2. Obtener las 2 Centenas más fuertes para el Turno Destino
+    let rankingCentenas = obtenerCentenasDominantes(historial, turnoDestino);
+    let c1 = rankingCentenas[0].centena; // Mejor centena
+    let c2 = rankingCentenas[1].centena; // Segunda mejor centena
 
-    let principal = topAmbos[0];
-    let apoyo1 = topAmbos[1] || "00";
-    let apoyo2 = topAmbos[2] || "00";
+    // 3. Armar los Ternos Específicos a la Cabeza
+    let ternoPrincipal = c1 + topAmbos[0];  // Ej: Centena c1 + Ambos 1º
+    let ternoRefuerzo = c2 + topAmbos[0];   // Ej: Centena c2 + Ambos 1º
+    let ternoAlternativo = c1 + topAmbos[1];// Ej: Centena c1 + Ambos 2º
 
-    let ternos = [principal + apoyo1[1], principal + apoyo2[1]];
-    let cuaternos = [principal + apoyo1, principal + apoyo2];
+    let ternosEspeciales = [ternoPrincipal, ternoRefuerzo, ternoAlternativo];
+    let cuaternos = [c1 + ternoPrincipal, c2 + ternoRefuerzo];
 
+    // 4. Determinar Semaforización / Luz Verde
+    let scoreAmbosTop = resultadosAmbos[0].score;
+    let semaforo = "🔴 LUZ ROJA (Poca claridad - No arriesgar a la cabeza)";
+    let recomendacion = "Baja atracción de terno. Jugar solo ambos de apoyo o esperar el próximo turno.";
+
+    if (scoreAmbosTop >= 250) {
+        semaforo = "🟢 LUZ VERDE (ALTA PROBABILIDAD A LA CABEZA - 1º PREMIO)";
+        recomendacion = `Señal fuerte. Apostar preferentemente al Terno Principal (${ternoPrincipal}) al 1º Premio.`;
+    } else if (scoreAmbosTop >= 180) {
+        semaforo = "🟡 LUZ AMARILLA (PROBABILIDAD MODERADA)";
+        recomendacion = "Alineación media. Buena opción para ambos a la cabeza, moderar apuesta en terno.";
+    }
+
+    // 5. Guardar Predicción
     PREDICCION_ACTUAL_V49 = {
         fecha: new Date().toISOString(),
         turno: turnoOrigen,
         ambos: topAmbos,
-        ternos: ternos,
+        ternos: ternosEspeciales,
         cuaternos: cuaternos
     };
 
@@ -5650,29 +5712,36 @@ async function generarResultadoIA() {
         turnoOrigen: turnoOrigen,
         turnoDestino: turnoDestino,
         ambos: topAmbos,
-        ternos: ternos,
+        ternos: ternosEspeciales,
         cuaternos: cuaternos,
-        origen: "MOTOR_17K_TURNO_EXACTO"
+        origen: "MOTOR_17K_TERNO_CABEZA"
     });
 
+    // 6. Mostrar en Pantalla
     mostrarV48(`
-🧠 MOTOR IA PREDICCIÓN POR TURNO
+🧠 MOTOR DE PREDICCIÓN - ENFOQUE TERNO A LA CABEZA
 
 Origen: ${turnoOrigen} ➔ Destino: ${turnoDestino}
 
-🎯 AMBOS EXACTOS (TOP 3):
-1º AMBOS: ${resultados[0].ambosExacto} (Puntos: ${resultados[0].score})
-2º AMBOS: ${resultados[1].ambosExacto} (Puntos: ${resultados[1].score})
-3º AMBOS: ${resultados[2].ambosExacto} (Puntos: ${resultados[2].score})
+STATUS DEL TURNO:
+${semaforo}
+💡 ${recomendacion}
 
-TERNOS:
-${ternos.join("\n")}
+----------------------------------------
+🎯 TERNO SUGERIDO (1º PREMIO - CABEZA):
+1º TERNO FUERTE: ${ternoPrincipal}  (Centena [${c1}] + Ambos ${topAmbos[0]})
+2º TERNO REFUERZO: ${ternoRefuerzo}  (Centena [${c2}] + Ambos ${topAmbos[0]})
+3º TERNO ALTERNATIVO: ${ternoAlternativo}  (Centena [${c1}] + Ambos ${topAmbos[1]})
 
-CUATERNOS:
-${cuaternos.join("\n")}
+----------------------------------------
+🎯 AMBOS BASE (TOP 3):
+1º AMBOS: ${topAmbos[0]} (Puntos: ${resultadosAmbos[0].score})
+2º AMBOS: ${topAmbos[1]} (Puntos: ${resultadosAmbos[1].score})
+3º AMBOS: ${topAmbos[2]} (Puntos: ${resultadosAmbos[2].score})
     `);
-    }
-    
+}
+
+ 
 
 
 

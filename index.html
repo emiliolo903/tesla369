@@ -5477,7 +5477,6 @@ async function aplicarNucleoDominanteV61(
     // =========================================================
 // MOTOR PREDICCIÓN POR TURNO EXACTO (REEMPLAZA LAS ANTERIORES)
 // =========================================================
-
 function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
     let tOrigen = String(turnoOrigen || "").toUpperCase().trim();
     let tDestino = String(turnoDestino || "").toUpperCase().trim();
@@ -5493,12 +5492,11 @@ function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
     if (registrosOrigen.length === 0) registrosOrigen = historial;
     if (registrosDestino.length === 0) registrosDestino = historial;
 
-    // Tomar las últimas bases reales del turno origen
     let ultimosOrigen = registrosOrigen.slice(-5).map(r => String(r.numero).slice(-2).padStart(2, "0"));
     let nActual = ultimosOrigen[ultimosOrigen.length - 1] || "00";
     let nAnterior = ultimosOrigen[ultimosOrigen.length - 2] || "00";
 
-    let ranking = {};
+    let rankingBase = {};
 
     // 2. TRANSICIONES REALES: ORIGEN -> DESTINO
     for (let i = 0; i < historial.length - 1; i++) {
@@ -5514,14 +5512,14 @@ function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
             let base = String(actual.numero).slice(-2).padStart(2, "0");
             let salida = String(siguiente.numero).slice(-2).padStart(2, "0");
 
-            if (!ranking[salida]) ranking[salida] = 0;
+            if (!rankingBase[salida]) rankingBase[salida] = 0;
 
             if (base === nActual) {
-                ranking[salida] += 120;
+                rankingBase[salida] += 120;
             } else if (base === nAnterior) {
-                ranking[salida] += 50;
+                rankingBase[salida] += 50;
             } else {
-                ranking[salida] += 15;
+                rankingBase[salida] += 15;
             }
         }
     }
@@ -5540,26 +5538,64 @@ function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
 
     for (let i = 0; i < 100; i++) {
         let ambos = String(i).padStart(2, "0");
-        if (!ranking[ambos]) ranking[ambos] = 0;
+        if (!rankingBase[ambos]) rankingBase[ambos] = 0;
 
         let freq = frecs[ambos] || 0;
         let ultimoIdx = ultimasApariciones[ambos] !== undefined ? ultimasApariciones[ambos] : -1;
         let atraso = ultimoIdx === -1 ? 40 : (totalRegDestino - 1 - ultimoIdx);
 
-        ranking[ambos] += freq * 2.5;
+        rankingBase[ambos] += freq * 2.5;
 
         if (atraso > 10) {
-            ranking[ambos] += Math.min(atraso * 1.2, 50);
+            rankingBase[ambos] += Math.min(atraso * 1.2, 50);
         }
     }
 
-    // 4. DESEMPATE DINÁMICO SEGÚN EL TURNO DESTINO
+    // =========================================================
+    // MÓDULO DE CORRECCIÓN VECINAL (+1 / -1) Y CONTINUIDAD
+    // =========================================================
+    let rankingFinal = { ...rankingBase };
+
+    // A) Transferencia de energía vecinal:
+    // Si un número acumula alto puntaje, sus vecinos directos (+1 y -1) reciben impulso.
+    for (let i = 0; i < 100; i++) {
+        let numInt = i;
+        let numStr = String(numInt).padStart(2, "0");
+        let score = rankingBase[numStr] || 0;
+
+        if (score > 25) {
+            let vecArriba = String((numInt + 1) % 100).padStart(2, "0");
+            let vecAbajo = String((numInt + 99) % 100).padStart(2, "0");
+
+            rankingFinal[vecArriba] = (rankingFinal[vecArriba] || 0) + (score * 0.25);
+            rankingFinal[vecAbajo] = (rankingFinal[vecAbajo] || 0) + (score * 0.25);
+        }
+    }
+
+    // B) Detección de deriva reciente en los últimos 3 sorteos del turno
+    let ultimos3Destino = registrosDestino.slice(-3).map(r => parseInt(String(r.numero).slice(-2)));
+    if (ultimos3Destino.length >= 2) {
+        let diff = ultimos3Destino[ultimos3Destino.length - 1] - ultimos3Destino[ultimos3Destino.length - 2];
+        if (diff === 1 || diff === 2) {
+            for (let i = 0; i < 100; i++) {
+                let sigStr = String((i + 1) % 100).padStart(2, "0");
+                rankingFinal[sigStr] = (rankingFinal[sigStr] || 0) + 15;
+            }
+        } else if (diff === -1 || diff === -2) {
+            for (let i = 0; i < 100; i++) {
+                let prevStr = String((i + 99) % 100).padStart(2, "0");
+                rankingFinal[prevStr] = (rankingFinal[prevStr] || 0) + 15;
+            }
+        }
+    }
+
+    // 4. DESEMPATE Y ORDENAMIENTO FINAL
     let hashTurno = 0;
     for (let c of tDestino) hashTurno += c.charCodeAt(0);
 
-    let resultado = Object.keys(ranking)
+    let resultado = Object.keys(rankingFinal)
         .sort((a, b) => {
-            let diff = ranking[b] - ranking[a];
+            let diff = rankingFinal[b] - rankingFinal[a];
             if (Math.abs(diff) < 0.001) {
                 return ((parseInt(b) + hashTurno) % 97) - ((parseInt(a) + hashTurno) % 97);
             }
@@ -5568,11 +5604,12 @@ function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
         .slice(0, 10)
         .map(ambos => ({
             ambosExacto: ambos,
-            score: Math.round(ranking[ambos])
+            score: Math.round(rankingFinal[ambos])
         }));
 
     return resultado;
-}
+    }
+
 
 // =========================================================
 // FUNCIÓN PRINCIPAL DE CONTROL

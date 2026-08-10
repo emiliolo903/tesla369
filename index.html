@@ -5472,33 +5472,30 @@ async function aplicarNucleoDominanteV61(
 //////////////////////////////////////////////////
 // GENERADOR IA V60
 // BLOQUE 1
-//////////////////////////////////////////////////
+//////////////////////////////////////////////////    
 
     // =========================================================
-// MOTOR PREDICCIÓN POR TURNO EXACTO (REEMPLAZA LAS ANTERIORES)
+// MOTOR ESPECIALIZADO EN 7 AGENCIAS SIMULTÁNEAS
 // =========================================================
+
 function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
     let tOrigen = String(turnoOrigen || "").toUpperCase().trim();
     let tDestino = String(turnoDestino || "").toUpperCase().trim();
 
-    // 1. FILTRAR HISTORIAL POR TURNO ORIGEN Y TURNO DESTINO
-    let registrosOrigen = historial.filter(r => 
-        r && r.numero && String(r.turno || "").toUpperCase().trim() === tOrigen
-    );
-    let registrosDestino = historial.filter(r => 
-        r && r.numero && String(r.turno || "").toUpperCase().trim() === tDestino
-    );
+    // 1. Obtener todos los registros de los turnos seleccionados
+    let regOrigen = historial.filter(r => r && r.numero && String(r.turno || "").toUpperCase().trim() === tOrigen);
+    let regDestino = historial.filter(r => r && r.numero && String(r.turno || "").toUpperCase().trim() === tDestino);
 
-    if (registrosOrigen.length === 0) registrosOrigen = historial;
-    if (registrosDestino.length === 0) registrosDestino = historial;
+    if (regOrigen.length === 0) regOrigen = historial;
+    if (regDestino.length === 0) regDestino = historial;
 
-    let ultimosOrigen = registrosOrigen.slice(-5).map(r => String(r.numero).slice(-2).padStart(2, "0"));
-    let nActual = ultimosOrigen[ultimosOrigen.length - 1] || "00";
-    let nAnterior = ultimosOrigen[ultimosOrigen.length - 2] || "00";
+    // Capturar el bloque de las últimas 7 cabezas cargadas en el turno origen
+    let bloqueOrigenActual = regOrigen.slice(-7).map(r => String(r.numero).slice(-2).padStart(2, "0"));
 
     let rankingBase = {};
+    for (let i = 0; i < 100; i++) rankingBase[String(i).padStart(2, "0")] = 0;
 
-    // 2. TRANSICIONES REALES: ORIGEN -> DESTINO
+    // 2. Evaluacion de Bloques Históricos (Transición de 7 Cabezas -> 7 Cabezas)
     for (let i = 0; i < historial.length - 1; i++) {
         let actual = historial[i];
         let siguiente = historial[i + 1];
@@ -5512,45 +5509,76 @@ function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
             let base = String(actual.numero).slice(-2).padStart(2, "0");
             let salida = String(siguiente.numero).slice(-2).padStart(2, "0");
 
-            if (!rankingBase[salida]) rankingBase[salida] = 0;
-
-            if (base === nActual) {
-                rankingBase[salida] += 120;
-            } else if (base === nAnterior) {
-                rankingBase[salida] += 50;
+            // Si el número histórico del origen coincide con CUALQUIERA de las 7 cabezas actuales
+            if (bloqueOrigenActual.includes(base)) {
+                rankingBase[salida] += 80; // Fuerza de atracción por presencia en bloque
             } else {
-                rankingBase[salida] += 15;
+                rankingBase[salida] += 10;
             }
         }
     }
 
-    // 3. FRECUENCIA Y ATRASO EXCLUSIVO DEL TURNO DESTINO
+    // 3. Frecuencia y Atraso en el Mapa de las 7 Agencias del Turno Destino
     let frecs = {};
-    let ultimasApariciones = {};
-
-    registrosDestino.forEach((r, idx) => {
+    let ultimas = {};
+    regDestino.forEach((r, idx) => {
         let num = String(r.numero).slice(-2).padStart(2, "0");
         frecs[num] = (frecs[num] || 0) + 1;
-        ultimasApariciones[num] = idx;
+        ultimas[num] = idx;
     });
 
-    let totalRegDestino = registrosDestino.length;
+    let totalRegDestino = regDestino.length;
 
     for (let i = 0; i < 100; i++) {
         let ambos = String(i).padStart(2, "0");
-        if (!rankingBase[ambos]) rankingBase[ambos] = 0;
-
         let freq = frecs[ambos] || 0;
-        let ultimoIdx = ultimasApariciones[ambos] !== undefined ? ultimasApariciones[ambos] : -1;
-        let atraso = ultimoIdx === -1 ? 40 : (totalRegDestino - 1 - ultimoIdx);
+        let uIdx = ultimas[ambos] !== undefined ? ultimas[ambos] : -1;
+        let atraso = uIdx === -1 ? 50 : (totalRegDestino - 1 - uIdx);
 
-        rankingBase[ambos] += freq * 2.5;
+        rankingBase[ambos] += freq * 2.0;
 
-        if (atraso > 10) {
-            rankingBase[ambos] += Math.min(atraso * 1.2, 50);
+        if (atraso > 15) {
+            rankingBase[ambos] += Math.min(atraso * 1.1, 45);
         }
     }
 
+    // 4. Cobertura Vecinal (+1 / -1) para asegurar impacto en cualquiera de las 7 agencias
+    let rankingFinal = { ...rankingBase };
+    for (let i = 0; i < 100; i++) {
+        let numStr = String(i).padStart(2, "0");
+        let score = rankingBase[numStr] || 0;
+
+        if (score > 150) {
+            let vecArriba = String((i + 1) % 100).padStart(2, "0");
+            let vecAbajo = String((i + 99) % 100).padStart(2, "0");
+
+            rankingFinal[vecArriba] = (rankingFinal[vecArriba] || 0) + (score * 0.20);
+            rankingFinal[vecAbajo] = (rankingFinal[vecAbajo] || 0) + (score * 0.20);
+        }
+    }
+
+    // 5. Desempate y salida del Top 4
+    let hashTurno = 0;
+    for (let c of tDestino) hashTurno += c.charCodeAt(0);
+
+    let resultado = Object.keys(rankingFinal)
+        .sort((a, b) => {
+            let diff = rankingFinal[b] - rankingFinal[a];
+            if (Math.abs(diff) < 0.001) {
+                return ((parseInt(b) + hashTurno) % 97) - ((parseInt(a) + hashTurno) % 97);
+            }
+            return diff;
+        })
+        .slice(0, 10)
+        .map(ambos => ({
+            ambosExacto: ambos,
+            score: Math.round(rankingFinal[ambos])
+        }));
+
+    return resultado;
+            }
+
+    
     // =========================================================
     // MÓDULO DE CORRECCIÓN VECINAL (+1 / -1) Y CONTINUIDAD
     // =========================================================

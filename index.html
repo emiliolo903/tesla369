@@ -5629,6 +5629,103 @@ function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
     return resultado;
 }
 
+    // =========================================================
+// MATRIZ DE TRANSICIÓN DIRECTA POR SECUENCIA DE TURNOS
+// =========================================================
+
+function analizarTransicionSecuencial(historial, numeroSalida, turnoOrigen, turnoDestino) {
+    let numBase = String(numeroSalida).trim().slice(-2).padStart(2, "0");
+    let tOrigen = String(turnoOrigen || "").toUpperCase().trim();
+    let tDestino = String(turnoDestino || "").toUpperCase().trim();
+
+    let conteoSalidas = {};
+    for (let i = 0; i < 100; i++) conteoSalidas[String(i).padStart(2, "0")] = 0;
+
+    let totalCoincidencias = 0;
+
+    // Recorrer el historial buscando el par (turnoOrigen -> turnoDestino)
+    for (let i = 0; i < historial.length - 1; i++) {
+        let actual = historial[i];
+        let siguiente = historial[i + 1];
+
+        if (!actual || !siguiente) continue;
+
+        let turnAct = String(actual.turno || "").toUpperCase().trim();
+        let turnSig = String(siguiente.turno || "").toUpperCase().trim();
+
+        // Validar secuencia exacta de turnos
+        if (turnAct === tOrigen && turnSig === tDestino) {
+            let valAct = actual.numero !== undefined ? actual.numero : (actual.ambos || "");
+            let baseHist = String(valAct).trim().slice(-2).padStart(2, "0");
+
+            // Si el número en el turno origen coincide con el buscado
+            if (baseHist === numBase) {
+                let valSig = siguiente.numero !== undefined ? siguiente.numero : (siguiente.ambos || "");
+                let salidaHist = String(valSig).trim().slice(-2).padStart(2, "0");
+
+                conteoSalidas[salidaHist]++;
+                totalCoincidencias++;
+            }
+        }
+    }
+
+    // Ordenar de mayor a menor frecuencia de salida
+    let rankingTransicion = Object.keys(conteoSalidas)
+        .map(ambos => ({
+            ambos: ambos,
+            veces: conteoSalidas[ambos],
+            porcentaje: totalCoincidencias > 0 ? ((conteoSalidas[ambos] / totalCoincidencias) * 100).toFixed(1) : 0
+        }))
+        .sort((a, b) => b.veces - a.veces);
+
+    return {
+        numeroBusqueda: numBase,
+        origen: tOrigen,
+        destino: tDestino,
+        totalMuestras: totalCoincidencias,
+        topSalidas: rankingTransicion.slice(0, 5)
+    };
+    }
+    // =========================================================
+// AUDITORÍA DE ACIERTOS Y ERRORES DE LA IA
+// =========================================================
+
+async function auditarRendimientoIA() {
+    let predicciones = await leerV48(STORES_V48.predicciones) || [];
+    let historial = await leerV48(STORES_V48.historico) || [];
+
+    let totalAuditadas = 0;
+    let aciertosAmbos = 0;
+
+    predicciones.forEach(pred => {
+        if (!pred.ambos || !pred.turnoDestino) return;
+
+        // Buscar si existe el resultado real en el historial para ese turno
+        let coincidencia = historial.find(r => 
+            String(r.turno || "").toUpperCase().trim() === String(pred.turnoDestino).toUpperCase().trim() &&
+            new Date(r.fecha).toDateString() === new Date(pred.fecha).toDateString()
+        );
+
+        if (coincidencia) {
+            totalAuditadas++;
+            let numReal = String(coincidencia.numero || coincidencia.ambos || "").slice(-2).padStart(2, "0");
+
+            // Verificar si el número real estaba dentro de los ambos sugeridos (Top 2 o Top 4)
+            if (pred.ambos.includes(numReal)) {
+                aciertosAmbos++;
+            }
+        }
+    });
+
+    let tasaEfectividad = totalAuditadas > 0 ? ((aciertosAmbos / totalAuditadas) * 100).toFixed(1) : 0;
+
+    return {
+        evaluadas: totalAuditadas,
+        aciertos: aciertosAmbos,
+        efectividad: tasaEfectividad + "%"
+    };
+        }
+    
 // =========================================================
 // 3. CONTROLADOR PRINCIPAL Y GENERACIÓN DE PREDICCIÓN
 // =========================================================

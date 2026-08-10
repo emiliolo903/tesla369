@@ -5473,61 +5473,112 @@ async function aplicarNucleoDominanteV61(
 // GENERADOR IA V60
 // BLOQUE 1
 //////////////////////////////////////////////////    
+// =========================================================
+// 1. ANALIZADOR DE CENTENAS DOMINANTES (0 AL 9 A LA CABEZA)
+// =========================================================
 
-    // =========================================================
-// MOTOR ESPECIALIZADO EN 7 AGENCIAS SIMULTÁNEAS
+function obtenerCentenasDominantes(historial, turnoDestino) {
+    let tDestino = String(turnoDestino || "").toUpperCase().trim();
+    
+    let regDestino = (historial || []).filter(r => {
+        if (!r) return false;
+        let turnStr = String(r.turno || "").toUpperCase().trim();
+        return turnStr === tDestino;
+    });
+
+    if (regDestino.length === 0) regDestino = historial || [];
+
+    let frecs = {};
+    let ultimas = {};
+
+    regDestino.forEach((r, idx) => {
+        let numVal = r.numero !== undefined ? r.numero : (r.ambos || r.resultado || "");
+        let numStr = String(numVal).trim().padStart(4, "0");
+        let centena = numStr.length >= 3 ? numStr.slice(-3, -2) : "0";
+        
+        frecs[centena] = (frecs[centena] || 0) + 1;
+        ultimas[centena] = idx;
+    });
+
+    let total = regDestino.length || 1;
+    let ranking = [];
+
+    for (let c = 0; c <= 9; c++) {
+        let cStr = String(c);
+        let freq = frecs[cStr] || 0;
+        let uIdx = ultimas[cStr] !== undefined ? ultimas[cStr] : -1;
+        let atraso = uIdx === -1 ? 30 : (total - 1 - uIdx);
+
+        let score = (freq * 4) + (atraso > 8 ? atraso * 1.5 : 0);
+        ranking.push({ centena: cStr, score: Math.round(score) });
+    }
+
+    ranking.sort((a, b) => b.score - a.score);
+    return ranking;
+}
+
+// =========================================================
+// 2. MOTOR DE AMBOS EXACTOS (MATRIZ 7 AGENCIAS Y VECINOS)
 // =========================================================
 
 function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
     let tOrigen = String(turnoOrigen || "").toUpperCase().trim();
     let tDestino = String(turnoDestino || "").toUpperCase().trim();
 
-    // 1. Obtener todos los registros de los turnos seleccionados
-    let regOrigen = historial.filter(r => r && r.numero && String(r.turno || "").toUpperCase().trim() === tOrigen);
-    let regDestino = historial.filter(r => r && r.numero && String(r.turno || "").toUpperCase().trim() === tDestino);
+    let baseHistorial = Array.isArray(historial) ? historial : [];
 
-    if (regOrigen.length === 0) regOrigen = historial;
-    if (regDestino.length === 0) regDestino = historial;
+    // Filtrar por turno con tolerancia
+    let regOrigen = baseHistorial.filter(r => r && String(r.turno || "").toUpperCase().trim() === tOrigen);
+    let regDestino = baseHistorial.filter(r => r && String(r.turno || "").toUpperCase().trim() === tDestino);
 
-    // Capturar el bloque de las últimas 7 cabezas cargadas en el turno origen
-    let bloqueOrigenActual = regOrigen.slice(-7).map(r => String(r.numero).slice(-2).padStart(2, "0"));
+    if (regOrigen.length === 0) regOrigen = baseHistorial;
+    if (regDestino.length === 0) regDestino = baseHistorial;
+
+    // Extraer bloque de las últimas 7 cabezas cargadas
+    let bloqueOrigenActual = regOrigen.slice(-7).map(r => {
+        let val = r.numero !== undefined ? r.numero : (r.ambos || r.resultado || "00");
+        return String(val).trim().slice(-2).padStart(2, "0");
+    });
 
     let rankingBase = {};
     for (let i = 0; i < 100; i++) rankingBase[String(i).padStart(2, "0")] = 0;
 
-    // 2. Evaluacion de Bloques Históricos (Transición de 7 Cabezas -> 7 Cabezas)
-    for (let i = 0; i < historial.length - 1; i++) {
-        let actual = historial[i];
-        let siguiente = historial[i + 1];
+    // Transición de bloques históricos
+    for (let i = 0; i < baseHistorial.length - 1; i++) {
+        let actual = baseHistorial[i];
+        let siguiente = baseHistorial[i + 1];
 
-        if (!actual || !siguiente || !actual.numero || !siguiente.numero) continue;
+        if (!actual || !siguiente) continue;
 
         let turnAct = String(actual.turno || "").toUpperCase().trim();
         let turnSig = String(siguiente.turno || "").toUpperCase().trim();
 
         if (turnAct === tOrigen && turnSig === tDestino) {
-            let base = String(actual.numero).slice(-2).padStart(2, "0");
-            let salida = String(siguiente.numero).slice(-2).padStart(2, "0");
+            let valAct = actual.numero !== undefined ? actual.numero : (actual.ambos || "00");
+            let valSig = siguiente.numero !== undefined ? siguiente.numero : (siguiente.ambos || "00");
 
-            // Si el número histórico del origen coincide con CUALQUIERA de las 7 cabezas actuales
+            let base = String(valAct).trim().slice(-2).padStart(2, "0");
+            let salida = String(valSig).trim().slice(-2).padStart(2, "0");
+
             if (bloqueOrigenActual.includes(base)) {
-                rankingBase[salida] += 80; // Fuerza de atracción por presencia en bloque
+                rankingBase[salida] += 80;
             } else {
                 rankingBase[salida] += 10;
             }
         }
     }
 
-    // 3. Frecuencia y Atraso en el Mapa de las 7 Agencias del Turno Destino
+    // Frecuencia y Atraso en Turno Destino
     let frecs = {};
     let ultimas = {};
     regDestino.forEach((r, idx) => {
-        let num = String(r.numero).slice(-2).padStart(2, "0");
+        let val = r.numero !== undefined ? r.numero : (r.ambos || "00");
+        let num = String(val).trim().slice(-2).padStart(2, "0");
         frecs[num] = (frecs[num] || 0) + 1;
         ultimas[num] = idx;
     });
 
-    let totalRegDestino = regDestino.length;
+    let totalRegDestino = regDestino.length || 1;
 
     for (let i = 0; i < 100; i++) {
         let ambos = String(i).padStart(2, "0");
@@ -5542,13 +5593,13 @@ function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
         }
     }
 
-    // 4. Cobertura Vecinal (+1 / -1) para asegurar impacto en cualquiera de las 7 agencias
+    // Cobertura Vecinal (+1 / -1)
     let rankingFinal = { ...rankingBase };
     for (let i = 0; i < 100; i++) {
         let numStr = String(i).padStart(2, "0");
         let score = rankingBase[numStr] || 0;
 
-        if (score > 150) {
+        if (score > 120) {
             let vecArriba = String((i + 1) % 100).padStart(2, "0");
             let vecAbajo = String((i + 99) % 100).padStart(2, "0");
 
@@ -5557,7 +5608,7 @@ function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
         }
     }
 
-    // 5. Desempate y salida del Top 4
+    // Ordenamiento y salida Top 4
     let hashTurno = 0;
     for (let c of tDestino) hashTurno += c.charCodeAt(0);
 
@@ -5576,119 +5627,16 @@ function predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino) {
         }));
 
     return resultado;
-            }
-
-    
-    // =========================================================
-    // MÓDULO DE CORRECCIÓN VECINAL (+1 / -1) Y CONTINUIDAD
-    // =========================================================
-    let rankingFinal = { ...rankingBase };
-
-    // A) Transferencia de energía vecinal:
-    // Si un número acumula alto puntaje, sus vecinos directos (+1 y -1) reciben impulso.
-    for (let i = 0; i < 100; i++) {
-        let numInt = i;
-        let numStr = String(numInt).padStart(2, "0");
-        let score = rankingBase[numStr] || 0;
-
-        if (score > 25) {
-            let vecArriba = String((numInt + 1) % 100).padStart(2, "0");
-            let vecAbajo = String((numInt + 99) % 100).padStart(2, "0");
-
-            rankingFinal[vecArriba] = (rankingFinal[vecArriba] || 0) + (score * 0.25);
-            rankingFinal[vecAbajo] = (rankingFinal[vecAbajo] || 0) + (score * 0.25);
-        }
-    }
-
-    // B) Detección de deriva reciente en los últimos 3 sorteos del turno
-    let ultimos3Destino = registrosDestino.slice(-3).map(r => parseInt(String(r.numero).slice(-2)));
-    if (ultimos3Destino.length >= 2) {
-        let diff = ultimos3Destino[ultimos3Destino.length - 1] - ultimos3Destino[ultimos3Destino.length - 2];
-        if (diff === 1 || diff === 2) {
-            for (let i = 0; i < 100; i++) {
-                let sigStr = String((i + 1) % 100).padStart(2, "0");
-                rankingFinal[sigStr] = (rankingFinal[sigStr] || 0) + 15;
-            }
-        } else if (diff === -1 || diff === -2) {
-            for (let i = 0; i < 100; i++) {
-                let prevStr = String((i + 99) % 100).padStart(2, "0");
-                rankingFinal[prevStr] = (rankingFinal[prevStr] || 0) + 15;
-            }
-        }
-    }
-
-    // 4. DESEMPATE Y ORDENAMIENTO FINAL
-    let hashTurno = 0;
-    for (let c of tDestino) hashTurno += c.charCodeAt(0);
-
-    let resultado = Object.keys(rankingFinal)
-        .sort((a, b) => {
-            let diff = rankingFinal[b] - rankingFinal[a];
-            if (Math.abs(diff) < 0.001) {
-                return ((parseInt(b) + hashTurno) % 97) - ((parseInt(a) + hashTurno) % 97);
-            }
-            return diff;
-        })
-        .slice(0, 10)
-        .map(ambos => ({
-            ambosExacto: ambos,
-            score: Math.round(rankingFinal[ambos])
-        }));
-
-    return resultado;
-    }
-
-
-// =========================================================
-// 1. ANALIZADOR DE CENTENAS DOMINANTES (POSICIÓN A LA CABEZA)
-// =========================================================
-
-function obtenerCentenasDominantes(historial, turnoDestino) {
-    let tDestino = String(turnoDestino || "").toUpperCase().trim();
-    let regDestino = historial.filter(r => 
-        r && r.numero && String(r.turno || "").toUpperCase().trim() === tDestino
-    );
-    
-    if (regDestino.length === 0) regDestino = historial;
-
-    let frecs = {};
-    let ultimas = {};
-
-    regDestino.forEach((r, idx) => {
-        let numStr = String(r.numero).padStart(4, "0");
-        let centena = numStr.slice(-3, -2); // Captura el 3er dígito (Centena)
-        if (centena !== "") {
-            frecs[centena] = (frecs[centena] || 0) + 1;
-            ultimas[centena] = idx;
-        }
-    });
-
-    let total = regDestino.length;
-    let ranking = [];
-
-    for (let c = 0; c <= 9; c++) {
-        let cStr = String(c);
-        let freq = frecs[cStr] || 0;
-        let uIdx = ultimas[cStr] !== undefined ? ultimas[cStr] : -1;
-        let atraso = uIdx === -1 ? 30 : (total - 1 - uIdx);
-
-        let score = (freq * 4) + (atraso > 8 ? atraso * 1.5 : 0);
-        ranking.push({ centena: cStr, score: Math.round(score) });
-    }
-
-    ranking.sort((a, b) => b.score - a.score);
-    return ranking; // Devuelve las mejores centenas ordenadas
 }
 
-
 // =========================================================
-// 2. CONTROLADOR CON LUZ VERDE Y TERNO A LA CABEZA
+// 3. CONTROLADOR PRINCIPAL Y GENERACIÓN DE PREDICCIÓN
 // =========================================================
 
 async function generarResultadoIA() {
     let historial = await leerV48(STORES_V48.historico);
 
-    if (!historial || historial.length < 2) {
+    if (!historial || !Array.isArray(historial) || historial.length < 2) {
         mostrarV48("⚠️ LA BASE HISTÓRICA ESTÁ VACÍA O TIENE MENOS DE 2 REGISTROS");
         return;
     }
@@ -5696,37 +5644,38 @@ async function generarResultadoIA() {
     let turnoOrigen = document.getElementById("turnoCarga").value;
     let turnoDestino = obtenerSiguienteTurnoV48(turnoOrigen);
 
-    // 1. Obtener Ambos Exactos (Usa el motor actual sin tocarlo)
+    // 1. Obtener Top Ambos Exactos
     let resultadosAmbos = predecirAmbosExactoV17k(historial, turnoOrigen, turnoDestino);
-    let topAmbos = resultadosAmbos.slice(0, 3).map(r => r.ambosExacto);
+    let topAmbos = resultadosAmbos.slice(0, 4).map(r => r.ambosExacto);
 
-    // 2. Obtener las 2 Centenas más fuertes para el Turno Destino
+    // 2. Obtener Centenas Dominantes
     let rankingCentenas = obtenerCentenasDominantes(historial, turnoDestino);
-    let c1 = rankingCentenas[0].centena; // Mejor centena
-    let c2 = rankingCentenas[1].centena; // Segunda mejor centena
+    let c1 = rankingCentenas[0] ? rankingCentenas[0].centena : "5";
+    let c2 = rankingCentenas[1] ? rankingCentenas[1].centena : "8";
 
-    // 3. Armar los Ternos Específicos a la Cabeza
-    let ternoPrincipal = c1 + topAmbos[0];  // Ej: Centena c1 + Ambos 1º
-    let ternoRefuerzo = c2 + topAmbos[0];   // Ej: Centena c2 + Ambos 1º
-    let ternoAlternativo = c1 + topAmbos[1];// Ej: Centena c1 + Ambos 2º
+    // 3. Armar Ternos
+    let ternoPrincipal = c1 + topAmbos[0];
+    let ternoRefuerzo = c2 + topAmbos[0];
+    let ternoAlternativo = c1 + (topAmbos[1] || "00");
+    let ternoApoyo = c2 + (topAmbos[1] || "00");
 
-    let ternosEspeciales = [ternoPrincipal, ternoRefuerzo, ternoAlternativo];
+    let ternosEspeciales = [ternoPrincipal, ternoRefuerzo, ternoAlternativo, ternoApoyo];
     let cuaternos = [c1 + ternoPrincipal, c2 + ternoRefuerzo];
 
-    // 4. Determinar Semaforización / Luz Verde
-    let scoreAmbosTop = resultadosAmbos[0].score;
-    let semaforo = "🔴 LUZ ROJA (Poca claridad - No arriesgar a la cabeza)";
-    let recomendacion = "Baja atracción de terno. Jugar solo ambos de apoyo o esperar el próximo turno.";
+    // 4. Semáforo y Indicador de Confianza
+    let scoreAmbosTop = resultadosAmbos[0] ? resultadosAmbos[0].score : 0;
+    let semaforo = "🔴 LUZ ROJA (Baja atracción - Moderar apuesta)";
+    let recomendacion = "Poca alineación estadística. Jugar solo ambos de apoyo o esperar próximo turno.";
 
-    if (scoreAmbosTop >= 250) {
-        semaforo = "🟢 LUZ VERDE (ALTA PROBABILIDAD A LA CABEZA - 1º PREMIO)";
-        recomendacion = `Señal fuerte. Apostar preferentemente al Terno Principal (${ternoPrincipal}) al 1º Premio.`;
-    } else if (scoreAmbosTop >= 180) {
+    if (scoreAmbosTop >= 220) {
+        semaforo = "🟢 LUZ VERDE (ALTA PROBABILIDAD A LA CABEZA - 7 AGENCIAS)";
+        recomendacion = `Señal fuerte. Apostar preferentemente al Terno (${ternoPrincipal}) y Ambos (${topAmbos[0]} / ${topAmbos[1]}) a la cabeza en las 7 agencias.`;
+    } else if (scoreAmbosTop >= 150) {
         semaforo = "🟡 LUZ AMARILLA (PROBABILIDAD MODERADA)";
-        recomendacion = "Alineación media. Buena opción para ambos a la cabeza, moderar apuesta en terno.";
+        recomendacion = "Alineación media. Priorizar Ambos a la cabeza en las 7 agencias y moderar Terno.";
     }
 
-    // 5. Guardar Predicción
+    // 5. Guardar predicción
     PREDICCION_ACTUAL_V49 = {
         fecha: new Date().toISOString(),
         turno: turnoOrigen,
@@ -5742,12 +5691,12 @@ async function generarResultadoIA() {
         ambos: topAmbos,
         ternos: ternosEspeciales,
         cuaternos: cuaternos,
-        origen: "MOTOR_17K_TERNO_CABEZA"
+        origen: "MOTOR_17K_7_AGENCIAS"
     });
 
-    // 6. Mostrar en Pantalla
+    // 6. Mostrar pantalla
     mostrarV48(`
-🧠 MOTOR DE PREDICCIÓN - ENFOQUE TERNO A LA CABEZA
+🧠 MOTOR PREDICCIÓN 7 AGENCIAS (17K)
 
 Origen: ${turnoOrigen} ➔ Destino: ${turnoDestino}
 
@@ -5756,20 +5705,20 @@ ${semaforo}
 💡 ${recomendacion}
 
 ----------------------------------------
-🎯 TERNO SUGERIDO (1º PREMIO - CABEZA):
-1º TERNO FUERTE: ${ternoPrincipal}  (Centena [${c1}] + Ambos ${topAmbos[0]})
-2º TERNO REFUERZO: ${ternoRefuerzo}  (Centena [${c2}] + Ambos ${topAmbos[0]})
-3º TERNO ALTERNATIVO: ${ternoAlternativo}  (Centena [${c1}] + Ambos ${topAmbos[1]})
+🎯 TERNOS SUGERIDOS (A LA CABEZA):
+1º TERNO FUERTE: ${ternoPrincipal} (Centena [${c1}] + Ambos ${topAmbos[0]})
+2º TERNO REFUERZO: ${ternoRefuerzo} (Centena [${c2}] + Ambos ${topAmbos[0]})
+3º TERNO ALTERNATIVO: ${ternoAlternativo} (Centena [${c1}] + Ambos ${topAmbos[1] || "00"})
+4º TERNO APOYO: ${ternoApoyo} (Centena [${c2}] + Ambos ${topAmbos[1] || "00"})
 
 ----------------------------------------
-🎯 AMBOS BASE (TOP 3):
-1º AMBOS: ${topAmbos[0]} (Puntos: ${resultadosAmbos[0].score})
-2º AMBOS: ${topAmbos[1]} (Puntos: ${resultadosAmbos[1].score})
-3º AMBOS: ${topAmbos[2]} (Puntos: ${resultadosAmbos[2].score})
+🎯 TOP 4 AMBOS PARA LAS 7 AGENCIAS:
+1º AMBOS: ${topAmbos[0]} (Puntos: ${resultadosAmbos[0] ? resultadosAmbos[0].score : 0})
+2º AMBOS: ${topAmbos[1] || "00"} (Puntos: ${resultadosAmbos[1] ? resultadosAmbos[1].score : 0})
+3º AMBOS: ${topAmbos[2] || "00"} (Puntos: ${resultadosAmbos[2] ? resultadosAmbos[2].score : 0})
+4º AMBOS: ${topAmbos[3] || "00"} (Puntos: ${resultadosAmbos[3] ? resultadosAmbos[3].score : 0})
     `);
-}
-
- 
+    }
 
 
 

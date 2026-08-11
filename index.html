@@ -5468,6 +5468,242 @@ async function aplicarNucleoDominanteV61(
     return ranking;
 
     }  
+
+    //////////////////////////////////////////////////
+// CORRECTOR DECENA POR TURNO + UNIDAD V61.2
+// CONSERVA LA UNIDAD
+// ANALIZA SOLAMENTE LA DECENA
+//////////////////////////////////////////////////
+
+async function corregirDecenaPorTurnoUnidadV61_2(
+    ambos,
+    turnoOrigen,
+    turnoDestino
+){
+
+    let historial =
+    await leerV48(
+        STORES_V48.historico
+    );
+
+    if(
+        !Array.isArray(historial) ||
+        historial.length < 2
+    ){
+        return ambos;
+    }
+
+
+    let salidaFinal = [];
+
+
+    //////////////////////////////////////////////////
+    // PROCESAR CADA AMBOS
+    //////////////////////////////////////////////////
+
+    for(let numeroBase of ambos){
+
+        numeroBase =
+        String(numeroBase)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+        // LA UNIDAD NO SE TOCA
+        let unidad =
+        numeroBase[1];
+
+
+        let decenas = {};
+
+
+        //////////////////////////////////////////////////
+        // BUSCAR HISTÓRICO DEL MISMO SALTO DE TURNO
+        //////////////////////////////////////////////////
+
+        for(let i=0;i<historial.length-1;i++){
+
+            let actual =
+            historial[i];
+
+            let siguiente =
+            historial[i+1];
+
+
+            if(
+                !actual ||
+                !siguiente ||
+                !actual.numero ||
+                !siguiente.numero
+            ){
+                continue;
+            }
+
+
+            if(
+                actual.turno !== turnoOrigen
+            ){
+                continue;
+            }
+
+
+            if(
+                siguiente.turno !== turnoDestino
+            ){
+                continue;
+            }
+
+
+            // Mantener misma provincia
+            if(
+                actual.provincia !==
+                siguiente.provincia
+            ){
+                continue;
+            }
+
+
+            let actualNumero =
+            String(actual.numero)
+            .slice(-2)
+            .padStart(2,"0");
+
+
+            let siguienteNumero =
+            String(siguiente.numero)
+            .slice(-2)
+            .padStart(2,"0");
+
+
+            //////////////////////////////////////////////////
+            // BUSCAMOS LA UNIDAD QUE NOS INTERESA
+            //////////////////////////////////////////////////
+
+            if(
+                siguienteNumero[1] !== unidad
+            ){
+                continue;
+            }
+
+
+            let decena =
+            siguienteNumero[0];
+
+
+            if(!decenas[decena]){
+                decenas[decena] = 0;
+            }
+
+
+            decenas[decena]++;
+
+        }
+
+
+        //////////////////////////////////////////////////
+        // ORDENAR DE MENOR A MAYOR FUERZA
+        //////////////////////////////////////////////////
+
+        let ordenDecenas =
+        Object.keys(decenas)
+        .sort(
+            (a,b)=>
+            decenas[b] -
+            decenas[a]
+        );
+
+
+        //////////////////////////////////////////////////
+        // SI NO HAY HISTÓRICO ESPECÍFICO
+        // CONSERVAR EL NÚMERO ORIGINAL
+        //////////////////////////////////////////////////
+
+        if(
+            ordenDecenas.length === 0
+        ){
+
+            salidaFinal.push(
+                numeroBase
+            );
+
+            continue;
+
+        }
+
+
+        //////////////////////////////////////////////////
+        // DECENA DOMINANTE
+        //////////////////////////////////////////////////
+
+        let mejorDecena =
+        ordenDecenas[0];
+
+
+        let mejorNumero =
+        mejorDecena + unidad;
+
+
+        //////////////////////////////////////////////////
+        // DIAGNÓSTICO
+        //////////////////////////////////////////////////
+
+        console.log(
+            "V61.2 DECENA POR TURNO + UNIDAD",
+            {
+                turnoOrigen,
+                turnoDestino,
+                unidad,
+                decenas,
+                ordenDecenas,
+                original:numeroBase,
+                elegido:mejorNumero
+            }
+        );
+
+
+        //////////////////////////////////////////////////
+        // MOSTRAR DIAGNÓSTICO EN PANTALLA
+        //////////////////////////////////////////////////
+
+        mostrarV48(
+`
+V61.2 DECENA
+
+Turno:
+${turnoOrigen} → ${turnoDestino}
+
+Unidad:
+${unidad}
+
+Decenas históricas:
+${JSON.stringify(decenas,null,2)}
+
+Orden:
+${ordenDecenas.join(" - ")}
+
+Original:
+${numeroBase}
+
+Decena elegida:
+${mejorNumero}
+`
+        );
+
+
+        //////////////////////////////////////////////////
+        // GUARDAR
+        //////////////////////////////////////////////////
+
+        salidaFinal.push(
+            mejorNumero
+        );
+
+    }
+
+
+    return salidaFinal;
+
+    }
     
 //////////////////////////////////////////////////
 // GENERADOR IA V60
@@ -5877,6 +6113,23 @@ ${motorV60.ambos.join(" - ")}
         ambos.join(" - ")
     );
 
+    //////////////////////////////////////////////////
+// V61.2
+// DECENA ESPECÍFICA POR TURNO + UNIDAD
+//////////////////////////////////////////////////
+
+ambos =
+await corregirDecenaPorTurnoUnidadV61_2(
+    ambos,
+    turnoOrigen,
+    turnoDestino
+);
+
+mostrarV48(
+    "DESPUÉS V61.2 DECENA POR TURNO + UNIDAD\n" +
+    ambos.join(" - ")
+);
+
 
     //////////////////////////////////////////////////
     // TERCER AMBOS HISTÓRICO
@@ -5910,7 +6163,7 @@ ${motorV60.ambos.join(" - ")}
     //////////////////////////////////////////////////
     // CORRECTOR DECENA V56
     //////////////////////////////////////////////////
-
+/*
     ambos =
     await aplicarCorrectorDecenaV56(
         ambos,

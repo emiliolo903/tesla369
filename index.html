@@ -4969,126 +4969,97 @@ if(
 
 
 //////////////////////////////////////////////////
-// SELECCIÓN DE 3 AMBOS
-// EVITAR DUPLICAR EL MISMO NÚMERO
-// Y PRIORIZAR DECENAS DIFERENTES
+// SELECCIÓN DE 3 AMBOS V60.5
+// PRIORIDAD: PUNTAJE REAL DEL RANKING
+// CONTROL: NO REPETIR UNIDAD
 //////////////////////////////////////////////////
 
 let ambos = [];
 
+let unidadesUsadas = {};
 
-// Primero: mejor candidato del ranking
-if(orden.length > 0){
+
+// ================================================
+// 1° AMBOS
+// Siempre el mejor puntaje disponible
+// ================================================
+
+if(candidatos.length > 0){
 
     let primero =
-    String(orden[0])
+    String(candidatos[0].numero)
     .slice(-2)
     .padStart(2,"0");
 
     ambos.push(primero);
 
-}
-
-
-// Segundo: buscar candidato con DECENA diferente
-for(let n of orden){
-
-    n =
-    String(n)
-    .slice(-2)
-    .padStart(2,"0");
-
-    if(ambos.includes(n))
-        continue;
-
-    if(
-        ambos.length >= 2
-    )
-        break;
-
-    // Preferir decena diferente
-    if(
-        n[0] !== ambos[0][0]
-    ){
-
-        ambos.push(n);
-
-    }
+    unidadesUsadas[primero[1]] = true;
 
 }
 
 
-// Si todavía falta el segundo,
-// usar el siguiente disponible
-if(ambos.length < 2){
+// ================================================
+// 2° Y 3° AMBOS
+// Buscar los mejores puntajes con unidad diferente
+// ================================================
 
-    for(let n of orden){
-
-        n =
-        String(n)
-        .slice(-2)
-        .padStart(2,"0");
-
-        if(!ambos.includes(n)){
-
-            ambos.push(n);
-            break;
-
-        }
-
-    }
-
-}
-
-
-// Tercero: buscar otra decena diferente
-for(let n of orden){
-
-    n =
-    String(n)
-    .slice(-2)
-    .padStart(2,"0");
-
-    if(ambos.includes(n))
-        continue;
+for(let candidato of candidatos){
 
     if(ambos.length >= 3)
         break;
 
 
-    let decenaRepetida =
-    ambos.some(x =>
-        x[0] === n[0]
-    );
+    let numero =
+    String(candidato.numero)
+    .slice(-2)
+    .padStart(2,"0");
 
 
-    if(!decenaRepetida){
+    if(ambos.includes(numero))
+        continue;
 
-        ambos.push(n);
 
-    }
+    let unidad =
+    numero[1];
+
+
+    // Evitar repetir unidad
+    if(unidadesUsadas[unidad])
+        continue;
+
+
+    ambos.push(numero);
+
+    unidadesUsadas[unidad] = true;
 
 }
 
 
-// Si no hay tercera decena diferente,
-// completar con cualquier candidato nuevo
+// ================================================
+// RESPALDO
+// Si no existen 3 unidades diferentes,
+// completar con los mejores disponibles
+// ================================================
+
 if(ambos.length < 3){
 
-    for(let n of orden){
-
-        n =
-        String(n)
-        .slice(-2)
-        .padStart(2,"0");
-
-        if(ambos.includes(n))
-            continue;
-
-        ambos.push(n);
+    for(let candidato of candidatos){
 
         if(ambos.length >= 3)
             break;
+
+
+        let numero =
+        String(candidato.numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+        if(ambos.includes(numero))
+            continue;
+
+
+        ambos.push(numero);
 
     }
 
@@ -5096,10 +5067,9 @@ if(ambos.length < 3){
 
 
 console.log(
-    "AMBOS SELECCIONADOS V60.4:",
+    "V60.5 AMBOS SELECCIONADOS:",
     ambos
 );
-
 
     //////////////////////////////////////////////////
     // FORMATO

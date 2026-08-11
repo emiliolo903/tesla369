@@ -5884,7 +5884,6 @@ async function corregirDecenaPorTurnoUnidadV61_1(
 // GENERADOR IA V60
 // BLOQUE COMPLETO
 //////////////////////////////////////////////////
-
 async function generarResultadoIA(){
 
     await ejecutarBloque11IA();
@@ -5897,7 +5896,7 @@ async function generarResultadoIA(){
     );
 
     let elemento =
-    document.getElementById("turnoCarga");
+        document.getElementById("turnoCarga");
 
     if(!elemento){
         console.error(
@@ -5907,12 +5906,12 @@ async function generarResultadoIA(){
     }
 
     let turnoOrigen =
-    elemento.value;
+        elemento.value;
 
     let turnoDestino =
-    obtenerSiguienteTurnoV48(
-        turnoOrigen
-    );
+        obtenerSiguienteTurnoV48(
+            turnoOrigen
+        );
 
 
     //////////////////////////////////////////////////
@@ -5920,10 +5919,9 @@ async function generarResultadoIA(){
     //////////////////////////////////////////////////
 
     let historico =
-    await leerV48(
-        STORES_V48.historico
-    );
-
+        await leerV48(
+            STORES_V48.historico
+        );
 
     if(!Array.isArray(historico)){
         console.error(
@@ -5945,11 +5943,7 @@ async function generarResultadoIA(){
     //////////////////////////////////////////////////
 
     let bases =
-    obtenerBases7Provincias();
-
-
-    // Si no hay bases cargadas,
-    // utilizar últimas 100 del histórico
+        obtenerBases7Provincias();
 
     if(
         !bases ||
@@ -5957,13 +5951,13 @@ async function generarResultadoIA(){
     ){
 
         bases =
-        historico
-        .slice(-100)
-        .map(x =>
-            String(x.numero)
-            .slice(-2)
-            .padStart(2,"0")
-        );
+            historico
+            .slice(-100)
+            .map(x =>
+                String(x.numero)
+                .slice(-2)
+                .padStart(2,"0")
+            );
 
     }
 
@@ -5975,27 +5969,23 @@ async function generarResultadoIA(){
     for(let base of bases){
 
         let candidatos =
-        await analizarTransicionTurnoV48(
-            base,
-            turnoOrigen
-        );
-
+            await analizarTransicionTurnoV48(
+                base,
+                turnoOrigen
+            );
 
         if(!Array.isArray(candidatos))
             continue;
 
-
         for(let salida of candidatos){
 
             salida =
-            String(salida)
-            .slice(-2)
-            .padStart(2,"0");
-
+                String(salida)
+                .slice(-2)
+                .padStart(2,"0");
 
             if(!ranking[salida])
                 ranking[salida] = 0;
-
 
             ranking[salida] += 30;
 
@@ -6010,9 +6000,11 @@ async function generarResultadoIA(){
 
     let destinoMatriz =
 
-    MATRIZ_HISTORICA_V48[turnoOrigen]
-    &&
-    MATRIZ_HISTORICA_V48[turnoOrigen][turnoDestino];
+        MATRIZ_HISTORICA_V48[turnoOrigen]
+        &&
+        MATRIZ_HISTORICA_V48[
+            turnoOrigen
+        ][turnoDestino];
 
 
     if(destinoMatriz){
@@ -6020,21 +6012,23 @@ async function generarResultadoIA(){
         for(let provincia in destinoMatriz){
 
             let datos =
-            destinoMatriz[provincia];
-
+                destinoMatriz[provincia];
 
             if(!datos)
                 continue;
 
-
             for(let salida in datos){
+
+                salida =
+                    String(salida)
+                    .slice(-2)
+                    .padStart(2,"0");
 
                 if(!ranking[salida])
                     ranking[salida] = 0;
 
-
                 ranking[salida] +=
-                Number(datos[salida]) || 0;
+                    Number(datos[salida]) || 0;
 
             }
 
@@ -6048,10 +6042,10 @@ async function generarResultadoIA(){
     //////////////////////////////////////////////////
 
     ranking =
-    await aplicarCorrectorDesviacionV55_2(
-        ranking,
-        historico
-    );
+        await aplicarCorrectorDesviacionV55_2(
+            ranking,
+            historico
+        );
 
 
     //////////////////////////////////////////////////
@@ -6059,13 +6053,12 @@ async function generarResultadoIA(){
     //////////////////////////////////////////////////
 
     let candidatosError =
-    Object.keys(ranking);
-
+        Object.keys(ranking);
 
     let corregidosError =
-    aplicarCorreccionErroresIA_V52(
-        candidatosError
-    );
+        aplicarCorreccionErroresIA_V52(
+            candidatosError
+        );
 
 
     if(Array.isArray(corregidosError)){
@@ -6073,14 +6066,12 @@ async function generarResultadoIA(){
         for(let n of corregidosError){
 
             n =
-            String(n)
-            .slice(-2)
-            .padStart(2,"0");
-
+                String(n)
+                .slice(-2)
+                .padStart(2,"0");
 
             if(!ranking[n])
                 ranking[n] = 0;
-
 
             ranking[n] += 40;
 
@@ -6099,10 +6090,10 @@ async function generarResultadoIA(){
     ){
 
         ranking =
-        await aplicarNucleoDominanteV61(
-            ranking,
-            turnoOrigen
-        );
+            await aplicarNucleoDominanteV61(
+                ranking,
+                turnoOrigen
+            );
 
     }
 
@@ -6117,10 +6108,9 @@ async function generarResultadoIA(){
     ){
 
         ranking =
-        await aplicarDiagnosticoBloque12V60(
-            ranking
-        );
-
+            await aplicarDiagnosticoBloque12V60(
+                ranking
+            );
 
         console.log(
             "BLOQUE 12 APLICADO",
@@ -6135,22 +6125,34 @@ async function generarResultadoIA(){
     //////////////////////////////////////////////////
 
     ranking =
-    Object.fromEntries(
+        Object.fromEntries(
 
-        Object.entries(ranking)
+            Object.entries(ranking)
 
-        .filter(([numero,peso]) =>
-            typeof peso === "number" &&
-            Number.isFinite(peso)
-        )
+            .filter(([numero,peso]) =>
 
-        .sort(
-            (a,b)=>b[1]-a[1]
-        )
+                typeof peso === "number" &&
+                Number.isFinite(peso)
 
-        .slice(0,50)
+            )
 
-    );
+            .map(([numero,peso]) => [
+
+                String(numero)
+                .slice(-2)
+                .padStart(2,"0"),
+
+                peso
+
+            ])
+
+            .sort(
+                (a,b)=>b[1]-a[1]
+            )
+
+            .slice(0,50)
+
+        );
 
 
     mostrarV48(`
@@ -6169,12 +6171,12 @@ ${JSON.stringify(
     //////////////////////////////////////////////////
 
     let motorV60 =
-    await aplicarMotorV60(
-        ranking,
-        bases,
-        turnoOrigen,
-        turnoDestino
-    );
+        await aplicarMotorV60(
+            ranking,
+            bases,
+            turnoOrigen,
+            turnoDestino
+        );
 
 
     if(
@@ -6192,241 +6194,206 @@ ${JSON.stringify(
 
 
     //////////////////////////////////////////////////
-    // RESULTADO DEL MOTOR V60
+    // RANKING DEVUELTO POR V60
     //////////////////////////////////////////////////
 
+    ranking =
+        motorV60.ranking;
+
+
+    //////////////////////////////////////////////////
+    // PESO IA71
+    //////////////////////////////////////////////////
+
+    ranking =
+        await aplicarPesosRankingIA71(
+            ranking,
+            motorV60.orden
+        );
+
+
+    //////////////////////////////////////////////////
+    // RECONSTRUIR ORDEN REAL
+    // DESPUÉS DE TODOS LOS PESOS
+    //////////////////////////////////////////////////
+
+    let ordenFinal =
+
+        Object.keys(ranking)
+
+        .map(numero => ({
+
+            numero:
+                String(numero)
+                .slice(-2)
+                .padStart(2,"0"),
+
+            peso:
+                Number(ranking[numero]) || 0
+
+        }))
+
+        .filter(x =>
+            x.numero.length === 2 &&
+            Number.isFinite(x.peso)
+        )
+
+        .sort(
+            (a,b)=>
+                b.peso - a.peso
+        );
+
+
+    //////////////////////////////////////////////////
+    // MOSTRAR ORDEN REAL
+    //////////////////////////////////////////////////
+
+    let orden =
+        ordenFinal.map(
+            x => x.numero
+        );
+
+
     mostrarV48(`
-ORDEN
+ORDEN FINAL
 
-${motorV60.orden.join(" - ")}
-
-AMBOS
-
-${motorV60.ambos.join(" - ")}
+${orden.join(" - ")}
 `);
 
 
-    ranking =
-    motorV60.ranking;
-
-
-    let orden =
-    motorV60.orden;
-
-
-    let ambos =
-    motorV60.ambos;
-
-
     //////////////////////////////////////////////////
-    // PESOS IA71
+    // SELECCIÓN DE 3 AMBOS
+    //
+    // AQUÍ YA NO USAMOS:
+    // - motorV60.ambos
+    // - tercer histórico
+    // - V61.2
+    // - V56
+    // - V57
+    //
+    // SOLO RANKING FINAL
     //////////////////////////////////////////////////
 
-    ranking =
-    await aplicarPesosRankingIA71(
-        ranking,
-        orden
-    );
+    let ambos = [];
 
 
-    //////////////////////////////////////////////////
-    // VOLVER A ORDENAR DESPUÉS DE IA71
-    //////////////////////////////////////////////////
+    for(let candidato of ordenFinal){
 
-    orden =
-    Object.keys(ranking)
+        let numero =
+            candidato.numero;
 
-    .sort(
-        (a,b)=>
-        ranking[b]-ranking[a]
-    );
-
-
-    //////////////////////////////////////////////////
-    // SELECCIONAR 2 AMBOS
-    //////////////////////////////////////////////////
-
-    ambos = [];
-
-
-    for(let numero of orden){
-
-        numero =
-        String(numero)
-        .slice(-2)
-        .padStart(2,"0");
-
-
-        if(!ambos.includes(numero)){
+        if(
+            !ambos.includes(numero)
+        ){
 
             ambos.push(numero);
 
         }
 
+        if(
+            ambos.length === 3
+        ){
 
-        if(ambos.length === 2)
             break;
+
+        }
 
     }
 
 
     //////////////////////////////////////////////////
     // CORRECTOR DECENA HISTÓRICO V60
-    //////////////////////////////////////////////////
-
-   ambos =
-    await corregirDecenaHistoricaV60(
-        ambos,
-        turnoOrigen,
-        turnoDestino,
-        ranking
-    );
-
-
-    mostrarV48(
-        "DESPUÉS corregirDecenaHistoricaV60\n" +
-        ambos.join(" - ")
-    );
-    
-
-    //////////////////////////////////////////////////
-// V61.2
-// DECENA ESPECÍFICA POR TURNO + UNIDAD
-//////////////////////////////////////////////////
-/*ambos =
-await corregirDecenaPorTurnoUnidadV61_1(
-    ambos,
-    turnoOrigen,
-    turnoDestino,
-    ranking
-);
-
-mostrarV48(
-    "DESPUÉS V61.2 DECENA POR TURNO + UNIDAD\n" +
-    ambos.join(" - ")
-);
-*/
-
-    //////////////////////////////////////////////////
-// TERCER AMBOS
-// TOMAR DEL ORDEN PRINCIPAL
-// NO GENERAR NUEVA TRANSICIÓN
-//////////////////////////////////////////////////
-
-if(ambos.length < 3){
-
-    for(let n of orden){
-
-        n =
-        String(n)
-        .slice(-2)
-        .padStart(2,"0");
-
-        if(ambos.includes(n))
-            continue;
-
-        ambos.push(n);
-
-        if(ambos.length === 3)
-            break;
-
-    }
-
-    }
-
-
-    //////////////////////////////////////////////////
-    // CORRECTOR DECENA V56
-    //////////////////////////////////////////////////
-/*
-    ambos =
-    await aplicarCorrectorDecenaV56(
-        ambos,
-        turnoOrigen
-    );
-
-
-    mostrarV48(
-        "DESPUÉS aplicarCorrectorDecenaV56\n" +
-        ambos.join(" - ")
-    );
-
-
-    //////////////////////////////////////////////////
-    // CORRECTOR PATRÓN V57
-    // DESACTIVADO PARA LA PRUEBA
-    //////////////////////////////////////////////////
-
-    /*
-    ambos =
-    await aplicarCorrectorPatronV57(
-        ambos,
-        turnoOrigen
-    );
-
-    mostrarV48(
-        "DESPUÉS aplicarCorrectorPatronV57\n" +
-        ambos.join(" - ")
-    );
-    */
-
-
-
-    //////////////////////////////////////////////////
-// ASEGURAR 3 AMBOS
-// SIN VOLVER A USAR ORDEN
-// SI V60 DEJÓ 2, COMPLETAR DESDE EL RANKING
-//////////////////////////////////////////////////
-
-if(ambos.length < 3){
-
-    let candidatosExtra =
-    Object.keys(ranking)
-    .map(n => ({
-        numero:
-        String(n)
-        .slice(-2)
-        .padStart(2,"0"),
-
-        peso:
-        Number(ranking[n]) || 0
-    }))
-    .sort(
-        (a,b)=>b.peso-a.peso
-    );
-
-
-    for(let candidato of candidatosExtra){
-
-        let n =
-        candidato.numero;
-
-
-        if(ambos.includes(n))
-            continue;
-
-
-        ambos.push(n);
-
-
-        if(ambos.length === 3)
-            break;
-
-    }
-
-    }
-    
-    //////////////////////////////////////////////////
-    // FORMATO FINAL
+    //
+    // SE EJECUTA UNA SOLA VEZ
     //////////////////////////////////////////////////
 
     ambos =
-    ambos.map(n =>
-        String(n)
-        .slice(-2)
-        .padStart(2,"0")
+        await corregirDecenaHistoricaV60(
+            ambos,
+            turnoOrigen,
+            turnoDestino,
+            ranking
+        );
+
+
+    //////////////////////////////////////////////////
+    // ELIMINAR DUPLICADOS
+    //////////////////////////////////////////////////
+
+    ambos =
+        [
+            ...new Set(
+
+                ambos.map(
+                    n =>
+                        String(n)
+                        .slice(-2)
+                        .padStart(2,"0")
+                )
+
+            )
+        ];
+
+
+    //////////////////////////////////////////////////
+    // SI EL CORRECTOR CAMBIÓ LA LISTA
+    // COMPLETAR DESDE EL MISMO RANKING FINAL
+    //////////////////////////////////////////////////
+
+    if(ambos.length < 3){
+
+        for(let candidato of ordenFinal){
+
+            let numero =
+                candidato.numero;
+
+            if(
+                ambos.includes(numero)
+            ){
+
+                continue;
+
+            }
+
+            ambos.push(numero);
+
+            if(
+                ambos.length === 3
+            ){
+
+                break;
+
+            }
+
+        }
+
+    }
+
+
+    //////////////////////////////////////////////////
+    // FORMATO FINAL DE AMBOS
+    //////////////////////////////////////////////////
+
+    ambos =
+        ambos.map(
+            n =>
+                String(n)
+                .slice(-2)
+                .padStart(2,"0")
+        );
+
+
+    console.log(
+        "V61.1 AMBOS FINALES:",
+        ambos
     );
 
+
+    mostrarV48(`
+DESPUÉS CORRECTOR DECENA V60
+
+${ambos.join(" - ")}
+`);
 
     //////////////////////////////////////////////////
     // RESPALDO
@@ -6435,21 +6402,13 @@ if(ambos.length < 3){
     if(ambos.length === 0){
 
         ambos =
-        orden
-        .slice(0,3)
-        .map(n =>
-            String(n)
-            .slice(-2)
-            .padStart(2,"0")
-        );
+            ordenFinal
+            .slice(0,3)
+            .map(
+                x => x.numero
+            );
 
     }
-
-
-    console.log(
-        "V60 RESULTADO AMBOS",
-        ambos
-    );
 
 
     //////////////////////////////////////////////////
@@ -6457,8 +6416,9 @@ if(ambos.length < 3){
     //////////////////////////////////////////////////
 
     let principal =
-    String(ambos[0])
-    .padStart(2,"0");
+        String(ambos[0])
+        .slice(-2)
+        .padStart(2,"0");
 
 
     let ternos = [];
@@ -6466,14 +6426,21 @@ if(ambos.length < 3){
     let cuaternos = [];
 
 
-    for(let i=1;i<ambos.length;i++){
+    for(
+        let i = 1;
+        i < ambos.length;
+        i++
+    ){
 
         let apoyo =
-        String(ambos[i])
-        .padStart(2,"0");
+            String(ambos[i])
+            .slice(-2)
+            .padStart(2,"0");
 
 
+        //////////////////////////////////////////////////
         // TERNO
+        //////////////////////////////////////////////////
 
         ternos.push(
             principal +
@@ -6481,7 +6448,9 @@ if(ambos.length < 3){
         );
 
 
+        //////////////////////////////////////////////////
         // CUATERNO
+        //////////////////////////////////////////////////
 
         cuaternos.push(
             principal +
@@ -6496,12 +6465,15 @@ if(ambos.length < 3){
     //////////////////////////////////////////////////
 
     ternos =
-    ternos.slice(0,2);
-
+        ternos.slice(0,2);
 
     cuaternos =
-    cuaternos.slice(0,2);
+        cuaternos.slice(0,2);
 
+
+    //////////////////////////////////////////////////
+    // RESULTADO GENERADO
+    //////////////////////////////////////////////////
 
     console.log(
         "GENERADO:",
@@ -6523,25 +6495,26 @@ if(ambos.length < 3){
 
         {
 
-            fecha:new Date(),
+            fecha:
+                new Date(),
 
             turnoOrigen:
-            turnoOrigen,
+                turnoOrigen,
 
             turnoDestino:
-            turnoDestino,
+                turnoDestino,
 
             ambos:
-            ambos,
+                ambos,
 
             ternos:
-            ternos,
+                ternos,
 
             cuaternos:
-            cuaternos,
+                cuaternos,
 
             origen:
-            "MOTOR_IA_V60"
+                "MOTOR_IA_V61_1"
 
         }
 
@@ -6555,31 +6528,35 @@ if(ambos.length < 3){
     PREDICCION_ACTUAL_V49 = {
 
         fecha:
-        new Date().toISOString(),
+            new Date()
+            .toISOString(),
 
         turno:
-        turnoOrigen,
+            turnoOrigen,
 
         ambos:
-        ambos,
+            ambos,
 
         ternos:
-        ternos,
+            ternos,
 
         cuaternos:
-        cuaternos
+            cuaternos
 
     };
 
 
     console.log(
-        "V60 PREDICCION FINAL",
+        "V61.1 PREDICCION FINAL",
         PREDICCION_ACTUAL_V49
     );
 
 
     //////////////////////////////////////////////////
     // ACTUALIZAR IA71
+    //
+    // ESTO SE HACE DESPUÉS DE GUARDAR,
+    // NO ANTES DE SELECCIONAR LOS AMBOS
     //////////////////////////////////////////////////
 
     await ejecutarSimuladorIA71();
@@ -6592,7 +6569,8 @@ if(ambos.length < 3){
 
 
     if(
-        typeof LABORATORIO_IA71 !== "undefined" &&
+        typeof LABORATORIO_IA71 !==
+        "undefined" &&
         LABORATORIO_IA71.ranking
     ){
 
@@ -6616,7 +6594,7 @@ if(ambos.length < 3){
     mostrarV48(
 
 `
-🧠 MOTOR IA V60 ACTIVO
+🧠 MOTOR IA V61.1 ACTIVO
 
 Turno:
 ${turnoOrigen} → ${turnoDestino}
@@ -6638,12 +6616,13 @@ ${cuaternos.join("\n")}
 
 
 Motor:
-MEMORIA HISTÓRICA + TRANSICIÓN + ACOMPAÑANTES
+RANKING FINAL + MEMORIA HISTÓRICA + TRANSICIÓN
 `
 
     );
 
     }
+    
 
 //////////////////////////////////////////////////
 // GUARDAR / CARGAR APRENDIZAJE PT V51

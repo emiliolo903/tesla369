@@ -5469,11 +5469,10 @@ async function aplicarNucleoDominanteV61(
 
     }  
 
-    //////////////////////////////////////////////////
+//////////////////////////////////////////////////
 // CORRECTOR DECENA POR TURNO + UNIDAD V61.1
 // CONSERVA LA UNIDAD
-// CORRIGE SOLAMENTE LA DECENA
-// RESPETA EL RANKING ORIGINAL
+// SOLO CORRIGE LA DECENA
 //////////////////////////////////////////////////
 
 async function corregirDecenaPorTurnoUnidadV61_1(
@@ -5490,333 +5489,147 @@ async function corregirDecenaPorTurnoUnidadV61_1(
 
     if(
         !Array.isArray(historial) ||
-        historial.length < 2
+        historial.length === 0
     ){
         return ambos;
     }
 
 
-    let salidaFinal = [];
+    let salida = [];
 
 
-    //////////////////////////////////////////////////
-    // PROCESAR CADA AMBOS
-    //////////////////////////////////////////////////
+    for(let base of ambos){
 
-    for(let numeroBase of ambos){
-
-        numeroBase =
-        String(numeroBase)
+        base =
+        String(base)
         .slice(-2)
         .padStart(2,"0");
 
 
-        // LA UNIDAD ES FIJA
-        let unidad =
-        numeroBase[1];
+        // LA UNIDAD QUEDA BLOQUEADA
+        let unidad = base[1];
 
 
-        let decenas = {};
+        let contador = {};
 
 
         //////////////////////////////////////////////////
-        // ANALIZAR SOLAMENTE EL SALTO
-        // TURNO ORIGEN → TURNO DESTINO
+        // CONTAR DECENAS DEL DESTINO CON ESTA UNIDAD
         //////////////////////////////////////////////////
 
-        for(let i=0;i<historial.length;i++){
+        for(let r of historial){
 
-            let actual =
-            historial[i];
-
-            if(
-                !actual ||
-                !actual.numero
-            ){
+            if(!r || !r.numero)
                 continue;
-            }
 
-
-            if(
-                actual.turno !== turnoOrigen
-            ){
+            if(r.turno !== turnoDestino)
                 continue;
-            }
 
 
-            let actualNumero =
-            String(actual.numero)
+            let n =
+            String(r.numero)
             .slice(-2)
             .padStart(2,"0");
 
 
-            //////////////////////////////////////////////////
-            // BUSCAR EL SIGUIENTE REGISTRO DEL MISMO
-            // SORTEO / PROVINCIA
-            //////////////////////////////////////////////////
-
-            for(let j=i+1;j<historial.length;j++){
-
-                let siguiente =
-                historial[j];
+            if(n[1] !== unidad)
+                continue;
 
 
-                if(
-                    !siguiente ||
-                    !siguiente.numero
-                ){
-                    continue;
-                }
+            let d = n[0];
 
 
-                //////////////////////////////////////////////////
-                // MISMA FECHA
-                //////////////////////////////////////////////////
-
-                if(
-                    actual.fecha &&
-                    siguiente.fecha &&
-                    String(actual.fecha)!==
-                    String(siguiente.fecha)
-                ){
-                    continue;
-                }
-
-
-                //////////////////////////////////////////////////
-                // MISMA PROVINCIA
-                //////////////////////////////////////////////////
-
-                if(
-                    actual.provincia &&
-                    siguiente.provincia &&
-                    actual.provincia !==
-                    siguiente.provincia
-                ){
-                    continue;
-                }
-
-
-                //////////////////////////////////////////////////
-                // BUSCAR TURNO DESTINO
-                //////////////////////////////////////////////////
-
-                if(
-                    siguiente.turno !== turnoDestino
-                ){
-                    continue;
-                }
-
-
-                let salida =
-                String(siguiente.numero)
-                .slice(-2)
-                .padStart(2,"0");
-
-
-                //////////////////////////////////////////////////
-                // SOLO NOS INTERESA LA UNIDAD
-                //////////////////////////////////////////////////
-
-                if(
-                    salida[1] !== unidad
-                ){
-                    break;
-                }
-
-
-                let decena =
-                salida[0];
-
-
-                if(!decenas[decena]){
-                    decenas[decena]=0;
-                }
-
-
-                //////////////////////////////////////////////////
-                // PESO HISTÓRICO
-                //////////////////////////////////////////////////
-
-                decenas[decena]++;
-
-
-                break;
-
-            }
+            contador[d] =
+            (contador[d] || 0) + 1;
 
         }
 
 
         //////////////////////////////////////////////////
-        // SI NO HAY HISTÓRICO ESPECÍFICO
+        // SI NO HAY DATOS
         //////////////////////////////////////////////////
 
         if(
-            Object.keys(decenas).length===0
+            Object.keys(contador).length === 0
         ){
 
-            salidaFinal.push(
-                numeroBase
-            );
-
+            salida.push(base);
             continue;
 
         }
 
 
         //////////////////////////////////////////////////
-        // CALCULAR PUNTAJE FINAL
+        // BUSCAR MEJOR DECENA
         //////////////////////////////////////////////////
 
-        let candidatos = {};
+        let mejor =
+        base;
+
+        let mejorPeso =
+        Number(ranking[base] || 0);
 
 
-        for(let d=0;d<=9;d++){
+        for(let d=0; d<=9; d++){
 
             let candidato =
-            String(d)+unidad;
+            String(d) + unidad;
 
 
             let pesoRanking =
-            Number(ranking[candidato]||0);
+            Number(ranking[candidato] || 0);
 
 
             let pesoHistorico =
-            Number(decenas[String(d)]||0);
+            Number(contador[d] || 0);
 
 
-            //////////////////////////////////////////////////
-            // NORMALIZAR EL HISTÓRICO
-            //////////////////////////////////////////////////
+            // Ranking manda.
+            // Histórico solo sirve como apoyo.
 
-            let maxHistorico =
-            Math.max(
-                ...Object.values(decenas)
-            );
-
-
-            let pesoHistoricoNormalizado = 0;
-
-
-            if(maxHistorico>0){
-
-                pesoHistoricoNormalizado =
-                (
-                    pesoHistorico /
-                    maxHistorico
-                ) * 10;
-
-            }
-
-
-            //////////////////////////////////////////////////
-            // PESO FINAL
-            //
-            // RANKING = FUERZA PRINCIPAL
-            // HISTÓRICO = APOYO
-            //////////////////////////////////////////////////
-
-            let pesoFinal =
-                pesoRanking +
-                pesoHistoricoNormalizado;
-
-
-            candidatos[candidato]=
-            pesoFinal;
-
-        }
-
-
-        //////////////////////////////////////////////////
-        // ORDENAR CANDIDATOS
-        //////////////////////////////////////////////////
-
-        let orden =
-        Object.keys(candidatos)
-        .sort(
-            (a,b)=>
-            candidatos[b]-
-            candidatos[a]
-        );
-
-
-        //////////////////////////////////////////////////
-        // DECENA ORIGINAL
-        //////////////////////////////////////////////////
-
-        let original =
-        numeroBase[0];
-
-
-        let mejor =
-        numeroBase;
-
-
-        //////////////////////////////////////////////////
-        // SOLO CAMBIAR SI LA NUEVA DECENA
-        // REALMENTE SUPERA A LA ORIGINAL
-        //////////////////////////////////////////////////
-
-        let pesoOriginal =
-        candidatos[numeroBase]||0;
-
-
-        for(let candidato of orden){
-
-            let pesoCandidato =
-            candidatos[candidato];
+            let peso =
+            pesoRanking +
+            (pesoHistorico * 0.20);
 
 
             if(
-                pesoCandidato >
-                pesoOriginal + 3
+                peso >
+                mejorPeso
             ){
+
+                mejorPeso =
+                peso;
 
                 mejor =
                 candidato;
 
-                break;
-
             }
 
         }
 
 
         //////////////////////////////////////////////////
-        // DIAGNÓSTICO
+        // ASEGURAR QUE LA UNIDAD NO CAMBIE
         //////////////////////////////////////////////////
 
-        console.log(
-            "V61.1 DECENA POR TURNO + UNIDAD",
-            {
-                turnoOrigen,
-                turnoDestino,
-                unidad,
-                original,
-                decenasHistoricas:decenas,
-                rankingOriginal:ranking[numeroBase]||0,
-                candidatos,
-                orden,
-                elegido:mejor
-            }
-        );
+        mejor =
+        String(mejor)
+        .slice(-2)
+        .padStart(2,"0");
+
+        mejor =
+        mejor[0] + unidad;
 
 
-        //////////////////////////////////////////////////
-        // RESULTADO
-        //////////////////////////////////////////////////
-
-        salidaFinal.push(
-            mejor
-        );
+        salida.push(mejor);
 
     }
 
 
-    return salidaFinal;
+    return salida;
 
 }
+                
 //////////////////////////////////////////////////
 // GENERADOR IA V60
 // BLOQUE COMPLETO
@@ -6234,7 +6047,8 @@ ambos =
 await corregirDecenaPorTurnoUnidadV61_1(
     ambos,
     turnoOrigen,
-    turnoDestino
+    turnoDestino,
+    ranking
 );
 
 mostrarV48(

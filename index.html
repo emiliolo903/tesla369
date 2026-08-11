@@ -2870,251 +2870,363 @@ function obtenerSiguienteTurnoV48(turno){
 
 
 
-////////////////////////////////////////////////
-// MOTOR IA HISTÓRICO V49
-////////////////////////////////////////////////
 async function analizarTransicionTurnoV48(
     base,
     turnoOrigen,
-    turnoDestino
+    datos = null
 ){
 
-    let historial =
+    //////////////////////////////////////////////////
+    // TRANSICIÓN V48 CORREGIDA
+    // ORIGEN -> DESTINO
+    //
+    // IMPORTANTE:
+    // NO premia misma unidad
+    // NO premia misma decena
+    // NO mezcla turnos
+    // NO usa frecuencia global como premio
+    //////////////////////////////////////////////////
+
+    let destino =
+        obtenerSiguienteTurnoV48(turnoOrigen);
+
+    if(!destino){
+        return [];
+    }
+
+
+    //////////////////////////////////////////////////
+    // HISTÓRICO
+    //////////////////////////////////////////////////
+
+    if(!datos){
+
+        datos =
         await leerV48(
             STORES_V48.historico
         );
 
-    let pesos = {};
+    }
+
+    if(!Array.isArray(datos) || datos.length===0){
+        return [];
+    }
+
+
+    //////////////////////////////////////////////////
+    // BASE NORMALIZADA
+    //////////////////////////////////////////////////
 
     base =
-        String(base)
-        .slice(-2)
-        .padStart(2,"0");
+    String(base)
+    .slice(-2)
+    .padStart(2,"0");
 
-    turnoOrigen =
-        String(turnoOrigen || "").trim();
+    let inversion =
+        base[1] + base[0];
 
-    turnoDestino =
-        String(turnoDestino || "").trim();
 
-    if(!Array.isArray(historial))
-        return [];
+    //////////////////////////////////////////////////
+    // RANKING DE TRANSICIONES
+    //////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////
-    // AGRUPAR POR FECHA + PROVINCIA
-    //////////////////////////////////////////////////////
+    let pesos = {};
 
-    let grupos = {};
 
-    for(let registro of historial){
+    //////////////////////////////////////////////////
+    // BUSCAR SOLAMENTE:
+    //
+    // MISMA FECHA
+    // MISMA PROVINCIA
+    // TURNO ORIGEN
+    // TURNO DESTINO
+    //////////////////////////////////////////////////
 
-        if(!registro)
+    for(let i=0; i<datos.length; i++){
+
+        let actual =
+            datos[i];
+
+        if(
+            !actual ||
+            !actual.numero
+        ){
             continue;
+        }
 
-        let fecha =
-            String(
-                registro.fecha || ""
-            ).trim();
 
-        let provincia =
-            String(
-                registro.provincia || ""
-            ).trim();
+        if(
+            actual.turno !==
+            turnoOrigen
+        ){
+            continue;
+        }
 
-        let turno =
-            String(
-                registro.turno || ""
-            ).trim();
 
-        let numero =
-            String(
-                registro.numero || ""
-            )
+        let numeroActual =
+            String(actual.numero)
             .slice(-2)
             .padStart(2,"0");
 
-        if(
-            !fecha ||
-            !provincia ||
-            !turno ||
-            !/^\d{2}$/.test(numero)
-        )
-            continue;
-
-        let clave =
-            fecha +
-            "|" +
-            provincia;
-
-        if(!grupos[clave])
-            grupos[clave] = {};
-
-        if(!grupos[clave][turno])
-            grupos[clave][turno] = [];
-
-        grupos[clave][turno].push(
-            numero
-        );
-
-    }
-
-    //////////////////////////////////////////////////////
-    // BUSCAR TRANSICIONES COMPLETAS
-    //
-    // IMPORTANTE:
-    // NO SE PREMIA UNIDAD.
-    // NO SE PREMIA DECENA.
-    // SOLO EL NUMERO COMPLETO.
-    //////////////////////////////////////////////////////
-
-    for(
-        let claveGrupo in grupos
-    ){
-
-        let grupo =
-            grupos[claveGrupo];
-
-        let origenes =
-            grupo[turnoOrigen];
-
-        let destinos =
-            grupo[turnoDestino];
-
-        if(
-            !Array.isArray(origenes) ||
-            !Array.isArray(destinos)
-        )
-            continue;
 
         //////////////////////////////////////////////////
-        // EL BASE DEBE APARECER COMPLETO
+        // LA BASE PUEDE APARECER DIRECTA O INVERTIDA
         //////////////////////////////////////////////////
 
         if(
-            !origenes.includes(base)
-        )
-            continue;
-
-        //////////////////////////////////////////////////
-        // CADA DESTINO ES UN AMBOS COMPLETO
-        //////////////////////////////////////////////////
-
-        for(
-            let salida of destinos
+            numeroActual !== base &&
+            numeroActual !== inversion
         ){
+            continue;
+        }
 
-            salida =
-                String(salida)
+
+        //////////////////////////////////////////////////
+        // BUSCAR EL RESULTADO DEL TURNO DESTINO
+        // EN LA MISMA FECHA Y PROVINCIA
+        //////////////////////////////////////////////////
+
+        for(let j=i+1; j<datos.length; j++){
+
+            let siguiente =
+                datos[j];
+
+            if(
+                !siguiente ||
+                !siguiente.numero
+            ){
+                continue;
+            }
+
+
+            //////////////////////////////////////////////////
+            // NO SALIR DE LA MISMA FECHA
+            //////////////////////////////////////////////////
+
+            if(
+                siguiente.fecha !==
+                actual.fecha
+            ){
+                continue;
+            }
+
+
+            //////////////////////////////////////////////////
+            // MISMA PROVINCIA
+            //////////////////////////////////////////////////
+
+            if(
+                siguiente.provincia !==
+                actual.provincia
+            ){
+                continue;
+            }
+
+
+            //////////////////////////////////////////////////
+            // SOLAMENTE EL TURNO DESTINO
+            //////////////////////////////////////////////////
+
+            if(
+                siguiente.turno !==
+                destino
+            ){
+                continue;
+            }
+
+
+            //////////////////////////////////////////////////
+            // SALIDA
+            //////////////////////////////////////////////////
+
+            let salida =
+                String(siguiente.numero)
                 .slice(-2)
                 .padStart(2,"0");
 
+
+            //////////////////////////////////////////////////
+            // NO DEVOLVER LA MISMA BASE
+            //////////////////////////////////////////////////
+
             if(
-                !/^\d{2}$/.test(salida)
-            )
-                continue;
+                salida === base
+            ){
+                break;
+            }
 
-            if(!pesos[salida])
-                pesos[salida] = 0;
 
-            /*
-             * UNICO PUNTAJE:
-             *
-             * 42 -> 42
-             * 42 -> 52 NO RECIBE BONO
-             * 42 -> 32 NO RECIBE BONO
-             *
-             * Cada aparición del Ambos completo
-             * suma evidencia.
-             */
+            //////////////////////////////////////////////////
+            // NO DEVOLVER INVERTIDO DE LA BASE
+            //////////////////////////////////////////////////
+
+            if(
+                salida === inversion
+            ){
+                break;
+            }
+
+
+            //////////////////////////////////////////////////
+            // CREAR CANDIDATO
+            //////////////////////////////////////////////////
+
+            if(!pesos[salida]){
+                pesos[salida]=0;
+            }
+
+
+            //////////////////////////////////////////////////
+            // PESO PRINCIPAL
+            //
+            // Cada aparición REAL de:
+            //
+            // base en origen
+            // ->
+            // salida en destino
+            //
+            // suma 1.
+            //////////////////////////////////////////////////
 
             pesos[salida] += 1;
+
+
+            //////////////////////////////////////////////////
+            // TESLA COMO SEÑAL INDEPENDIENTE
+            //
+            // NO domina la transición.
+            //////////////////////////////////////////////////
+
+            let tesla =
+                aplicarTeslaV48(base);
+
+
+            if(
+                salida === tesla
+            ){
+
+                pesos[salida] += 0.25;
+
+            }
+
+
+            //////////////////////////////////////////////////
+            // IMPORTANTE:
+            //
+            // NO HACER:
+            //
+            // salida[1] === base[1]
+            // salida[0] === base[0]
+            //
+            // Porque eso fue lo que ayudaba a fabricar
+            // familias repetidas como 06 / 26 / 46.
+            //////////////////////////////////////////////////
+
+
+            //////////////////////////////////////////////////
+            // SOLAMENTE TOMAMOS EL PRIMER RESULTADO
+            // DEL TURNO DESTINO PARA ESA OCURRENCIA.
+            //////////////////////////////////////////////////
+
+            break;
 
         }
 
     }
 
-    //////////////////////////////////////////////////////
-    // ORDENAR POR EVIDENCIA DEL AMBOS COMPLETO
-    //////////////////////////////////////////////////////
 
-    let candidatos =
+    //////////////////////////////////////////////////
+    // SI NO EXISTE TRANSICIÓN REAL
+    //////////////////////////////////////////////////
+
+    let orden =
         Object.keys(pesos)
-        .map(numero => ({
+        .sort(
+            (a,b)=>
+                pesos[b]-pesos[a]
+        );
 
-            numero:
-                String(numero)
-                .slice(-2)
-                .padStart(2,"0"),
 
-            peso:
-                Number(
-                    pesos[numero]
-                ) || 0
+    //////////////////////////////////////////////////
+    // RESPALDO
+    //
+    // NO USAMOS FRECUENCIA GLOBAL DEL HISTÓRICO.
+    // Si no existe transición real, devolvemos vacío.
+    //
+    // Esto evita que el sistema vuelva a fabricar
+    // 06 / 26 / 46 por frecuencia general.
+    //////////////////////////////////////////////////
 
-        }));
+    if(orden.length===0){
 
-    candidatos.sort(
-        (a,b)=>
-            b.peso -
-            a.peso
-    );
+        console.log(
+            "V48 TRANSICIÓN: sin transición real",
+            {
+                base,
+                turnoOrigen,
+                turnoDestino: destino
+            }
+        );
 
-    //////////////////////////////////////////////////////
-    // DIAGNOSTICO
-    //////////////////////////////////////////////////////
-
-    console.log(
-        "========== TRANSICION V48 AMBOS EXACTO =========="
-    );
-
-    console.log(
-        "BASE:",
-        base
-    );
-
-    console.log(
-        "ORIGEN:",
-        turnoOrigen
-    );
-
-    console.log(
-        "DESTINO:",
-        turnoDestino
-    );
-
-    console.log(
-        "TOP AMBOS COMPLETOS:",
-        candidatos.slice(0,20)
-    );
-
-    console.log(
-        "NO SE USA UNIDAD"
-    );
-
-    console.log(
-        "NO SE USA DECENA"
-    );
-
-    console.log(
-        "================================================="
-    );
-
-    //////////////////////////////////////////////////////
-    // DEVOLVER SOLO NUMEROS COMPLETOS
-    //////////////////////////////////////////////////////
-
-    return candidatos.map(
-        x =>
-            String(x.numero)
-            .slice(-2)
-            .padStart(2,"0")
-    );
+        return [];
 
     }
-                
-    
 
-    // ... tus funciones anteriores (leerV48, etc.) ...
+
+    //////////////////////////////////////////////////
+    // NORMALIZAR RESULTADO
+    //////////////////////////////////////////////////
+
+    orden =
+        orden.map(
+            n =>
+                String(n)
+                .slice(-2)
+                .padStart(2,"0")
+        );
+
+
+    //////////////////////////////////////////////////
+    // ELIMINAR DUPLICADOS
+    //////////////////////////////////////////////////
+
+    orden =
+        orden.filter(
+            (n,index,array)=>
+                array.indexOf(n)===index
+        );
+
+
+    //////////////////////////////////////////////////
+    // DIAGNÓSTICO
+    //////////////////////////////////////////////////
+
+    console.log(
+        "V48 TRANSICIÓN CORREGIDA",
+        {
+            base,
+            turnoOrigen,
+            turnoDestino: destino,
+            candidatos: orden.slice(0,10),
+            pesos: Object.fromEntries(
+                orden
+                .slice(0,10)
+                .map(n=>[
+                    n,
+                    pesos[n]
+                ])
+            )
+        }
+    );
+
+
+    //////////////////////////////////////////////////
+    // DEVOLVER TOP 10
+    //////////////////////////////////////////////////
+
+    return orden.slice(0,10);
+
+        }
 
 // ==========================================
 // NUEVO MOTOR DE PREDICCIÓN 17K

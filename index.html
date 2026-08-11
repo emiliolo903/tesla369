@@ -4968,29 +4968,137 @@ if(
     );
 
 
-    //////////////////////////////////////////////////
-    // 3 AMBOS COMPLETOS
-    //////////////////////////////////////////////////
+//////////////////////////////////////////////////
+// SELECCIÓN DE 3 AMBOS
+// EVITAR DUPLICAR EL MISMO NÚMERO
+// Y PRIORIZAR DECENAS DIFERENTES
+//////////////////////////////////////////////////
 
-    let ambos = [];
-
-    for(let candidato of candidatos){
-
-        let numero =
-        candidato.numero;
+let ambos = [];
 
 
-        if(!ambos.includes(numero)){
+// Primero: mejor candidato del ranking
+if(orden.length > 0){
 
-            ambos.push(numero);
+    let primero =
+    String(orden[0])
+    .slice(-2)
+    .padStart(2,"0");
+
+    ambos.push(primero);
+
+}
+
+
+// Segundo: buscar candidato con DECENA diferente
+for(let n of orden){
+
+    n =
+    String(n)
+    .slice(-2)
+    .padStart(2,"0");
+
+    if(ambos.includes(n))
+        continue;
+
+    if(
+        ambos.length >= 2
+    )
+        break;
+
+    // Preferir decena diferente
+    if(
+        n[0] !== ambos[0][0]
+    ){
+
+        ambos.push(n);
+
+    }
+
+}
+
+
+// Si todavía falta el segundo,
+// usar el siguiente disponible
+if(ambos.length < 2){
+
+    for(let n of orden){
+
+        n =
+        String(n)
+        .slice(-2)
+        .padStart(2,"0");
+
+        if(!ambos.includes(n)){
+
+            ambos.push(n);
+            break;
 
         }
 
+    }
 
-        if(ambos.length === 3)
+}
+
+
+// Tercero: buscar otra decena diferente
+for(let n of orden){
+
+    n =
+    String(n)
+    .slice(-2)
+    .padStart(2,"0");
+
+    if(ambos.includes(n))
+        continue;
+
+    if(ambos.length >= 3)
+        break;
+
+
+    let decenaRepetida =
+    ambos.some(x =>
+        x[0] === n[0]
+    );
+
+
+    if(!decenaRepetida){
+
+        ambos.push(n);
+
+    }
+
+}
+
+
+// Si no hay tercera decena diferente,
+// completar con cualquier candidato nuevo
+if(ambos.length < 3){
+
+    for(let n of orden){
+
+        n =
+        String(n)
+        .slice(-2)
+        .padStart(2,"0");
+
+        if(ambos.includes(n))
+            continue;
+
+        ambos.push(n);
+
+        if(ambos.length >= 3)
             break;
 
     }
+
+}
+
+
+console.log(
+    "AMBOS SELECCIONADOS V60.4:",
+    ambos
+);
 
 
     //////////////////////////////////////////////////

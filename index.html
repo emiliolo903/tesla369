@@ -6371,35 +6371,51 @@ if(ambos.length < 3){
     */
 
 
+
     //////////////////////////////////////////////////
-    // ASEGURAR 3 AMBOS
-    //////////////////////////////////////////////////
+// ASEGURAR 3 AMBOS
+// SIN VOLVER A USAR ORDEN
+// SI V60 DEJÓ 2, COMPLETAR DESDE EL RANKING
+//////////////////////////////////////////////////
 
-    if(ambos.length < 3){
+if(ambos.length < 3){
 
-        for(let n of orden){
+    let candidatosExtra =
+    Object.keys(ranking)
+    .map(n => ({
+        numero:
+        String(n)
+        .slice(-2)
+        .padStart(2,"0"),
 
-            n =
-            String(n)
-            .slice(-2)
-            .padStart(2,"0");
+        peso:
+        Number(ranking[n]) || 0
+    }))
+    .sort(
+        (a,b)=>b.peso-a.peso
+    );
 
 
-            if(!ambos.includes(n)){
+    for(let candidato of candidatosExtra){
 
-                ambos.push(n);
+        let n =
+        candidato.numero;
 
-            }
+
+        if(ambos.includes(n))
+            continue;
 
 
-            if(ambos.length === 3)
-                break;
+        ambos.push(n);
 
-        }
+
+        if(ambos.length === 3)
+            break;
 
     }
 
-
+    }
+    
     //////////////////////////////////////////////////
     // FORMATO FINAL
     //////////////////////////////////////////////////

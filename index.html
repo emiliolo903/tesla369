@@ -4672,10 +4672,20 @@ function aplicarAcompanantesV60(
     return ranking;
 
 }
-    //////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
 // MOTOR IA V60
-// BLOQUE 4
-// ORIENTADOR INTELIGENTE
+// ORIENTADOR V60 CORREGIDO
+//
+// OBJETIVO:
+// NO permitir que una unidad histórica global
+// domine el ranking.
+//
+// La unidad ya NO recibe peso.
+// La decena global tampoco recibe peso.
+//
+// Solo se conserva una señal muy pequeña de
+// decena + unidad específica, y únicamente
+// cuando existe memoria real para esa combinación.
 //////////////////////////////////////////////////////
 
 function aplicarOrientadorV60(
@@ -4684,55 +4694,95 @@ function aplicarOrientadorV60(
 
     let nuevo = {};
 
+
     for(let numero in ranking){
 
         numero =
         String(numero)
+        .slice(-2)
         .padStart(2,"0");
 
+
         let peso =
-        ranking[numero];
+        Number(ranking[numero]) || 0;
+
 
         let decena =
         numero[0];
 
+
         let unidad =
         numero[1];
 
-        // Unidad
 
-peso +=
-(MEMORIA_V60.unidades[unidad]||0)*0.5;
+        //////////////////////////////////////////////////
+        // IMPORTANTE
+        //
+        // ELIMINADO:
+        //
+        // MEMORIA_V60.unidades[unidad] * 0.5
+        //
+        // porque podía hacer que toda la familia
+        // terminada en 6 subiera artificialmente.
+        //////////////////////////////////////////////////
 
-// Decena global
 
-peso +=
-(MEMORIA_V60.decenas[decena]||0)*0.2;
+        //////////////////////////////////////////////////
+        // IMPORTANTE
+        //
+        // ELIMINADO:
+        //
+        // MEMORIA_V60.decenas[decena] * 0.2
+        //
+        // porque es una frecuencia GLOBAL y no
+        // necesariamente corresponde a este turno.
+        //////////////////////////////////////////////////
 
-// Decena histórica para esa unidad
 
-if(
+        //////////////////////////////////////////////////
+        // ÚNICA CORRECCIÓN CONSERVADA
+        //
+        // Decena específica para una unidad.
+        //
+        // Peso MUY REDUCIDO.
+        //////////////////////////////////////////////////
 
-    MEMORIA_V60.decenaPorUnidad[unidad] &&
+        if(
 
-    MEMORIA_V60.decenaPorUnidad[unidad][decena]
+            MEMORIA_V60.decenaPorUnidad &&
 
-){
+            MEMORIA_V60.decenaPorUnidad[unidad] &&
 
-    peso +=
-    MEMORIA_V60
-    .decenaPorUnidad[unidad][decena]
-    *1.5;
+            MEMORIA_V60
+            .decenaPorUnidad[unidad][decena]
 
-}
+        ){
 
-        nuevo[numero] = peso;
+            peso +=
+
+            Number(
+                MEMORIA_V60
+                .decenaPorUnidad[unidad][decena]
+            ) * 0.25;
+
+        }
+
+
+        //////////////////////////////////////////////////
+        // GUARDAR
+        //////////////////////////////////////////////////
+
+        nuevo[numero] =
+        peso;
 
     }
+
 
     return nuevo;
 
-    }
+}
+
+    
 
     async function reevaluarDecenaFinalV60(ranking){
 

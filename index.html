@@ -5543,12 +5543,31 @@ async function obtenerTercerAmbosHistoricoV60(
 
     }
     
-//////////////////////////////////////////////////
-// CORRECTOR INTELIGENTE DE DECENA HISTÓRICA V60.3
-// CORRIGE SOLO LA DECENA
-// CONSERVA LA UNIDAD
-// ANALIZA TURNO ORIGEN → TURNO DESTINO
-//////////////////////////////////////////////////
+//////////////////////////////////////////////////////
+// CORRECTOR DECENA HISTÓRICA V60.3
+//
+// OBJETIVO ÚNICO:
+//
+//    CONSERVAR LA UNIDAD
+//    CORREGIR SOLAMENTE LA DECENA
+//
+// Ejemplo:
+//
+// IA = 28
+// unidad = 8
+//
+// Se buscan resultados históricos:
+// 08, 18, 28, 38, 48, 58, 68, 78, 88, 98
+//
+// pero SOLAMENTE dentro de:
+//
+// turnoOrigen -> turnoDestino
+//
+// No modifica Tesla.
+// No modifica transición.
+// No modifica IA71.
+// No cambia la unidad.
+//////////////////////////////////////////////////////
 
 async function corregirDecenaHistoricaV60(
     ambos,
@@ -5556,6 +5575,14 @@ async function corregirDecenaHistoricaV60(
     turnoDestino,
     ranking
 ){
+
+    if(
+        !Array.isArray(ambos) ||
+        ambos.length === 0
+    ){
+        return ambos;
+    }
+
 
     let historial =
     await leerV48(
@@ -5565,42 +5592,45 @@ async function corregirDecenaHistoricaV60(
 
     if(
         !Array.isArray(historial) ||
-        historial.length === 0
+        historial.length < 2
     ){
         return ambos;
     }
 
 
-    let salida = [];
+    let salidaFinal = [];
 
 
     //////////////////////////////////////////////////
     // PROCESAR CADA AMBOS
     //////////////////////////////////////////////////
 
-    for(let base of ambos){
+    for(let candidato of ambos){
 
-        base =
-        String(base)
+        candidato =
+        String(candidato)
         .slice(-2)
         .padStart(2,"0");
 
 
-        // LA UNIDAD NO SE TOCA
         let unidad =
-        base[1];
-
-
-        let transiciones = {};
+        candidato[1];
 
 
         //////////////////////////////////////////////////
-        // BUSCAR RESULTADOS DEL SALTO
-        // ORIGEN → DESTINO
-        // PARA LA MISMA UNIDAD
+        // CONTADOR DE DECENAS
+        //
+        // decena -> cantidad de veces encontrada
         //////////////////////////////////////////////////
 
-        for(let i=0; i<historial.length; i++){
+        let decenas = {};
+
+
+        //////////////////////////////////////////////////
+        // BUSCAR TRANSICIONES REALES
+        //////////////////////////////////////////////////
+
+        for(let i=0;i<historial.length;i++){
 
             let actual =
             historial[i];
@@ -5622,14 +5652,12 @@ async function corregirDecenaHistoricaV60(
 
 
             //////////////////////////////////////////////////
-            // BUSCAR EL SIGUIENTE TURNO
+            // BUSCAR EL SIGUIENTE RESULTADO
+            // DE LA MISMA PROVINCIA
+            // EN EL TURNO DESTINO
             //////////////////////////////////////////////////
 
-            for(
-                let j=i+1;
-                j<historial.length;
-                j++
-            ){
+            for(let j=i+1;j<historial.length;j++){
 
                 let siguiente =
                 historial[j];
@@ -5644,70 +5672,61 @@ async function corregirDecenaHistoricaV60(
 
 
                 //////////////////////////////////////////////////
-                // MISMA FECHA CUANDO EXISTE
+                // MISMA PROVINCIA
                 //////////////////////////////////////////////////
 
                 if(
-                    actual.fecha &&
-                    siguiente.fecha &&
-                    String(actual.fecha) !==
-                    String(siguiente.fecha)
+                    siguiente.provincia !==
+                    actual.provincia
                 ){
                     continue;
                 }
 
 
                 //////////////////////////////////////////////////
-                // MISMA PROVINCIA CUANDO EXISTE
+                // TURNO DESTINO
                 //////////////////////////////////////////////////
 
                 if(
-                    actual.provincia &&
-                    siguiente.provincia &&
-                    actual.provincia !==
-                    siguiente.provincia
+                    siguiente.turno !==
+                    turnoDestino
                 ){
                     continue;
                 }
 
 
-                //////////////////////////////////////////////////
-                // ESPERAR AL TURNO DESTINO
-                //////////////////////////////////////////////////
-
-                if(
-                    siguiente.turno !== turnoDestino
-                ){
-                    continue;
-                }
-
-
-                let numeroDestino =
+                let salida =
                 String(siguiente.numero)
                 .slice(-2)
                 .padStart(2,"0");
 
 
                 //////////////////////////////////////////////////
-                // SOLO NOS INTERESA LA UNIDAD CORRECTA
+                // CONSERVAR SOLAMENTE LA UNIDAD
                 //////////////////////////////////////////////////
 
                 if(
-                    numeroDestino[1] !== unidad
+                    salida[1] !== unidad
                 ){
                     break;
                 }
 
 
                 let decena =
-                numeroDestino[0];
+                salida[0];
 
 
-                transiciones[decena] =
-                (transiciones[decena] || 0) + 1;
+                if(!decenas[decena])
+                    decenas[decena]=0;
 
 
-                // Primera coincidencia válida
+                decenas[decena]++;
+
+
+                //////////////////////////////////////////////////
+                // SOLO LA PRIMERA TRANSICIÓN VÁLIDA
+                //////////////////////////////////////////////////
+
                 break;
 
             }
@@ -5716,14 +5735,19 @@ async function corregirDecenaHistoricaV60(
 
 
         //////////////////////////////////////////////////
-        // SI NO EXISTE EVIDENCIA DEL SALTO
+        // SI NO HAY HISTORIA PARA ESA UNIDAD
+        // CONSERVAR EL CANDIDATO ORIGINAL
         //////////////////////////////////////////////////
 
-        if(
-            Object.keys(transiciones).length === 0
-        ){
+        let opciones =
+        Object.keys(decenas);
 
-            salida.push(base);
+
+        if(opciones.length === 0){
+
+            salidaFinal.push(
+                candidato
+            );
 
             continue;
 
@@ -5731,185 +5755,117 @@ async function corregirDecenaHistoricaV60(
 
 
         //////////////////////////////////////////////////
-        // PUNTAJE DE CADA DECENA
+        // ORDENAR DECENAS POR FRECUENCIA
         //////////////////////////////////////////////////
 
-        let candidatos = {};
-
-
-        for(let d=0; d<=9; d++){
-
-            let candidato =
-            String(d) + unidad;
-
-
-            //////////////////////////////////////////////////
-            // RANKING ORIGINAL
-            //////////////////////////////////////////////////
-
-            let pesoRanking =
-            Number(
-                ranking[candidato] || 0
-            );
-
-
-            //////////////////////////////////////////////////
-            // EVIDENCIA ESPECÍFICA
-            // ORIGEN → DESTINO + UNIDAD
-            //////////////////////////////////////////////////
-
-            let pesoTransicion =
-            Number(
-                transiciones[String(d)] || 0
-            );
-
-
-            //////////////////////////////////////////////////
-            // PESO HISTÓRICO ESPECÍFICO
-            //////////////////////////////////////////////////
-
-            let pesoHistorico = 0;
-
-
-            if(
-                MEMORIA_V60 &&
-                MEMORIA_V60.decenaPorUnidad &&
-                MEMORIA_V60.decenaPorUnidad[unidad] &&
-                MEMORIA_V60.decenaPorUnidad[unidad][String(d)]
-            ){
-
-                pesoHistorico =
-                Number(
-                    MEMORIA_V60
-                    .decenaPorUnidad[unidad]
-                    [String(d)]
-                );
-
-            }
-
-
-            //////////////////////////////////////////////////
-            // PUNTAJE FINAL
-            //
-            // TRANSICIÓN ES LA SEÑAL PRINCIPAL
-            // RANKING ES APOYO
-            //////////////////////////////////////////////////
-
-            let pesoFinal =
-
-                pesoRanking * 0.50 +
-
-                pesoTransicion * 8 +
-
-                pesoHistorico * 0.20;
-
-
-            candidatos[candidato] =
-            pesoFinal;
-
-        }
-
-
-        //////////////////////////////////////////////////
-        // ORDENAR
-        //////////////////////////////////////////////////
-
-        let orden =
-        Object.keys(candidatos)
-        .sort(
+        opciones.sort(
             (a,b)=>
-            candidatos[b] -
-            candidatos[a]
+                decenas[b] -
+                decenas[a]
         );
 
 
+        let mejorDecena =
+            opciones[0];
+
+
+        let frecuenciaMejor =
+            decenas[mejorDecena];
+
+
+        let total =
+            opciones.reduce(
+                (s,d)=>
+                    s + decenas[d],
+                0
+            );
+
+
         //////////////////////////////////////////////////
-        // MANTENER LA DECENA ORIGINAL
-        // SI NO HAY UNA EVIDENCIA CLARA
+        // CONFIANZA
         //////////////////////////////////////////////////
 
-        let mejor =
-        base;
+        let confianza =
+            total > 0
+            ? frecuenciaMejor / total
+            : 0;
 
 
-        let pesoOriginal =
-        candidatos[base] || 0;
+        //////////////////////////////////////////////////
+        // SOLO CORREGIR SI EXISTE
+        // UNA SEÑAL HISTÓRICA REAL
+        //
+        // Con poca evidencia no forzamos el cambio.
+        //////////////////////////////////////////////////
+
+        if(
+            frecuenciaMejor >= 3 &&
+            confianza >= 0.25
+        ){
+
+            let corregido =
+                mejorDecena +
+                unidad;
 
 
-        for(let candidato of orden){
-
-            if(
-                candidato === base
-            ){
-                continue;
-            }
+            salidaFinal.push(
+                corregido
+            );
 
 
-            let pesoCandidato =
-            candidatos[candidato];
+            console.log(
+                "V60.3 DECENA CORREGIDA",
+                {
+                    original:candidato,
+                    unidad:unidad,
+                    decenaOriginal:candidato[0],
+                    decenaNueva:mejorDecena,
+                    frecuencia:frecuenciaMejor,
+                    total:total,
+                    confianza:confianza
+                }
+            );
 
+        }else{
 
             //////////////////////////////////////////////////
-            // SOLO CAMBIAR SI LA NUEVA DECENA
-            // SUPERA CLARAMENTE A LA ORIGINAL
+            // SIN EVIDENCIA SUFICIENTE:
+            // NO TOCAR
             //////////////////////////////////////////////////
 
-            if(
-                pesoCandidato >
-                pesoOriginal + 4
-            ){
-
-                mejor =
-                candidato;
-
-                break;
-
-            }
+            salidaFinal.push(
+                candidato
+            );
 
         }
-
-
-        //////////////////////////////////////////////////
-        // GARANTIZAR UNIDAD
-        //////////////////////////////////////////////////
-
-        mejor =
-        String(mejor)
-        .slice(-2)
-        .padStart(2,"0");
-
-
-        mejor =
-        mejor[0] + unidad;
-
-
-        salida.push(mejor);
-
-
-        //////////////////////////////////////////////////
-        // DIAGNÓSTICO
-        //////////////////////////////////////////////////
-
-        console.log(
-            "V60.3 DECENA",
-            {
-                base,
-                turnoOrigen,
-                turnoDestino,
-                unidad,
-                transiciones,
-                candidatos,
-                elegido:mejor
-            }
-        );
 
     }
 
 
-    return salida;
+    //////////////////////////////////////////////////
+    // ELIMINAR DUPLICADOS
+    //////////////////////////////////////////////////
 
-        }
-                    
+    salidaFinal =
+    salidaFinal.filter(
+        (numero,index,array)=>
+            array.indexOf(numero) === index
+    );
+
+
+    //////////////////////////////////////////////////
+    // DEVOLVER
+    //////////////////////////////////////////////////
+
+    return salidaFinal;
+
+    }
+
+
+
+
+
+        
   //////////////////////////////////////////////////
 // BLOQUE V61.1
 // NÚCLEOS DOMINANTES SOBRE RANKING

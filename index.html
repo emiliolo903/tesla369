@@ -4624,7 +4624,6 @@ function aplicarMotorHistoricoV60(
 // BLOQUE 3
 // DETECTOR DE ACOMPAÑANTES HISTÓRICOS
 //////////////////////////////////////////////////////
-
 function aplicarAcompanantesV60(
     ranking,
     base,
@@ -4632,46 +4631,147 @@ function aplicarAcompanantesV60(
     turnoDestino
 ){
 
+    //////////////////////////////////////////////////
+    // ACOMPAÑANTES V60 CORREGIDO
+    //
+    // El acompañante NO debe dominar el ranking.
+    // Su función es aportar una señal secundaria.
+    //////////////////////////////////////////////////
+
     let clave =
-    turnoOrigen + "->" + turnoDestino;
+        turnoOrigen + "->" + turnoDestino;
+
 
     if(
+        !MEMORIA_V60 ||
+        !MEMORIA_V60.transiciones ||
         !MEMORIA_V60.transiciones[clave]
-    ) return ranking;
+    ){
+        return ranking;
+    }
+
 
     let historialBase =
-    MEMORIA_V60.transiciones[clave][base];
+        MEMORIA_V60
+        .transiciones[clave][base];
 
-    if(!historialBase)
+
+    if(
+        !historialBase ||
+        typeof historialBase !== "object"
+    ){
         return ranking;
+    }
+
+
+    //////////////////////////////////////////////////
+    // ORDENAR POR FRECUENCIA REAL
+    //////////////////////////////////////////////////
 
     let lista =
-    Object.keys(historialBase)
-    .sort(
-        (a,b)=>
-        historialBase[b]-
-        historialBase[a]
-    );
+        Object.keys(historialBase)
+        .sort(
+            (a,b)=>
+                Number(historialBase[b]) -
+                Number(historialBase[a])
+        );
+
+
+    if(lista.length === 0)
+        return ranking;
+
+
+    //////////////////////////////////////////////////
+    // TOMAR COMO MÁXIMO 5
+    //////////////////////////////////////////////////
 
     let limite =
-    Math.min(5,lista.length);
+        Math.min(5,lista.length);
+
+
+    //////////////////////////////////////////////////
+    // FRECUENCIA MÁXIMA
+    //////////////////////////////////////////////////
+
+    let frecuenciaMax =
+        Number(
+            historialBase[lista[0]]
+        ) || 0;
+
+
+    if(frecuenciaMax <= 0)
+        return ranking;
+
+
+    //////////////////////////////////////////////////
+    // APLICAR BONUS PROPORCIONAL
+    //
+    // MÁXIMO +5
+    // NO +20
+    //////////////////////////////////////////////////
 
     for(let i=0;i<limite;i++){
 
         let numero =
-        lista[i];
+            String(lista[i])
+            .slice(-2)
+            .padStart(2,"0");
 
-        if(!ranking[numero])
-            ranking[numero]=0;
 
-        // Premio fuerte a los acompañantes
-        ranking[numero]+=20-i;
+        let frecuencia =
+            Number(
+                historialBase[lista[i]]
+            ) || 0;
+
+
+        if(frecuencia <= 0)
+            continue;
+
+
+        //////////////////////////////////////////////////
+        // PROPORCIÓN REAL
+        //////////////////////////////////////////////////
+
+        let proporcion =
+            frecuencia /
+            frecuenciaMax;
+
+
+        //////////////////////////////////////////////////
+        // BONUS MÁXIMO 5
+        //////////////////////////////////////////////////
+
+        let bonus =
+            proporcion * 5;
+
+
+        if(
+            !Number.isFinite(bonus) ||
+            bonus <= 0
+        ){
+            continue;
+        }
+
+
+        if(
+            !Object.prototype.hasOwnProperty.call(
+                ranking,
+                numero
+            )
+        ){
+            ranking[numero] = 0;
+        }
+
+
+        ranking[numero] += bonus;
 
     }
+
 
     return ranking;
 
 }
+
 //////////////////////////////////////////////////////
 // MOTOR IA V60
 // ORIENTADOR V60 CORREGIDO

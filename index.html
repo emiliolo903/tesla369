@@ -12550,34 +12550,136 @@ function obtenerPesoMotorIA71(motor){
 }
 
 async function aplicarPesosRankingIA71(
-
     ranking,
-
     numerosMotor
-
 ){
 
+    //////////////////////////////////////////////////
+    // IA71 CORREGIDO
+    //
+    // NO MULTIPLICAR EL RANKING COMPLETO
+    //
+    // V60 ya realizó el ranking.
+    // IA71 solamente puede aportar un pequeño
+    // ajuste, sin aplastar las diferencias reales.
+    //////////////////////////////////////////////////
+
+    if(
+        !ranking ||
+        typeof ranking !== "object"
+    ){
+        return ranking;
+    }
+
+
+    if(
+        !Array.isArray(numerosMotor) ||
+        numerosMotor.length === 0
+    ){
+        return ranking;
+    }
+
+
     let motor =
-    obtenerMotorActivoIA71();
+        obtenerMotorActivoIA71();
+
 
     let peso =
-    obtenerPesoMotorIA71(motor);
+        obtenerPesoMotorIA71(motor);
+
+
+    peso =
+        Number(peso);
+
+
+    //////////////////////////////////////////////////
+    // PESO INVÁLIDO
+    //////////////////////////////////////////////////
+
+    if(
+        !Number.isFinite(peso) ||
+        peso <= 0
+    ){
+        return ranking;
+    }
+
+
+    //////////////////////////////////////////////////
+    // NORMALIZAR EL PESO
+    //
+    // Nunca permitimos que IA71 multiplique
+    // el ranking por un valor enorme.
+    //////////////////////////////////////////////////
+
+    let ajuste =
+        Math.max(
+            0,
+            Math.min(
+                5,
+                (peso - 1) * 2
+            )
+        );
+
+
+    //////////////////////////////////////////////////
+    // APLICAR SOLO UN BONUS PEQUEÑO
+    //////////////////////////////////////////////////
 
     for(let numero of numerosMotor){
 
-        if(ranking[numero]){
+        numero =
+            String(numero)
+            .slice(-2)
+            .padStart(2,"0");
 
-            ranking[numero] +=
-            ranking[numero] * (peso - 1);
 
+        if(
+            !Object.prototype.hasOwnProperty.call(
+                ranking,
+                numero
+            )
+        ){
+            continue;
         }
+
+
+        let actual =
+            Number(ranking[numero]);
+
+
+        if(!Number.isFinite(actual))
+            continue;
+
+
+        //////////////////////////////////////////////////
+        // BONUS ADITIVO
+        //
+        // NO:
+        // actual * peso
+        //
+        // SÍ:
+        // actual + ajuste
+        //////////////////////////////////////////////////
+
+        ranking[numero] =
+            actual + ajuste;
 
     }
 
+
+    console.log(
+        "IA71 AJUSTE CONTROLADO:",
+        {
+            motor,
+            peso,
+            ajuste
+        }
+    );
+
+
     return ranking;
 
-}
-
+    }
 
 
 async function actualizarSistemaIA71(){

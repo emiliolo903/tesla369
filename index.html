@@ -6097,6 +6097,167 @@ async function corregirDecenaPorTurnoUnidadV61_1(
     return salida;
 
 }
+
+    //////////////////////////////////////////////////////
+// SELECTOR DE PAREJA COMPLETA V61.3
+//
+// OBJETIVO:
+// Seleccionar AMBOS como pares completos.
+// La unidad NO puede decidir sola.
+//
+// 28 = pareja "28"
+// 72 = pareja "72"
+// 38 = pareja "38"
+//
+// No separar decena y unidad.
+// No modificar el ranking original.
+// No generar números nuevos.
+//////////////////////////////////////////////////////
+
+function seleccionarParejasCompletasV61_3(
+    ranking,
+    cantidad = 3
+){
+
+    if(
+        !ranking ||
+        typeof ranking !== "object"
+    ){
+        return [];
+    }
+
+
+    let candidatos = [];
+
+
+    //////////////////////////////////////////////////
+    // CONSTRUIR CANDIDATOS COMO PARES COMPLETOS
+    //////////////////////////////////////////////////
+
+    for(let numero in ranking){
+
+        numero =
+        String(numero)
+        .slice(-2)
+        .padStart(2,"0");
+
+
+        let peso =
+        Number(ranking[numero]);
+
+
+        if(!Number.isFinite(peso))
+            continue;
+
+
+        //////////////////////////////////////////////////
+        // CADA NÚMERO ES UNA PAREJA COMPLETA
+        //////////////////////////////////////////////////
+
+        candidatos.push({
+
+            numero: numero,
+
+            peso: peso
+
+        });
+
+    }
+
+
+    //////////////////////////////////////////////////
+    // ELIMINAR DUPLICADOS
+    //////////////////////////////////////////////////
+
+    let vistos = new Set();
+
+
+    candidatos =
+    candidatos.filter(item => {
+
+        if(vistos.has(item.numero))
+            return false;
+
+
+        vistos.add(item.numero);
+
+        return true;
+
+    });
+
+
+    //////////////////////////////////////////////////
+    // ORDENAR POR PESO DEL PAR COMPLETO
+    //////////////////////////////////////////////////
+
+    candidatos.sort(
+        (a,b)=>
+        b.peso - a.peso
+    );
+
+
+    //////////////////////////////////////////////////
+    // SELECCIONAR LOS MEJORES PARES
+    //////////////////////////////////////////////////
+
+    let resultado = [];
+
+
+    for(let candidato of candidatos){
+
+        let par =
+        candidato.numero;
+
+
+        if(resultado.includes(par))
+            continue;
+
+
+        resultado.push(par);
+
+
+        if(
+            resultado.length >= cantidad
+        ){
+            break;
+        }
+
+    }
+
+
+    //////////////////////////////////////////////////
+    // FORMATO FINAL
+    //////////////////////////////////////////////////
+
+    resultado =
+    resultado.map(
+        n =>
+        String(n)
+        .slice(-2)
+        .padStart(2,"0")
+    );
+
+
+    console.log(
+        "V61.3 PAREJAS COMPLETAS:",
+        resultado
+    );
+
+
+    console.log(
+        "V61.3 PESOS:",
+        resultado.map(
+            n => ({
+                numero:n,
+                peso:ranking[n]
+            })
+        )
+    );
+
+
+    return resultado;
+
+}
                 
 //////////////////////////////////////////////////
 // GENERADOR IA V60
@@ -6479,45 +6640,25 @@ ${orden.join(" - ")}
 `);
 
 
-    //////////////////////////////////////////////////
-    // SELECCIÓN DE 3 AMBOS
-    //
-    // AQUÍ YA NO USAMOS:
-    // - motorV60.ambos
-    // - tercer histórico
-    // - V61.2
-    // - V56
-    // - V57
-    //
-    // SOLO RANKING FINAL
-    //////////////////////////////////////////////////
+    /////////////////////////////////////////////////
+// SELECCIÓN DE 3 AMBOS
+// V61.3 — PAREJA COMPLETA
+/////////////////////////////////////////////////
 
-    let ambos = [];
+let ambos =
+    seleccionarParejasCompletasV61_3(
+        ranking,
+        3
+    );
 
 
-    for(let candidato of ordenFinal){
+mostrarV48(
+`
+PAREJAS COMPLETAS V61.3
 
-        let numero =
-            candidato.numero;
-
-        if(
-            !ambos.includes(numero)
-        ){
-
-            ambos.push(numero);
-
-        }
-
-        if(
-            ambos.length === 3
-        ){
-
-            break;
-
-        }
-
-    }
-
+${ambos.join(" - ")}
+`
+);
 
     //////////////////////////////////////////////////
     // CORRECTOR DECENA HISTÓRICO V60
@@ -6525,13 +6666,14 @@ ${orden.join(" - ")}
     // SE EJECUTA UNA SOLA VEZ
     //////////////////////////////////////////////////
 
-    ambos =
+ /*   ambos =
         await corregirDecenaHistoricaV60(
             ambos,
             turnoOrigen,
             turnoDestino,
             ranking
         );
+        */
 
 
     //////////////////////////////////////////////////

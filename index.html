@@ -14385,9 +14385,869 @@ async function CORR_NUEVO_guardarOCR(){
             )
         ){
 
-            CORR_NUEVO_pa
+                        CORR_NUEVO_panel(`
 
-    
+                <h3>⚠️ DATO OCR INVÁLIDO</h3>
+
+                Falta o está mal cargada la posición:
+                <b>${i + 1}</b>
+
+                <br><br>
+
+                Ingrese un número de 00 a 99.
+
+            `);
+
+            return;
+
+        }
+
+
+        let numero =
+            CORR_NUEVO_2(
+                campo.value.trim()
+            );
+
+
+        numeros.push(numero);
+
+    }
+
+
+    let turnoElemento =
+        document.getElementById(
+            "CORR_NUEVO_OCR_TURNO"
+        );
+
+
+    let turno =
+        turnoElemento
+        ? turnoElemento.value
+        : "PREVIA";
+
+
+    try{
+
+        await CORR_NUEVO_guardarSorteo(
+            numeros,
+            turno,
+            "OCR"
+        );
+
+
+        CORR_NUEVO_panel(`
+
+            <h2>✅ OCR GUARDADO</h2>
+
+            <p>
+                Correntina independiente
+            </p>
+
+            <b>
+                ${turno}
+            </b>
+
+            <br><br>
+
+            ${numeros
+                .map(
+                    (n,i)=>
+                    `${i+1}° → ${n}`
+                )
+                .join("<br>")
+            }
+
+            <br><br>
+
+            🧠
+            Sorteo guardado y aprendizaje actualizado.
+
+        `);
+
+
+        console.log(
+            "CORR_NUEVO OCR GUARDADO",
+            {
+                turno,
+                numeros
+            }
+        );
+
+
+    }catch(e){
+
+        console.error(
+            "ERROR GUARDANDO OCR CORRENTINA",
+            e
+        );
+
+
+        CORR_NUEVO_panel(`
+
+            <h3>❌ ERROR GUARDANDO OCR</h3>
+
+            ${e.message || e}
+
+        `);
+
+    }
+
+}
+
+
+///////////////////////////////////////////////////////////////
+// APRENDIZAJE CORRENTINA
+///////////////////////////////////////////////////////////////
+async function CORR_NUEVO_aprender(){
+
+    try{
+
+        let sorteos =
+            await CORR_NUEVO_leer(
+                CORR_NUEVO_STORES.sorteos
+            );
+
+
+        if(
+            !sorteos ||
+            sorteos.length===0
+        ){
+
+            return;
+
+        }
+
+
+        let posiciones = {};
+
+        let transiciones = {};
+
+        let decenas = {};
+
+        let unidades = {};
+
+
+        ///////////////////////////////////////////////////////
+        // ANALIZAR TODOS LOS SORTEOS
+        ///////////////////////////////////////////////////////
+
+        for(
+            let sorteo of sorteos
+        ){
+
+            if(
+                !Array.isArray(
+                    sorteo.posiciones
+                )
+            ){
+
+                continue;
+
+            }
+
+
+            for(
+                let dato of sorteo.posiciones
+            ){
+
+                let posicion =
+                    String(
+                        dato.posicion
+                    );
+
+
+                let numero =
+                    CORR_NUEVO_2(
+                        dato.numero
+                    );
+
+
+                if(
+                    !posiciones[posicion]
+                ){
+
+                    posiciones[posicion] = {
+
+                        frecuencia:{},
+
+                        decenas:{},
+
+                        unidades:{}
+
+                    };
+
+                }
+
+
+                //////////////////////////////////////////////////
+                // FRECUENCIA EXACTA
+                //////////////////////////////////////////////////
+
+                posiciones[posicion]
+                    .frecuencia[numero] =
+
+                    (
+                        posiciones[posicion]
+                            .frecuencia[numero]
+                        || 0
+                    ) + 1;
+
+
+                //////////////////////////////////////////////////
+                // DECENA
+                //////////////////////////////////////////////////
+
+                let decena =
+                    numero[0];
+
+
+                posiciones[posicion]
+                    .decenas[decena] =
+
+                    (
+                        posiciones[posicion]
+                            .decenas[decena]
+                        || 0
+                    ) + 1;
+
+
+                //////////////////////////////////////////////////
+                // UNIDAD
+                //////////////////////////////////////////////////
+
+                let unidad =
+                    numero[1];
+
+
+                posiciones[posicion]
+                    .unidades[unidad] =
+
+                    (
+                        posiciones[posicion]
+                            .unidades[unidad]
+                        || 0
+                    ) + 1;
+
+
+                //////////////////////////////////////////////////
+                // MEMORIA GLOBAL
+                //////////////////////////////////////////////////
+
+                decenas[decena] =
+                    (
+                        decenas[decena]
+                        || 0
+                    ) + 1;
+
+
+                unidades[unidad] =
+                    (
+                        unidades[unidad]
+                        || 0
+                    ) + 1;
+
+            }
+
+        }
+
+
+        ///////////////////////////////////////////////////////
+        // TRANSICIÓN ENTRE POSICIONES
+        //
+        // EJEMPLO:
+        // POSICIÓN 1 → POSICIÓN 2
+        // POSICIÓN 2 → POSICIÓN 3
+        ///////////////////////////////////////////////////////
+
+        for(
+            let sorteo of sorteos
+        ){
+
+            if(
+                !Array.isArray(
+                    sorteo.posiciones
+                )
+            ){
+
+                continue;
+
+            }
+
+
+            let lista =
+                sorteo.posiciones;
+
+
+            for(
+                let i=0;
+                i<lista.length-1;
+                i++
+            ){
+
+                let actual =
+                    CORR_NUEVO_2(
+                        lista[i].numero
+                    );
+
+
+                let siguiente =
+                    CORR_NUEVO_2(
+                        lista[i+1].numero
+                    );
+
+
+                let clave =
+                    String(
+                        lista[i].posicion
+                    )
+                    +
+                    "->"
+                    +
+                    String(
+                        lista[i+1].posicion
+                    );
+
+
+                if(
+                    !transiciones[clave]
+                ){
+
+                    transiciones[clave] = {};
+
+                }
+
+
+                if(
+                    !transiciones[clave][actual]
+                ){
+
+                    transiciones[clave][actual] = {};
+
+                }
+
+
+                transiciones[clave][actual][siguiente] =
+
+                    (
+                        transiciones[clave][actual][siguiente]
+                        || 0
+                    ) + 1;
+
+            }
+
+        }
+
+
+        ///////////////////////////////////////////////////////
+        // GUARDAR APRENDIZAJE
+        ///////////////////////////////////////////////////////
+
+        await CORR_NUEVO_guardar(
+
+            CORR_NUEVO_STORES.aprendizaje,
+
+            {
+
+                fecha:
+                    new Date().toISOString(),
+
+                sorteos:
+                    sorteos.length,
+
+                posiciones:
+                    posiciones,
+
+                decenas:
+                    decenas,
+
+                unidades:
+                    unidades,
+
+                transiciones:
+                    transiciones
+
+            }
+
+        );
+
+
+        CORR_NUEVO_estado.aprendizaje++;
+
+
+        CORR_NUEVO_estado.ultimoAnalisis =
+            new Date().toLocaleString();
+
+
+        CORR_NUEVO_estadoMostrar();
+
+
+        console.log(
+            "🧠 APRENDIZAJE CORRENTINA ACTUALIZADO",
+            {
+                sorteos:
+                    sorteos.length,
+
+                posiciones,
+
+                transiciones
+
+            }
+        );
+
+
+    }catch(e){
+
+        console.error(
+            "ERROR APRENDIENDO CORRENTINA",
+            e
+        );
+
+    }
+
+}
+
+
+///////////////////////////////////////////////////////////////
+// OBTENER ÚLTIMO APRENDIZAJE
+///////////////////////////////////////////////////////////////
+async function CORR_NUEVO_ultimoAprendizaje(){
+
+    let datos =
+        await CORR_NUEVO_leer(
+            CORR_NUEVO_STORES.aprendizaje
+        );
+
+
+    if(
+        !datos ||
+        datos.length===0
+    ){
+
+        return null;
+
+    }
+
+
+    return datos[
+        datos.length-1
+    ];
+
+}
+
+
+///////////////////////////////////////////////////////////////
+// ANALIZAR POSICIÓN
+///////////////////////////////////////////////////////////////
+
+async function CORR_NUEVO_analizarPosicion(
+    posicion
+){
+
+    let memoria =
+        await CORR_NUEVO_ultimoAprendizaje();
+
+
+    if(!memoria){
+
+        return [];
+
+    }
+
+
+    let p =
+        String(posicion);
+
+
+    if(
+        !memoria.posiciones ||
+        !memoria.posiciones[p]
+    ){
+
+        return [];
+
+    }
+
+
+    let datos =
+        memoria.posiciones[p];
+
+
+    let ranking =
+        Object.keys(
+            datos.frecuencia || {}
+        )
+        .map(
+            numero=>({
+
+                numero:
+
+                    String(numero)
+                    .padStart(2,"0"),
+
+                frecuencia:
+
+                    datos.frecuencia[numero]
+
+            })
+        )
+        .sort(
+            (a,b)=>
+                b.frecuencia-
+                a.frecuencia
+        );
+
+
+    return ranking;
+
+
+}
+
+
+///////////////////////////////////////////////////////////////
+// ANALIZAR LAS 20 POSICIONES
+///////////////////////////////////////////////////////////////
+
+async function CORR_NUEVO_analizarTodo(){
+
+    let memoria =
+        await CORR_NUEVO_ultimoAprendizaje();
+
+
+    if(!memoria){
+
+        CORR_NUEVO_panel(`
+            ⚠️ Todavía no existe aprendizaje.
+        `);
+
+        return;
+
+    }
+
+
+    let html = `
+
+        <h2>🧠 ANÁLISIS CORRENTINA 1–20</h2>
+
+        <p>
+        Análisis independiente por posición.
+        </p>
+
+    `;
+
+
+    for(
+        let i=1;
+        i<=20;
+        i++
+    ){
+
+        let datos =
+            memoria.posiciones &&
+            memoria.posiciones[String(i)];
+
+
+        if(!datos){
+
+            html += `
+                <hr>
+                <b>${i}°</b>
+                → Sin datos
+            `;
+
+            continue;
+
+        }
+
+
+        let ranking =
+            Object.keys(
+                datos.frecuencia || {}
+            )
+            .sort(
+                (a,b)=>
+                    datos.frecuencia[b]-
+                    datos.frecuencia[a]
+            )
+            .slice(0,5);
+
+
+        html += `
+
+            <hr>
+
+            <b>${i}° posición</b>
+
+            <br>
+
+            ${ranking.length
+                ?
+                ranking
+                    .map(
+                        n=>
+                        `${n}
+                        (${datos.frecuencia[n]})`
+                    )
+                    .join(" - ")
+                :
+                "Sin datos"
+            }
+
+        `;
+
+    }
+
+
+    CORR_NUEVO_panel(
+        html
+    );
+
+
+    CORR_NUEVO_estado.ultimoAnalisis =
+        new Date().toLocaleString();
+
+
+    CORR_NUEVO_estadoMostrar();
+
+}
+
+
+///////////////////////////////////////////////////////////////
+// HISTORIAL
+///////////////////////////////////////////////////////////////
+async function CORR_NUEVO_mostrarHistorial(){
+
+    let sorteos =
+        await CORR_NUEVO_leer(
+            CORR_NUEVO_STORES.sorteos
+        );
+
+
+    if(
+        !sorteos ||
+        sorteos.length===0
+    ){
+
+        CORR_NUEVO_panel(`
+            <h3>📚 HISTORIAL</h3>
+            No hay sorteos cargados.
+        `);
+
+        return;
+
+    }
+
+
+    let html = `
+
+        <h2>📚 HISTORIAL CORRENTINA</h2>
+
+        <p>
+        Sorteos guardados:
+        <b>${sorteos.length}</b>
+        </p>
+
+    `;
+
+
+    let ultimos =
+        sorteos
+        .slice()
+        .reverse()
+        .slice(0,20);
+
+
+    for(
+        let sorteo of ultimos
+    ){
+
+        html += `
+
+            <hr>
+
+            <b>
+                ${sorteo.fecha}
+                ${sorteo.hora || ""}
+            </b>
+
+            <br>
+
+            Turno:
+            <b>${sorteo.turno}</b>
+
+            <br><br>
+
+            ${
+                (sorteo.posiciones || [])
+                .map(
+                    x=>
+                    `${x.posicion}° → ${x.numero}`
+                )
+                .join(" | ")
+            }
+
+        `;
+
+    }
+
+
+    CORR_NUEVO_panel(
+        html
+    );
+
+}
+
+
+///////////////////////////////////////////////////////////////
+// PREDICCIÓN INDEPENDIENTE
+///////////////////////////////////////////////////////////////
+
+async function CORR_NUEVO_generarPrediccion(){
+
+    let memoria =
+        await CORR_NUEVO_ultimoAprendizaje();
+
+
+    if(!memoria){
+
+        CORR_NUEVO_panel(`
+            ⚠️ Primero cargue sorteos.
+        `);
+
+        return;
+
+    }
+
+
+    let resultado=[];
+
+
+    ///////////////////////////////////////////////////////////
+    // GENERAR UN NÚMERO POR CADA POSICIÓN
+    ///////////////////////////////////////////////////////////
+
+    for(
+        let posicion=1;
+        posicion<=20;
+        posicion++
+    ){
+
+        let datos =
+            memoria.posiciones &&
+            memoria.posiciones[
+                String(posicion)
+            ];
+
+
+        if(
+            !datos ||
+            !datos.frecuencia
+        ){
+
+            resultado.push(
+                "00"
+            );
+
+            continue;
+
+        }
+
+
+        let orden =
+            Object.keys(
+                datos.frecuencia
+            )
+            .sort(
+                (a,b)=>
+                    datos.frecuencia[b]-
+                    datos.frecuencia[a]
+            );
+
+
+        resultado.push(
+            orden.length
+            ?
+            CORR_NUEVO_2(
+                orden[0]
+            )
+            :
+            "00"
+        );
+
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    // GUARDAR PREDICCIÓN
+    ///////////////////////////////////////////////////////////
+
+    let registro={
+
+        fecha:
+            new Date().toISOString(),
+
+        posiciones:
+            resultado.map(
+                (numero,i)=>({
+
+                    posicion:
+                        i+1,
+
+                    numero:
+                        CORR_NUEVO_2(
+                            numero
+                        )
+
+                })
+            )
+
+    };
+
+
+    await CORR_NUEVO_guardar(
+
+        CORR_NUEVO_STORES.predicciones,
+
+        registro
+
+    );
+
+
+    CORR_NUEVO_estado.predicciones++;
+
+
+    CORR_NUEVO_estado.ultimoAnalisis =
+        new Date().toLocaleString();
+
+
+    CORR_NUEVO_estadoMostrar();
+
+
+    CORR_NUEVO_panel(`
+
+        <h2>🎯 PREDICCIÓN CORRENTINA</h2>
+
+        ${resultado
+            .map(
+                (n,i)=>
+                `${i+1}° → <b>${n}</b>`
+            )
+            .join("<br>")
+        }
+
+    `);
+
+
+    console.log(
+        "PREDICCIÓN CORRENTINA",
+        resultado
+    );
+
+}
+
+
+///////////////////////////////////////////////////////////////
+// BOTONES DEL MÓDULO
+///////////////////////////////////////////////////////////////    
 </script> 
     
 </body>

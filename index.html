@@ -6640,61 +6640,88 @@ ${orden.join(" - ")}
 `);
 
 
-    /////////////////////////////////////////////////
-// SELECCIÓN DE 3 AMBOS
-// V61.3 — PAREJA COMPLETA
-/////////////////////////////////////////////////
+//////////////////////////////////////////////////
+// SELECCIÓN INICIAL DESDE RANKING
+// V60 — SIN PAREJAS V61.3
+//////////////////////////////////////////////////
 
-let ambos =
-    seleccionarParejasCompletasV61_3(
-        ranking,
-        3
-    );
-
-
-mostrarV48(
-`
-PAREJAS COMPLETAS V61.3
-
-${ambos.join(" - ")}
-`
+let ordenRanking =
+Object.keys(ranking)
+.sort(
+    (a,b)=>
+        ranking[b]-ranking[a]
+)
+.map(
+    n =>
+        String(n)
+        .slice(-2)
+        .padStart(2,"0")
 );
 
 
-    //////////////////////////////////////////////////
-    // CORRECTOR DECENA HISTÓRICO V60
-    //
-    // SE EJECUTA UNA SOLA VEZ
-    //////////////////////////////////////////////////
+// Tomar los mejores candidatos del ranking
+// solamente como entrada para V60
 
-  ambos =
-        await corregirDecenaHistoricaV60(
-            ambos,
-            turnoOrigen,
-            turnoDestino,
-            ranking
-        );
-        
+let candidatosIniciales =
+ordenRanking.slice(0,10);
 
 
-    //////////////////////////////////////////////////
-    // ELIMINAR DUPLICADOS
-    //////////////////////////////////////////////////
+//////////////////////////////////////////////////
+// CORRECTOR DECENA HISTÓRICO V60
+// V60 QUEDA AL MANDO
+//////////////////////////////////////////////////
 
-    ambos =
-        [
-            ...new Set(
+let ambos =
+await corregirDecenaHistoricaV60(
+    candidatosIniciales,
+    turnoOrigen,
+    turnoDestino,
+    ranking
+);
 
-                ambos.map(
-                    n =>
-                        String(n)
-                        .slice(-2)
-                        .padStart(2,"0")
-                )
 
-            )
-        ];
+//////////////////////////////////////////////////
+// ELIMINAR DUPLICADOS
+//////////////////////////////////////////////////
 
+ambos =
+[
+    ...new Set(
+
+        ambos.map(
+            n =>
+                String(n)
+                .slice(-2)
+                .padStart(2,"0")
+        )
+
+    )
+];
+
+
+//////////////////////////////////////////////////
+// QUEDARNOS CON 3 AMBOS
+//////////////////////////////////////////////////
+
+ambos =
+ambos.slice(0,3);
+
+
+//////////////////////////////////////////////////
+// DIAGNÓSTICO
+//////////////////////////////////////////////////
+
+mostrarV48(
+`
+DECENA HISTÓRICA V60 ACTIVA
+
+Candidatos:
+${candidatosIniciales.join(" - ")}
+
+AMBOS V60:
+${ambos.join(" - ")}
+`
+);
 
     //////////////////////////////////////////////////
     // SI EL CORRECTOR CAMBIÓ LA LISTA

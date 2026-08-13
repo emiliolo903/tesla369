@@ -14145,7 +14145,477 @@ function CORR_NUEVO_extraerCorrientes(items){
 
     
     
+///////////////////////////////////////////////////////////////
+// 🎯 PROCESAR PDF CORRENTINA
+// V1 — CORREGIDO
+//
+// IMPORTANTE:
+// NO llama al extractor dentro del for.
+// Primero termina PDF.js.
+// Después analiza cada página.
+// Si encuentra los 20 cuaternos,
+// NO activa Tesseract.
+///////////////////////////////////////////////////////////////
 
+async function CORR_NUEVO_procesarPDF(){
+
+    let archivo =
+    document.getElementById(
+        "CORR_NUEVO_pdf"
+    )?.files?.[0];
+
+
+    if(!archivo){
+
+        CORR_NUEVO_panel(
+            "⚠️ Seleccione un PDF"
+        );
+
+        return;
+
+    }
+
+
+    try{
+
+        ///////////////////////////////////////////////////////
+        // CARGAR PDF
+        ///////////////////////////////////////////////////////
+
+        let buffer =
+        await archivo.arrayBuffer();
+
+
+        let pdf =
+        await pdfjsLib
+            .getDocument({
+                data:buffer
+            })
+            .promise;
+
+
+        console.log(
+            "PDF cargado:",
+            pdf.numPages,
+            "páginas"
+        );
+
+
+        ///////////////////////////////////////////////////////
+        // PRIMERO PDF.JS
+        ///////////////////////////////////////////////////////
+
+        for(
+            let pagina=1;
+            pagina<=pdf.numPages;
+            pagina++
+        ){
+
+            let progreso =
+            document.getElementById(
+                "CORR_NUEVO_progreso"
+            );
+
+
+            if(progreso){
+
+                progreso.innerText =
+                "PDF.js procesando página "+
+                pagina+
+                " / "+
+                pdf.numPages;
+
+            }
+
+
+            let page =
+            await pdf.getPage(
+                pagina
+            );
+
+
+            let contenido =
+            await page.getTextContent();
+
+
+            let itemsPagina =
+            contenido.items;
+
+
+            console.log(
+                "Página",
+                pagina,
+                "items PDF.js:",
+                itemsPagina.length
+            );
+
+
+            ///////////////////////////////////////////////////
+            // EXTRAER SOLO CORRENTINA
+            ///////////////////////////////////////////////////
+
+            let numeros =
+            CORR_NUEVO_extraerCorrientes(
+                itemsPagina
+            );
+
+
+            console.log(
+                "PDF.js encontró",
+                numeros.length,
+                "cuaternos"
+            );
+
+
+            ///////////////////////////////////////////////////
+            // SI ENCONTRÓ LOS 20,
+            // TERMINAMOS ACÁ.
+            ///////////////////////////////////////////////////
+
+            if(
+                numeros.length >= 20
+            ){
+
+                console.log(
+                    "✅ PDF.JS ENCONTRÓ LOS 20 CUATERNOS"
+                );
+
+
+                CORR_NUEVO_mostrarOCR(
+                    numeros.slice(0,20),
+                    "PDF.js — CORRENTINA"
+                );
+
+
+                return;
+
+            }
+
+        }
+
+
+        ///////////////////////////////////////////////////////
+        // SI LLEGAMOS ACÁ:
+        // PDF.JS NO ENCONTRÓ LOS 20
+        ///////////////////////////////////////////////////////
+
+        console.warn(
+            "PDF.js no encontró los 20 cuaternos"
+        );
+
+
+        CORR_NUEVO_panel(`
+
+            <h3>🧠 PDF.JS NO COMPLETÓ CORRENTINA</h3>
+
+            No se encontraron los 20 cuaternos
+            directamente.
+
+            <br><br>
+
+            Se activa OCR visual.
+
+            <br><br>
+
+            Procesando página...
+
+        `);
+
+
+        ///////////////////////////////////////////////////////
+        // OCR VISUAL
+        ///////////////////////////////////////////////////////
+
+        let worker =
+        await Tesseract.createWorker(
+            "spa"
+        );
+
+
+        let resultado=[];
+
+
+        for(
+            let pagina=1;
+            pagina<=pdf.numPages;
+            pagina++
+        ){
+
+            let progreso =
+            document.getElementById(
+                "CORR_NUEVO_progreso"
+            );
+
+
+            if(progreso){
+
+                progreso.innerText =
+                "OCR visual página "+
+                pagina+
+                " / "+
+                pdf.numPages;
+
+            }
+
+
+            let page =
+            await pdf.getPage(
+                pagina
+            );
+
+
+            let viewport =
+            page.getViewport({
+                scale:3
+            });
+
+
+            let canvas =
+            document.createElement(
+                "canvas"
+            );
+
+
+            canvas.width =
+            Math.floor(
+                viewport.width
+            );
+
+
+            canvas.height =
+            Math.floor(
+                viewport.height
+            );
+
+
+            let contexto =
+            canvas.getContext(
+                "2d"
+            );
+
+
+            await page.render({
+
+                canvasContext:
+                contexto,
+
+                viewport:
+                viewport
+
+            }).promise;
+
+
+            ///////////////////////////////////////////////////
+            // TESSERACT
+            ///////////////////////////////////////////////////
+
+            let ocr =
+            await worker.recognize(
+                canvas
+            );
+
+
+            resultado.push(
+                ocr.data.text
+            );
+
+        }
+
+
+        await worker.terminate();
+
+
+        ///////////////////////////////////////////////////////
+        // TEXTO OCR
+        ///////////////////////////////////////////////////////
+
+        let textoOCR =
+        resultado.join("\n");
+
+
+        console.log(
+            "OCR TEXTO CORRENTINA:",
+            textoOCR
+        );
+
+
+        ///////////////////////////////////////////////////////
+        // EXTRAER CUATERNOS DEL TEXTO OCR
+        ///////////////////////////////////////////////////////
+
+        let numerosOCR =
+        CORR_NUEVO_extraerCorrientesOCR(
+            textoOCR
+        );
+
+
+        console.log(
+            "OCR encontró:",
+            numerosOCR.length,
+            "cuaternos"
+        );
+
+
+        ///////////////////////////////////////////////////////
+        // VALIDACIÓN
+        ///////////////////////////////////////////////////////
+
+        if(
+            numerosOCR.length < 20
+        ){
+
+            CORR_NUEVO_panel(`
+
+                <h3>⚠️ OCR INSUFICIENTE</h3>
+
+                Encontró:
+
+                <b>
+                ${numerosOCR.length}
+                </b>
+
+                cuaternos.
+
+                <br><br>
+
+                No se guarda información incompleta.
+
+            `);
+
+            return;
+
+        }
+
+
+        ///////////////////////////////////////////////////////
+        // MOSTRAR PARA CONFIRMAR
+        ///////////////////////////////////////////////////////
+
+        CORR_NUEVO_mostrarOCR(
+            numerosOCR.slice(0,20),
+            "TESSERACT — CORRENTINA"
+        );
+
+
+    }catch(e){
+
+        console.error(
+            "ERROR PROCESANDO CORRENTINA",
+            e
+        );
+
+
+        CORR_NUEVO_panel(`
+
+            <h3>❌ ERROR PDF CORRENTINA</h3>
+
+            ${e.message || e}
+
+        `);
+
+    }
+
+        }
+    ///////////////////////////////////////////////////////////////
+// 🎯 EXTRAER CORRENTINA DESDE TEXTO OCR
+///////////////////////////////////////////////////////////////
+
+function CORR_NUEVO_extraerCorrientesOCR(texto){
+
+    texto =
+    String(texto || "")
+        .toUpperCase()
+        .replace(/\r/g,"\n");
+
+
+    ///////////////////////////////////////////////////////////
+    // BUSCAR CORRENTINA
+    ///////////////////////////////////////////////////////////
+
+    let posicion =
+    texto.indexOf("CORRENTINA");
+
+
+    if(posicion === -1){
+
+        posicion =
+        texto.indexOf("CORRIENTES");
+
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    // SI OCR LEYÓ MAL EL ENCABEZADO
+    ///////////////////////////////////////////////////////////
+
+    if(posicion === -1){
+
+        console.warn(
+            "OCR: no encontró CORRENTINA"
+        );
+
+        return [];
+
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    // TOMAR DESDE CORRENTINA
+    ///////////////////////////////////////////////////////////
+
+    let bloque =
+    texto.slice(posicion);
+
+
+    ///////////////////////////////////////////////////////////
+    // EXTRAER TODOS LOS CUATERNOS
+    ///////////////////////////////////////////////////////////
+
+    let encontrados =
+    bloque.match(
+        /\b\d{4}\b/g
+    ) || [];
+
+
+    let numeros=[];
+
+
+    for(let n of encontrados){
+
+        n =
+        String(n)
+            .replace(/\D/g,"");
+
+
+        if(
+            /^\d{4}$/.test(n)
+        ){
+
+            numeros.push(n);
+
+        }
+
+
+        if(
+            numeros.length===20
+        ){
+
+            break;
+
+        }
+
+    }
+
+
+    console.log(
+        "OCR CORRENTINA 1–20:",
+        numeros
+    );
+
+
+    return numeros.slice(0,20);
+
+    }
 
 ///////////////////////////////////////////////////////////////
 // MOSTRAR OCR ANTES DE GUARDAR

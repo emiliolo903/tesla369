@@ -13846,52 +13846,78 @@ function CORR_NUEVO_normalizarTexto(texto){
 
 
 ///////////////////////////////////////////////////////////////
-// EXTRAER 20 NÚMEROS DE CORRIENTES
+// 🎯 CORRENTINA INDEPENDIENTE V1
+// EXTRACTOR CORRIENTES 1–20 — CORREGIDO
+//
+// IMPORTANTE:
+// - NO USA Index 82
+// - NO USA Tesla
+// - NO USA V60
+// - NO USA POCEADA
+// - Busca solamente el bloque CORRIENTES/CORRENTINA
+// - Intenta reconstruir 20 posiciones
 ///////////////////////////////////////////////////////////////
 
-function CORR_NUEVO_extraerCorrientes(
-    texto
-){
+function CORR_NUEVO_extraerCorrientes(texto){
 
     texto =
-    CORR_NUEVO_normalizarTexto(
-        texto
-    );
+    CORR_NUEVO_normalizarTexto(texto);
+
+    if(!texto){
+        return [];
+    }
 
 
     ///////////////////////////////////////////////////////////
-    // BUSCAR CORRIENTES
+    // 1. LIMPIEZA ESPECÍFICA DE ERRORES OCR
     ///////////////////////////////////////////////////////////
 
-    let marcas = [
+    texto =
+    texto
+    .replace(/[Oo]/g,"0")
+    .replace(/[IiLl]/g,"1")
+    .replace(/[Bb]/g,"8");
+
+
+    ///////////////////////////////////////////////////////////
+    // 2. BUSCAR ENCABEZADO DE CORRIENTES
+    ///////////////////////////////////////////////////////////
+
+    const marcas = [
 
         "CORRIENTES",
-
-        "CORRIENTE",
-
-        "CORRENTINA"
+        "CORRENTINA",
+        "CORRIENTE"
 
     ];
 
+    let inicio = -1;
 
-    let inicio=-1;
+    for(let marca of marcas){
 
-
-    for(
-        let marca of marcas
-    ){
-
-        inicio =
+        let pos =
         texto.indexOf(marca);
 
+        if(pos !== -1){
 
-        if(inicio!==-1)
+            inicio = pos;
+
             break;
+
+        }
 
     }
 
 
-    if(inicio===-1){
+    ///////////////////////////////////////////////////////////
+    // SI NO ENCUENTRA CORRIENTES
+    ///////////////////////////////////////////////////////////
+
+    if(inicio === -1){
+
+        console.warn(
+            "CORR_NUEVO: no se encontró CORRIENTES"
+        );
 
         return [];
 
@@ -13899,25 +13925,26 @@ function CORR_NUEVO_extraerCorrientes(
 
 
     ///////////////////////////////////////////////////////////
-    // BUSCAR HASTA LA PRÓXIMA PROVINCIA
+    // 3. TOMAR EL BLOQUE DESDE CORRIENTES
     ///////////////////////////////////////////////////////////
 
     let resto =
     texto.slice(inicio);
 
 
-    let siguientes = [
+    ///////////////////////////////////////////////////////////
+    // 4. CORTAR ANTES DE LA PRÓXIMA PROVINCIA
+    ///////////////////////////////////////////////////////////
+
+    const siguientes = [
 
         "CIUDAD",
-
         "BONAERENSE",
-
         "SANTA FE",
-
         "CORDOBA",
-
+        "CÓRDOBA",
         "ENTRE RIOS",
-
+        "ENTRE RÍOS",
         "CHACO"
 
     ];
@@ -13927,23 +13954,20 @@ function CORR_NUEVO_extraerCorrientes(
     resto.length;
 
 
-    for(
-        let marca of siguientes
-    ){
+    for(let marca of siguientes){
 
-        let p =
+        let pos =
         resto.indexOf(
             marca,
-            20
+            10
         );
 
-
         if(
-            p!==-1 &&
-            p<fin
+            pos !== -1 &&
+            pos < fin
         ){
 
-            fin=p;
+            fin = pos;
 
         }
 
@@ -13958,57 +13982,205 @@ function CORR_NUEVO_extraerCorrientes(
 
 
     ///////////////////////////////////////////////////////////
-    // EXTRAER CANDIDATOS DE DOS DÍGITOS
+    // 5. NORMALIZAR NUEVAMENTE EL BLOQUE
     ///////////////////////////////////////////////////////////
 
-    let candidatos=[];
+    bloque =
+    bloque
+    .replace(/\r/g,"\n")
+    .replace(/[|]/g," ")
+    .replace(/[;:]/g," ")
+    .replace(/[ \t]+/g," ");
 
 
-    let regex =
-    /\b\d{2}\b/g;
-
+    ///////////////////////////////////////////////////////////
+    // 6. EXTRAER NÚMEROS DE 1–2 CIFRAS
+    //
+    // Esto permite que OCR lea:
+    //
+    // 01
+    // 1
+    // 25
+    // 99
+    //
+    // y después los normalizamos.
+    ///////////////////////////////////////////////////////////
 
     let encontrados =
-    bloque.match(regex) || [];
+    bloque.match(/\b\d{1,2}\b/g) || [];
 
 
-    for(
-        let n of encontrados
-    ){
+    ///////////////////////////////////////////////////////////
+    // 7. NORMALIZAR A 00–99
+    ///////////////////////////////////////////////////////////
+
+    let candidatos = [];
+
+    for(let valor of encontrados){
+
+        let numero =
+        parseInt(valor,10);
+
+        if(
+            Number.isNaN(numero) ||
+            numero < 0 ||
+            numero > 99
+        ){
+
+            continue;
+
+        }
 
         candidatos.push(
-            CORR_NUEVO_2(n)
+            String(numero)
+            .padStart(2,"0")
         );
 
     }
 
 
     ///////////////////////////////////////////////////////////
-    // ELIMINAR REPETICIONES EXCESIVAS
+    // 8. ELIMINAR RUIDO INICIAL
+    //
+    // El encabezado puede contener:
+    // fecha, año, número de página, etc.
+    //
+    // Buscamos secuencias de 20 números.
     ///////////////////////////////////////////////////////////
 
-    let unicos=[];
+    let mejorGrupo = null;
+
+    let mejorPuntaje = -Infinity;
 
 
     for(
-        let n of candidatos
+        let inicioGrupo=0;
+        inicioGrupo<=candidatos.length-20;
+        inicioGrupo++
     ){
 
-        if(
-            unicos.length<20
-        ){
+        let grupo =
+        candidatos.slice(
+            inicioGrupo,
+            inicioGrupo+20
+        );
 
-            unicos.push(n);
+
+        let puntaje = 0;
+
+
+        ///////////////////////////////////////////////////////
+        // Premiar grupos completos de 20
+        ///////////////////////////////////////////////////////
+
+        puntaje += 20;
+
+
+        ///////////////////////////////////////////////////////
+        // Premiar diversidad razonable
+        ///////////////////////////////////////////////////////
+
+        let diferentes =
+        new Set(grupo).size;
+
+        puntaje +=
+        diferentes * 0.5;
+
+
+        ///////////////////////////////////////////////////////
+        // Penalizar demasiados repetidos
+        ///////////////////////////////////////////////////////
+
+        let frecuencia = {};
+
+        for(let n of grupo){
+
+            frecuencia[n] =
+            (frecuencia[n] || 0) + 1;
+
+        }
+
+
+        for(let n in frecuencia){
+
+            if(frecuencia[n] > 2){
+
+                puntaje -=
+                (frecuencia[n]-2) * 5;
+
+            }
+
+        }
+
+
+        ///////////////////////////////////////////////////////
+        // Guardar mejor grupo
+        ///////////////////////////////////////////////////////
+
+        if(puntaje > mejorPuntaje){
+
+            mejorPuntaje =
+            puntaje;
+
+            mejorGrupo =
+            grupo;
 
         }
 
     }
 
 
-    return unicos;
+    ///////////////////////////////////////////////////////////
+    // 9. SI NO HAY GRUPO DE 20
+    ///////////////////////////////////////////////////////////
 
-}
+    if(!mejorGrupo){
 
+        console.warn(
+            "CORR_NUEVO: no se pudieron reconstruir 20 posiciones",
+            candidatos
+        );
+
+        return [];
+
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    // 10. RESULTADO FINAL
+    ///////////////////////////////////////////////////////////
+
+    mejorGrupo =
+    mejorGrupo
+    .slice(0,20)
+    .map(
+        n =>
+        CORR_NUEVO_2(n)
+    );
+
+
+    ///////////////////////////////////////////////////////////
+    // 11. VALIDACIÓN
+    ///////////////////////////////////////////////////////////
+
+    if(
+        mejorGrupo.length !== 20
+    ){
+
+        return [];
+
+    }
+
+
+    console.log(
+        "🎯 CORR_NUEVO CORRIENTES DETECTADO:",
+        mejorGrupo
+    );
+
+
+    return mejorGrupo;
+
+    }
 
 ///////////////////////////////////////////////////////////////
 // PROCESAR PDF

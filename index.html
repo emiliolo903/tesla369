@@ -13846,242 +13846,247 @@ function CORR_NUEVO_normalizarTexto(texto){
 
 ///////////////////////////////////////////////////////////////
 // 🎯 EXTRAER CORRIENTES 1–20
-// V2 — EXTRACCIÓN POR COLUMNA
+// CORRENTINA INDEPENDIENTE V1
 //
-// IMPORTANTE:
-// NO toma los primeros 20 números del PDF.
-// Busca el encabezado CORRENTINA y toma solamente
-// los cuaternos que están debajo de esa columna.
+// RECIBE DIRECTAMENTE:
+// contenido.items de PDF.js
+//
+// BUSCA:
+// CORRIENTES / CORRENTINA
+//
+// Y TOMA SOLAMENTE:
+// LOS 20 CUATERNOS DE ESA COLUMNA
 ///////////////////////////////////////////////////////////////
 
 function CORR_NUEVO_extraerCorrientes(items){
 
-    ///////////////////////////////////////////////////////////
-    // VALIDACIÓN
-    ///////////////////////////////////////////////////////////
-
-    if(!Array.isArray(items) || items.length === 0){
-
+    if(!Array.isArray(items)){
         console.warn(
-            "CORR_NUEVO: no hay items PDF"
+            "CORR_NUEVO_extraerCorrientes: se esperaba array de items PDF.js"
         );
 
         return [];
-
     }
 
 
     ///////////////////////////////////////////////////////////
-    // NORMALIZAR ITEM
+    // LIMPIAR ITEMS
     ///////////////////////////////////////////////////////////
 
-    let datos = items.map(item => {
-
-        let texto =
-        String(item.str || "")
-        .trim()
-        .toUpperCase();
-
-        let transform =
-        item.transform || [];
-
-        let x =
-        Number(transform[4] || 0);
-
-        let y =
-        Number(transform[5] || 0);
+    let lista =
+    items
+    .filter(item =>
+        item &&
+        typeof item.str === "string" &&
+        item.str.trim() !== "" &&
+        Array.isArray(item.transform)
+    )
+    .map(item => {
 
         return {
 
-            texto,
-            x,
-            y,
+            texto:
+            item.str
+            .trim()
+            .toUpperCase(),
 
-            ancho:
-            Number(item.width || 0),
+            x:
+            Number(item.transform[4]) || 0,
 
-            alto:
-            Number(item.height || 0)
+            y:
+            Number(item.transform[5]) || 0
 
         };
 
     });
 
 
+    if(!lista.length)
+        return [];
+
+
     ///////////////////////////////////////////////////////////
-    // BUSCAR ENCABEZADO CORRENTINA
+    // BUSCAR ENCABEZADO CORRIENTES
     ///////////////////////////////////////////////////////////
 
-    let encabezado =
-    datos.find(item => {
+    let encabezado = null;
 
-        return (
-            item.texto.includes("CORRENTINA") ||
-            item.texto.includes("CORRIENTES") ||
-            item.texto === "CORRIENTE"
-        );
 
-    });
+    for(let item of lista){
 
+        let t =
+        item.texto
+        .replace(/\s+/g,"");
+
+
+        if(
+            t === "CORRIENTES" ||
+            t === "CORRIENTE" ||
+            t === "CORRENTINA"
+        ){
+
+            encabezado = item;
+            break;
+
+        }
+
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    // SI NO ENCUENTRA EL ENCABEZADO
+    ///////////////////////////////////////////////////////////
 
     if(!encabezado){
 
         console.warn(
-            "CORR_NUEVO: no se encontró encabezado CORRENTINA"
+            "NO SE ENCONTRÓ ENCABEZADO CORRIENTES"
         );
 
         return [];
 
     }
 
-
-    console.log(
-        "CORR_NUEVO encabezado encontrado:",
-        encabezado
-    );
-
-
-    ///////////////////////////////////////////////////////////
-    // X DE LA COLUMNA CORRIENTES
-    ///////////////////////////////////////////////////////////
 
     let xCorrientes =
     encabezado.x;
 
 
-    ///////////////////////////////////////////////////////////
-    // MARGEN HORIZONTAL
-    //
-    // Permite pequeñas diferencias de OCR/PDF.
-    ///////////////////////////////////////////////////////////
-
-    let toleranciaX = 45;
+    let yEncabezado =
+    encabezado.y;
 
 
+    console.log(
+        "CORRIENTES ENCONTRADO",
+        {
+            x:xCorrientes,
+            y:yEncabezado
+        }
+    );
+
+
     ///////////////////////////////////////////////////////////
-    // BUSCAR CUATERNOS
-    //
-    // Solamente:
-    // - 4 dígitos
-    // - debajo del encabezado
-    // - dentro de la columna Corrientes
+    // BUSCAR TODOS LOS CUATERNOS
     ///////////////////////////////////////////////////////////
 
     let candidatos =
-    datos.filter(item => {
+    lista
+    .filter(item => {
 
-        if(!/^\d{4}$/.test(item.texto))
-            return false;
-
-
-        ///////////////////////////////////////////////////////
-        // Debe estar debajo del encabezado.
-        //
-        // En PDF.js el eje Y normalmente aumenta hacia
-        // arriba, por eso los números inferiores tienen
-        // menor Y.
-        ///////////////////////////////////////////////////////
-
-        if(item.y >= encabezado.y)
-            return false;
-
-
-        ///////////////////////////////////////////////////////
-        // Debe pertenecer a la misma columna.
-        ///////////////////////////////////////////////////////
-
-        if(
-            Math.abs(item.x - xCorrientes)
-            > toleranciaX
-        ){
-
-            return false;
-
-        }
-
-
-        return true;
-
-    });
-
-
-    ///////////////////////////////////////////////////////////
-    // ORDENAR DE ARRIBA HACIA ABAJO
-    ///////////////////////////////////////////////////////////
-
-    candidatos.sort((a,b)=>{
-
-        return b.y - a.y;
-
-    });
-
-
-    ///////////////////////////////////////////////////////////
-    // ELIMINAR DUPLICADOS POR POSICIÓN
-    ///////////////////////////////////////////////////////////
-
-    let resultado=[];
-
-
-    for(let item of candidatos){
-
-        let numero =
+        let limpio =
         item.texto
-        .replace(/\D/g,"")
-        .slice(-4)
-        .padStart(4,"0");
+        .replace(/\D/g,"");
 
 
-        if(
-            !resultado.includes(numero)
-        ){
-
-            resultado.push(numero);
-
-        }
-
-
-        if(resultado.length === 20)
-            break;
-
-    }
-
-
-    ///////////////////////////////////////////////////////////
-    // DIAGNÓSTICO
-    ///////////////////////////////////////////////////////////
-
-    console.log(
-        "🎯 CORRENTINA EXTRAÍDA:",
-        resultado
-    );
-
-
-    console.log(
-        "📊 CANTIDAD:",
-        resultado.length
-    );
-
-
-    ///////////////////////////////////////////////////////////
-    // SOLO ACEPTAR SI HAY LAS 20 POSICIONES
-    ///////////////////////////////////////////////////////////
-
-    if(resultado.length !== 20){
-
-        console.warn(
-            "⚠️ CORRENTINA: no se pudieron reconstruir las 20 posiciones",
-            resultado
+        return (
+            /^\d{4}$/.test(limpio) &&
+            item.y < yEncabezado
         );
 
-        return [];
+    });
+
+
+    ///////////////////////////////////////////////////////////
+    // SELECCIONAR LOS QUE PERTENECEN A LA COLUMNA
+    // CORRIENTES
+    ///////////////////////////////////////////////////////////
+
+    //
+    // En PDF.js X puede variar unos pocos píxeles.
+    // Por eso usamos una tolerancia.
+    //
+
+    let columna =
+    candidatos
+    .filter(item => {
+
+        let diferencia =
+        Math.abs(
+            item.x - xCorrientes
+        );
+
+        return diferencia <= 45;
+
+    });
+
+
+    ///////////////////////////////////////////////////////////
+    // ORDENAR POR POSICIÓN VERTICAL
+    //
+    // PDF.js normalmente entrega Y desde abajo hacia arriba.
+    // Por eso ordenamos de MAYOR Y a MENOR Y.
+    ///////////////////////////////////////////////////////////
+
+    columna.sort(
+        (a,b) =>
+        b.y - a.y
+    );
+
+
+    ///////////////////////////////////////////////////////////
+    // EXTRAER LOS 20 PRIMEROS
+    ///////////////////////////////////////////////////////////
+
+    let numeros=[];
+
+
+    for(let item of columna){
+
+        let n =
+        item.texto
+        .replace(/\D/g,"");
+
+
+        if(
+            /^\d{4}$/.test(n)
+        ){
+
+            numeros.push(
+                n
+            );
+
+        }
+
+
+        if(
+            numeros.length >= 20
+        ){
+
+            break;
+
+        }
 
     }
 
 
-    return resultado;
+    ///////////////////////////////////////////////////////////
+    // MOSTRAR DIAGNÓSTICO
+    ///////////////////////////////////////////////////////////
 
-            }
+    console.log(
+        "🎯 CORRIENTES 1–20 DETECTADOS:",
+        numeros
+    );
+
+
+    ///////////////////////////////////////////////////////////
+    // VALIDACIÓN
+    ///////////////////////////////////////////////////////////
+
+    if(numeros.length < 20){
+
+        console.warn(
+            "CORRIENTES INCOMPLETO:",
+            numeros.length,
+            numeros
+        );
+
+    }
+
+
+    return numeros.slice(0,20);
+
+        }
 
 
 ///////////////////////////////////////////////////////////////

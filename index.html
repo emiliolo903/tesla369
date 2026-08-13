@@ -373,6 +373,12 @@ Sin auditoría todavía
     </button>
 
     <br><br>
+    
+    <button
+    onclick="CORR_TESLA_abrir()"
+>
+    ⚡ TESLA
+    </button>
 
     <button onclick="CORR_NUEVO_generar()">
         🧠 ANALIZAR Y GENERAR 2 CUATERNOS
@@ -397,6 +403,7 @@ Sin auditoría todavía
     </button>
 
     <br><br>
+    
 
     <button
         onclick="CORR_NUEVO_reiniciar()"
@@ -15244,10 +15251,327 @@ async function CORR_NUEVO_generarPrediccion(){
 
 }
 
+///////////////////////////////////////////////////////////////
+// ⚡ TESLA CORRENTINA INDEPENDIENTE V1
+// ============================================================
+// NO USA:
+// - generarResultadoIA()
+// - ranking V60
+// - MEMORIA_V60
+// - motores IA71
+// - análisis Correntina
+//
+// SOLAMENTE:
+// 4 números de entrada
+// → tabla Tesla
+// → 2 CUATERNOS
+///////////////////////////////////////////////////////////////
+
+const CORR_NUEVO_TESLA = {
+
+    "0":["0","0"],
+    "1":["0","0"],
+    "2":["5","7"],
+    "3":["8","0"],
+    "4":["6","9"],
+    "5":["2","7"],
+    "6":["4","9"],
+    "7":["5","2"],
+    "8":["3","0"],
+    "9":["3","4"]
+
+};
+
 
 ///////////////////////////////////////////////////////////////
-// BOTONES DEL MÓDULO
-///////////////////////////////////////////////////////////////    
+// ABRIR TESLA
+///////////////////////////////////////////////////////////////
+
+function CORR_NUEVO_abrirTesla(){
+
+    let html = `
+
+        <h2>⚡ TESLA CORRENTINA</h2>
+
+        <p>
+        Cargue 4 números de 4 cifras.
+        </p>
+
+        <div>
+
+            <input
+                id="CORR_TESLA_1"
+                maxlength="4"
+                inputmode="numeric"
+                placeholder="NRO 1"
+            >
+
+            <br><br>
+
+            <input
+                id="CORR_TESLA_2"
+                maxlength="4"
+                inputmode="numeric"
+                placeholder="NRO 2"
+            >
+
+            <br><br>
+
+            <input
+                id="CORR_TESLA_3"
+                maxlength="4"
+                inputmode="numeric"
+                placeholder="NRO 3"
+            >
+
+            <br><br>
+
+            <input
+                id="CORR_TESLA_4"
+                maxlength="4"
+                inputmode="numeric"
+                placeholder="NRO 4"
+            >
+
+        </div>
+
+        <br>
+
+        <button
+            onclick="CORR_NUEVO_generarTesla()"
+        >
+            ⚡ GENERAR 2 CUATERNOS
+        </button>
+
+        <br><br>
+
+        <button
+            onclick="CORR_NUEVO_cargaManual()"
+        >
+            ↩ VOLVER A CORRENTINA
+        </button>
+
+    `;
+
+    CORR_NUEVO_panel(html);
+
+}
+
+
+///////////////////////////////////////////////////////////////
+// TRANSFORMACIÓN TESLA DE UN CUATRO
+///////////////////////////////////////////////////////////////
+
+function CORR_NUEVO_transformarTesla(numero){
+
+    numero =
+    CORR_NUEVO_4(numero);
+
+    let salidaA = "";
+    let salidaB = "";
+
+    for(let digito of numero){
+
+        let tabla =
+        CORR_NUEVO_TESLA[digito];
+
+        if(!tabla)
+            continue;
+
+        salidaA += tabla[0];
+        salidaB += tabla[1];
+
+    }
+
+    return {
+
+        principal:
+        salidaA.slice(0,4),
+
+        apoyo:
+        salidaB.slice(0,4)
+
+    };
+
+}
+
+
+///////////////////////////////////////////////////////////////
+// GENERAR 2 CUATERNOS
+///////////////////////////////////////////////////////////////
+
+async function CORR_NUEVO_generarTesla(){
+
+    let entradas=[];
+
+    for(let i=1;i<=4;i++){
+
+        let campo =
+        document.getElementById(
+            "CORR_TESLA_"+i
+        );
+
+        if(
+            !campo ||
+            !/^\d{4}$/.test(
+                campo.value.trim()
+            )
+        ){
+
+            CORR_NUEVO_panel(`
+                ⚠️ El NRO ${i}
+                debe tener exactamente 4 cifras.
+            `);
+
+            return;
+
+        }
+
+        entradas.push(
+            campo.value.trim()
+        );
+
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    // TRANSFORMAR LOS 4 NÚMEROS
+    ///////////////////////////////////////////////////////////
+
+    let transformados =
+    entradas.map(
+        n =>
+        CORR_NUEVO_transformarTesla(n)
+    );
+
+
+    ///////////////////////////////////////////////////////////
+    // CONSTRUIR LOS DOS CUATERNOS
+    ///////////////////////////////////////////////////////////
+
+    let cuaternoPrincipal =
+    transformados
+    .map(x=>x.principal)
+    .join("")
+    .slice(0,4);
+
+
+    let cuaternoApoyo =
+    transformados
+    .map(x=>x.apoyo)
+    .join("")
+    .slice(0,4);
+
+
+    ///////////////////////////////////////////////////////////
+    // GUARDAR
+    ///////////////////////////////////////////////////////////
+
+    try{
+
+        await CORR_NUEVO_guardar(
+
+            CORR_NUEVO_STORES.predicciones,
+
+            {
+
+                fecha:
+                new Date().toISOString(),
+
+                tipo:
+                "TESLA_CORRENTINA",
+
+                entradas:
+                entradas,
+
+                cuaternoPrincipal:
+                cuaternoPrincipal,
+
+                cuaternoApoyo:
+                cuaternoApoyo
+
+            }
+
+        );
+
+        CORR_NUEVO_estado.predicciones++;
+
+        CORR_NUEVO_estadoMostrar();
+
+    }catch(e){
+
+        console.error(
+            "ERROR GUARDANDO TESLA",
+            e
+        );
+
+    }
+
+
+    ///////////////////////////////////////////////////////////
+    // MOSTRAR
+    ///////////////////////////////////////////////////////////
+
+    CORR_NUEVO_panel(`
+
+        <h2>⚡ TESLA CORRENTINA</h2>
+
+        <hr>
+
+        <b>NÚMEROS CARGADOS</b>
+
+        <br><br>
+
+        ${entradas
+            .map(
+                (n,i)=>
+                `${i+1}° → ${n}`
+            )
+            .join("<br>")
+        }
+
+        <br><br>
+
+        <hr>
+
+        <h3>
+        🎯 CUATERNOS GENERADOS
+        </h3>
+
+        <div style="
+            font-size:28px;
+            font-weight:bold;
+            margin:10px;
+        ">
+
+            🔥 PRINCIPAL:
+            ${cuaternoPrincipal}
+
+        </div>
+
+        <div style="
+            font-size:28px;
+            font-weight:bold;
+            margin:10px;
+        ">
+
+            🟡 APOYO:
+            ${cuaternoApoyo}
+
+        </div>
+
+        <br>
+
+        <button
+            onclick="CORR_NUEVO_abrirTesla()"
+        >
+            ⚡ NUEVA CARGA TESLA
+        </button>
+
+    `);
+
+    }
+
 </script> 
     
 </body>

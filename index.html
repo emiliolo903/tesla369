@@ -13848,24 +13848,21 @@ function CORR_NUEVO_normalizarTexto(texto){
 // 🎯 EXTRAER CORRIENTES 1–20
 // CORRENTINA INDEPENDIENTE V1
 //
-// RECIBE DIRECTAMENTE:
-// contenido.items de PDF.js
-//
-// BUSCA:
-// CORRIENTES / CORRENTINA
-//
-// Y TOMA SOLAMENTE:
-// LOS 20 CUATERNOS DE ESA COLUMNA
+// RECIBE ITEMS DIRECTAMENTE DE PDF.JS
+// BUSCA LA COLUMNA CORRIENTES
+// TOMA LOS 20 CUATERNOS DE ESA COLUMNA
 ///////////////////////////////////////////////////////////////
 
 function CORR_NUEVO_extraerCorrientes(items){
 
     if(!Array.isArray(items)){
+
         console.warn(
-            "CORR_NUEVO_extraerCorrientes: se esperaba array de items PDF.js"
+            "CORR_NUEVO_extraerCorrientes: items no es array"
         );
 
         return [];
+
     }
 
 
@@ -13901,8 +13898,15 @@ function CORR_NUEVO_extraerCorrientes(items){
     });
 
 
-    if(!lista.length)
+    if(!lista.length){
+
+        console.warn(
+            "CORR_NUEVO: PDF.JS NO ENTREGÓ ITEMS"
+        );
+
         return [];
+
+    }
 
 
     ///////////////////////////////////////////////////////////
@@ -13926,6 +13930,7 @@ function CORR_NUEVO_extraerCorrientes(items){
         ){
 
             encabezado = item;
+
             break;
 
         }
@@ -13933,14 +13938,15 @@ function CORR_NUEVO_extraerCorrientes(items){
     }
 
 
-    ///////////////////////////////////////////////////////////
-    // SI NO ENCUENTRA EL ENCABEZADO
-    ///////////////////////////////////////////////////////////
-
     if(!encabezado){
 
         console.warn(
-            "NO SE ENCONTRÓ ENCABEZADO CORRIENTES"
+            "CORR_NUEVO: NO SE ENCONTRÓ CORRIENTES"
+        );
+
+        console.log(
+            "TEXTOS PDF:",
+            lista.map(x=>x.texto)
         );
 
         return [];
@@ -13951,13 +13957,12 @@ function CORR_NUEVO_extraerCorrientes(items){
     let xCorrientes =
     encabezado.x;
 
-
     let yEncabezado =
     encabezado.y;
 
 
     console.log(
-        "CORRIENTES ENCONTRADO",
+        "🎯 CORRIENTES ENCONTRADO",
         {
             x:xCorrientes,
             y:yEncabezado
@@ -13966,7 +13971,7 @@ function CORR_NUEVO_extraerCorrientes(items){
 
 
     ///////////////////////////////////////////////////////////
-    // BUSCAR TODOS LOS CUATERNOS
+    // BUSCAR CUATERNOS
     ///////////////////////////////////////////////////////////
 
     let candidatos =
@@ -13987,14 +13992,8 @@ function CORR_NUEVO_extraerCorrientes(items){
 
 
     ///////////////////////////////////////////////////////////
-    // SELECCIONAR LOS QUE PERTENECEN A LA COLUMNA
-    // CORRIENTES
+    // FILTRAR COLUMNA CORRIENTES
     ///////////////////////////////////////////////////////////
-
-    //
-    // En PDF.js X puede variar unos pocos píxeles.
-    // Por eso usamos una tolerancia.
-    //
 
     let columna =
     candidatos
@@ -14005,29 +14004,26 @@ function CORR_NUEVO_extraerCorrientes(items){
             item.x - xCorrientes
         );
 
-        return diferencia <= 45;
+        return diferencia <= 55;
 
     });
 
 
     ///////////////////////////////////////////////////////////
-    // ORDENAR POR POSICIÓN VERTICAL
-    //
-    // PDF.js normalmente entrega Y desde abajo hacia arriba.
-    // Por eso ordenamos de MAYOR Y a MENOR Y.
+    // ORDENAR 1° → 20°
     ///////////////////////////////////////////////////////////
 
     columna.sort(
-        (a,b) =>
+        (a,b)=>
         b.y - a.y
     );
 
 
     ///////////////////////////////////////////////////////////
-    // EXTRAER LOS 20 PRIMEROS
+    // EXTRAER
     ///////////////////////////////////////////////////////////
 
-    let numeros=[];
+    let numeros = [];
 
 
     for(let item of columna){
@@ -14041,9 +14037,7 @@ function CORR_NUEVO_extraerCorrientes(items){
             /^\d{4}$/.test(n)
         ){
 
-            numeros.push(
-                n
-            );
+            numeros.push(n);
 
         }
 
@@ -14059,24 +14053,16 @@ function CORR_NUEVO_extraerCorrientes(items){
     }
 
 
-    ///////////////////////////////////////////////////////////
-    // MOSTRAR DIAGNÓSTICO
-    ///////////////////////////////////////////////////////////
-
     console.log(
-        "🎯 CORRIENTES 1–20 DETECTADOS:",
+        "🎯 CORRIENTES 1–20:",
         numeros
     );
 
 
-    ///////////////////////////////////////////////////////////
-    // VALIDACIÓN
-    ///////////////////////////////////////////////////////////
-
     if(numeros.length < 20){
 
         console.warn(
-            "CORRIENTES INCOMPLETO:",
+            "⚠️ CORRIENTES INCOMPLETO:",
             numeros.length,
             numeros
         );
@@ -14086,11 +14072,17 @@ function CORR_NUEVO_extraerCorrientes(items){
 
     return numeros.slice(0,20);
 
-        }
-
+}
+    
 
 ///////////////////////////////////////////////////////////////
-// PROCESAR PDF
+// 📄 PROCESAR PDF
+// CORRENTINA INDEPENDIENTE V1
+//
+// 1° PDF.JS
+// 2° SI FALLA → TESSERACT
+//
+// SOLO CORRIENTES 1–20
 ///////////////////////////////////////////////////////////////
 
 async function CORR_NUEVO_procesarPDF(){
@@ -14114,6 +14106,10 @@ async function CORR_NUEVO_procesarPDF(){
 
     try{
 
+        ///////////////////////////////////////////////////////
+        // ABRIR PDF
+        ///////////////////////////////////////////////////////
+
         let buffer =
         await archivo.arrayBuffer();
 
@@ -14126,7 +14122,11 @@ async function CORR_NUEVO_procesarPDF(){
         .promise;
 
 
-        let textos=[];
+        ///////////////////////////////////////////////////////
+        // ACUMULAR TODOS LOS ITEMS PDF.JS
+        ///////////////////////////////////////////////////////
+
+        let textos = [];
 
 
         for(
@@ -14163,38 +14163,54 @@ async function CORR_NUEVO_procesarPDF(){
 
 
             let itemsPagina =
-contenido.items;
+            contenido.items;
 
-textos.push(
-    ...itemsPagina
-);
+
+            textos.push(
+                ...itemsPagina
+            );
+
+        } // ← MUY IMPORTANTE: cerrar el FOR ACÁ
 
 
         ///////////////////////////////////////////////////////
-        // PRIMERO INTENTAR TEXTO DIRECTO DEL PDF
+        // PRIMER MÉTODO
+        // PDF.JS TEXTO DIRECTO
         ///////////////////////////////////////////////////////
+
+        console.log(
+            "CORR_NUEVO: ITEMS PDF.JS:",
+            textos.length
+        );
+
 
         let numeros =
-CORR_NUEVO_extraerCorrientes(
-    textos
-);
+        CORR_NUEVO_extraerCorrientes(
+            textos
+        );
 
 
         ///////////////////////////////////////////////////////
-        // SI ENCUENTRA 20, MOSTRAR PARA CONFIRMACIÓN
+        // SI ENCONTRÓ LOS 20
         ///////////////////////////////////////////////////////
 
         if(
-            numeros.length>=20
+            numeros.length >= 20
         ){
 
             numeros =
             numeros.slice(0,20);
 
 
+            console.log(
+                "✅ CORRIENTES EXTRAÍDO CON PDF.JS",
+                numeros
+            );
+
+
             CORR_NUEVO_mostrarOCR(
                 numeros,
-                "OCR TEXTO PDF"
+                "PDF.JS TEXTO DIRECTO"
             );
 
 
@@ -14204,21 +14220,28 @@ CORR_NUEVO_extraerCorrientes(
 
 
         ///////////////////////////////////////////////////////
-        // SEGUNDO MÉTODO: OCR TESSERACT
+        // SEGUNDO MÉTODO
+        // TESSERACT
         ///////////////////////////////////////////////////////
 
         CORR_NUEVO_panel(`
 
             <h3>🧠 TEXTO DIRECTO INSUFICIENTE</h3>
 
-            Se activa OCR visual.
+            PDF.JS encontró
+            <b>${numeros.length}</b>
+            cuaternos.
 
             <br><br>
 
-            Procesando páginas...
+            Se activa OCR visual...
 
         `);
 
+
+        ///////////////////////////////////////////////////////
+        // CREAR WORKER
+        ///////////////////////////////////////////////////////
 
         let worker =
         await Tesseract.createWorker(
@@ -14226,8 +14249,12 @@ CORR_NUEVO_extraerCorrientes(
         );
 
 
-        let resultado=[];
+        let resultado = [];
 
+
+        ///////////////////////////////////////////////////////
+        // OCR DE TODAS LAS PÁGINAS
+        ///////////////////////////////////////////////////////
 
         for(
             let pagina=1;
@@ -14264,9 +14291,7 @@ CORR_NUEVO_extraerCorrientes(
             await page.render({
 
                 canvasContext:
-                canvas.getContext(
-                    "2d"
-                ),
+                canvas.getContext("2d"),
 
                 viewport:
                 viewport
@@ -14287,39 +14312,95 @@ CORR_NUEVO_extraerCorrientes(
         }
 
 
+        ///////////////////////////////////////////////////////
+        // CERRAR TESSERACT
+        ///////////////////////////////////////////////////////
+
         await worker.terminate();
 
+
+        ///////////////////////////////////////////////////////
+        // TEXTO OCR
+        ///////////////////////////////////////////////////////
 
         let textoOCR =
         resultado.join("\n");
 
 
-        numeros =
-        CORR_NUEVO_extraerCorrientes(
+        console.log(
+            "TEXTO TESSERACT:",
             textoOCR
         );
 
 
+        ///////////////////////////////////////////////////////
+        // IMPORTANTE
+        //
+        // La función nueva trabaja con ITEMS PDF.JS.
+        // NO LE PASAMOS textoOCR directamente.
+        //
+        // Por ahora buscamos los cuaternos directamente
+        // dentro del texto OCR.
+        ///////////////////////////////////////////////////////
+
+        let candidatosOCR =
+        textoOCR.match(
+            /\b\d{4}\b/g
+        ) || [];
+
+
+        ///////////////////////////////////////////////////////
+        // FILTRAR REPETICIONES
+        ///////////////////////////////////////////////////////
+
+        let numerosOCR = [];
+
+
+        for(let n of candidatosOCR){
+
+            if(
+                /^\d{4}$/.test(n)
+            ){
+
+                numerosOCR.push(n);
+
+            }
+
+
+            if(
+                numerosOCR.length >= 20
+            ){
+
+                break;
+
+            }
+
+        }
+
+
+        ///////////////////////////////////////////////////////
+        // VALIDAR
+        ///////////////////////////////////////////////////////
+
         if(
-            numeros.length<20
+            numerosOCR.length < 20
         ){
 
             CORR_NUEVO_panel(`
 
                 <h3>⚠️ OCR INSUFICIENTE</h3>
 
-                Encontró:
+                PDF.JS encontró:
                 <b>${numeros.length}</b>
-                posiciones.
+
+                <br>
+
+                Tesseract encontró:
+                <b>${numerosOCR.length}</b>
 
                 <br><br>
 
-                No voy a guardar datos incompletos.
-
-                <br><br>
-
-                Use carga manual para corregir
-                las posiciones.
+                No se guardaron datos incompletos.
 
             `);
 
@@ -14328,19 +14409,27 @@ CORR_NUEVO_extraerCorrientes(
         }
 
 
+        ///////////////////////////////////////////////////////
+        // MOSTRAR PARA CONFIRMACIÓN
+        ///////////////////////////////////////////////////////
+
         CORR_NUEVO_mostrarOCR(
-            numeros.slice(0,20),
-            "OCR TESSERACT"
+            numerosOCR.slice(0,20),
+            "TESSERACT OCR"
         );
 
 
     }catch(e){
 
-        console.error(e);
+        console.error(
+            "❌ ERROR PROCESANDO PDF CORRENTINA",
+            e
+        );
+
 
         CORR_NUEVO_panel(`
 
-            <h3>❌ ERROR OCR</h3>
+            <h3>❌ ERROR PDF</h3>
 
             ${e.message || e}
 
@@ -14348,8 +14437,9 @@ CORR_NUEVO_extraerCorrientes(
 
     }
 
-}
+    }
 
+ 
 
 ///////////////////////////////////////////////////////////////
 // MOSTRAR OCR ANTES DE GUARDAR

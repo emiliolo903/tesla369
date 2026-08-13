@@ -347,147 +347,97 @@ Sin auditoría todavía
 
 </div>
     
-<!-- ========================= -->
-<!-- 🎯 POCEADA CORRENTINA IA V4 -->
-<!-- MÓDULO INDEPENDIENTE -->
-<!-- ========================= -->
-
+<!-- =========================================================
+     🎯 CORRENTINA INDEPENDIENTE V1
+     MÓDULO TOTALMENTE INDEPENDIENTE
+     ========================================================= -->
 
 <div id="seccionPoceada">
 
+    <h2 style="color:#00FFD5;">
+        🎯 CORRENTINA INDEPENDIENTE
+    </h2>
 
-<h2 style="color:#00FFD5;">
-🎯 POCEADA CORRENTINA IA V4
-</h2>
+    <p>
+        Análisis exclusivo de Corrientes — posiciones 1 a 20
+    </p>
 
+    <button onclick="CORR_NUEVO_abrirOCR()">
+        📄 CARGAR PDF CORRENTINA
+    </button>
 
+    <br><br>
 
-<button onclick="abrirCargaPDFPoceadaV4()">
-📄 CARGAR PDF HISTÓRICO
-</button>
+    <button onclick="CORR_NUEVO_cargaManual()">
+        ✍️ CARGA MANUAL 1–20
+    </button>
 
+    <br><br>
 
-<br><br>
+    <button onclick="CORR_NUEVO_generar()">
+        🧠 ANALIZAR Y GENERAR 2 CUATERNOS
+    </button>
 
+    <br><br>
 
-<button onclick="abrirCargaManualPoceadaV4()">
-✍️ CARGA MANUAL
-</button>
+    <button onclick="CORR_NUEVO_verHistorial()">
+        📋 HISTORIAL
+    </button>
 
+    <br><br>
 
-<br><br>
+    <button onclick="CORR_NUEVO_verAnalisis()">
+        📊 ANÁLISIS
+    </button>
 
+    <br><br>
 
-<button onclick="generarPoceadaV4()">
-🎯 GENERAR 5 NÚMEROS
-</button>
+    <button onclick="CORR_NUEVO_simular()">
+        🧪 SIMULAR APRENDIZAJE
+    </button>
 
+    <br><br>
 
-<br><br>
+    <button
+        onclick="CORR_NUEVO_reiniciar()"
+        style="background:#c62828;color:white;"
+    >
+        🗑 BORRAR MEMORIA CORRENTINA
+    </button>
 
+    <hr>
 
-<button onclick="simularPoceadaV4()">
-🧠 SIMULAR APRENDIZAJE
-</button>
+    <div
+        id="CORR_NUEVO_estado"
+        style="
+            background:#111;
+            color:white;
+            padding:15px;
+            border-radius:10px;
+        "
+    >
+        Cargando módulo...
+    </div>
 
+    <hr>
 
-<br><br>
-
-
-<button onclick="verRegistroPoceadaV4()">
-📋 HISTORIAL
-</button>
-
-
-<br><br>
-
-
-<button onclick="auditoriaPoceadaV4()">
-🛡️ AUDITORÍA
-</button>
-
-
-
-<br><br>
-
-
-<button 
-onclick="limpiarPoceada()"
-style="
-background:#c62828;
-color:white;
-">
-🗑 REINICIAR IA
-</button>
-
-
-
-<!-- ESTADO -->
-
-
-<div class="card"
-style="
-margin-top:15px;
-padding:15px;
-background:#111;
-border-radius:10px;
-color:white;
-">
-
-
-<h3 style="color:#00ff99;">
-📊 ESTADO POCEADA IA
-</h3>
-
-
-
-<div id="estadoPoceadaV4">
-
-
-Estado:
-
-<br>
-
-Esperando datos...
-
-
-</div>
-
+    <div
+        id="CORR_NUEVO_panel"
+        style="
+            background:#000;
+            color:white;
+            padding:15px;
+            border-radius:10px;
+            min-height:250px;
+        "
+    >
+        🎯 Correntina independiente lista.
+    </div>
 
 </div>
 
 
 
-
-<!-- PANEL PROPIO -->
-
-
-<div class="card"
-style="
-margin-top:15px;
-background:#000;
-color:white;
-min-height:260px;
-padding:15px;
-border-radius:10px;
-overflow:auto;
-">
-
-
-
-<h3 style="color:#00ff99;">
-🖥️ PANEL POCEADA IA
-</h3>
-
-
-
-<div id="panelPoceadaV4">
-
-
-🎯 POCEADA CORRENTINA IA LISTA
-
-
-</div>
 
 
 

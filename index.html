@@ -14465,11 +14465,103 @@ async function CORR_PROCESAR_PDF(
             // EXTRAER CORRIENTES
             //////////////////////////////////////////////////
 
-            let datos =
-    CORR_extraer20Corrientes(
-        texto,
-        pagina
-    );
+            let datos = {
+    encontrado: false,
+    turno: "SIN_TURNO",
+    pagina: pagina,
+    numeros: []
+};
+
+let textoOCR =
+    String(texto || "").toUpperCase();
+
+
+/* DETECTAR TURNO */
+
+if (textoOCR.includes("PREVIA")) {
+    datos.turno = "PREVIA";
+}
+else if (textoOCR.includes("PRIMERA")) {
+    datos.turno = "PRIMERA";
+}
+else if (textoOCR.includes("MATUTINA")) {
+    datos.turno = "MATUTINA";
+}
+else if (textoOCR.includes("VESPERTINA")) {
+    datos.turno = "VESPERTINA";
+}
+else if (textoOCR.includes("NOCTURNA")) {
+    datos.turno = "NOCTURNA";
+}
+
+
+/* BUSCAR CORRIENTES */
+
+let posicionCorrientes =
+    textoOCR.indexOf("CORRIENTES");
+
+if (posicionCorrientes === -1) {
+    posicionCorrientes =
+        textoOCR.indexOf("CORRIENTE");
+}
+
+if (posicionCorrientes === -1) {
+    posicionCorrientes =
+        textoOCR.indexOf("CORRIENT");
+}
+
+
+/* EXTRAER SOLAMENTE LA ZONA DE CORRIENTES */
+
+if (posicionCorrientes !== -1) {
+
+    datos.encontrado = true;
+
+    let zonaCorrientes =
+        textoOCR.substring(
+            posicionCorrientes,
+            posicionCorrientes + 6000
+        );
+
+
+    let encontrados =
+        zonaCorrientes.match(
+            /\b\d{4}\b/g
+        ) || [];
+
+
+    /* POSICIONES 1 A 20 */
+
+    for (let numero of encontrados) {
+
+        if (
+            /^\d{4}$/.test(numero)
+        ) {
+
+            datos.numeros.push(
+                numero
+            );
+        }
+
+        if (
+            datos.numeros.length >= 20
+        ) {
+            break;
+        }
+    }
+
+
+    datos.numeros =
+        datos.numeros.slice(0, 20);
+
+
+    if (
+        datos.numeros.length === 0
+    ) {
+
+        datos.encontrado = false;
+    }
+}
 
             //////////////////////////////////////////////////
             // PÁGINA PROCESADA

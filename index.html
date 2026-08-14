@@ -14522,6 +14522,32 @@ async function procesarPDFCorrentina(
 
             }
 
+    // ============================================================
+// 🧠 CONEXIÓN CORRENTINA → APRENDIZAJE
+// ============================================================
+
+if (typeof CORR_aprenderRegistro === "function") {
+
+    try {
+
+        await CORR_aprenderRegistro(registro);
+
+        console.log(
+            "🧠 CORRENTINA: registro enviado a aprendizaje",
+            registro
+        );
+
+    } catch (error) {
+
+        console.error(
+            "❌ Error aprendizaje Correntina:",
+            error
+        );
+
+    }
+}
+    
+
 
             //////////////////////////////////////////////////
             // MOSTRAR PROGRESO
@@ -14765,6 +14791,684 @@ window.detenerOCR_CORRENTINA =
 
 
 })();
+
+//////////////////////////////////////////////////////////////
+// 🧠 CORRENTINA — BLOQUE DE APRENDIZAJE Y COMPORTAMIENTO
+// SOLO CORRIENTES
+// OBJETIVO: ACIERTO EN POSICIONES 1 A 5
+//////////////////////////////////////////////////////////////
+
+let APRENDIZAJE_CORR =
+    JSON.parse(
+        localStorage.getItem(
+            "APRENDIZAJE_CORR_V1"
+        )
+    ) || {
+
+        predicciones: [],
+
+        aciertos: {
+            cuaterno: 0,
+            terno: 0,
+            ambo: 0
+        },
+
+        posiciones: {
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0
+        },
+
+        transiciones: {},
+
+        patronesTurno: {},
+
+        frecuenciaCuaterno: {},
+
+        frecuenciaTerno: {},
+
+        frecuenciaAmbo: {}
+    };
+
+
+//////////////////////////////////////////////////////////////
+// 💾 GUARDAR APRENDIZAJE
+//////////////////////////////////////////////////////////////
+
+function CORR_guardarAprendizaje() {
+
+    localStorage.setItem(
+        "APRENDIZAJE_CORR_V1",
+        JSON.stringify(
+            APRENDIZAJE_CORR
+        )
+    );
+}
+
+
+//////////////////////////////////////////////////////////////
+// 🔢 OBTENER CUATERNOS
+//////////////////////////////////////////////////////////////
+
+function CORR_obtenerCuaternos(registro) {
+
+    if (
+        !registro ||
+        !Array.isArray(registro.numeros)
+    ) {
+        return [];
+    }
+
+    return registro.numeros
+        .slice(0, 20)
+        .filter(function(n) {
+
+            return /^\d{4}$/.test(
+                String(n)
+            );
+
+        });
+}
+
+
+//////////////////////////////////////////////////////////////
+// 🔢 OBTENER TERNO
+//////////////////////////////////////////////////////////////
+
+function CORR_terno(cuaterno) {
+
+    cuaterno =
+        String(cuaterno || "");
+
+    if (
+        !/^\d{4}$/.test(cuaterno)
+    ) {
+        return null;
+    }
+
+    return cuaterno.slice(1);
+}
+
+
+//////////////////////////////////////////////////////////////
+// 🔢 OBTENER AMBO
+//////////////////////////////////////////////////////////////
+
+function CORR_ambo(cuaterno) {
+
+    cuaterno =
+        String(cuaterno || "");
+
+    if (
+        !/^\d{4}$/.test(cuaterno)
+    ) {
+        return null;
+    }
+
+    return cuaterno.slice(-2);
+}
+
+
+//////////////////////////////////////////////////////////////
+// 📊 REGISTRAR FRECUENCIAS
+//////////////////////////////////////////////////////////////
+
+function CORR_registrarFrecuencias(registro) {
+
+    let numeros =
+        CORR_obtenerCuaternos(
+            registro
+        );
+
+
+    numeros.forEach(
+        function(cuaterno) {
+
+            //////////////////////////////////////////////////
+            // CUATERNO
+            //////////////////////////////////////////////////
+
+            APRENDIZAJE_CORR
+                .frecuenciaCuaterno[
+                    cuaterno
+                ] =
+                (
+                    APRENDIZAJE_CORR
+                        .frecuenciaCuaterno[
+                            cuaterno
+                        ] || 0
+                ) + 1;
+
+
+            //////////////////////////////////////////////////
+            // TERNO
+            //////////////////////////////////////////////////
+
+            let terno =
+                CORR_terno(
+                    cuaterno
+                );
+
+
+            if (terno) {
+
+                APRENDIZAJE_CORR
+                    .frecuenciaTerno[
+                        terno
+                    ] =
+                    (
+                        APRENDIZAJE_CORR
+                            .frecuenciaTerno[
+                                terno
+                            ] || 0
+                    ) + 1;
+            }
+
+
+            //////////////////////////////////////////////////
+            // AMBO
+            //////////////////////////////////////////////////
+
+            let ambo =
+                CORR_ambo(
+                    cuaterno
+                );
+
+
+            if (ambo) {
+
+                APRENDIZAJE_CORR
+                    .frecuenciaAmbo[
+                        ambo
+                    ] =
+                    (
+                        APRENDIZAJE_CORR
+                            .frecuenciaAmbo[
+                                ambo
+                            ] || 0
+                    ) + 1;
+            }
+
+        }
+    );
+}
+
+
+//////////////////////////////////////////////////////////////
+// 🔄 ESTUDIAR TRANSICIÓN ENTRE TURNOS
+//////////////////////////////////////////////////////////////
+
+function CORR_estudiarTransicion(
+    registroAnterior,
+    registroActual
+) {
+
+    if (
+        !registroAnterior ||
+        !registroActual
+    ) {
+        return;
+    }
+
+
+    let turnoAnterior =
+        registroAnterior.turno;
+
+
+    let turnoActual =
+        registroActual.turno;
+
+
+    if (
+        !turnoAnterior ||
+        !turnoActual
+    ) {
+        return;
+    }
+
+
+    let clave =
+        turnoAnterior +
+        "->" +
+        turnoActual;
+
+
+    if (
+        !APRENDIZAJE_CORR
+            .transiciones[
+                clave
+            ]
+    ) {
+
+        APRENDIZAJE_CORR
+            .transiciones[
+                clave
+            ] = {
+
+                cantidad: 0,
+
+                cuaternos: {},
+
+                ternos: {},
+
+                ambos: {}
+            };
+    }
+
+
+    let destino =
+        APRENDIZAJE_CORR
+            .transiciones[
+                clave
+            ];
+
+
+    destino.cantidad++;
+
+
+    let numeros =
+        CORR_obtenerCuaternos(
+            registroActual
+        );
+
+
+    numeros.forEach(
+        function(cuaterno) {
+
+            //////////////////////////////////////////////////
+            // CUATERNO
+            //////////////////////////////////////////////////
+
+            destino
+                .cuaternos[
+                    cuaterno
+                ] =
+                (
+                    destino
+                        .cuaternos[
+                            cuaterno
+                        ] || 0
+                ) + 1;
+
+
+            //////////////////////////////////////////////////
+            // TERNO
+            //////////////////////////////////////////////////
+
+            let terno =
+                CORR_terno(
+                    cuaterno
+                );
+
+
+            if (terno) {
+
+                destino
+                    .ternos[
+                        terno
+                    ] =
+                    (
+                        destino
+                            .ternos[
+                                terno
+                            ] || 0
+                    ) + 1;
+            }
+
+
+            //////////////////////////////////////////////////
+            // AMBO
+            //////////////////////////////////////////////////
+
+            let ambo =
+                CORR_ambo(
+                    cuaterno
+                );
+
+
+            if (ambo) {
+
+                destino
+                    .ambos[
+                        ambo
+                    ] =
+                    (
+                        destino
+                            .ambos[
+                                ambo
+                            ] || 0
+                    ) + 1;
+            }
+
+        }
+    );
+}
+
+
+//////////////////////////////////////////////////////////////
+// 🧠 RECONSTRUIR TODO EL APRENDIZAJE
+//////////////////////////////////////////////////////////////
+
+function CORR_reconstruirAprendizaje() {
+
+    APRENDIZAJE_CORR = {
+
+        predicciones: [],
+
+        aciertos: {
+            cuaterno: 0,
+            terno: 0,
+            ambo: 0
+        },
+
+        posiciones: {
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0
+        },
+
+        transiciones: {},
+
+        patronesTurno: {},
+
+        frecuenciaCuaterno: {},
+
+        frecuenciaTerno: {},
+
+        frecuenciaAmbo: {}
+    };
+
+
+    for (
+        let i = 0;
+        i < MEMORIA_CORRENTINA.length;
+        i++
+    ) {
+
+        let actual =
+            MEMORIA_CORRENTINA[i];
+
+
+        //////////////////////////////////////////////////
+        // FRECUENCIAS
+        //////////////////////////////////////////////////
+
+        CORR_registrarFrecuencias(
+            actual
+        );
+
+
+        //////////////////////////////////////////////////
+        // TRANSICIÓN ENTRE TURNOS
+        //////////////////////////////////////////////////
+
+        if (i > 0) {
+
+            CORR_estudiarTransicion(
+
+                MEMORIA_CORRENTINA[
+                    i - 1
+                ],
+
+                actual
+            );
+        }
+    }
+
+
+    CORR_guardarAprendizaje();
+}
+
+
+//////////////////////////////////////////////////////////////
+// 🎯 EVALUAR PREDICCIÓN CONTRA RESULTADO REAL
+//////////////////////////////////////////////////////////////
+
+function CORR_evaluarPrediccion(
+    prediccion,
+    registroReal
+) {
+
+    if (
+        !prediccion ||
+        !registroReal
+    ) {
+        return null;
+    }
+
+
+    let numeros =
+        CORR_obtenerCuaternos(
+            registroReal
+        );
+
+
+    //////////////////////////////////////////////////
+    // SOLAMENTE POSICIONES 1 A 5
+    //////////////////////////////////////////////////
+
+    let primerosCinco =
+        numeros.slice(0, 5);
+
+
+    let resultado = {
+
+        cuaterno: false,
+
+        terno: false,
+
+        ambo: false,
+
+        posicionCuaterno: null,
+
+        posicionTerno: null,
+
+        posicionAmbo: null
+    };
+
+
+    //////////////////////////////////////////////////
+    // 🎯 CUATERNO — PRIORIDAD PRINCIPAL
+    //////////////////////////////////////////////////
+
+    if (
+        prediccion.cuaterno
+    ) {
+
+        let pos =
+            primerosCinco.indexOf(
+                String(
+                    prediccion.cuaterno
+                )
+            );
+
+
+        if (pos !== -1) {
+
+            resultado.cuaterno =
+                true;
+
+            resultado.posicionCuaterno =
+                pos + 1;
+
+
+            APRENDIZAJE_CORR
+                .aciertos
+                .cuaterno++;
+
+
+            APRENDIZAJE_CORR
+                .posiciones[
+                    pos + 1
+                ]++;
+        }
+    }
+
+
+    //////////////////////////////////////////////////
+    // 🎯 TERNO — RESPALDO
+    //////////////////////////////////////////////////
+
+    if (
+        prediccion.terno
+    ) {
+
+        for (
+            let i = 0;
+            i < primerosCinco.length;
+            i++
+        ) {
+
+            let ternoReal =
+                CORR_terno(
+                    primerosCinco[i]
+                );
+
+
+            if (
+                ternoReal ===
+                String(
+                    prediccion.terno
+                )
+            ) {
+
+                resultado.terno =
+                    true;
+
+                resultado.posicionTerno =
+                    i + 1;
+
+                APRENDIZAJE_CORR
+                    .aciertos
+                    .terno++;
+
+                break;
+            }
+        }
+    }
+
+
+    //////////////////////////////////////////////////
+    // 🎯 AMBO — RESPALDO
+    //////////////////////////////////////////////////
+
+    if (
+        prediccion.ambo
+    ) {
+
+        for (
+            let i = 0;
+            i < primerosCinco.length;
+            i++
+        ) {
+
+            let amboReal =
+                CORR_ambo(
+                    primerosCinco[i]
+                );
+
+
+            if (
+                amboReal ===
+                String(
+                    prediccion.ambo
+                )
+            ) {
+
+                resultado.ambo =
+                    true;
+
+                resultado.posicionAmbo =
+                    i + 1;
+
+                APRENDIZAJE_CORR
+                    .aciertos
+                    .ambo++;
+
+                break;
+            }
+        }
+    }
+
+
+    CORR_guardarAprendizaje();
+
+
+    return resultado;
+}
+
+
+//////////////////////////////////////////////////////////////
+// 📊 VER APRENDIZAJE
+//////////////////////////////////////////////////////////////
+
+function CORR_NUEVO_verAprendizaje() {
+
+    CORR_reconstruirAprendizaje();
+
+
+    let a =
+        APRENDIZAJE_CORR;
+
+
+    let texto =
+
+        `🧠 APRENDIZAJE CORRENTINA\n` +
+
+        `=========================================\n\n` +
+
+        `🎯 OBJETIVO: POSICIONES 1 A 5\n\n` +
+
+        `🔥 ACIERTOS CUATERNOS: ` +
+        a.aciertos.cuaterno +
+        `\n` +
+
+        `🎯 ACIERTOS TERNOS: ` +
+        a.aciertos.terno +
+        `\n` +
+
+        `🔢 ACIERTOS AMBOS: ` +
+        a.aciertos.ambo +
+        `\n\n` +
+
+        `📍 CUATERNOS POR POSICIÓN\n` +
+
+        `🥇 1°: ` +
+        a.posiciones[1] +
+        `\n` +
+
+        `🥈 2°: ` +
+        a.posiciones[2] +
+        `\n` +
+
+        `🥉 3°: ` +
+        a.posiciones[3] +
+        `\n` +
+
+        `4°: ` +
+        a.posiciones[4] +
+        `\n` +
+
+        `5°: ` +
+        a.posiciones[5] +
+        `\n\n` +
+
+        `🔄 TRANSICIONES ESTUDIADAS: ` +
+        Object.keys(
+            a.transiciones
+        ).length;
+
+
+    CORR_NUEVO_mostrarPanel(
+        texto
+    );
+    }
+    
+    
     
 //////////////////////////////////////////////////////////////
 // 🎯 EMI TESLA PRO

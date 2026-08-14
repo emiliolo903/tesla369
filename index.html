@@ -347,104 +347,67 @@ Sin auditoría todavía
 
 </div>
     
-<!-- =========================================================
-     🎯 CORRENTINA INDEPENDIENTE V1
-     MÓDULO TOTALMENTE INDEPENDIENTE
-     ========================================================= -->
+<div id="CORR_NUEVO_CONTROLES">
 
-<div id="seccionPoceada">
+    <h2>🎯 CORRENTINA INDEPENDIENTE</h2>
 
-    <h2 style="color:#00FFD5;">
-        🎯 CORRENTINA INDEPENDIENTE
-    </h2>
-
-    <p>
-        Análisis exclusivo de Corrientes — posiciones 1 a 20
-    </p>
-
-    <button onclick="CORR_NUEVO_abrirOCR()">
-        📄 CARGAR PDF CORRENTINA
-    </button>
-
-    <br><br>
-
-    <button onclick="CORR_NUEVO_cargaManual()">
-        ✍️ CARGA MANUAL 1–20
-    </button>
-
-    <br><br>
-    
     <button
-    onclick="CORR_TESLA_abrir()"
->
-    ⚡ TESLA
+        type="button"
+        onclick="CORR_NUEVO_abrirOCR()">
+        📄 CARGAR PDF / OCR
     </button>
 
-    <button onclick="CORR_NUEVO_generar()">
-        🧠 ANALIZAR Y GENERAR 2 CUATERNOS
+    <button
+        type="button"
+        onclick="CORR_NUEVO_cargaManual()">
+        ✍️ CARGA MANUAL
     </button>
 
-    <br><br>
-
-    <button onclick="CORR_NUEVO_verHistorial()">
-        📋 HISTORIAL
+    <button
+        type="button"
+        onclick="CORR_NUEVO_generar()">
+        🎯 GENERAR 2 CUATERNOS
     </button>
 
-    <br><br>
+    <button
+        type="button"
+        onclick="CORR_TESLA_abrir()">
+        ⚡ TESLA INDEPENDIENTE
+    </button>
 
-    <button onclick="CORR_NUEVO_verAnalisis()">
+    <button
+        type="button"
+        onclick="CORR_NUEVO_verAnalisis()">
         📊 ANÁLISIS
     </button>
 
-    <br><br>
-
-    <button onclick="CORR_NUEVO_simular()">
-        🧪 SIMULAR APRENDIZAJE
+    <button
+        type="button"
+        onclick="CORR_NUEVO_verHistorial()">
+        📋 HISTORIAL
     </button>
-
-    <br><br>
-    
 
     <button
-        onclick="CORR_NUEVO_reiniciar()"
-        style="background:#c62828;color:white;"
-    >
-        🗑 BORRAR MEMORIA CORRENTINA
+        type="button"
+        onclick="CORR_NUEVO_simular()">
+        🧪 SIMULAR
     </button>
 
-    <hr>
-
-    <div
-        id="CORR_NUEVO_estado"
-        style="
-            background:#111;
-            color:white;
-            padding:15px;
-            border-radius:10px;
-        "
-    >
-        Cargando módulo...
-    </div>
-
-    <hr>
-
-    <div
-        id="CORR_NUEVO_panel"
-        style="
-            background:#000;
-            color:white;
-            padding:15px;
-            border-radius:10px;
-            min-height:250px;
-        "
-    >
-        🎯 Correntina independiente lista.
-    </div>
+    <button
+        type="button"
+        onclick="CORR_NUEVO_reiniciar()">
+        🗑 LIMPIAR
+    </button>
 
 </div>
 
+<div id="CORR_NUEVO_estado">
+    Cargando Correntina...
+</div>
 
-
+<div id="CORR_NUEVO_panel">
+    Esperando operación...
+</div>
 
 
 

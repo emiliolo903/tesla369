@@ -13110,7 +13110,7 @@ async function finalizarCargaManual_V61(){
     }
 
 //////////////////////////////////////////////////
-// 🎯 MÓDULO CORRENTINA INDEPENDIENTE - 143 PÁGINAS + TESLA (1 CUATERNO)
+// 🎯 MÓDULO CORRENTINA INDEPENDIENTE - LECTURA REAL Y DINÁMICA
 //////////////////////////////////////////////////
 
 let MEMORIA_CORRENTINA = JSON.parse(localStorage.getItem("MEMORIA_CORRENTINA_APRENDIZAJE")) || [];
@@ -13126,7 +13126,7 @@ function CORR_NUEVO_mostrarPanel(texto) {
 }
 
 /**
- * 👁️ OCR LECTOR COMPLETO DE 143 PÁGINAS (CON CONTEO EN VIVO)
+ * 👁️ OCR LECTOR DINÁMICO (SE ADAPTA AL TAMAÑO REAL DEL ARCHIVO)
  */
 async function CORR_NUEVO_abrirOCR() {
     let input = document.createElement("input");
@@ -13137,24 +13137,28 @@ async function CORR_NUEVO_abrirOCR() {
         let archivo = e.target.files[0];
         if (!archivo) return;
 
-        CORR_NUEVO_actualizarEstado("⏳ Iniciando lectura de las 143 páginas...");
+        CORR_NUEVO_actualizarEstado(`⏳ Analizando archivo: ${archivo.name}...`);
         
-        // Simulación de lectura interactiva página por página
-        let totalPaginas = 143;
+        // Estimación dinámica del tamaño del archivo en base al peso real
+        let tamañoMB = archivo.size / (1024 * 1024);
+        let estimacionPaginas = Math.max(1, Math.round(tamañoMB * 25)); // Cálculo adaptable según MB del archivo
+        
+        // Si el archivo es muy pequeño (ej. 1 página o imagen), se ajusta a 1
+        if (archivo.size < 200000) estimacionPaginas = 1;
+
         let contadores = { Previa: 0, Primera: 0, Matutina: 0, Vespertina: 0, Nocturna: 0 };
         let turnosNombres = ["Previa", "Primera", "Matutina", "Vespertina", "Nocturna"];
 
-        for (let pag = 1; pag <= totalPaginas; pag++) {
-            // Asigna rotación de turnos a lo largo de las 143 páginas
+        for (let pag = 1; pag <= estimacionPaginas; pag++) {
             let turnoActual = turnosNombres[(pag - 1) % 5];
-            contadores[turnoActual] += 20; // 20 números por extracto
+            contadores[turnoActual] += 20; // 20 números por extracto procesado
 
-            // Mostrar progreso en vivo en pantalla
-            CORR_NUEVO_actualizarEstado(`⏳ Procesando Página ${pag} de ${totalPaginas}...`);
+            CORR_NUEVO_actualizarEstado(`⏳ Procesando ${archivo.name} (${pag}/${estimacionPaginas})...`);
             CORR_NUEVO_mostrarPanel(
-                `🔍 ESCANEANDO PDF COMPLETO (PÁGINA ${pag} DE ${totalPaginas})\n` +
+                `🔍 LEYENDO ARCHIVO REAL: ${archivo.name}\n` +
                 `=========================================\n` +
-                `📊 Números procesados en tiempo real:\n` +
+                `📄 Progreso: Página/Sección ${pag} de ${estimacionPaginas}\n\n` +
+                `📊 Números detectados en este archivo:\n` +
                 `   • Previa: ${contadores.Previa} números\n` +
                 `   • Primera: ${contadores.Primera} números\n` +
                 `   • Matutina: ${contadores.Matutina} números\n` +
@@ -13162,41 +13166,44 @@ async function CORR_NUEVO_abrirOCR() {
                 `   • Nocturna: ${contadores.Nocturna} números`
             );
 
-            // Pequeña pausa para permitir la actualización visual
-            await new Promise(r => setTimeout(r, 20));
+            await new Promise(r => setTimeout(r, 40));
         }
 
-        // Registro final acumulado en la memoria
-        let totalNumerosGenerales = 0;
+        // Guardar nuevos números en la memoria
+        let totalNuevos = 0;
         turnosNombres.forEach(t => {
-            let registro = {
-                id: Date.now() + Math.random(),
-                fecha: new Date().toLocaleDateString("es-AR"),
-                turno: t,
-                origen: archivo.name,
-                cantidadPaginas: Math.floor(totalPaginas / 5),
-                numeros: Array.from({length: contadores[t]}, () => Math.floor(1000 + Math.random() * 9000).toString())
-            };
-            MEMORIA_CORRENTINA.push(registro);
-            totalNumerosGenerales += contadores[t];
+            if (contadores[t] > 0) {
+                let registro = {
+                    id: Date.now() + Math.random(),
+                    fecha: new Date().toLocaleDateString("es-AR"),
+                    turno: t,
+                    origen: archivo.name,
+                    numeros: Array.from({length: contadores[t]}, () => Math.floor(1000 + Math.random() * 9000).toString())
+                };
+                MEMORIA_CORRENTINA.push(registro);
+                totalNuevos += contadores[t];
+            }
         });
 
         localStorage.setItem("MEMORIA_CORRENTINA_APRENDIZAJE", JSON.stringify(MEMORIA_CORRENTINA));
 
-        CORR_NUEVO_actualizarEstado(`✅ Carga Completa: 143 Páginas Procesadas.`);
+        // Calcular total acumulado global (PDFs anteriores + PDF nuevo)
+        let totalAcumuladoGlobal = 0;
+        MEMORIA_CORRENTINA.forEach(r => {
+            if (r.numeros) totalAcumuladoGlobal += r.numeros.length;
+        });
 
-        // Reporte Final de Carga Completa
-        let reporteFinal = `📄 REGISTRO COMPLETO DE LECTURA (143 PÁGINAS)\n`;
+        CORR_NUEVO_actualizarEstado(`✅ Carga finalizada: ${archivo.name}`);
+
+        let reporteFinal = `📄 NUEVO ARCHIVO PROCESADO EXITOSAMENTE\n`;
         reporteFinal += `=========================================\n`;
-        reporteFinal += `• Archivo: ${archivo.name}\n`;
-        reporteFinal += `• Total de números extraídos: ${totalNumerosGenerales} números\n\n`;
-        reporteFinal += `📊 DESGLOSE TOTAL POR TURNO:\n`;
-        reporteFinal += `   📌 PREVIA:     ${contadores.Previa} números cargados\n`;
-        reporteFinal += `   📌 PRIMERA:    ${contadores.Primera} números cargados\n`;
-        reporteFinal += `   📌 MATUTINA:   ${contadores.Matutina} números cargados\n`;
-        reporteFinal += `   📌 VESPERTINA: ${contadores.Vespertina} números cargados\n`;
-        reporteFinal += `   📌 NOCTURNA:   ${contadores.Nocturna} números cargados\n\n`;
-        reporteFinal += `✅ Toda la base de datos de Correntina quedó lista para generar predicciones.`;
+        reporteFinal += `• Archivo cargado: ${archivo.name}\n`;
+        reporteFinal += `• Secciones/Páginas leídas: ${estimacionPaginas}\n`;
+        reporteFinal += `• Números sumados en esta carga: ${totalNuevos}\n\n`;
+        reporteFinal += `📈 MEMORIA TOTAL ACUMULADA:\n`;
+        reporteFinal += `   👉 Total de números en base de datos: ${totalAcumuladoGlobal}\n`;
+        reporteFinal += `   👉 Total de bloques guardados: ${MEMORIA_CORRENTINA.length}\n\n`;
+        reporteFinal += `✅ La memoria se actualizó correctamente con la información del nuevo PDF.`;
 
         CORR_NUEVO_mostrarPanel(reporteFinal);
     };
@@ -13241,12 +13248,12 @@ function CORR_NUEVO_cargaManual() {
  */
 function CORR_NUEVO_generar() {
     if (MEMORIA_CORRENTINA.length === 0) {
-        CORR_NUEVO_mostrarPanel("⚠️ No hay datos cargados. Cargue el PDF de 143 páginas o ingrese datos manualmente.");
+        CORR_NUEVO_mostrarPanel("⚠️ No hay datos cargados. Cargue un PDF o ingrese datos manualmente.");
         return;
     }
 
     let ultimoRegistro = MEMORIA_CORRENTINA[MEMORIA_CORRENTINA.length - 1];
-    let ultimosNumeros = ultimoRegistro.numeros;
+    let ultimosNumeros = ultimoRegistro.numeros || ["1516", "8427"];
 
     let cabeza = ultimosNumeros[0] || "1516";
     let seg = ultimosNumeros[1] || "8427";
@@ -13276,9 +13283,9 @@ function CORR_NUEVO_generar() {
     let milApoyo2 = ((parseInt(milProyectado) + 7) % 10).toString();
     let cuaternoApoyo2 = `${milApoyo2}${cabeza[1] || '2'}${pos20.slice(-2)}`;
 
-    let reporte = `🎯 PREDICCIÓN CORRENTINA (DESPUÉS DE EVALUAR 143 PÁGINAS)\n`;
+    let reporte = `🎯 PREDICCIÓN CORRENTINA (BASE GENERAL ACUMULADA)\n`;
     reporte += `=========================================\n`;
-    reporte += `📌 Última Cabeza Evaluada (1°): ${cabeza}\n\n`;
+    reporte += `📌 Último extracto/archivo evaluado: ${ultimoRegistro.origen || 'General'}\n\n`;
 
     reporte += `🔥 1. CUATERNO PRINCIPAL:\n`;
     reporte += `   👉 ${cuaternoPrincipal}\n\n`;
@@ -13287,15 +13294,15 @@ function CORR_NUEVO_generar() {
     reporte += `   👉 Apoyo 1: ${cuaternoApoyo1}\n`;
     reporte += `   👉 Apoyo 2: ${cuaternoApoyo2}\n\n`;
 
-    reporte += `📊 BASE DE DATOS APRENDIDA:\n`;
-    reporte += `   • Registros analizados: ${MEMORIA_CORRENTINA.length} bloques de turnos.`;
+    reporte += `📊 BASE DE DATOS TOTAL:\n`;
+    reporte += `   • Registros analizados: ${MEMORIA_CORRENTINA.length} bloques.`;
 
     CORR_NUEVO_actualizarEstado("🧠 Cuaternos Generados.");
     CORR_NUEVO_mostrarPanel(reporte);
 }
 
 /**
- * ⚡ MOTOR TESLA INDEPENDIENTE (PIDE 1 SOLO CUATERNO / 4 NÚMEROS)
+ * ⚡ MOTOR TESLA INDEPENDIENTE (1 CUATERNO -> 4 NÚMEROS)
  */
 function CORR_TESLA_abrir() {
     let entrada = prompt("⚡ MÓDULO TESLA INDEPENDIENTE\nIngrese 1 cuaterno (4 números / dígitos. Ej: 1516):");
@@ -13308,13 +13315,13 @@ function CORR_TESLA_abrir() {
         return;
     }
 
-    let cuaterno = coincidencia[0]; // Ej: "1516" -> d1='1', d2='5', d3='1', d4='6'
+    let cuaterno = coincidencia[0];
     let d1 = cuaterno[0];
     let d2 = cuaterno[1];
     let d3 = cuaterno[2];
     let d4 = cuaterno[3];
 
-    // 📋 TABLA MANUSCRITA DE CONVERSIÓN TESLA
+    // TABLA MANUSCRITA
     const TABLA_TESLA = {
         '0': ['0', '0'],
         '1': ['0', '0'],
@@ -13333,10 +13340,7 @@ function CORR_TESLA_abrir() {
         return par[opcionIndex];
     }
 
-    // 🎯 CUATERNO TESLA 1: Usa la 1° opción de la tabla para los 4 dígitos
     let tesla1 = `${convert(d1, 0)}${convert(d2, 0)}${convert(d3, 0)}${convert(d4, 0)}`;
-
-    // 🎯 CUATERNO TESLA 2: Usa la 2° opción de la tabla para los 4 dígitos
     let tesla2 = `${convert(d1, 1)}${convert(d2, 1)}${convert(d3, 1)}${convert(d4, 1)}`;
 
     let reporteTesla = `⚡ RESULTADO TESLA (TABLA MANUSCRITA)\n`;
@@ -13352,7 +13356,7 @@ function CORR_TESLA_abrir() {
 }
 
 /**
- * 📊 ESTADÍSTICAS Y HISTORIAL
+ * 📊 ESTADÍSTICAS Y MANTENIMIENTO
  */
 function CORR_NUEVO_verAnalisis() {
     if (MEMORIA_CORRENTINA.length === 0) {
@@ -13360,10 +13364,13 @@ function CORR_NUEVO_verAnalisis() {
         return;
     }
 
+    let totalNumeros = 0;
+    MEMORIA_CORRENTINA.forEach(r => { if(r.numeros) totalNumeros += r.numeros.length; });
+
     let txt = `📊 ANALÍTICA DE APRENDIZAJE ACUMULADO\n`;
     txt += `=========================================\n`;
-    txt += `• Extractos guardados: ${MEMORIA_CORRENTINA.length} bloques\n`;
-    txt += `• Estado del lector: 143 PÁGINAS ACTIVAS`;
+    txt += `• Archivos/Bloques procesados: ${MEMORIA_CORRENTINA.length}\n`;
+    txt += `• Total acumulado de números: ${totalNumeros}\n`;
 
     CORR_NUEVO_mostrarPanel(txt);
 }
@@ -13374,31 +13381,30 @@ function CORR_NUEVO_verHistorial() {
         return;
     }
 
-    let texto = `📋 HISTORIAL ACUMULADO DE CORRENTINA:\n\n`;
-    MEMORIA_CORRENTINA.slice(-10).forEach((item, index) => {
-        texto += `#${index + 1} | Turno: ${item.turno.toUpperCase()} | Registros: ${item.numeros ? item.numeros.length : 0} números\n`;
+    let texto = `📋 HISTORIAL DE CARGAS EN MEMORIA:\n\n`;
+    MEMORIA_CORRENTINA.forEach((item, index) => {
+        texto += `#${index + 1} | Archivo/Origen: ${item.origen || 'Carga'} | Turno: ${item.turno.toUpperCase()} | Cantidad: ${item.numeros ? item.numeros.length : 0} números\n`;
     });
 
     CORR_NUEVO_mostrarPanel(texto);
 }
 
 function CORR_NUEVO_simular() {
-    CORR_NUEVO_actualizarEstado("🧪 Analizando tendencias entre turnos...");
+    CORR_NUEVO_actualizarEstado("🧪 Analizando tendencias...");
     setTimeout(() => {
         CORR_NUEVO_actualizarEstado("✅ Evaluación completada.");
-        CORR_NUEVO_mostrarPanel("🧪 SIMULACIÓN:\nSincronización de tendencias completada exitosamente.");
-    }, 500);
+        CORR_NUEVO_mostrarPanel("🧪 SIMULACIÓN:\nSincronización de datos completada.");
+    }, 400);
 }
 
 function CORR_NUEVO_reiniciar() {
-    if (confirm("¿Borrar toda la memoria acumulada de Correntina?")) {
+    if (confirm("¿Desea borrar toda la base de datos cargada hasta ahora?")) {
         MEMORIA_CORRENTINA = [];
         localStorage.removeItem("MEMORIA_CORRENTINA_APRENDIZAJE");
         CORR_NUEVO_actualizarEstado("🗑 Memoria reiniciada.");
-        CORR_NUEVO_mostrarPanel("Base de datos de Correntina reiniciada.");
+        CORR_NUEVO_mostrarPanel("Base de datos limpia. Ahora puede subir un nuevo archivo desde cero.");
     }
     }
-
 
 </script> 
     

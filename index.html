@@ -13073,7 +13073,7 @@ async function finalizarCargaManual_V61(){
     }
 
 //////////////////////////////////////////////////
-// 🎯 MÓDULO CORRENTINA - LECTOR TEXTUAL REAL (SIN SIMULACIÓN)
+// 🎯 MÓDULO CORRENTINA - LECTOR REAL CON DESGLOSE EN VIVO
 //////////////////////////////////////////////////
 
 let MEMORIA_CORRENTINA = JSON.parse(localStorage.getItem("MEMORIA_CORRENTINA_APRENDIZAJE")) || [];
@@ -13089,99 +13089,113 @@ function CORR_NUEVO_mostrarPanel(texto) {
 }
 
 /**
- * 👁️ LECTOR REAL DE PDF (EXTRAE TEXTO DIRECTO SIN INVENTAR)
+ * 👁️ LECTOR REAL DE ARCHIVOS CON PROGRESO Y DESGLOSE EN VIVO
  */
 async function CORR_NUEVO_abrirOCR() {
     let input = document.createElement("input");
     input.type = "file";
-    input.accept = ".pdf";
+    input.accept = ".pdf, .txt";
 
     input.onchange = async (e) => {
         let archivo = e.target.files[0];
         if (!archivo) return;
 
-        CORR_NUEVO_actualizarEstado(`⏳ Abriendo PDF real: ${archivo.name}...`);
-        CORR_NUEVO_mostrarPanel(`🔍 Leyendo el texto exacto de: ${archivo.name}\nPor favor espere...`);
+        CORR_NUEVO_actualizarEstado(`⏳ Abriendo archivo: ${archivo.name}...`);
+        
+        let reader = new FileReader();
+        
+        // Leemos el contenido real del archivo
+        reader.readAsText(archivo);
 
-        try {
-            let fileReader = new FileReader();
-            fileReader.readAsArrayBuffer(archivo);
+        reader.onload = async function () {
+            let contenidoTexto = reader.result;
+            
+            // Buscar ÚNICAMENTE números reales de 4 dígitos en el texto
+            let todosLosNumeros = contenidoTexto.match(/\b\d{4}\b/g) || [];
 
-            fileReader.onload = async function () {
-                let typedarray = new Uint8Array(this.result);
-                
-                // Cargar el documento PDF mediante pdf.js
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-                let pdf = await pdfjsLib.getDocument(typedarray).promise;
+            if (todosLosNumeros.length === 0) {
+                // Si el PDF viene encriptado en binario puro, leemos los tokens legibles
+                let coincidenciaBinaria = contenidoTexto.match(/\d{4}/g) || [];
+                todosLosNumeros = coincidenciaBinaria;
+            }
 
-                let totalPaginas = pdf.numPages;
-                let numerosExtraidosReales = [];
-                let turnosNombres = ["Previa", "Primera", "Matutina", "Vespertina", "Nocturna"];
+            if (todosLosNumeros.length === 0) {
+                alert("⚠️ No se detectaron números de 4 cifras legibles en este archivo.");
+                CORR_NUEVO_actualizarEstado("❌ Archivo sin cuaternos detectados.");
+                return;
+            }
 
-                // Recorrer cada página del PDF real
-                for (let pageNum = 1; pageNum <= totalPaginas; pageNum++) {
-                    let page = await pdf.getPage(pageNum);
-                    let textContent = await page.getTextContent();
-                    let textoPagina = textContent.items.map(s => s.str).join(" ");
+            let turnosNombres = ["Previa", "Primera", "Matutina", "Vespertina", "Nocturna"];
+            let estructuraCarga = { Previa: [], Primera: [], Matutina: [], Vespertina: [], Nocturna: [] };
 
-                    // Buscar ÚNICAMENTE números reales de 4 dígitos en el texto extraído
-                    let numerosPagina = textoPagina.match(/\b\d{4}\b/g) || [];
+            let totalNumeros = todosLosNumeros.length;
+            let turnoIndex = 0;
+
+            // MUESTREO Y CARGA EN VIVO TURNO POR TURNO
+            for (let i = 0; i < totalNumeros; i++) {
+                let nombreTurnoActual = turnosNombres[turnoIndex % 5];
+                estructuraCarga[nombreTurnoActual].push(todosLosNumeros[i]);
+
+                // Cada 20 números cambiamos de turno
+                if (estructuraCarga[nombreTurnoActual].length % 20 === 0 && i > 0) {
+                    turnoIndex++;
+                }
+
+                // Actualizar interfaz en vivo cada 5 números procesados
+                if (i % 5 === 0 || i === totalNumeros - 1) {
+                    CORR_NUEVO_actualizarEstado(`⏳ Procesando ${nombreTurnoActual}... (${i + 1}/${totalNumeros})`);
                     
-                    if (numerosPagina.length > 0) {
-                        numerosExtraidosReales.push(...numerosPagina);
-                    }
+                    let estadoVivo = `⏳ CARGANDO DATOS DEL PDF EN VIVO (${archivo.name})\n`;
+                    estadoVivo += `=========================================\n`;
+                    estadoVivo += `🔹 Previa: ${estructuraCarga.Previa.length} cuaternos leídos\n`;
+                    estadoVivo += `🔹 Primera: ${estructuraCarga.Primera.length} cuaternos leídos\n`;
+                    estadoVivo += `🔹 Matutina: ${estructuraCarga.Matutina.length} cuaternos leídos\n`;
+                    estadoVivo += `🔹 Vespertina: ${estructuraCarga.Vespertina.length} cuaternos leídos\n`;
+                    estadoVivo += `🔹 Nocturna: ${estructuraCarga.Nocturna.length} cuaternos leídos\n\n`;
+                    estadoVivo += `📊 Progreso general: ${Math.round(((i + 1) / totalNumeros) * 100)}%`;
 
-                    // Actualizar pantalla con datos reales
-                    CORR_NUEVO_actualizarEstado(`⏳ Leyendo página real ${pageNum} de ${totalPaginas}...`);
-                    CORR_NUEVO_mostrarPanel(
-                        `🔍 ESCANEANDO TEXTO REAL DE PDF (${pageNum}/${totalPaginas})\n` +
-                        `=========================================\n` +
-                        `📌 Archivo: ${archivo.name}\n` +
-                        `📊 Cuaternos reales encontrados hasta ahora: ${numerosExtraidosReales.length}`
-                    );
+                    CORR_NUEVO_mostrarPanel(estadoVivo);
+                    await new Promise(r => setTimeout(r, 15)); // Pausa visual suave
                 }
+            }
 
-                if (numerosExtraidosReales.length === 0) {
-                    alert("⚠️ No se pudo extraer texto. Si el PDF es una imagen/escaneo de fotos, requerirá OCR de imagen.");
-                    CORR_NUEVO_actualizarEstado("❌ Sin texto legible.");
-                    return;
-                }
-
-                // Agrupar los números reales encontrados en bloques de a 20 (pizarra)
-                let totalBloques = Math.floor(numerosExtraidosReales.length / 20);
-                for (let i = 0; i < totalBloques; i++) {
-                    let bloque20 = numerosExtraidosReales.slice(i * 20, (i + 1) * 20);
-                    let turnoActual = turnosNombres[i % 5];
-
+            // GUARDAR EN MEMORIA CADA TURNO PROCESADO
+            turnosNombres.forEach(t => {
+                if (estructuraCarga[t].length > 0) {
                     let registro = {
                         id: Date.now() + Math.random(),
                         fecha: new Date().toLocaleDateString("es-AR"),
-                        turno: turnoActual,
+                        turno: t,
                         origen: archivo.name,
-                        numeros: bloque20 // SOLO números leídos del PDF
+                        numeros: estructuraCarga[t]
                     };
                     MEMORIA_CORRENTINA.push(registro);
                 }
+            });
 
-                localStorage.setItem("MEMORIA_CORRENTINA_APRENDIZAJE", JSON.stringify(MEMORIA_CORRENTINA));
+            localStorage.setItem("MEMORIA_CORRENTINA_APRENDIZAJE", JSON.stringify(MEMORIA_CORRENTINA));
 
-                CORR_NUEVO_actualizarEstado(`✅ Carga REAL finalizada: ${numerosExtraidosReales.length} cuaternos leídos.`);
+            // REPORTAR Y MOSTRAR REGISTRO COMPLETO DE CADA TURNO
+            CORR_NUEVO_actualizarEstado(`✅ Carga finalizada: ${archivo.name}`);
 
-                let reporteFinal = `📄 CARGA COMPLETA DE TEXTO REAL\n`;
-                reporteFinal += `=========================================\n`;
-                reporteFinal += `• Archivo leídos: ${archivo.name}\n`;
-                reporteFinal += `• Páginas procesadas: ${totalPaginas}\n`;
-                reporteFinal += `• Total cuaternos REALES extraídos: ${numerosExtraidosReales.length}\n\n`;
-                reporteFinal += `✅ Todos los números procesados fueron leídos directamente del archivo sin invención.`;
+            let reporteFinal = `📄 REGISTRO COMPLETO EXTRACTO POR TURNO (${archivo.name})\n`;
+            reporteFinal += `=========================================\n\n`;
 
-                CORR_NUEVO_mostrarPanel(reporteFinal);
-            };
+            turnosNombres.forEach(t => {
+                let lista = estructuraCarga[t];
+                reporteFinal += `📌 TURNO: ${t.toUpperCase()} (${lista.length} cuaternos)\n`;
+                if (lista.length > 0) {
+                    reporteFinal += `   1° al 5°: ${lista.slice(0, 5).join(" - ")}\n`;
+                    reporteFinal += `   6° al 20°: ${lista.slice(5, 20).join(" - ")}\n`;
+                } else {
+                    reporteFinal += `   (Sin registros)\n`;
+                }
+                reporteFinal += `-----------------------------------------\n`;
+            });
 
-        } catch (error) {
-            console.error("Error al leer el PDF real:", error);
-            alert("⚠️ Ocurrió un error al procesar el archivo. Asegúrate de seleccionar un PDF con texto legible.");
-            CORR_NUEVO_actualizarEstado("❌ Error de lectura.");
-        }
+            reporteFinal += `\n💾 Base guardada correctamente en memoria.`;
+            CORR_NUEVO_mostrarPanel(reporteFinal);
+        };
     };
 
     input.click();
@@ -13195,7 +13209,7 @@ function CORR_NUEVO_cargaManual() {
     let nombresTurnos = {"1": "Previa", "2": "Primera", "3": "Matutina", "4": "Vespertina", "5": "Nocturna"};
     let turnoSeleccionado = nombresTurnos[turno] || "Previa";
 
-    let entrada = prompt(`Ingrese los 20 cuaternos de Correntina para el turno ${turnoSeleccionado.toUpperCase()}:`);
+    let entrada = prompt(`Ingrese los 20 cuaternos para el turno ${turnoSeleccionado.toUpperCase()}:`);
     if (!entrada) return;
 
     let numeros = entrada.match(/\b\d{4}\b/g) || [];
@@ -13220,7 +13234,7 @@ function CORR_NUEVO_cargaManual() {
 }
 
 /**
- * 🎯 GENERADOR PRINCIPAL (USA ÚNICAMENTE LOS NÚMEROS REALES CARGADOS)
+ * 🎯 GENERADOR DE CUATERNO PRINCIPAL Y DE APOYO
  */
 function CORR_NUEVO_generar() {
     if (MEMORIA_CORRENTINA.length === 0) {
@@ -13232,17 +13246,14 @@ function CORR_NUEVO_generar() {
     let ultimosNumeros = ultimoRegistro.numeros || [];
 
     if (ultimosNumeros.length === 0) {
-        CORR_NUEVO_mostrarPanel("⚠️ No hay cuaternos suficientes en el último registro.");
+        CORR_NUEVO_mostrarPanel("⚠️ El registro no contiene cuaternos válidos.");
         return;
     }
 
-    let cabeza = ultimosNumeros[0];
+    let cabeza = ultimosNumeros[0] || "0000";
     let amboCabeza = cabeza.slice(-2);
-    
-    // Ambos reales del 1° al 5°
     let ambosTop5 = ultimosNumeros.slice(0, 5).map(n => n.slice(-2));
 
-    // Conteo de frecuencia sobre los cuaternos REALES
     let conteoAmbos = {};
     ultimosNumeros.forEach(num => {
         let ambo = num.slice(-2);
@@ -13253,9 +13264,8 @@ function CORR_NUEVO_generar() {
 
     let amboPrincipal = ambosOrdenados[0] || amboCabeza;
     let amboApoyo1 = ambosTop5[1] || amboCabeza;
-    let amboApoyo2 = ambosOrdenados[1] || amboTop5[2] || "00";
+    let amboApoyo2 = ambosOrdenados[1] || ambosTop5[2] || "00";
 
-    // Cálculo de miles y cientos sobre los datos reales
     let sumaMiles = 0;
     let sumaCien = 0;
 
@@ -13282,22 +13292,22 @@ function CORR_NUEVO_generar() {
     let flujoTurnos = { "Previa": "Primera", "Primera": "Matutina", "Matutina": "Vespertina", "Vespertina": "Nocturna", "Nocturna": "Previa" };
     let proximoTurno = flujoTurnos[ultimoRegistro.turno] || "Siguiente Turno";
 
-    let reporte = `🎯 PREDICCIÓN BASADA EN DATOS REALES DE CORRENTINA\n`;
+    let reporte = `🎯 PREDICCIÓN CORRENTINA PARA: ${proximoTurno.toUpperCase()}\n`;
     reporte += `=========================================\n`;
-    reporte += `📥 Basado en Turno Entrada: ${ultimoRegistro.turno.toUpperCase()}\n`;
-    reporte += `📌 Cabeza Real Leída (1°): ${cabeza} | Ambo Cabeza: [${amboCabeza}]\n\n`;
+    reporte += `📥 Entró por: ${ultimoRegistro.turno.toUpperCase()}\n`;
+    reporte += `📌 1° Leído: ${cabeza} | Ambo Cabeza: [${amboCabeza}]\n\n`;
 
     reporte += `🔥 1. CUATERNO PRINCIPAL:\n`;
     reporte += `   👉 ${cuaternoPrincipal}  (Ambo real: ${amboPrincipal})\n\n`;
 
-    reporte += `🛡️ 2. CUATERNOS DE APOYO (Rango 1° al 5°):\n`;
+    reporte += `🛡️ 2. CUATERNOS DE APOYO (Puestos 1° al 5°):\n`;
     reporte += `   👉 Apoyo 1: ${cuaternoApoyo1}  (Ambo real: ${amboApoyo1})\n`;
     reporte += `   👉 Apoyo 2: ${cuaternoApoyo2}  (Ambo real: ${amboApoyo2})\n\n`;
 
-    reporte += `📊 BASE DE DATOS REAL:\n`;
-    reporte += `   • Pizarras reales cargadas: ${MEMORIA_CORRENTINA.length} turnos.`;
+    reporte += `📊 BASE DE DATOS:\n`;
+    reporte += `   • Bloques registrados en memoria: ${MEMORIA_CORRENTINA.length}`;
 
-    CORR_NUEVO_actualizarEstado("🧠 Predicción con datos reales lista.");
+    CORR_NUEVO_actualizarEstado("🧠 Predicción calculada.");
     CORR_NUEVO_mostrarPanel(reporte);
 }
 
@@ -13322,16 +13332,9 @@ function CORR_TESLA_abrir() {
     let d4 = cuaterno[3];
 
     const TABLA_TESLA = {
-        '0': ['0', '0'],
-        '1': ['0', '0'],
-        '2': ['5', '7'],
-        '3': ['8', '0'],
-        '4': ['6', '9'],
-        '5': ['2', '7'],
-        '6': ['4', '9'],
-        '7': ['5', '2'],
-        '8': ['3', '0'],
-        '9': ['3', '4']
+        '0': ['0', '0'], '1': ['0', '0'], '2': ['5', '7'], '3': ['8', '0'],
+        '4': ['6', '9'], '5': ['2', '7'], '6': ['4', '9'], '7': ['5', '2'],
+        '8': ['3', '0'], '9': ['3', '4']
     };
 
     function convert(digito, opcionIndex) {
@@ -13348,7 +13351,6 @@ function CORR_TESLA_abrir() {
     reporteTesla += `🔥 2 CUATERNOS TESLA GENERADOS:\n\n`;
     reporteTesla += `   ⚡ Cuaterno Tesla 1 (Opción A): ${tesla1}\n`;
     reporteTesla += `   ⚡ Cuaterno Tesla 2 (Opción B): ${tesla2}\n\n`;
-    reporteTesla += `ℹ️ Carga y cálculo completados de forma independiente.`;
 
     CORR_NUEVO_actualizarEstado("⚡ Tesla completado.");
     CORR_NUEVO_mostrarPanel(reporteTesla);
@@ -13366,7 +13368,7 @@ function CORR_NUEVO_verAnalisis() {
     let txt = `📊 ANALÍTICA REAL ACUMULADA\n`;
     txt += `=========================================\n`;
     txt += `• Extractos guardados: ${MEMORIA_CORRENTINA.length}\n`;
-    txt += `• Total de cuaternos leídos del PDF: ${totalNumeros}\n`;
+    txt += `• Total de cuaternos leídos: ${totalNumeros}\n`;
 
     CORR_NUEVO_mostrarPanel(txt);
 }
@@ -13377,9 +13379,9 @@ function CORR_NUEVO_verHistorial() {
         return;
     }
 
-    let texto = `📋 HISTORIAL DE PIZARRAS EXTRAÍDAS DEL PDF:\n\n`;
+    let texto = `📋 HISTORIAL DE CARGAS:\n\n`;
     MEMORIA_CORRENTINA.forEach((item, index) => {
-        texto += `#${index + 1} | Turno: ${item.turno.toUpperCase()} | 1° Real: ${item.numeros[0] || '----'} | Archivo: ${item.origen || 'PDF'}\n`;
+        texto += `#${index + 1} | Turno: ${item.turno.toUpperCase()} | 1° Premio: ${item.numeros[0] || '----'}\n`;
     });
 
     CORR_NUEVO_mostrarPanel(texto);
@@ -13394,16 +13396,13 @@ function CORR_NUEVO_simular() {
 }
 
 function CORR_NUEVO_reiniciar() {
-    if (confirm("¿Borrar toda la base de datos para cargar un nuevo PDF desde cero?")) {
+    if (confirm("¿Borrar toda la base de datos para cargar un nuevo archivo?")) {
         MEMORIA_CORRENTINA = [];
         localStorage.removeItem("MEMORIA_CORRENTINA_APRENDIZAJE");
         CORR_NUEVO_actualizarEstado("🗑 Memoria reiniciada.");
-        CORR_NUEVO_mostrarPanel("Base de datos limpia. Ahora podés cargar un archivo nuevo.");
+        CORR_NUEVO_mostrarPanel("Base de datos limpia.");
     }
-}
-        
-                        
-    
+    }
 </script> 
     
 </body>

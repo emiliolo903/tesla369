@@ -14096,10 +14096,11 @@ async function CORR_leerColumna(
     // EXTRAER 20 CUATERNOS
     //////////////////////////////////////////////////////////
 
-    let numeros =
-        CORR_extraer20Numeros(
-            texto
-        );
+    let datos =
+    CORR_extraer20Corrientes(
+        texto,
+        pagina
+    );
 
     return {
 

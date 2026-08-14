@@ -13586,33 +13586,36 @@ window.CORR_NUEVO_mostrarPanel =
 })();
     
 //////////////////////////////////////////////////////////////
-// 🎯 CORRENTINA INDEPENDIENTE
-// BLOQUE 2 COMPLETO — LECTOR PDF IMAGEN + TESSERACT
-// SOLO CORRIENTES — POSICIONES 1 A 20
+// 🎯 MÓDULO CORRENTINA
+// BLOQUE 2 — PARTE 1/2
+// LECTOR PDF REAL + OCR DE IMÁGENES
 //////////////////////////////////////////////////////////////
+
+window.EMI_CORR = window.EMI_CORR || {};
 
 let DETENER_OCR_CORR = false;
 
-let AUDITORIA_CORR = {
+window.EMI_CORR.auditoria =
+    window.EMI_CORR.auditoria || {
 
-    PAGINAS_PROCESADAS: 0,
-    PAGINAS_CORRIENTES: 0,
-    CUATERNOS_DETECTADOS: 0,
-    CUATERNOS_GUARDADOS: 0,
+        paginasProcesadas: 0,
+        paginasCorrientes: 0,
+        cuaternosDetectados: 0,
+        cuaternosGuardados: 0,
 
-    PREVIA: 0,
-    PRIMERA: 0,
-    MATUTINA: 0,
-    VESPERTINA: 0,
-    NOCTURNA: 0
-};
+        PREVIA: 0,
+        PRIMERA: 0,
+        MATUTINA: 0,
+        VESPERTINA: 0,
+        NOCTURNA: 0
+    };
 
 
 //////////////////////////////////////////////////////////////
 // 🧠 MEMORIA CORRENTINA
 //////////////////////////////////////////////////////////////
 
-let MEMORIA_CORRENTINA =
+window.MEMORIA_CORRENTINA =
     JSON.parse(
         localStorage.getItem(
             "MEMORIA_CORRENTINA_APRENDIZAJE"
@@ -13621,48 +13624,44 @@ let MEMORIA_CORRENTINA =
 
 
 //////////////////////////////////////////////////////////////
-// 🔄 RESET AUDITORÍA
+// 🔄 REINICIAR AUDITORÍA
 //////////////////////////////////////////////////////////////
 
-function CORR_resetAuditoria() {
+window.EMI_CORR.resetAuditoria = function () {
 
-    AUDITORIA_CORR = {
+    window.EMI_CORR.auditoria = {
 
-        PAGINAS_PROCESADAS: 0,
-        PAGINAS_CORRIENTES: 0,
-        CUATERNOS_DETECTADOS: 0,
-        CUATERNOS_GUARDADOS: 0,
+        paginasProcesadas: 0,
+        paginasCorrientes: 0,
+        cuaternosDetectados: 0,
+        cuaternosGuardados: 0,
 
         PREVIA: 0,
         PRIMERA: 0,
         MATUTINA: 0,
         VESPERTINA: 0,
         NOCTURNA: 0
-
     };
-
-}
+};
 
 
 //////////////////////////////////////////////////////////////
 // 📅 DETECTAR FECHA
 //////////////////////////////////////////////////////////////
 
-function CORR_detectarFecha(texto) {
+window.EMI_CORR.detectarFecha = function (texto) {
 
     texto = String(texto || "");
 
-    let fecha =
-        texto.match(
-            /\b\d{2}[\/\-]\d{2}[\/\-]\d{4}\b/
-        );
+    let fecha = texto.match(
+        /\b\d{2}[\/\-]\d{2}[\/\-]\d{4}\b/
+    );
 
     if (!fecha) {
 
         return new Date()
             .toISOString()
             .slice(0, 10);
-
     }
 
     let partes =
@@ -13677,14 +13676,14 @@ function CORR_detectarFecha(texto) {
         "-" +
         partes[0]
     );
-}
+};
 
 
 //////////////////////////////////////////////////////////////
 // 🕐 DETECTAR TURNO
 //////////////////////////////////////////////////////////////
 
-function CORR_detectarTurno(texto) {
+window.EMI_CORR.detectarTurno = function (texto) {
 
     texto =
         String(texto || "")
@@ -13706,46 +13705,32 @@ function CORR_detectarTurno(texto) {
         return "NOCTURNA";
 
     return "SIN_TURNO";
-}
+};
 
 
 //////////////////////////////////////////////////////////////
 // 🎯 DETECTAR CORRIENTES
 //////////////////////////////////////////////////////////////
 
-function CORR_detectarCorrientes(texto) {
+window.EMI_CORR.detectarCorrientes = function (texto) {
 
     texto =
         String(texto || "")
             .toUpperCase();
 
-    /*
-     * Tesseract puede leer:
-     *
-     * CORRIENTES
-     * CORRIENTE
-     * CORRIENTES:
-     *
-     */
-
-    if (
+    return (
         texto.includes("CORRIENTES") ||
-        texto.includes("CORRIENTE")
-    ) {
-
-        return true;
-
-    }
-
-    return false;
-}
+        texto.includes("CORRIENTE") ||
+        texto.includes("CORRIENT")
+    );
+};
 
 
 //////////////////////////////////////////////////////////////
 // 🔢 LIMPIAR CUATERNO
 //////////////////////////////////////////////////////////////
 
-function CORR_limpiarCuaterno(numero) {
+window.EMI_CORR.limpiarCuaterno = function (numero) {
 
     if (!numero)
         return null;
@@ -13754,24 +13739,24 @@ function CORR_limpiarCuaterno(numero) {
         String(numero)
             .replace(/\D/g, "");
 
-    if (
-        numero.length !== 4
-    ) {
-
+    if (numero.length !== 4)
         return null;
 
-    }
-
     return numero;
-}
+};
 
 
 //////////////////////////////////////////////////////////////
-// 🎯 EXTRAER LOS 20 CUATERNOS
-// SOLO DE LA ZONA DE CORRIENTES
+// 🎯 EXTRAER 20 CUATERNOS DE CORRIENTES
+//
+// IMPORTANTE:
+// ESTA ES LA FUNCIÓN QUE FALTABA CONECTAR.
+//
+// AHORA EXISTE COMO:
+// window.EMI_CORR.extraer20Corrientes
 //////////////////////////////////////////////////////////////
 
-function CORR_extraer20Corrientes(
+window.EMI_CORR.extraer20Corrientes = function (
     texto,
     pagina
 ) {
@@ -13781,87 +13766,74 @@ function CORR_extraer20Corrientes(
             .toUpperCase();
 
 
-    //////////////////////////////////////////////////////////
-    // COMPROBAR CORRIENTES
-    //////////////////////////////////////////////////////////
-
-    if (
-        !CORR_detectarCorrientes(texto)
-    ) {
-
-        return {
-
-            encontrado: false,
-
-            turno:
-                CORR_detectarTurno(texto),
-
-            fecha:
-                CORR_detectarFecha(texto),
-
-            numeros: [],
-
-            pagina: pagina
-
-        };
-
-    }
+    let fecha =
+        window.EMI_CORR.detectarFecha(
+            texto
+        );
 
 
-    //////////////////////////////////////////////////////////
-    // BUSCAR ENCABEZADO CORRIENTES
-    //////////////////////////////////////////////////////////
-
-    let posicionCorrientes =
-        texto.indexOf("CORRIENTES");
-
-
-    if (
-        posicionCorrientes === -1
-    ) {
-
-        posicionCorrientes =
-            texto.indexOf("CORRIENTE");
-
-    }
-
-
-    if (
-        posicionCorrientes === -1
-    ) {
-
-        return {
-
-            encontrado: false,
-
-            turno:
-                CORR_detectarTurno(texto),
-
-            fecha:
-                CORR_detectarFecha(texto),
-
-            numeros: [],
-
-            pagina: pagina
-
-        };
-
-    }
-
-
-    //////////////////////////////////////////////////////////
-    // TOMAR ZONA POSTERIOR A CORRIENTES
-    //////////////////////////////////////////////////////////
-
-    let bloque =
-        texto.substring(
-            posicionCorrientes,
-            posicionCorrientes + 6000
+    let turno =
+        window.EMI_CORR.detectarTurno(
+            texto
         );
 
 
     //////////////////////////////////////////////////////////
-    // EXTRAER TODOS LOS CUATERNOS
+    // BUSCAR CORRIENTES
+    //////////////////////////////////////////////////////////
+
+    if (
+        !window.EMI_CORR.detectarCorrientes(
+            texto
+        )
+    ) {
+
+        return {
+
+            encontrado: false,
+
+            turno: turno,
+
+            fecha: fecha,
+
+            pagina: pagina,
+
+            numeros: []
+        };
+    }
+
+
+    //////////////////////////////////////////////////////////
+    // ENCONTRAR UBICACIÓN DE CORRIENTES
+    //////////////////////////////////////////////////////////
+
+    let posicion =
+        texto.indexOf("CORRIENTES");
+
+
+    if (posicion === -1)
+        posicion =
+            texto.indexOf("CORRIENTE");
+
+
+    if (posicion === -1)
+        posicion =
+            texto.indexOf("CORRIENT");
+
+
+    //////////////////////////////////////////////////////////
+    // TOMAR BLOQUE DESDE CORRIENTES
+    //////////////////////////////////////////////////////////
+
+    let bloque =
+        texto.substring(
+            posicion,
+            posicion + 6000
+        );
+
+
+    //////////////////////////////////////////////////////////
+    // BUSCAR CUATERNOS
     //////////////////////////////////////////////////////////
 
     let encontrados =
@@ -13871,57 +13843,33 @@ function CORR_extraer20Corrientes(
 
 
     //////////////////////////////////////////////////////////
-    // LIMPIAR Y LIMITAR A 20
+    // QUEDARNOS SOLO CON LOS PRIMEROS 20
     //////////////////////////////////////////////////////////
 
     let numeros = [];
 
 
     for (
-        let numero of encontrados
+        let i = 0;
+        i < encontrados.length;
+        i++
     ) {
 
-        let limpio =
-            CORR_limpiarCuaterno(
-                numero
+        let numero =
+            window.EMI_CORR.limpiarCuaterno(
+                encontrados[i]
             );
 
 
-        if (!limpio)
+        if (!numero)
             continue;
 
 
-        /*
-         * Evitar duplicados consecutivos
-         */
-
-        if (
-            numeros.length > 0 &&
-            numeros[
-                numeros.length - 1
-            ] === limpio
-        ) {
-
-            continue;
-
-        }
+        numeros.push(numero);
 
 
-        numeros.push(limpio);
-
-
-        /*
-         * SOLO POSICIONES 1 A 20
-         */
-
-        if (
-            numeros.length >= 20
-        ) {
-
+        if (numeros.length >= 20)
             break;
-
-        }
-
     }
 
 
@@ -13931,23 +13879,34 @@ function CORR_extraer20Corrientes(
 
     return {
 
-        encontrado:
-            numeros.length > 0,
+        encontrado: numeros.length > 0,
 
-        turno:
-            CORR_detectarTurno(texto),
+        turno: turno,
 
-        fecha:
-            CORR_detectarFecha(texto),
+        fecha: fecha,
 
-        numeros:
-            numeros.slice(0, 20),
+        pagina: pagina,
 
-        pagina:
-            pagina
-
+        numeros: numeros.slice(0, 20)
     };
+};
 
+
+//////////////////////////////////////////////////////////////
+// 🔗 COMPATIBILIDAD CON EL NOMBRE ANTIGUO
+//
+// Esto evita que alguna parte vieja del módulo rompa.
+//////////////////////////////////////////////////////////////
+
+function CORR_extraer20Corrientes(
+    texto,
+    pagina
+) {
+
+    return window.EMI_CORR.extraer20Corrientes(
+        texto,
+        pagina
+    );
 }
 
 
@@ -13955,7 +13914,7 @@ function CORR_extraer20Corrientes(
 // 💾 GUARDAR BLOQUE CORRENTINA
 //////////////////////////////////////////////////////////////
 
-function CORR_guardarBloque(
+window.EMI_CORR.guardarBloque = function (
     datos,
     nombreArchivo
 ) {
@@ -13963,26 +13922,14 @@ function CORR_guardarBloque(
     if (!datos)
         return;
 
+    if (!Array.isArray(datos.numeros))
+        return;
 
-    if (
-        !Array.isArray(
-            datos.numeros
-        )
-    )
+    if (datos.numeros.length === 0)
         return;
 
 
-    if (
-        datos.numeros.length === 0
-    )
-        return;
-
-
-    //////////////////////////////////////////////////////////
-    // VALIDAR TURNO
-    //////////////////////////////////////////////////////////
-
-    const turnosValidos = [
+    let turnosValidos = [
 
         "PREVIA",
         "PRIMERA",
@@ -13999,19 +13946,22 @@ function CORR_guardarBloque(
         )
     ) {
 
-        /*
-         * No guardamos páginas
-         * sin turno identificado.
-         */
+        console.warn(
+            "CORRENTINA: turno no reconocido:",
+            datos.turno
+        );
 
         return;
-
     }
 
 
     //////////////////////////////////////////////////////////
-    // CREAR REGISTRO
+    // GUARDAR SOLO HASTA POSICIÓN 20
     //////////////////////////////////////////////////////////
+
+    let numeros =
+        datos.numeros.slice(0, 20);
+
 
     let registro = {
 
@@ -14035,22 +13985,18 @@ function CORR_guardarBloque(
             nombreArchivo,
 
         cantidad:
-            Math.min(
-                datos.numeros.length,
-                20
-            ),
+            numeros.length,
 
         numeros:
-            datos.numeros.slice(0, 20)
-
+            numeros
     };
 
 
     //////////////////////////////////////////////////////////
-    // GUARDAR EN MEMORIA
+    // MEMORIA
     //////////////////////////////////////////////////////////
 
-    MEMORIA_CORRENTINA.push(
+    window.MEMORIA_CORRENTINA.push(
         registro
     );
 
@@ -14059,26 +14005,25 @@ function CORR_guardarBloque(
     // CONTADORES
     //////////////////////////////////////////////////////////
 
-    AUDITORIA_CORR.CUATERNOS_GUARDADOS +=
-        registro.numeros.length;
+    window.EMI_CORR.auditoria
+        .cuaternosGuardados +=
+        numeros.length;
 
 
     if (
-        AUDITORIA_CORR[
-            registro.turno
+        window.EMI_CORR.auditoria[
+            datos.turno
         ] !== undefined
     ) {
 
-        AUDITORIA_CORR[
-            registro.turno
-        ] +=
-            registro.numeros.length;
-
+        window.EMI_CORR.auditoria[
+            datos.turno
+        ] += numeros.length;
     }
 
 
     //////////////////////////////////////////////////////////
-    // PERSISTIR
+    // GUARDAR
     //////////////////////////////////////////////////////////
 
     localStorage.setItem(
@@ -14086,68 +14031,76 @@ function CORR_guardarBloque(
         "MEMORIA_CORRENTINA_APRENDIZAJE",
 
         JSON.stringify(
-            MEMORIA_CORRENTINA
+            window.MEMORIA_CORRENTINA
         )
-
     );
-
-}
+};
 
 
 //////////////////////////////////////////////////////////////
-// 📊 MOSTRAR AUDITORÍA EN VIVO
+// 📊 MOSTRAR AUDITORÍA
 //////////////////////////////////////////////////////////////
 
-function CORR_actualizarAuditoria(
+window.EMI_CORR.mostrarAuditoria = function (
     pagina,
     totalPaginas
 ) {
 
-    let porcentaje =
-        totalPaginas > 0
-            ? Math.round(
-                (pagina / totalPaginas) * 100
-            )
-            : 0;
+    let a =
+        window.EMI_CORR.auditoria;
 
 
     let texto =
 
-        `🧠 LECTOR CORRENTINA ACTIVO\n` +
+        "🧠 LECTOR CORRENTINA ACTIVO\n" +
+        "=========================================\n\n" +
 
-        `=========================================\n\n` +
+        "📄 Página: " +
+        pagina +
+        "/" +
+        totalPaginas +
+        "\n\n" +
 
-        `📄 Página: ${pagina}/${totalPaginas}\n` +
+        "🎯 Páginas con Correntina: " +
+        a.paginasCorrientes +
+        "\n" +
 
-        `📊 Progreso: ${porcentaje}%\n\n` +
+        "🔢 Cuaternos detectados: " +
+        a.cuaternosDetectados +
+        "\n" +
 
-        `🎯 Páginas con Correntina: ` +
-        `${AUDITORIA_CORR.PAGINAS_CORRIENTES}\n` +
+        "💾 Cuaternos guardados: " +
+        a.cuaternosGuardados +
+        "\n\n" +
 
-        `🔢 Cuaternos detectados: ` +
-        `${AUDITORIA_CORR.CUATERNOS_DETECTADOS}\n` +
+        "📚 CARGA POR TURNO\n" +
+        "-----------------------------------------\n" +
 
-        `💾 Cuaternos guardados: ` +
-        `${AUDITORIA_CORR.CUATERNOS_GUARDADOS}\n\n` +
+        "🔹 PREVIA: " +
+        a.PREVIA +
+        "\n" +
 
-        `📚 CARGA POR TURNO\n` +
+        "🔹 PRIMERA: " +
+        a.PRIMERA +
+        "\n" +
 
-        `-----------------------------------------\n` +
+        "🔹 MATUTINA: " +
+        a.MATUTINA +
+        "\n" +
 
-        `🔹 PREVIA: ` +
-        `${AUDITORIA_CORR.PREVIA} cuaternos\n` +
+        "🔹 VESPERTINA: " +
+        a.VESPERTINA +
+        "\n" +
 
-        `🔹 PRIMERA: ` +
-        `${AUDITORIA_CORR.PRIMERA} cuaternos\n` +
+        "🔹 NOCTURNA: " +
+        a.NOCTURNA +
+        "\n\n" +
 
-        `🔹 MATUTINA: ` +
-        `${AUDITORIA_CORR.MATUTINA} cuaternos\n` +
-
-        `🔹 VESPERTINA: ` +
-        `${AUDITORIA_CORR.VESPERTINA} cuaternos\n` +
-
-        `🔹 NOCTURNA: ` +
-        `${AUDITORIA_CORR.NOCTURNA} cuaternos`;
+        "📊 Progreso: " +
+        Math.round(
+            (pagina / totalPaginas) * 100
+        ) +
+        "%";
 
 
     if (
@@ -14156,9 +14109,11 @@ function CORR_actualizarAuditoria(
     ) {
 
         CORR_NUEVO_actualizarEstado(
-            `📄 Correntina: página ${pagina}/${totalPaginas}`
+            "📄 Correntina: página " +
+            pagina +
+            "/" +
+            totalPaginas
         );
-
     }
 
 
@@ -14170,10 +14125,35 @@ function CORR_actualizarAuditoria(
         CORR_NUEVO_mostrarPanel(
             texto
         );
-
     }
+};
 
-}
+
+//////////////////////////////////////////////////////////////
+// 🛑 DETENER OCR
+//////////////////////////////////////////////////////////////
+
+window.detenerOCRCorrentina = function () {
+
+    DETENER_OCR_CORR = true;
+
+    if (
+        typeof CORR_NUEVO_actualizarEstado ===
+        "function"
+    ) {
+
+        CORR_NUEVO_actualizarEstado(
+            "⛔ OCR Correntina detenido."
+        );
+    }
+};
+
+        
+   //////////////////////////////////////////////////////////////
+// 🎯 MÓDULO CORRENTINA
+// BLOQUE 2 — PARTE 2/2
+// PROCESADOR PDF COMPLETO + CONEXIÓN DEL BOTÓN
+//////////////////////////////////////////////////////////////
 
 
 //////////////////////////////////////////////////////////////
@@ -14182,27 +14162,27 @@ function CORR_actualizarAuditoria(
 
 async function CORR_NUEVO_abrirOCR() {
 
-    CORR_resetAuditoria();
+    try {
 
-    DETENER_OCR_CORR = false;
+        window.EMI_CORR.resetAuditoria();
 
-
-    let input =
-        document.createElement(
-            "input"
-        );
+        DETENER_OCR_CORR = false;
 
 
-    input.type = "file";
+        let input =
+            document.createElement("input");
 
-    input.accept = ".pdf";
+
+        input.type = "file";
+
+        input.accept = ".pdf";
 
 
-    input.onchange =
-        async function(e) {
+        input.onchange = async function (evento) {
 
             let archivo =
-                e.target.files[0];
+                evento.target.files[0];
+
 
             if (!archivo)
                 return;
@@ -14215,9 +14195,30 @@ async function CORR_NUEVO_abrirOCR() {
         };
 
 
-    input.click();
+        input.click();
 
+
+    } catch (error) {
+
+        console.error(
+            "ERROR ABRIENDO PDF CORRENTINA:",
+            error
+        );
+
+
+        if (
+            typeof CORR_NUEVO_actualizarEstado ===
+            "function"
+        ) {
+
+            CORR_NUEVO_actualizarEstado(
+                "❌ Error al abrir PDF."
+            );
+        }
+
+    }
 }
+
 
 
 //////////////////////////////////////////////////////////////
@@ -14228,6 +14229,9 @@ async function CORR_PROCESAR_PDF(
     archivo
 ) {
 
+    let worker = null;
+
+
     try {
 
         //////////////////////////////////////////////////////
@@ -14235,26 +14239,23 @@ async function CORR_PROCESAR_PDF(
         //////////////////////////////////////////////////////
 
         CORR_NUEVO_actualizarEstado(
-            `⏳ Abriendo PDF: ${archivo.name}...`
+            "⏳ Abriendo PDF: " +
+            archivo.name
         );
 
 
         CORR_NUEVO_mostrarPanel(
 
-            `📄 ABRIENDO PDF\n` +
-            `=========================================\n\n` +
-            `Archivo: ${archivo.name}\n\n` +
-            `🧠 Preparando lector de imágenes...`
+            "📄 LECTOR CORRENTINA\n" +
+            "=========================================\n\n" +
+
+            "Archivo: " +
+            archivo.name +
+            "\n\n" +
+
+            "⏳ Preparando PDF..."
 
         );
-
-
-        //////////////////////////////////////////////////////
-        // LEER ARCHIVO
-        //////////////////////////////////////////////////////
-
-        let buffer =
-            await archivo.arrayBuffer();
 
 
         //////////////////////////////////////////////////////
@@ -14269,8 +14270,30 @@ async function CORR_PROCESAR_PDF(
             throw new Error(
                 "PDF.js no está cargado."
             );
-
         }
+
+
+        //////////////////////////////////////////////////////
+        // COMPROBAR TESSERACT
+        //////////////////////////////////////////////////////
+
+        if (
+            typeof Tesseract ===
+            "undefined"
+        ) {
+
+            throw new Error(
+                "Tesseract.js no está cargado."
+            );
+        }
+
+
+        //////////////////////////////////////////////////////
+        // LEER ARCHIVO
+        //////////////////////////////////////////////////////
+
+        let buffer =
+            await archivo.arrayBuffer();
 
 
         //////////////////////////////////////////////////////
@@ -14286,34 +14309,23 @@ async function CORR_PROCESAR_PDF(
 
 
         //////////////////////////////////////////////////////
-        // COMPROBAR TESSERACT
-        //////////////////////////////////////////////////////
-
-        if (
-            typeof Tesseract ===
-            "undefined"
-        ) {
-
-            throw new Error(
-                "Tesseract.js no está cargado."
-            );
-
-        }
-
-
-        //////////////////////////////////////////////////////
         // INFORMAR TOTAL
         //////////////////////////////////////////////////////
 
         CORR_NUEVO_mostrarPanel(
 
-            `📄 PDF DETECTADO\n` +
-            `=========================================\n\n` +
-            `Archivo: ${archivo.name}\n` +
-            `📖 Total páginas: ${pdf.numPages}\n\n` +
-            `🎯 Buscando solamente CORRIENTES\n` +
-            `📌 Posiciones: 1 a 20\n\n` +
-            `🧠 Iniciando OCR...`
+            "📄 PDF DETECTADO\n" +
+            "=========================================\n\n" +
+
+            "Archivo: " +
+            archivo.name +
+            "\n" +
+
+            "📖 Páginas: " +
+            pdf.numPages +
+            "\n\n" +
+
+            "🧠 Preparando lector OCR..."
 
         );
 
@@ -14322,7 +14334,7 @@ async function CORR_PROCESAR_PDF(
         // CREAR WORKER
         //////////////////////////////////////////////////////
 
-        let worker =
+        worker =
             await Tesseract.createWorker(
                 "spa"
             );
@@ -14338,17 +14350,35 @@ async function CORR_PROCESAR_PDF(
             pagina++
         ) {
 
+
+            //////////////////////////////////////////////////
+            // DETENER
+            //////////////////////////////////////////////////
+
             if (
                 DETENER_OCR_CORR
             ) {
 
                 break;
-
             }
 
 
             //////////////////////////////////////////////////
-            // PÁGINA
+            // ESTADO ANTES DE PROCESAR
+            //////////////////////////////////////////////////
+
+            CORR_NUEVO_actualizarEstado(
+
+                "🔎 Procesando página " +
+                pagina +
+                "/" +
+                pdf.numPages
+
+            );
+
+
+            //////////////////////////////////////////////////
+            // OBTENER PÁGINA
             //////////////////////////////////////////////////
 
             let page =
@@ -14358,7 +14388,7 @@ async function CORR_PROCESAR_PDF(
 
 
             //////////////////////////////////////////////////
-            // RENDER
+            // RENDERIZAR CON BUENA CALIDAD
             //////////////////////////////////////////////////
 
             let viewport =
@@ -14377,6 +14407,7 @@ async function CORR_PROCESAR_PDF(
                 Math.floor(
                     viewport.width
                 );
+
 
             canvas.height =
                 Math.floor(
@@ -14402,7 +14433,7 @@ async function CORR_PROCESAR_PDF(
 
 
             //////////////////////////////////////////////////
-            // OCR
+            // OCR DE LA IMAGEN
             //////////////////////////////////////////////////
 
             let lectura =
@@ -14412,59 +14443,74 @@ async function CORR_PROCESAR_PDF(
 
 
             let texto =
-                lectura.data.text || "";
+                lectura &&
+                lectura.data &&
+                lectura.data.text
+                    ? lectura.data.text
+                    : "";
 
 
             console.log(
-                "CORRENTINA OCR - PÁGINA",
-                pagina,
+                "CORRENTINA — PÁGINA:",
+                pagina
+            );
+
+
+            console.log(
                 texto
             );
 
 
             //////////////////////////////////////////////////
-            // 🎯 EXTRAER CORRIENTES
-            // ESTA ES LA LLAMADA CORRECTA
+            // EXTRAER CORRIENTES
             //////////////////////////////////////////////////
 
             let datos =
-                CORR_extraer20Corrientes(
+                window.EMI_CORR.extraer20Corrientes(
                     texto,
                     pagina
                 );
 
 
             //////////////////////////////////////////////////
-            // CONTADOR DE PÁGINA
+            // PÁGINA PROCESADA
             //////////////////////////////////////////////////
 
-            AUDITORIA_CORR.PAGINAS_PROCESADAS =
+            window.EMI_CORR.auditoria
+                .paginasProcesadas =
                 pagina;
 
 
             //////////////////////////////////////////////////
-            // SI ENCONTRÓ CORRIENTES
+            // CORRIENTES ENCONTRADA
             //////////////////////////////////////////////////
 
             if (
                 datos.encontrado
             ) {
 
-                AUDITORIA_CORR.PAGINAS_CORRIENTES++;
+
+                window.EMI_CORR
+                    .auditoria
+                    .paginasCorrientes++;
 
 
-                AUDITORIA_CORR.CUATERNOS_DETECTADOS +=
+                window.EMI_CORR
+                    .auditoria
+                    .cuaternosDetectados +=
                     datos.numeros.length;
 
 
                 //////////////////////////////////////////////////
-                // GUARDAR
+                // GUARDAR LOS 20
                 //////////////////////////////////////////////////
 
-                CORR_guardarBloque(
-                    datos,
-                    archivo.name
-                );
+                window.EMI_CORR
+                    .guardarBloque(
+                        datos,
+                        archivo.name
+                    );
+
 
             }
 
@@ -14473,10 +14519,11 @@ async function CORR_PROCESAR_PDF(
             // MOSTRAR PROGRESO
             //////////////////////////////////////////////////
 
-            CORR_actualizarAuditoria(
-                pagina,
-                pdf.numPages
-            );
+            window.EMI_CORR
+                .mostrarAuditoria(
+                    pagina,
+                    pdf.numPages
+                );
 
 
             //////////////////////////////////////////////////
@@ -14484,6 +14531,7 @@ async function CORR_PROCESAR_PDF(
             //////////////////////////////////////////////////
 
             canvas.width = 1;
+
             canvas.height = 1;
 
 
@@ -14506,7 +14554,12 @@ async function CORR_PROCESAR_PDF(
         // TERMINAR WORKER
         //////////////////////////////////////////////////////
 
-        await worker.terminate();
+        if (worker) {
+
+            await worker.terminate();
+
+            worker = null;
+        }
 
 
         //////////////////////////////////////////////////////
@@ -14518,87 +14571,91 @@ async function CORR_PROCESAR_PDF(
             "MEMORIA_CORRENTINA_APRENDIZAJE",
 
             JSON.stringify(
-                MEMORIA_CORRENTINA
+                window.MEMORIA_CORRENTINA
             )
 
         );
 
 
         //////////////////////////////////////////////////////
-        // ESTADO FINAL
+        // RESULTADO FINAL
         //////////////////////////////////////////////////////
+
+        let a =
+            window.EMI_CORR.auditoria;
+
+
+        let estadoFinal =
+
+            "✅ CARGA CORRENTINA FINALIZADA\n" +
+            "=========================================\n\n" +
+
+            "📄 Archivo: " +
+            archivo.name +
+            "\n\n" +
+
+            "📖 Páginas procesadas: " +
+            a.paginasProcesadas +
+            "/" +
+            pdf.numPages +
+            "\n\n" +
+
+            "🎯 Páginas con Correntina: " +
+            a.paginasCorrientes +
+            "\n" +
+
+            "🔢 Cuaternos detectados: " +
+            a.cuaternosDetectados +
+            "\n" +
+
+            "💾 Cuaternos guardados: " +
+            a.cuaternosGuardados +
+            "\n\n" +
+
+            "📚 REGISTROS POR TURNO\n" +
+            "-----------------------------------------\n" +
+
+            "🔹 PREVIA: " +
+            a.PREVIA +
+            "\n" +
+
+            "🔹 PRIMERA: " +
+            a.PRIMERA +
+            "\n" +
+
+            "🔹 MATUTINA: " +
+            a.MATUTINA +
+            "\n" +
+
+            "🔹 VESPERTINA: " +
+            a.VESPERTINA +
+            "\n" +
+
+            "🔹 NOCTURNA: " +
+            a.NOCTURNA +
+            "\n\n" +
+
+            "🧠 MEMORIA CORRENTINA: LISTA";
+
 
         if (
             DETENER_OCR_CORR
         ) {
 
             CORR_NUEVO_actualizarEstado(
-                "⛔ OCR Correntina detenido."
+                "⛔ OCR detenido."
             );
 
         } else {
 
             CORR_NUEVO_actualizarEstado(
-                "✅ PDF Correntina procesado completamente."
+                "✅ PDF completo procesado."
             );
-
         }
 
 
-        //////////////////////////////////////////////////////
-        // REPORTE FINAL
-        //////////////////////////////////////////////////////
-
-        let final =
-
-            `✅ CARGA CORRENTINA FINALIZADA\n` +
-
-            `=========================================\n\n` +
-
-            `📄 Archivo: ${archivo.name}\n` +
-
-            `📖 Páginas procesadas: ` +
-            `${AUDITORIA_CORR.PAGINAS_PROCESADAS}/${pdf.numPages}\n\n` +
-
-            `🎯 Páginas con Correntina: ` +
-            `${AUDITORIA_CORR.PAGINAS_CORRIENTES}\n` +
-
-            `🔢 Cuaternos detectados: ` +
-            `${AUDITORIA_CORR.CUATERNOS_DETECTADOS}\n` +
-
-            `💾 Cuaternos guardados: ` +
-            `${AUDITORIA_CORR.CUATERNOS_GUARDADOS}\n\n` +
-
-            `📚 REGISTROS POR TURNO\n` +
-
-            `-----------------------------------------\n` +
-
-            `🔹 PREVIA ✔ ` +
-            `${AUDITORIA_CORR.PREVIA}\n` +
-
-            `🔹 PRIMERA ✔ ` +
-            `${AUDITORIA_CORR.PRIMERA}\n` +
-
-            `🔹 MATUTINA ✔ ` +
-            `${AUDITORIA_CORR.MATUTINA}\n` +
-
-            `🔹 VESPERTINA ✔ ` +
-            `${AUDITORIA_CORR.VESPERTINA}\n` +
-
-            `🔹 NOCTURNA ✔ ` +
-            `${AUDITORIA_CORR.NOCTURNA}\n\n` +
-
-            `🧠 MEMORIA CORRENTINA: LISTA\n` +
-
-            `📊 Datos disponibles para análisis.\n\n` +
-
-            `🎯 OBJETIVO DEL LECTOR:\n` +
-
-            `Solo Corrientes, posiciones 1 a 20.`;
-
-
         CORR_NUEVO_mostrarPanel(
-            final
+            estadoFinal
         );
 
 
@@ -14606,7 +14663,29 @@ async function CORR_PROCESAR_PDF(
 
 
         //////////////////////////////////////////////////////
-        // ERROR
+        // TERMINAR WORKER SI HUBO ERROR
+        //////////////////////////////////////////////////////
+
+        if (worker) {
+
+            try {
+
+                await worker.terminate();
+
+            } catch (e) {
+
+                console.error(
+                    "Error terminando worker:",
+                    e
+                );
+            }
+
+            worker = null;
+        }
+
+
+        //////////////////////////////////////////////////////
+        // MOSTRAR ERROR SIN BORRAR MEMORIA
         //////////////////////////////////////////////////////
 
         console.error(
@@ -14616,20 +14695,19 @@ async function CORR_PROCESAR_PDF(
 
 
         CORR_NUEVO_actualizarEstado(
-            "❌ Error en lector Correntina."
+            "❌ ERROR EN LECTOR CORRENTINA"
         );
 
 
         CORR_NUEVO_mostrarPanel(
 
-            `❌ ERROR EN LECTOR CORRENTINA\n\n` +
+            "❌ ERROR EN LECTOR CORRENTINA\n\n" +
 
-            `${error.message || error}\n\n` +
+            error.message +
 
-            `La memoria anterior NO fue eliminada.\n\n` +
+            "\n\n" +
 
-            `📊 Datos anteriores conservados: ` +
-            `${MEMORIA_CORRENTINA.length} registros.`
+            "La memoria anterior NO fue eliminada."
 
         );
 
@@ -14638,8 +14716,9 @@ async function CORR_PROCESAR_PDF(
 }
 
 
+
 //////////////////////////////////////////////////////////////
-// ⛔ DETENER OCR
+// 🛑 FUNCIÓN DETENER
 //////////////////////////////////////////////////////////////
 
 function CORR_NUEVO_detenerOCR() {
@@ -14651,8 +14730,58 @@ function CORR_NUEVO_detenerOCR() {
         "⛔ Deteniendo lector Correntina..."
     );
 
-    }
-    
+
+    CORR_NUEVO_mostrarPanel(
+        "⛔ El lector se detendrá al terminar la página actual."
+    );
+}
+
+
+
+//////////////////////////////////////////////////////////////
+// 🔗 CONEXIÓN FINAL
+//
+// Dejamos las funciones disponibles globalmente.
+// Esto evita problemas de alcance entre bloques.
+//////////////////////////////////////////////////////////////
+
+window.CORR_NUEVO_abrirOCR =
+    CORR_NUEVO_abrirOCR;
+
+
+window.CORR_PROCESAR_PDF =
+    CORR_PROCESAR_PDF;
+
+
+window.CORR_NUEVO_detenerOCR =
+    CORR_NUEVO_detenerOCR;
+
+
+//////////////////////////////////////////////////////////////
+// ✅ VERIFICACIÓN DEL LECTOR
+//////////////////////////////////////////////////////////////
+
+console.log(
+    "✅ LECTOR CORRENTINA CARGADO"
+);
+
+
+console.log(
+    "extraer20Corrientes:",
+    typeof window.EMI_CORR.extraer20Corrientes
+);
+
+
+console.log(
+    "guardarBloque:",
+    typeof window.EMI_CORR.guardarBloque
+);
+
+
+console.log(
+    "CORR_NUEVO_abrirOCR:",
+    typeof window.CORR_NUEVO_abrirOCR
+); 
             
 //////////////////////////////////////////////////////////////
 // ✅ FIN BLOQUE 2

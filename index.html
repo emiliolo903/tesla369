@@ -15046,57 +15046,101 @@ function CORR_generarPorTurno(turno) {
 }
 
 //////////////////////////////////////////////////////////////
-// GENERADOR PRINCIPAL
+// 🎯 GENERADOR CORRENTINA
+// USA EL ÚLTIMO TURNO REALMENTE CARGADO
 //////////////////////////////////////////////////////////////
 
 function CORR_NUEVO_generar() {
 
-    //////////////////////////////////////////////////////////
-    // OBTENER TURNO
-    //
-    // Si tu interfaz tiene un selector de turno,
-    // usamos su valor.
-    //////////////////////////////////////////////////////////
-
     let turno = "";
 
-    let select =
-        document.querySelector(
-            "#CORR_TURNO"
+    //////////////////////////////////////////////////////////
+    // BUSCAR EL ÚLTIMO REGISTRO CARGADO
+    //////////////////////////////////////////////////////////
+
+    if (
+        Array.isArray(window.CORR_MEMORIA) &&
+        window.CORR_MEMORIA.length > 0
+    ) {
+
+        let ultimo =
+            window.CORR_MEMORIA[
+                window.CORR_MEMORIA.length - 1
+            ];
+
+        turno = String(
+            ultimo.turno ||
+            ultimo.turnoNombre ||
+            ultimo.nombreTurno ||
+            ""
+        )
+        .toUpperCase()
+        .trim();
+    }
+
+    //////////////////////////////////////////////////////////
+    // NORMALIZAR EL NOMBRE DEL TURNO
+    //////////////////////////////////////////////////////////
+
+    if (turno.includes("PREVIA")) {
+
+        turno = "PREVIA";
+
+    } else if (turno.includes("PRIMERA")) {
+
+        turno = "PRIMERA";
+
+    } else if (turno.includes("MATUTINA")) {
+
+        turno = "MATUTINA";
+
+    } else if (turno.includes("VESPERTINA")) {
+
+        turno = "VESPERTINA";
+
+    } else if (
+        turno.includes("NOCTURNA") ||
+        turno.includes("NOTURNA")
+    ) {
+
+        turno = "NOCTURNA";
+    }
+
+    //////////////////////////////////////////////////////////
+    // VERIFICAR
+    //////////////////////////////////////////////////////////
+
+    const TURNOS_VALIDOS = [
+        "PREVIA",
+        "PRIMERA",
+        "MATUTINA",
+        "VESPERTINA",
+        "NOCTURNA"
+    ];
+
+    if (!TURNOS_VALIDOS.includes(turno)) {
+
+        CORR_panel(
+            "⚠️ NO PUDE IDENTIFICAR EL TURNO.\n\n" +
+            "La memoria no tiene registrado " +
+            "el turno de los 20 cuaternos."
         );
 
-    if (select) {
-
-        turno =
-            select.value;
+        return [];
     }
 
     //////////////////////////////////////////////////////////
-    // SI NO HAY SELECTOR
-    //
-    // Intentar tomar el último turno cargado.
+    // GUARDAR TURNO ACTIVO
     //////////////////////////////////////////////////////////
 
-    if (!turno) {
+    window.EMI_CORR =
+        window.EMI_CORR || {};
 
-        let memoria =
-            window.CORR_MEMORIA || [];
-
-        if (
-            memoria.length > 0
-        ) {
-
-            turno =
-                String(
-                    memoria[
-                        memoria.length - 1
-                    ].turno || ""
-                ).toUpperCase();
-        }
-    }
+    window.EMI_CORR.ultimoTurno =
+        turno;
 
     //////////////////////////////////////////////////////////
-    // GENERAR
+    // GENERAR EXCLUSIVAMENTE PARA ESE TURNO
     //////////////////////////////////////////////////////////
 
     return CORR_generarPorTurno(

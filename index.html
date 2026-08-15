@@ -14617,39 +14617,508 @@ function CORR_frecuencia() {
 // GENERAR 2 CUATERNOS
 //////////////////////////////////////////////////////////////
 
-function CORR_NUEVO_generar() {
+//////////////////////////////////////////////////////////////
+// 🎯 CORRENTINA — GENERADOR POR TURNO
+// BLOQUE 5
+//
+// SIN TESLA
+// SIN HISTÓRICO GENERAL MEZCLADO
+//
+// Cada turno aprende de su propio turno:
+// PREVIA     → PREVIA
+// PRIMERA    → PRIMERA
+// MATUTINA   → MATUTINA
+// VESPERTINA → VESPERTINA
+// NOCTURNA   → NOCTURNA
+//////////////////////////////////////////////////////////////
+
+function CORR_generarPorTurno(turno) {
+
+    turno =
+        String(turno || "")
+            .toUpperCase()
+            .trim();
+
+    const TURNOS = [
+        "PREVIA",
+        "PRIMERA",
+        "MATUTINA",
+        "VESPERTINA",
+        "NOCTURNA"
+    ];
+
+    if (!TURNOS.includes(turno)) {
+
+        CORR_panel(
+            "❌ Seleccioná un turno válido."
+        );
+
+        return [];
+    }
+
+    //////////////////////////////////////////////////////////
+    // MEMORIA CORRENTINA
+    //////////////////////////////////////////////////////////
+
+    let memoria = [];
 
     if (
-        CORR_MEMORIA.length === 0
+        Array.isArray(
+            window.CORR_MEMORIA
+        )
+    ) {
+
+        memoria =
+            window.CORR_MEMORIA;
+
+    } else {
+
+        try {
+
+            memoria =
+                JSON.parse(
+                    localStorage.getItem(
+                        "MEMORIA_CORRENTINA_APRENDIZAJE"
+                    )
+                ) || [];
+
+        } catch(e) {
+
+            memoria = [];
+        }
+    }
+
+    //////////////////////////////////////////////////////////
+    // 🔥 SOLO EL TURNO SOLICITADO
+    //////////////////////////////////////////////////////////
+
+    let datosTurno =
+        memoria.filter(
+            function(registro) {
+
+                return (
+                    String(
+                        registro.turno || ""
+                    ).toUpperCase() === turno
+                );
+            }
+        );
+
+    //////////////////////////////////////////////////////////
+    // NO USAR HISTÓRICO GENERAL
+    //////////////////////////////////////////////////////////
+
+    if (
+        datosTurno.length === 0
     ) {
 
         CORR_panel(
 
-            "⚠️ TODAVÍA NO HAY MEMORIA\n\n" +
+            "⚠️ NO HAY DATOS PARA " +
+            turno +
+            "\n\n" +
 
-            "Cargá primero el PDF Correntina."
+            "Primero cargá resultados " +
+            "de ese turno."
         );
 
-        return;
+        return [];
     }
 
-    let frecuencia =
-        CORR_frecuencia();
+    //////////////////////////////////////////////////////////
+    // FRECUENCIA POR POSICIÓN
+    //
+    // SOLO P1–P5
+    //////////////////////////////////////////////////////////
 
-    let candidatos =
-        Object.keys(
-            frecuencia
+    let frecuencia = {
+
+        1: {},
+        2: {},
+        3: {},
+        4: {},
+        5: {}
+    };
+
+    for (
+        let registro of datosTurno
+    ) {
+
+        let posiciones =
+            registro.posiciones ||
+            registro.numeros ||
+            [];
+
+        for (
+            let i = 0;
+            i < 5;
+            i++
+        ) {
+
+            if (
+                !posiciones[i]
+            )
+                continue;
+
+            let numero =
+                String(
+                    posiciones[i]
+                )
+                .replace(/\D/g, "")
+                .padStart(4, "0")
+                .slice(-4);
+
+            frecuencia[i + 1][numero] =
+                (
+                    frecuencia[i + 1][numero] ||
+                    0
+                ) + 1;
+        }
+    }
+
+    //////////////////////////////////////////////////////////
+    // CANDIDATOS
+    //////////////////////////////////////////////////////////
+
+    let candidatos = {};
+
+    for (
+        let posicion = 1;
+        posicion <= 5;
+        posicion++
+    ) {
+
+        let mapa =
+            frecuencia[posicion];
+
+        let ordenados =
+            Object.keys(mapa)
+                .sort(
+                    function(a,b) {
+
+                        return (
+                            mapa[b] -
+                            mapa[a]
+                        );
+                    }
+                );
+
+        //////////////////////////////////////////////////////
+        // NO QUEDARSE SOLO CON EL PRIMERO
+        //////////////////////////////////////////////////////
+
+        for (
+            let i = 0;
+            i < Math.min(
+                ordenados.length,
+                15
+            );
+            i++
+        ) {
+
+            let numero =
+                ordenados[i];
+
+            if (!candidatos[numero]) {
+
+                candidatos[numero] = {
+
+                    numero:
+                        numero,
+
+                    frecuencia:
+                        0,
+
+                    posiciones: [],
+
+                    puntaje: 0
+                };
+            }
+
+            candidatos[numero]
+                .frecuencia +=
+                mapa[numero];
+
+            candidatos[numero]
+                .posiciones
+                .push(posicion);
+        }
+    }
+
+    //////////////////////////////////////////////////////////
+    // 🔄 TRANSICIÓN DEL MISMO TURNO
+    //////////////////////////////////////////////////////////
+
+    if (
+        typeof CORR_TR_obtener ===
+        "function"
+    ) {
+
+        //////////////////////////////////////////////////////
+        // TOMAR EL ÚLTIMO REGISTRO DEL MISMO TURNO
+        //////////////////////////////////////////////////////
+
+        let ultimo =
+            datosTurno[
+                datosTurno.length - 1
+            ];
+
+        let posiciones =
+            ultimo.posiciones ||
+            ultimo.numeros ||
+            [];
+
+        //////////////////////////////////////////////////////
+        // P1–P5
+        //////////////////////////////////////////////////////
+
+        for (
+            let posicion = 1;
+            posicion <= 5;
+            posicion++
+        ) {
+
+            let anterior =
+                posiciones[
+                    posicion - 1
+                ];
+
+            if (!anterior)
+                continue;
+
+            let transiciones =
+                CORR_TR_obtener(
+                    posicion,
+                    anterior,
+                    turno
+                );
+
+            for (
+                let t of transiciones
+            ) {
+
+                if (!t || !t.numero)
+                    continue;
+
+                let numero =
+                    t.numero;
+
+                if (!candidatos[numero]) {
+
+                    candidatos[numero] = {
+
+                        numero:
+                            numero,
+
+                        frecuencia:
+                            0,
+
+                        posiciones:
+                            [],
+
+                        puntaje:
+                            0
+                    };
+                }
+
+                //////////////////////////////////////////////////
+                // LA TRANSICIÓN TIENE MÁS PESO
+                //////////////////////////////////////////////////
+
+                candidatos[numero]
+                    .puntaje +=
+                    t.veces * 3;
+
+                candidatos[numero]
+                    .posiciones
+                    .push(posicion);
+            }
+        }
+    }
+
+    //////////////////////////////////////////////////////////
+    // PUNTAJE DE FRECUENCIA
+    //////////////////////////////////////////////////////////
+
+    Object.keys(
+        candidatos
+    ).forEach(
+        function(numero) {
+
+            candidatos[numero]
+                .puntaje +=
+                candidatos[numero]
+                    .frecuencia;
+        }
+    );
+
+    //////////////////////////////////////////////////////////
+    // ORDENAR
+    //////////////////////////////////////////////////////////
+
+    let ranking =
+        Object.values(
+            candidatos
         )
         .sort(
             function(a,b) {
 
                 return (
-                    frecuencia[b] -
-                    frecuencia[a]
+                    b.puntaje -
+                    a.puntaje
                 );
             }
         );
 
+    //////////////////////////////////////////////////////////
+    // 🔥 DIVERSIFICAR
+    //
+    // No devolver siempre el mismo número.
+    //////////////////////////////////////////////////////////
+
+    let seleccionados = [];
+
+    for (
+        let candidato of ranking
+    ) {
+
+        if (
+            seleccionados.includes(
+                candidato.numero
+            )
+        )
+            continue;
+
+        seleccionados.push(
+            candidato.numero
+        );
+
+        if (
+            seleccionados.length >= 10
+        )
+            break;
+    }
+
+    //////////////////////////////////////////////////////////
+    // MOSTRAR
+    //////////////////////////////////////////////////////////
+
+    let salida =
+
+        "🎯 CORRENTINA — " +
+        turno +
+        "\n" +
+
+        "================================\n\n" +
+
+        "🧠 Datos del turno: " +
+        datosTurno.length +
+        "\n\n" +
+
+        "🏆 CANDIDATOS APRENDIDOS\n\n";
+
+    seleccionados.forEach(
+        function(numero, indice) {
+
+            salida +=
+                (indice + 1) +
+                ". " +
+                numero +
+                "\n";
+        }
+    );
+
+    salida +=
+
+        "\n🔄 TRANSICIÓN: ACTIVA\n" +
+
+        "📊 FRECUENCIA: ACTIVA\n" +
+
+        "🎯 OBJETIVO: P1–P5\n\n" +
+
+        "⚡ TESLA: NO INTERVIENE";
+
+    CORR_panel(
+        salida
+    );
+
+    return seleccionados;
+}
+
+//////////////////////////////////////////////////////////////
+// GENERADOR PRINCIPAL
+//////////////////////////////////////////////////////////////
+
+function CORR_NUEVO_generar() {
+
+    //////////////////////////////////////////////////////////
+    // OBTENER TURNO
+    //
+    // Si tu interfaz tiene un selector de turno,
+    // usamos su valor.
+    //////////////////////////////////////////////////////////
+
+    let turno = "";
+
+    let select =
+        document.querySelector(
+            "#CORR_TURNO"
+        );
+
+    if (select) {
+
+        turno =
+            select.value;
+    }
+
+    //////////////////////////////////////////////////////////
+    // SI NO HAY SELECTOR
+    //
+    // Intentar tomar el último turno cargado.
+    //////////////////////////////////////////////////////////
+
+    if (!turno) {
+
+        let memoria =
+            window.CORR_MEMORIA || [];
+
+        if (
+            memoria.length > 0
+        ) {
+
+            turno =
+                String(
+                    memoria[
+                        memoria.length - 1
+                    ].turno || ""
+                ).toUpperCase();
+        }
+    }
+
+    //////////////////////////////////////////////////////////
+    // GENERAR
+    //////////////////////////////////////////////////////////
+
+    return CORR_generarPorTurno(
+        turno
+    );
+}
+
+//////////////////////////////////////////////////////////////
+// EXPORTAR
+//////////////////////////////////////////////////////////////
+
+window.EMI_CORR =
+    window.EMI_CORR || {};
+
+window.EMI_CORR.generarPorTurno =
+    CORR_generarPorTurno;
+
+//////////////////////////////////////////////////////////////
+// FIN
+//////////////////////////////////////////////////////////////
+
+    
     //////////////////////////////////////////////////////////
     // PRIORIDAD POSICIONES 1 A 5
     //////////////////////////////////////////////////////////

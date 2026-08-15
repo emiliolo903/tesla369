@@ -15253,6 +15253,565 @@ function CORR_NUEVO_verHistorial() {
 // FIN BLOQUE 4
 //////////////////////////////////////////////////////////////
 
+  //////////////////////////////////////////////////////////////
+// 🎯 CORRENTINA — MOTOR DE TRANSICIÓN
+// INDEPENDIENTE DE TESLA
+//
+// Estudia:
+// anterior → siguiente
+// turno → siguiente
+// posición → siguiente
+//
+// OBJETIVO PRINCIPAL: P1 a P5
+//////////////////////////////////////////////////////////////
+
+window.CORR_TRANSICION =
+    window.CORR_TRANSICION || {
+
+        registros: [],
+        pares: {},
+        porTurno: {},
+
+        totalAnalizados: 0,
+
+        aciertosP1: 0,
+        aciertosP2: 0,
+        aciertosP3: 0,
+        aciertosP4: 0,
+        aciertosP5: 0
+    };
+
+
+//////////////////////////////////////////////////////////////
+// NORMALIZAR NÚMERO
+//////////////////////////////////////////////////////////////
+
+function CORR_TR_normalizar(numero) {
+
+    if (numero === undefined ||
+        numero === null) {
+
+        return null;
+    }
+
+    numero =
+        String(numero)
+            .replace(/\D/g, "");
+
+    if (!numero)
+        return null;
+
+    return numero
+        .padStart(4, "0")
+        .slice(-4);
+}
+
+
+//////////////////////////////////////////////////////////////
+// REGISTRAR TRANSICIÓN
+//
+// Compara un registro anterior con el siguiente.
+// SOLO P1–P5 son objetivo de predicción.
+//
+//////////////////////////////////////////////////////////////
+
+function CORR_TR_registrar(
+    anterior,
+    siguiente
+) {
+
+    if (!anterior ||
+        !siguiente) {
+
+        return;
+    }
+
+    if (!Array.isArray(anterior.posiciones) ||
+        !Array.isArray(siguiente.posiciones)) {
+
+        return;
+    }
+
+    if (anterior.posiciones.length < 5 ||
+        siguiente.posiciones.length < 5) {
+
+        return;
+    }
+
+    CORR_TRANSICION
+        .totalAnalizados++;
+
+    //////////////////////////////////////////////////////////
+    // REGISTRO GENERAL
+    //////////////////////////////////////////////////////////
+
+    let registro = {
+
+        fechaAnterior:
+            anterior.fecha || "",
+
+        fechaSiguiente:
+            siguiente.fecha || "",
+
+        turnoAnterior:
+            anterior.turno || "",
+
+        turnoSiguiente:
+            siguiente.turno || "",
+
+        anterior:
+            anterior.posiciones
+                .slice(0, 5),
+
+        siguiente:
+            siguiente.posiciones
+                .slice(0, 5)
+    };
+
+    CORR_TRANSICION
+        .registros
+        .push(registro);
+
+
+    //////////////////////////////////////////////////////////
+    // ANALIZAR P1 → P1
+    // P2 → P2
+    // ...
+    // P5 → P5
+    //////////////////////////////////////////////////////////
+
+    for (
+        let i = 0;
+        i < 5;
+        i++
+    ) {
+
+        let numeroAnterior =
+            CORR_TR_normalizar(
+                anterior.posiciones[i]
+            );
+
+        let numeroSiguiente =
+            CORR_TR_normalizar(
+                siguiente.posiciones[i]
+            );
+
+        if (!numeroAnterior ||
+            !numeroSiguiente) {
+
+            continue;
+        }
+
+        //////////////////////////////////////////////////////
+        // CREAR ESTRUCTURA
+        //////////////////////////////////////////////////////
+
+        if (!CORR_TRANSICION.pares[i + 1]) {
+
+            CORR_TRANSICION.pares[i + 1] = {};
+        }
+
+        if (
+            !CORR_TRANSICION
+                .pares[i + 1][numeroAnterior]
+        ) {
+
+            CORR_TRANSICION
+                .pares[i + 1][numeroAnterior] = {};
+        }
+
+        let mapa =
+            CORR_TRANSICION
+                .pares[i + 1][numeroAnterior];
+
+        mapa[numeroSiguiente] =
+            (mapa[numeroSiguiente] || 0) + 1;
+
+
+        //////////////////////////////////////////////////////
+        // APRENDIZAJE POR TURNO
+        //////////////////////////////////////////////////////
+
+        let turno =
+            siguiente.turno ||
+            "SIN_TURNO";
+
+        if (!CORR_TRANSICION.porTurno[turno]) {
+
+            CORR_TRANSICION
+                .porTurno[turno] = {};
+        }
+
+        if (
+            !CORR_TRANSICION
+                .porTurno[turno][i + 1]
+        ) {
+
+            CORR_TRANSICION
+                .porTurno[turno][i + 1] = {};
+        }
+
+        if (
+            !CORR_TRANSICION
+                .porTurno[turno][i + 1]
+                [numeroAnterior]
+        ) {
+
+            CORR_TRANSICION
+                .porTurno[turno][i + 1]
+                [numeroAnterior] = {};
+        }
+
+        let mapaTurno =
+            CORR_TRANSICION
+                .porTurno[turno]
+                [i + 1]
+                [numeroAnterior];
+
+        mapaTurno[numeroSiguiente] =
+            (mapaTurno[numeroSiguiente] || 0) + 1;
+    }
+
+    //////////////////////////////////////////////////////////
+    // GUARDAR
+    //////////////////////////////////////////////////////////
+
+    CORR_TR_guardar();
+}
+
+
+//////////////////////////////////////////////////////////////
+// CONSTRUIR TRANSICIONES DE TODO EL HISTÓRICO
+//////////////////////////////////////////////////////////////
+
+function CORR_TR_entrenar() {
+
+    if (
+        typeof CORR_MEMORIA ===
+        "undefined"
+    ) {
+
+        return;
+    }
+
+    if (
+        !Array.isArray(
+            CORR_MEMORIA
+        )
+    ) {
+
+        return;
+    }
+
+    //////////////////////////////////////////////////////////
+    // ORDENAR POR FECHA / PÁGINA
+    //////////////////////////////////////////////////////////
+
+    let datos =
+        CORR_MEMORIA
+            .slice()
+            .sort(
+                function(a, b) {
+
+                    let fa =
+                        String(
+                            a.fecha || ""
+                        );
+
+                    let fb =
+                        String(
+                            b.fecha || ""
+                        );
+
+                    if (fa < fb)
+                        return -1;
+
+                    if (fa > fb)
+                        return 1;
+
+                    return (
+                        Number(
+                            a.pagina || 0
+                        ) -
+                        Number(
+                            b.pagina || 0
+                        )
+                    );
+                }
+            );
+
+    //////////////////////////////////////////////////////////
+    // LIMPIAR TRANSICIONES
+    //////////////////////////////////////////////////////////
+
+    CORR_TRANSICION.pares = {};
+    CORR_TRANSICION.porTurno = {};
+    CORR_TRANSICION.registros = [];
+
+    CORR_TRANSICION.totalAnalizados = 0;
+
+    //////////////////////////////////////////////////////////
+    // COMPARAR REGISTROS CONSECUTIVOS
+    //////////////////////////////////////////////////////////
+
+    for (
+        let i = 0;
+        i < datos.length - 1;
+        i++
+    ) {
+
+        let actual =
+            datos[i];
+
+        let siguiente =
+            datos[i + 1];
+
+        CORR_TR_registrar(
+            actual,
+            siguiente
+        );
+    }
+
+    CORR_TR_guardar();
+
+    return CORR_TRANSICION;
+}
+
+
+//////////////////////////////////////////////////////////////
+// OBTENER LAS TRANSICIONES MÁS FUERTES
+//////////////////////////////////////////////////////////////
+
+function CORR_TR_obtener(
+    posicion,
+    numero,
+    turno
+) {
+
+    numero =
+        CORR_TR_normalizar(
+            numero
+        );
+
+    if (!numero)
+        return [];
+
+    //////////////////////////////////////////////////////////
+    // SI HAY TURNO, PRIORIZAR TURNO
+    //////////////////////////////////////////////////////////
+
+    if (
+        turno &&
+        CORR_TRANSICION
+            .porTurno[turno] &&
+        CORR_TRANSICION
+            .porTurno[turno][posicion] &&
+        CORR_TRANSICION
+            .porTurno[turno][posicion]
+            [numero]
+    ) {
+
+        return CORR_TR_top(
+
+            CORR_TRANSICION
+                .porTurno[turno]
+                [posicion]
+                [numero],
+
+            10
+        );
+    }
+
+    //////////////////////////////////////////////////////////
+    // TRANSICIÓN GENERAL
+    //////////////////////////////////////////////////////////
+
+    if (
+        CORR_TRANSICION
+            .pares[posicion] &&
+        CORR_TRANSICION
+            .pares[posicion][numero]
+    ) {
+
+        return CORR_TR_top(
+
+            CORR_TRANSICION
+                .pares[posicion]
+                [numero],
+
+            10
+        );
+    }
+
+    return [];
+}
+
+
+//////////////////////////////////////////////////////////////
+// TOP TRANSICIONES
+//////////////////////////////////////////////////////////////
+
+function CORR_TR_top(
+    mapa,
+    limite
+) {
+
+    return Object.keys(mapa)
+        .sort(
+            function(a, b) {
+
+                return (
+                    mapa[b] -
+                    mapa[a]
+                );
+            }
+        )
+        .slice(0, limite)
+        .map(
+            function(numero) {
+
+                return {
+
+                    numero:
+                        numero,
+
+                    veces:
+                        mapa[numero]
+                };
+            }
+        );
+}
+
+
+//////////////////////////////////////////////////////////////
+// GUARDAR MEMORIA DE TRANSICIÓN
+//////////////////////////////////////////////////////////////
+
+function CORR_TR_guardar() {
+
+    try {
+
+        localStorage.setItem(
+
+            "CORR_TRANSICION_MEMORIA",
+
+            JSON.stringify(
+                CORR_TRANSICION
+            )
+        );
+
+    }
+    catch(error) {
+
+        console.error(
+            "Error guardando transición Correntina:",
+            error
+        );
+    }
+}
+
+
+//////////////////////////////////////////////////////////////
+// CARGAR MEMORIA DE TRANSICIÓN
+//////////////////////////////////////////////////////////////
+
+function CORR_TR_cargar() {
+
+    try {
+
+        let memoria =
+            localStorage.getItem(
+                "CORR_TRANSICION_MEMORIA"
+            );
+
+        if (!memoria)
+            return;
+
+        let datos =
+            JSON.parse(
+                memoria
+            );
+
+        if (datos) {
+
+            CORR_TRANSICION =
+                Object.assign(
+
+                    CORR_TRANSICION,
+
+                    datos
+                );
+        }
+
+    }
+    catch(error) {
+
+        console.error(
+            "Error cargando transición Correntina:",
+            error
+        );
+    }
+}
+
+
+//////////////////////////////////////////////////////////////
+// RESUMEN
+//////////////////////////////////////////////////////////////
+
+function CORR_TR_resumen() {
+
+    let total =
+        CORR_TRANSICION
+            .totalAnalizados || 0;
+
+    return (
+
+        "🔄 MOTOR TRANSICIÓN CORRENTINA\n" +
+        "================================\n\n" +
+
+        "Registros comparados: " +
+        total +
+        "\n\n" +
+
+        "El motor estudia cómo cambia " +
+        "cada posición P1–P5 entre " +
+        "un sorteo y el siguiente.\n\n" +
+
+        "⚡ Tesla: NO INTERVIENE.\n" +
+        "Este motor es independiente."
+    );
+}
+
+
+//////////////////////////////////////////////////////////////
+// INICIALIZAR
+//////////////////////////////////////////////////////////////
+
+CORR_TR_cargar();
+
+
+//////////////////////////////////////////////////////////////
+// EXPORTAR
+//////////////////////////////////////////////////////////////
+
+window.EMI_CORR =
+    window.EMI_CORR || {};
+
+window.EMI_CORR.transicion =
+    CORR_TR_registrar;
+
+window.EMI_CORR.entrenarTransicion =
+    CORR_TR_entrenar;
+
+window.EMI_CORR.obtenerTransicion =
+    CORR_TR_obtener;
+
+window.EMI_CORR.resumenTransicion =
+    CORR_TR_resumen;
+
+//////////////////////////////////////////////////////////////
+// FIN MOTOR TRANSICIÓN
+//////////////////////////////////////////////////////////////  
  //////////////////////////////////////////////////////////////
 // 🎯 CORRENTINA INDEPENDIENTE
 // BLOQUE 5/5 — TESLA + SISTEMA FINAL

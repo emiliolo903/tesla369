@@ -13071,33 +13071,206 @@ async function finalizarCargaManual_V61(){
     await ejecutarSistemaInteligenteV61();
 
     }
-
 //////////////////////////////////////////////////////////////
 // 🎯 CORRENTINA INDEPENDIENTE
-// MÓDULO COMPLETO — BLOQUE 1/5
+// MÓDULO NUEVO — BLOQUE 1/4
+//
+// MEMORIA + ESTADO + TURNOS
+//
+// ⚠️ TESLA NO INTERVIENE
 //////////////////////////////////////////////////////////////
 
-window.EMI_CORR = window.EMI_CORR || {};
+window.EMI_CORR =
+    window.EMI_CORR || {};
 
-const CORR_DB_KEY = "EMI_CORR_MEMORIA_V2";
+//////////////////////////////////////////////////////////////
+// CLAVE DE MEMORIA
+//////////////////////////////////////////////////////////////
+
+const CORR_DB_KEY =
+    "EMI_CORR_MEMORIA_V3";
+
+//////////////////////////////////////////////////////////////
+// MEMORIA PRINCIPAL
+//////////////////////////////////////////////////////////////
 
 let CORR_MEMORIA = [];
+
+window.CORR_MEMORIA =
+    CORR_MEMORIA;
+
+//////////////////////////////////////////////////////////////
+// TURNO ACTIVO
+//////////////////////////////////////////////////////////////
+
+let CORR_TURNO_ACTIVO = "";
+
+window.CORR_TURNO_ACTIVO = "";
+
+//////////////////////////////////////////////////////////////
+// ESTADO DEL LECTOR
+//////////////////////////////////////////////////////////////
 
 let CORR_ESTADO = {
 
     pdfPaginas: 0,
+
     paginasProcesadas: 0,
+
     paginasCorrientes: 0,
 
     registros: 0,
+
     cuaternos: 0,
 
+    erroresOCR: 0,
+
+    sinTurno: 0,
+
     PREVIA: 0,
+
     PRIMERA: 0,
+
     MATUTINA: 0,
+
     VESPERTINA: 0,
+
     NOCTURNA: 0
 };
+
+window.CORR_ESTADO =
+    CORR_ESTADO;
+
+//////////////////////////////////////////////////////////////
+// TURNOS VÁLIDOS
+//////////////////////////////////////////////////////////////
+
+const CORR_TURNOS = [
+
+    "PREVIA",
+    "PRIMERA",
+    "MATUTINA",
+    "VESPERTINA",
+    "NOCTURNA"
+];
+
+//////////////////////////////////////////////////////////////
+// NORMALIZAR TURNO
+//////////////////////////////////////////////////////////////
+
+function CORR_normalizarTurno(
+    turno
+) {
+
+    turno =
+        String(turno || "")
+            .toUpperCase()
+            .trim();
+
+    if (
+        turno.includes("PREVIA")
+    )
+        return "PREVIA";
+
+    if (
+        turno.includes("PRIMERA")
+    )
+        return "PRIMERA";
+
+    if (
+        turno.includes("MATUTINA")
+    )
+        return "MATUTINA";
+
+    if (
+        turno.includes("VESPERTINA")
+    )
+        return "VESPERTINA";
+
+    if (
+        turno.includes("NOCTURNA") ||
+        turno.includes("NOTURNA") ||
+        turno.includes("NOCT") ||
+        turno.includes("N0CT")
+    )
+        return "NOCTURNA";
+
+    return "";
+}
+
+//////////////////////////////////////////////////////////////
+// DEFINIR TURNO ACTIVO
+//////////////////////////////////////////////////////////////
+
+function CORR_definirTurno(
+    turno
+) {
+
+    let normalizado =
+        CORR_normalizarTurno(
+            turno
+        );
+
+    if (!normalizado)
+        return false;
+
+    CORR_TURNO_ACTIVO =
+        normalizado;
+
+    window.CORR_TURNO_ACTIVO =
+        normalizado;
+
+    window.EMI_CORR.turnoActivo =
+        normalizado;
+
+    try {
+
+        localStorage.setItem(
+            "CORR_TURNO_ACTIVO",
+            normalizado
+        );
+
+    } catch(e) {}
+
+    return true;
+}
+
+//////////////////////////////////////////////////////////////
+// CARGAR TURNO ACTIVO
+//////////////////////////////////////////////////////////////
+
+function CORR_cargarTurnoActivo() {
+
+    let turno = "";
+
+    try {
+
+        turno =
+            localStorage.getItem(
+                "CORR_TURNO_ACTIVO"
+            ) || "";
+
+    } catch(e) {}
+
+    turno =
+        CORR_normalizarTurno(
+            turno
+        );
+
+    if (turno) {
+
+        CORR_TURNO_ACTIVO =
+            turno;
+
+        window.CORR_TURNO_ACTIVO =
+            turno;
+
+        window.EMI_CORR.turnoActivo =
+            turno;
+    }
+
+    return turno;
+}
 
 //////////////////////////////////////////////////////////////
 // CARGAR MEMORIA
@@ -13105,39 +13278,52 @@ let CORR_ESTADO = {
 
 function CORR_cargarMemoria() {
 
+    CORR_MEMORIA = [];
+
     try {
 
-        let memoria =
+        let guardado =
             localStorage.getItem(
                 CORR_DB_KEY
             );
 
-        if (memoria) {
+        if (guardado) {
 
             let datos =
-                JSON.parse(memoria);
+                JSON.parse(
+                    guardado
+                );
 
-            if (Array.isArray(datos)) {
+            if (
+                Array.isArray(datos)
+            ) {
 
-                CORR_MEMORIA = datos;
-
-            } else {
-
-                CORR_MEMORIA = [];
+                CORR_MEMORIA =
+                    datos;
             }
-
-        } else {
-
-            CORR_MEMORIA = [];
         }
 
     } catch(error) {
 
+        console.error(
+            "Error cargando memoria Correntina:",
+            error
+        );
+
         CORR_MEMORIA = [];
     }
 
+    window.CORR_MEMORIA =
+        CORR_MEMORIA;
+
     window.EMI_CORR.memoria =
         CORR_MEMORIA;
+
+    //////////////////////////////////////////////////////////
+    // RECONSTRUIR ESTADO
+    //////////////////////////////////////////////////////////
+
+    CORR_reconstruirEstado();
 
     return CORR_MEMORIA;
 }
@@ -13159,6 +13345,9 @@ function CORR_guardarMemoria() {
             )
         );
 
+        window.CORR_MEMORIA =
+            CORR_MEMORIA;
+
         window.EMI_CORR.memoria =
             CORR_MEMORIA;
 
@@ -13167,12 +13356,82 @@ function CORR_guardarMemoria() {
     } catch(error) {
 
         console.error(
-            "Error guardando memoria Correntina",
+            "Error guardando memoria Correntina:",
             error
         );
 
         return false;
     }
+}
+
+//////////////////////////////////////////////////////////////
+// RECONSTRUIR CONTADORES
+//////////////////////////////////////////////////////////////
+
+function CORR_reconstruirEstado() {
+
+    CORR_ESTADO = {
+
+        pdfPaginas: 0,
+
+        paginasProcesadas: 0,
+
+        paginasCorrientes:
+            CORR_MEMORIA.length,
+
+        registros:
+            CORR_MEMORIA.length,
+
+        cuaternos: 0,
+
+        erroresOCR: 0,
+
+        sinTurno: 0,
+
+        PREVIA: 0,
+
+        PRIMERA: 0,
+
+        MATUTINA: 0,
+
+        VESPERTINA: 0,
+
+        NOCTURNA: 0
+    };
+
+    for (
+        let registro of CORR_MEMORIA
+    ) {
+
+        let posiciones =
+            Array.isArray(
+                registro.posiciones
+            )
+            ?
+            registro.posiciones
+            :
+            [];
+
+        CORR_ESTADO.cuaternos +=
+            posiciones.length;
+
+        let turno =
+            CORR_normalizarTurno(
+                registro.turno
+            );
+
+        if (
+            CORR_ESTADO[turno] !==
+            undefined
+        ) {
+
+            CORR_ESTADO[turno] +=
+                posiciones.length;
+        }
+    }
+
+    window.CORR_ESTADO =
+        CORR_ESTADO;
 }
 
 //////////////////////////////////////////////////////////////
@@ -13183,213 +13442,46 @@ function CORR_limpiarMemoria() {
 
     CORR_MEMORIA = [];
 
-    localStorage.removeItem(
-        CORR_DB_KEY
-    );
-
-    window.EMI_CORR.memoria =
+    window.CORR_MEMORIA =
         CORR_MEMORIA;
-}
 
-//////////////////////////////////////////////////////////////
-// RESET ESTADÍSTICAS
-//////////////////////////////////////////////////////////////
+    try {
 
-function CORR_resetEstado() {
-
-    CORR_ESTADO = {
-
-        pdfPaginas: 0,
-        paginasProcesadas: 0,
-        paginasCorrientes: 0,
-
-        registros: 0,
-        cuaternos: 0,
-
-        PREVIA: 0,
-        PRIMERA: 0,
-        MATUTINA: 0,
-        VESPERTINA: 0,
-        NOCTURNA: 0
-    };
-}
-
-//////////////////////////////////////////////////////////////
-// ESTADO VISUAL
-//////////////////////////////////////////////////////////////
-
-function CORR_estado(texto) {
-
-    let elemento =
-        document.getElementById(
-            "CORR_NUEVO_estado"
+        localStorage.removeItem(
+            CORR_DB_KEY
         );
 
-    if (elemento) {
-
-        elemento.innerText =
-            texto;
-    }
-}
-
-//////////////////////////////////////////////////////////////
-// PANEL
-//////////////////////////////////////////////////////////////
-
-function CORR_panel(texto) {
-
-    let elemento =
-        document.getElementById(
-            "CORR_NUEVO_panel"
+        localStorage.removeItem(
+            "CORR_APRENDIZAJE_P1_P5"
         );
 
-    if (elemento) {
+        localStorage.removeItem(
+            "CORR_TRANSICION_MEMORIA_V3"
+        );
 
-        elemento.innerText =
-            texto;
-    }
+    } catch(e) {}
+
+    CORR_reconstruirEstado();
+
+    CORR_panel(
+        "🗑 MEMORIA CORRENTINA LIMPIADA\n\n" +
+        "La memoria anterior fue eliminada."
+    );
 }
 
 //////////////////////////////////////////////////////////////
 // FECHA
 //////////////////////////////////////////////////////////////
 
-function CORR_fecha(texto) {
+function CORR_extraerFecha(
+    texto
+) {
 
     texto =
-        String(texto || "");
-
-    let encontrado =
-        texto.match(
-            /\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/
-        );
-
-    if (!encontrado) {
-
-        return new Date()
-            .toISOString()
-            .slice(0,10);
-    }
-
-    return (
-        encontrado[3] +
-        "-" +
-        encontrado[2] +
-        "-" +
-        encontrado[1]
-    );
-}
-
-//////////////////////////////////////////////////////////////
-// TURNO
-//////////////////////////////////////////////////////////////
-
-function CORR_turno(texto) {
-
-    texto =
-        String(texto || "")
-            .toUpperCase();
-
-    if (texto.includes("PREVIA"))
-        return "PREVIA";
-
-    if (texto.includes("PRIMERA"))
-        return "PRIMERA";
-
-    if (texto.includes("MATUTINA"))
-        return "MATUTINA";
-
-    if (texto.includes("VESPERTINA"))
-        return "VESPERTINA";
-
-    if (texto.includes("NOCTURNA"))
-        return "NOCTURNA";
-
-    return "SIN_TURNO";
-}
-
-//////////////////////////////////////////////////////////////
-// INICIAR
-//////////////////////////////////////////////////////////////
-
-CORR_cargarMemoria();
-
-window.EMI_CORR.memoria =
-    CORR_MEMORIA;
-
-window.EMI_CORR.estado =
-    CORR_ESTADO;
-
-//////////////////////////////////////////////////////////////
-// FIN BLOQUE 1
-//////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////
-// 🎯 CORRENTINA INDEPENDIENTE
-// BLOQUE 2/5 — PARTE 1/2
-// LECTOR PDF + OCR + DETECCIÓN DE TABLA
-//////////////////////////////////////////////////////////////
-
-let CORR_DETENER_OCR = false;
-
-//////////////////////////////////////////////////////////////
-// NORMALIZAR TEXTO OCR
-//////////////////////////////////////////////////////////////
-
-function CORR_normalizarOCR(texto) {
-
-    return String(texto || "")
-        .toUpperCase()
-        .replace(/[|]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-}
-
-//////////////////////////////////////////////////////////////
-// DETECTAR TURNO
-//////////////////////////////////////////////////////////////
-
-function CORR_buscarTurno(texto) {
-
-    texto =
-        CORR_normalizarOCR(texto);
-
-    if (texto.includes("PREVIA"))
-        return "PREVIA";
-
-    if (texto.includes("PRIMERA"))
-        return "PRIMERA";
-
-    if (texto.includes("MATUTINA"))
-        return "MATUTINA";
-
-    if (texto.includes("VESPERTINA"))
-        return "VESPERTINA";
-
-    if (texto.includes("NOCTURNA"))
-        return "NOCTURNA";
-
-    // OCR puede deformar NOCTURNA
-    if (
-        texto.includes("NOCT") ||
-        texto.includes("NOTUR") ||
-        texto.includes("N0CT")
-    )
-        return "NOCTURNA";
-
-    return "SIN_TURNO";
-}
-
-//////////////////////////////////////////////////////////////
-// DETECTAR FECHA
-//////////////////////////////////////////////////////////////
-
-function CORR_buscarFecha(texto) {
-
-    let t =
         String(texto || "");
 
     let m =
-        t.match(
+        texto.match(
             /\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/
         );
 
@@ -13410,31 +13502,251 @@ function CORR_buscarFecha(texto) {
 }
 
 //////////////////////////////////////////////////////////////
-// EXTRAER TODOS LOS CUATERNOS DEL OCR
+// PANEL
 //////////////////////////////////////////////////////////////
 
-function CORR_buscarCuaternos(texto) {
+function CORR_panel(
+    texto
+) {
+
+    let elemento =
+        document.getElementById(
+            "CORR_NUEVO_panel"
+        );
+
+    if (elemento) {
+
+        elemento.innerText =
+            String(texto || "");
+    }
+}
+
+//////////////////////////////////////////////////////////////
+// ESTADO
+//////////////////////////////////////////////////////////////
+
+function CORR_estado(
+    texto
+) {
+
+    let elemento =
+        document.getElementById(
+            "CORR_NUEVO_estado"
+        );
+
+    if (elemento) {
+
+        elemento.innerText =
+            String(texto || "");
+    }
+}
+
+//////////////////////////////////////////////////////////////
+// RESUMEN RÁPIDO
+//////////////////////////////////////////////////////////////
+
+function CORR_resumenMemoria() {
+
+    return (
+
+        "🧠 MEMORIA CORRENTINA\n\n" +
+
+        "Registros: " +
+        CORR_MEMORIA.length +
+        "\n" +
+
+        "Cuaternos: " +
+        CORR_ESTADO.cuaternos +
+        "\n\n" +
+
+        "PREVIA: " +
+        CORR_ESTADO.PREVIA +
+        "\n" +
+
+        "PRIMERA: " +
+        CORR_ESTADO.PRIMERA +
+        "\n" +
+
+        "MATUTINA: " +
+        CORR_ESTADO.MATUTINA +
+        "\n" +
+
+        "VESPERTINA: " +
+        CORR_ESTADO.VESPERTINA +
+        "\n" +
+
+        "NOCTURNA: " +
+        CORR_ESTADO.NOCTURNA
+    );
+}
+
+//////////////////////////////////////////////////////////////
+// INICIALIZAR
+//////////////////////////////////////////////////////////////
+
+CORR_cargarMemoria();
+
+CORR_cargarTurnoActivo();
+
+//////////////////////////////////////////////////////////////
+// EXPORTAR
+//////////////////////////////////////////////////////////////
+
+window.EMI_CORR.memoria =
+    CORR_MEMORIA;
+
+window.EMI_CORR.estado =
+    CORR_ESTADO;
+
+window.EMI_CORR.definirTurno =
+    CORR_definirTurno;
+
+window.EMI_CORR.cargarMemoria =
+    CORR_cargarMemoria;
+
+window.EMI_CORR.guardarMemoria =
+    CORR_guardarMemoria;
+
+window.EMI_CORR.limpiarMemoria =
+    CORR_limpiarMemoria;
+
+//////////////////////////////////////////////////////////////
+// FIN BLOQUE 1
+//////////////////////////////////////////////////////////////
+
+ //////////////////////////////////////////////////////////////
+// 🎯 CORRENTINA INDEPENDIENTE
+// MÓDULO NUEVO — BLOQUE 2/4
+//
+// PDF + OCR + 20 POSICIONES
+// APRENDIZAJE EN VIVO
+//
+// ⚠️ TESLA NO INTERVIENE
+//////////////////////////////////////////////////////////////
+
+let CORR_DETENER_OCR = false;
+
+//////////////////////////////////////////////////////////////
+// NORMALIZAR OCR
+//////////////////////////////////////////////////////////////
+
+function CORR_normalizarOCR(
+    texto
+) {
+
+    return String(texto || "")
+        .toUpperCase()
+        .replace(/[|]/g, " ")
+        .replace(/[“”"']/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+//////////////////////////////////////////////////////////////
+// BUSCAR TURNO
+//////////////////////////////////////////////////////////////
+
+function CORR_buscarTurno(
+    texto
+) {
+
+    let t =
+        CORR_normalizarOCR(
+            texto
+        );
+
+    if (
+        t.includes("PREVIA")
+    )
+        return "PREVIA";
+
+    if (
+        t.includes("PRIMERA")
+    )
+        return "PRIMERA";
+
+    if (
+        t.includes("MATUTINA")
+    )
+        return "MATUTINA";
+
+    if (
+        t.includes("VESPERTINA")
+    )
+        return "VESPERTINA";
+
+    if (
+        t.includes("NOCTURNA") ||
+        t.includes("NOTURNA") ||
+        t.includes("NOCT") ||
+        t.includes("N0CT")
+    )
+        return "NOCTURNA";
+
+    return "";
+}
+
+//////////////////////////////////////////////////////////////
+// BUSCAR NÚMEROS DE 4 DÍGITOS
+//////////////////////////////////////////////////////////////
+
+function CORR_buscarCuaternos(
+    texto
+) {
 
     let limpio =
         String(texto || "")
             .replace(/[^\d\s]/g, " ");
 
-    let encontrados =
+    return (
         limpio.match(
             /\b\d{4}\b/g
-        ) || [];
-
-    return encontrados;
+        ) || []
+    );
 }
 
 //////////////////////////////////////////////////////////////
-// DETECCIÓN PRINCIPAL
-//
-// No depende de:
-// window.EMI_CORR.extraer20Corrientes
-//
-// Esto evita definitivamente el error anterior.
-//
+// NORMALIZAR CUATERNO
+//////////////////////////////////////////////////////////////
+
+function CORR_normalizarCuaterno(
+    numero
+) {
+
+    let n =
+        String(numero || "")
+            .replace(/\D/g, "");
+
+    if (!n)
+        return "";
+
+    return n
+        .padStart(4, "0")
+        .slice(-4);
+}
+
+//////////////////////////////////////////////////////////////
+// DETECTAR CORRIENTES
+//////////////////////////////////////////////////////////////
+
+function CORR_esCorrientes(
+    texto
+) {
+
+    let t =
+        CORR_normalizarOCR(
+            texto
+        );
+
+    return (
+        t.includes("CORRIENTES") ||
+        t.includes("CORRIENTE") ||
+        t.includes("CORRIENT")
+    );
+}
+
+//////////////////////////////////////////////////////////////
+// EXTRAER LAS 20 POSICIONES
 //////////////////////////////////////////////////////////////
 
 function CORR_extraer20(
@@ -13442,162 +13754,215 @@ function CORR_extraer20(
     pagina
 ) {
 
-    texto =
-        CORR_normalizarOCR(texto);
+    let original =
+        String(texto || "");
 
-    let resultado = {
-
-        encontrado: false,
-
-        pagina:
-            pagina,
-
-        fecha:
-            CORR_buscarFecha(texto),
-
-        turno:
-            CORR_buscarTurno(texto),
-
-        numeros: []
-    };
+    let normalizado =
+        CORR_normalizarOCR(
+            original
+        );
 
     //////////////////////////////////////////////////////////
-    // BUSCAR INDICADORES DE CORRIENTES
+    // TURNO DETECTADO POR OCR
     //////////////////////////////////////////////////////////
 
-    let tieneCorrientes =
-        texto.includes("CORRIENTES") ||
-        texto.includes("CORRIENTE") ||
-        texto.includes("CORRIENT");
+    let turnoOCR =
+        CORR_buscarTurno(
+            normalizado
+        );
 
     //////////////////////////////////////////////////////////
-    // CUATERNOS
+    // SI NO LO LEYÓ OCR, BUSCAR TURNO ACTIVO
+    //////////////////////////////////////////////////////////
+
+    let turno =
+        turnoOCR ||
+        CORR_TURNO_ACTIVO ||
+        "";
+
+    turno =
+        CORR_normalizarTurno(
+            turno
+        );
+
+    //////////////////////////////////////////////////////////
+    // FECHA
+    //////////////////////////////////////////////////////////
+
+    let fecha =
+        CORR_extraerFecha(
+            normalizado
+        );
+
+    //////////////////////////////////////////////////////////
+    // TODOS LOS CUATERNOS
     //////////////////////////////////////////////////////////
 
     let todos =
-        CORR_buscarCuaternos(texto);
+        CORR_buscarCuaternos(
+            normalizado
+        )
+        .map(
+            CORR_normalizarCuaterno
+        )
+        .filter(Boolean);
+
+    let numeros = [];
 
     //////////////////////////////////////////////////////////
-    // IMPORTANTE
-    //
-    // Primero intenta localizar CORRIENTES.
-    // Si OCR reconoció el encabezado, toma los números
-    // posteriores al encabezado.
+    // BUSCAR ZONA CORRIENTES
     //////////////////////////////////////////////////////////
 
-    if (tieneCorrientes) {
+    let indiceCorrientes =
+        normalizado.indexOf(
+            "CORRIENTES"
+        );
 
-        let posicion =
-            texto.indexOf("CORRIENTES");
+    if (
+        indiceCorrientes < 0
+    ) {
 
-        if (posicion < 0)
-            posicion =
-                texto.indexOf("CORRIENTE");
+        indiceCorrientes =
+            normalizado.indexOf(
+                "CORRIENTE"
+            );
+    }
 
-        if (posicion < 0)
-            posicion =
-                texto.indexOf("CORRIENT");
+    if (
+        indiceCorrientes < 0
+    ) {
+
+        indiceCorrientes =
+            normalizado.indexOf(
+                "CORRIENT"
+            );
+    }
+
+    //////////////////////////////////////////////////////////
+    // PRIMER INTENTO:
+    // NÚMEROS DESPUÉS DE CORRIENTES
+    //////////////////////////////////////////////////////////
+
+    if (
+        indiceCorrientes >= 0
+    ) {
 
         let zona =
-            texto.substring(
-                Math.max(0, posicion),
-                posicion + 12000
+            normalizado.substring(
+                indiceCorrientes,
+                indiceCorrientes + 12000
             );
 
-        let numerosZona =
+        let zonaNumeros =
             CORR_buscarCuaternos(
                 zona
-            );
+            )
+            .map(
+                CORR_normalizarCuaterno
+            )
+            .filter(Boolean);
 
         if (
-            numerosZona.length >= 20
+            zonaNumeros.length >= 20
         ) {
 
-            resultado.numeros =
-                numerosZona.slice(0,20);
-
-            resultado.encontrado =
-                true;
+            numeros =
+                zonaNumeros.slice(0,20);
         }
     }
 
     //////////////////////////////////////////////////////////
-    // SEGUNDO MÉTODO
-    //
-    // Si el OCR no leyó "CORRIENTES", no descartamos la página.
-    // Intentamos detectar una secuencia de 20 cuaternos.
+    // SEGUNDO INTENTO:
+    // CUALQUIER GRUPO DE 20
     //////////////////////////////////////////////////////////
 
     if (
-        !resultado.encontrado &&
+        numeros.length !== 20 &&
         todos.length >= 20
     ) {
 
-        // Buscar grupos de 20 números.
-        // Esto permite trabajar aunque Tesseract
-        // haya perdido el encabezado.
+        let mejorGrupo =
+            null;
+
+        //////////////////////////////////////////////////////
+        // PROBAR GRUPOS DE 20
+        //////////////////////////////////////////////////////
 
         for (
-            let inicio = 0;
-            inicio <= todos.length - 20;
-            inicio++
+            let i = 0;
+            i <= todos.length - 20;
+            i++
         ) {
 
             let grupo =
                 todos.slice(
-                    inicio,
-                    inicio + 20
+                    i,
+                    i + 20
                 );
 
             if (
                 grupo.length === 20
             ) {
 
-                resultado.numeros =
+                mejorGrupo =
                     grupo;
 
-                resultado.encontrado =
-                    true;
+                //////////////////////////////////////////////////
+                // Si hay Corrientes, preferir el primer grupo
+                // después de su encabezado.
+                //////////////////////////////////////////////////
 
                 break;
             }
         }
-    }
 
-    //////////////////////////////////////////////////////////
-    // NORMALIZAR 20 POSICIONES
-    //////////////////////////////////////////////////////////
+        if (mejorGrupo) {
 
-    if (
-        resultado.encontrado
-    ) {
-
-        resultado.numeros =
-            resultado.numeros
-                .map(
-                    function(n) {
-
-                        return String(n)
-                            .replace(/\D/g,"")
-                            .padStart(4,"0")
-                            .slice(-4);
-                    }
-                )
-                .slice(0,20);
-
-        if (
-            resultado.numeros.length !== 20
-        ) {
-
-            resultado.encontrado =
-                false;
-
-            resultado.numeros =
-                [];
+            numeros =
+                mejorGrupo;
         }
     }
 
-    return resultado;
+    //////////////////////////////////////////////////////////
+    // VALIDACIÓN
+    //////////////////////////////////////////////////////////
+
+    numeros =
+        numeros
+            .map(
+                CORR_normalizarCuaterno
+            )
+            .filter(Boolean)
+            .slice(0,20);
+
+    return {
+
+        encontrado:
+            numeros.length === 20,
+
+        pagina:
+            pagina,
+
+        fecha:
+            fecha,
+
+        turno:
+            turno,
+
+        turnoOCR:
+            turnoOCR,
+
+        turnoActivo:
+            CORR_TURNO_ACTIVO,
+
+        numeros:
+            numeros,
+
+        corrientes:
+            CORR_esCorrientes(
+                normalizado
+            )
+    };
 }
 
 //////////////////////////////////////////////////////////////
@@ -13612,9 +13977,6 @@ function CORR_guardarRegistro(
     if (!datos)
         return false;
 
-    if (!datos.encontrado)
-        return false;
-
     if (
         !Array.isArray(
             datos.numeros
@@ -13623,9 +13985,75 @@ function CORR_guardarRegistro(
         return false;
 
     if (
-        datos.numeros.length < 20
+        datos.numeros.length !== 20
     )
         return false;
+
+    //////////////////////////////////////////////////////////
+    // EL TURNO DE OCR TIENE PRIORIDAD.
+    // SI OCR FALLA, USA TURNO ACTIVO.
+    //////////////////////////////////////////////////////////
+
+    let turno =
+        CORR_normalizarTurno(
+            datos.turnoOCR ||
+            datos.turno ||
+            CORR_TURNO_ACTIVO
+        );
+
+    //////////////////////////////////////////////////////////
+    // SIN TURNO = NO INVENTAR
+    //////////////////////////////////////////////////////////
+
+    if (!turno) {
+
+        CORR_ESTADO.sinTurno++;
+
+        return false;
+    }
+
+    //////////////////////////////////////////////////////////
+    // EVITAR DUPLICAR MISMA PÁGINA
+    //////////////////////////////////////////////////////////
+
+    let yaExiste =
+        CORR_MEMORIA.some(
+            function(registro) {
+
+                return (
+
+                    Number(
+                        registro.pagina
+                    ) ===
+                    Number(
+                        datos.pagina
+                    )
+
+                    &&
+
+                    String(
+                        registro.archivo ||
+                        ""
+                    ) ===
+                    String(
+                        archivo
+                        ?
+                        archivo.name
+                        :
+                        ""
+                    )
+                );
+            }
+        );
+
+    if (yaExiste) {
+
+        return false;
+    }
+
+    //////////////////////////////////////////////////////////
+    // CREAR REGISTRO
+    //////////////////////////////////////////////////////////
 
     let registro = {
 
@@ -13641,7 +14069,7 @@ function CORR_guardarRegistro(
             datos.fecha,
 
         turno:
-            datos.turno,
+            turno,
 
         pagina:
             datos.pagina,
@@ -13650,8 +14078,10 @@ function CORR_guardarRegistro(
             "CORRIENTES",
 
         archivo:
-            archivo ?
-            archivo.name :
+            archivo
+            ?
+            archivo.name
+            :
             "",
 
         posiciones:
@@ -13659,9 +14089,16 @@ function CORR_guardarRegistro(
                 .slice(0,20)
     };
 
+    //////////////////////////////////////////////////////////
+    // GUARDAR
+    //////////////////////////////////////////////////////////
+
     CORR_MEMORIA.push(
         registro
     );
+
+    window.CORR_MEMORIA =
+        CORR_MEMORIA;
 
     //////////////////////////////////////////////////////////
     // CONTADORES
@@ -13671,15 +14108,14 @@ function CORR_guardarRegistro(
 
     CORR_ESTADO.cuaternos += 20;
 
+    CORR_ESTADO.paginasCorrientes++;
+
     if (
-        CORR_ESTADO[
-            registro.turno
-        ] !== undefined
+        CORR_ESTADO[turno] !==
+        undefined
     ) {
 
-        CORR_ESTADO[
-            registro.turno
-        ] += 20;
+        CORR_ESTADO[turno] += 20;
     }
 
     //////////////////////////////////////////////////////////
@@ -13688,50 +14124,238 @@ function CORR_guardarRegistro(
 
     CORR_guardarMemoria();
 
+    //////////////////////////////////////////////////////////
+    // APRENDER INMEDIATAMENTE
+    //////////////////////////////////////////////////////////
+
+    CORR_aprenderEnVivo(
+        registro
+    );
+
     return true;
 }
 
 //////////////////////////////////////////////////////////////
-// AUDITORÍA EN VIVO
+// APRENDIZAJE EN VIVO
+//
+// SOLO P1–P5
+//////////////////////////////////////////////////////////////
+
+function CORR_aprenderEnVivo(
+    registro
+) {
+
+    if (!registro)
+        return;
+
+    let posiciones =
+        Array.isArray(
+            registro.posiciones
+        )
+        ?
+        registro.posiciones
+        :
+        [];
+
+    if (
+        posiciones.length < 5
+    )
+        return;
+
+    //////////////////////////////////////////////////////////
+    // MEMORIA DE APRENDIZAJE
+    //////////////////////////////////////////////////////////
+
+    let aprendizaje = null;
+
+    try {
+
+        aprendizaje =
+            JSON.parse(
+                localStorage.getItem(
+                    "CORR_APRENDIZAJE_P1_P5"
+                )
+            );
+
+    } catch(e) {
+
+        aprendizaje = null;
+    }
+
+    if (
+        !aprendizaje ||
+        typeof aprendizaje !== "object"
+    ) {
+
+        aprendizaje = {
+
+            total: 0,
+
+            turnos: {
+
+                PREVIA: 0,
+                PRIMERA: 0,
+                MATUTINA: 0,
+                VESPERTINA: 0,
+                NOCTURNA: 0
+            },
+
+            posiciones: {
+
+                1: {},
+                2: {},
+                3: {},
+                4: {},
+                5: {}
+            }
+        };
+    }
+
+    //////////////////////////////////////////////////////////
+    // TOTAL
+    //////////////////////////////////////////////////////////
+
+    aprendizaje.total++;
+
+    //////////////////////////////////////////////////////////
+    // TURNO
+    //////////////////////////////////////////////////////////
+
+    let turno =
+        CORR_normalizarTurno(
+            registro.turno
+        );
+
+    if (
+        aprendizaje.turnos[turno]
+        !== undefined
+    ) {
+
+        aprendizaje.turnos[turno]++;
+    }
+
+    //////////////////////////////////////////////////////////
+    // P1 A P5
+    //////////////////////////////////////////////////////////
+
+    for (
+        let i = 0;
+        i < 5;
+        i++
+    ) {
+
+        let numero =
+            CORR_normalizarCuaterno(
+                posiciones[i]
+            );
+
+        if (!numero)
+            continue;
+
+        if (
+            !aprendizaje.posiciones[
+                i + 1
+            ]
+        ) {
+
+            aprendizaje.posiciones[
+                i + 1
+            ] = {};
+        }
+
+        aprendizaje.posiciones[
+            i + 1
+        ][numero] =
+
+            (
+                aprendizaje.posiciones[
+                    i + 1
+                ][numero] || 0
+            ) + 1;
+    }
+
+    //////////////////////////////////////////////////////////
+    // GUARDAR APRENDIZAJE
+    //////////////////////////////////////////////////////////
+
+    try {
+
+        localStorage.setItem(
+
+            "CORR_APRENDIZAJE_P1_P5",
+
+            JSON.stringify(
+                aprendizaje
+            )
+        );
+
+    } catch(e) {}
+}
+
+//////////////////////////////////////////////////////////////
+// MOSTRAR PROGRESO
 //////////////////////////////////////////////////////////////
 
 function CORR_mostrarProgreso(
     pagina,
     total,
-    ultimo
+    datos
 ) {
 
     let porcentaje =
         total > 0
         ?
         Math.round(
-            pagina / total * 100
+            pagina /
+            total *
+            100
         )
         :
         0;
 
-    let texto =
+    let turno =
+        datos &&
+        datos.turno
+        ?
+        datos.turno
+        :
+        "—";
 
-        "🧠 LECTOR CORRENTINA ACTIVO\n" +
-        "================================\n\n" +
+    CORR_estado(
 
-        "📄 ANALIZANDO: " +
+        "📄 CORRENTINA " +
         pagina +
         "/" +
         total +
-        " (" +
+        " — " +
         porcentaje +
-        "%)\n\n" +
+        "%"
+    );
 
-        "🎯 ENCONTRADAS: " +
+    CORR_panel(
+
+        "🧠 LECTOR CORRENTINA\n" +
+        "================================\n\n" +
+
+        "📄 Página: " +
+        pagina +
+        "/" +
+        total +
+        "\n" +
+
+        "📊 Progreso: " +
+        porcentaje +
+        "%\n\n" +
+
+        "🎯 Correntina encontradas: " +
         CORR_ESTADO.paginasCorrientes +
         "\n" +
 
-        "🔢 CUATERNOS: " +
+        "🔢 Cuaternos aprendidos: " +
         CORR_ESTADO.cuaternos +
         "\n\n" +
 
-        "📚 POR TURNO\n" +
+        "📚 TURNOS\n" +
 
         "PREVIA: " +
         CORR_ESTADO.PREVIA +
@@ -13753,115 +14377,23 @@ function CORR_mostrarProgreso(
         CORR_ESTADO.NOCTURNA +
         "\n\n" +
 
-        "🎯 OBJETIVO DE APRENDIZAJE\n" +
-        "POSICIONES 1 → 5\n\n" +
+        "🕐 Turno página: " +
+        turno +
+        "\n\n" +
 
-        "Última página: " +
-        (
-            ultimo
-            ?
-            "CORRIENTES ENCONTRADA"
-            :
-            "sin Correntina detectada"
-        );
-
-    CORR_estado(
-        "📄 Correntina " +
-        pagina +
-        "/" +
-        total +
-        " — " +
-        porcentaje +
-        "%"
-    );
-
-    CORR_panel(
-        texto
+        "🎯 APRENDIENDO EN VIVO\n" +
+        "Posiciones P1 → P5"
     );
 }
 
 //////////////////////////////////////////////////////////////
 // ABRIR PDF
-// CORRENTINA — TURNO SELECCIONADO POR EL USUARIO
 //////////////////////////////////////////////////////////////
 
 async function CORR_NUEVO_abrirOCR() {
 
-    CORR_DETENER_OCR = false;
-
-    CORR_resetEstado();
-
-    //////////////////////////////////////////////////////////
-    // SELECCIONAR TURNO ANTES DEL PDF
-    //////////////////////////////////////////////////////////
-
-    let turno =
-        prompt(
-            "¿QUÉ TURNO ESTÁS CARGANDO?\n\n" +
-            "PREVIA\n" +
-            "PRIMERA\n" +
-            "MATUTINA\n" +
-            "VESPERTINA\n" +
-            "NOCTURNA"
-        );
-
-    if (!turno)
-        return;
-
-    turno =
-        String(turno)
-            .toUpperCase()
-            .trim();
-
-    //////////////////////////////////////////////////////////
-    // NORMALIZAR
-    //////////////////////////////////////////////////////////
-
-    if (turno.includes("PREVIA")) {
-
-        turno = "PREVIA";
-
-    } else if (turno.includes("PRIMERA")) {
-
-        turno = "PRIMERA";
-
-    } else if (turno.includes("MATUTINA")) {
-
-        turno = "MATUTINA";
-
-    } else if (turno.includes("VESPERTINA")) {
-
-        turno = "VESPERTINA";
-
-    } else if (
-        turno.includes("NOCTURNA") ||
-        turno.includes("NOTURNA")
-    ) {
-
-        turno = "NOCTURNA";
-
-    } else {
-
-        alert(
-            "Turno no válido."
-        );
-
-        return;
-    }
-
-    //////////////////////////////////////////////////////////
-    // GUARDAR TURNO ACTIVO
-    //////////////////////////////////////////////////////////
-
-    window.EMI_CORR =
-        window.EMI_CORR || {};
-
-    window.EMI_CORR.ultimoTurno =
-        turno;
-
-    //////////////////////////////////////////////////////////
-    // ARCHIVO PDF
-    //////////////////////////////////////////////////////////
+    CORR_DETENER_OCR =
+        false;
 
     let input =
         document.createElement(
@@ -13875,17 +14407,16 @@ async function CORR_NUEVO_abrirOCR() {
         ".pdf,application/pdf";
 
     input.onchange =
-        async function(e) {
+        async function(event) {
 
             let archivo =
-                e.target.files[0];
+                event.target.files[0];
 
             if (!archivo)
                 return;
 
             await CORR_procesarPDF(
-                archivo,
-                turno
+                archivo
             );
         };
 
@@ -13893,27 +14424,19 @@ async function CORR_NUEVO_abrirOCR() {
 }
 
 //////////////////////////////////////////////////////////////
-// FIN PARTE 1
+// PROCESAR PDF
 //////////////////////////////////////////////////////////////
-    
-//////////////////////////////////////////////////////////////
-// 🎯 CORRENTINA INDEPENDIENTE
-// BLOQUE 2/5 — PARTE 2/2
-// PROCESAMIENTO PDF + APRENDIZAJE EN VIVO
-//////////////////////////////////////////////////////////////
+
 async function CORR_procesarPDF(
-    archivo,
-    turnoSeleccionado
+    archivo
 ) {
-
-
 
     let worker = null;
 
     try {
 
         //////////////////////////////////////////////////////
-        // COMPROBAR PDF.JS
+        // PDF.JS
         //////////////////////////////////////////////////////
 
         if (
@@ -13927,7 +14450,7 @@ async function CORR_procesarPDF(
         }
 
         //////////////////////////////////////////////////////
-        // COMPROBAR TESSERACT
+        // TESSERACT
         //////////////////////////////////////////////////////
 
         if (
@@ -13940,8 +14463,11 @@ async function CORR_procesarPDF(
             );
         }
 
+        CORR_DETENER_OCR =
+            false;
+
         CORR_estado(
-            "⏳ Abriendo PDF..."
+            "⏳ ABRIENDO PDF..."
         );
 
         let buffer =
@@ -13957,12 +14483,19 @@ async function CORR_procesarPDF(
         CORR_ESTADO.pdfPaginas =
             pdf.numPages;
 
+        CORR_ESTADO.paginasProcesadas =
+            0;
+
+        //////////////////////////////////////////////////////
+        // MOSTRAR PDF
+        //////////////////////////////////////////////////////
+
         CORR_panel(
 
             "📄 PDF DETECTADO\n" +
             "================================\n\n" +
 
-            "Archivo: " +
+            "Archivo:\n" +
             archivo.name +
             "\n\n" +
 
@@ -13970,11 +14503,11 @@ async function CORR_procesarPDF(
             pdf.numPages +
             "\n\n" +
 
-            "🧠 Preparando aprendizaje..."
+            "🧠 Comenzando aprendizaje..."
         );
 
         //////////////////////////////////////////////////////
-        // CREAR OCR
+        // CREAR WORKER OCR
         //////////////////////////////////////////////////////
 
         worker =
@@ -13983,7 +14516,7 @@ async function CORR_procesarPDF(
             );
 
         //////////////////////////////////////////////////////
-        // PROCESAR PÁGINA POR PÁGINA
+        // PÁGINA POR PÁGINA
         //////////////////////////////////////////////////////
 
         for (
@@ -13996,11 +14529,15 @@ async function CORR_procesarPDF(
                 CORR_DETENER_OCR
             ) {
 
+                CORR_estado(
+                    "⛔ LECTOR DETENIDO"
+                );
+
                 break;
             }
 
             //////////////////////////////////////////////////
-            // OBTENER PÁGINA
+            // PÁGINA
             //////////////////////////////////////////////////
 
             let page =
@@ -14057,11 +14594,15 @@ async function CORR_procesarPDF(
                 );
 
             let texto =
-                lectura.data.text ||
+                lectura &&
+                lectura.data
+                ?
+                lectura.data.text || ""
+                :
                 "";
 
             //////////////////////////////////////////////////
-            // EXTRAER 20
+            // EXTRAER
             //////////////////////////////////////////////////
 
             let datos =
@@ -14069,49 +14610,36 @@ async function CORR_procesarPDF(
                     texto,
                     pagina
                 );
-            //////////////////////////////////////////////////////////////
-// EL TURNO SELECCIONADO MANDA
-// NO DEPENDE DEL OCR
-//////////////////////////////////////////////////////////////
-
-datos.turno =
-    turnoSeleccionado;
 
             CORR_ESTADO
                 .paginasProcesadas =
                 pagina;
 
             //////////////////////////////////////////////////
-            // ENCONTRADO
+            // GUARDAR
             //////////////////////////////////////////////////
+
+            let guardado =
+                false;
 
             if (
                 datos.encontrado
             ) {
 
-                let guardado =
+                guardado =
                     CORR_guardarRegistro(
                         datos,
                         archivo
                     );
 
-                if (guardado) {
+            } else {
 
-                    CORR_ESTADO
-                        .paginasCorrientes++;
-
-                    //////////////////////////////////////////////////
-                    // APRENDER INMEDIATAMENTE
-                    //////////////////////////////////////////////////
-
-                    CORR_aprenderEnVivo(
-                        datos
-                    );
-                }
+                CORR_ESTADO
+                    .erroresOCR++;
             }
 
             //////////////////////////////////////////////////
-            // MOSTRAR PROGRESO
+            // PROGRESO
             //////////////////////////////////////////////////
 
             CORR_mostrarProgreso(
@@ -14120,7 +14648,7 @@ datos.turno =
 
                 pdf.numPages,
 
-                datos.encontrado
+                datos
             );
 
             //////////////////////////////////////////////////
@@ -14128,18 +14656,15 @@ datos.turno =
             //////////////////////////////////////////////////
 
             canvas.width = 1;
-            canvas.height = 1;
 
-            //////////////////////////////////////////////////
-            // DAR TIEMPO A LA INTERFAZ
-            //////////////////////////////////////////////////
+            canvas.height = 1;
 
             await new Promise(
                 function(resolve) {
 
                     setTimeout(
                         resolve,
-                        10
+                        0
                     );
                 }
             );
@@ -14156,50 +14681,53 @@ datos.turno =
             worker = null;
         }
 
-        CORR_guardarMemoria();
+        //////////////////////////////////////////////////////
+        // ENTRENAMIENTO GLOBAL
+        //
+        // El Bloque 3 tendrá el motor de transición.
+        // Lo llamamos si ya existe.
+        //////////////////////////////////////////////////////
+
+        if (
+            typeof CORR_TR_entrenar ===
+            "function"
+        ) {
+
+            try {
+
+                CORR_TR_entrenar();
+
+            } catch(error) {
+
+                console.error(
+                    "Error entrenando transición:",
+                    error
+                );
+            }
+        }
 
         //////////////////////////////////////////////////////
         // FINAL
         //////////////////////////////////////////////////////
 
-        if (
-            CORR_DETENER_OCR
-        ) {
-
-            CORR_estado(
-                "⛔ Lector detenido."
-            );
-
-        } else {
-
-            CORR_estado(
-                "✅ PDF completo analizado."
-            );
-        }
-
-        //////////////////////////////////////////////////////
-        // MOSTRAR RESUMEN
-        //////////////////////////////////////////////////////
-
-        let aprendizaje =
-            CORR_resumenAprendizaje();
+        CORR_guardarMemoria();
 
         CORR_panel(
 
-            "✅ ANÁLISIS CORRENTINA TERMINADO\n" +
+            "✅ CARGA CORRENTINA TERMINADA\n" +
             "================================\n\n" +
 
-            "📄 PÁGINAS ANALIZADAS: " +
+            "📄 Páginas procesadas: " +
             CORR_ESTADO.paginasProcesadas +
             "/" +
             CORR_ESTADO.pdfPaginas +
             "\n\n" +
 
-            "🎯 CORRIENTES ENCONTRADAS: " +
+            "🎯 Correntina encontradas: " +
             CORR_ESTADO.paginasCorrientes +
             "\n\n" +
 
-            "🔢 CUATERNOS: " +
+            "🔢 Cuaternos: " +
             CORR_ESTADO.cuaternos +
             "\n\n" +
 
@@ -14223,13 +14751,16 @@ datos.turno =
             CORR_ESTADO.NOCTURNA +
             "\n\n" +
 
-            "🧠 APRENDIZAJE P1–P5\n\n" +
-
-            aprendizaje
+            "🧠 La memoria quedó guardada."
         );
 
     }
     catch(error) {
+
+        console.error(
+            "Error lector Correntina:",
+            error
+        );
 
         if (worker) {
 
@@ -14240,215 +14771,22 @@ datos.turno =
             } catch(e) {}
         }
 
-        console.error(
-            "CORR lector:",
-            error
-        );
-
-        CORR_estado(
-            "❌ Error lector Correntina"
-        );
-
         CORR_panel(
 
-            "❌ ERROR EN LECTOR CORRENTINA\n\n" +
+            "❌ ERROR LECTOR CORRENTINA\n\n" +
 
-            (
+            String(
                 error.message ||
-                String(error)
+                error
             ) +
-
             "\n\n" +
 
-            "La memoria anterior NO fue eliminada."
+            "Páginas procesadas: " +
+            CORR_ESTADO.paginasProcesadas +
+            "/" +
+            CORR_ESTADO.pdfPaginas
         );
     }
-}
-
-//////////////////////////////////////////////////////////////
-// APRENDIZAJE EN VIVO
-//////////////////////////////////////////////////////////////
-
-function CORR_aprenderEnVivo(
-    datos
-) {
-
-    if (!datos)
-        return;
-
-    if (
-        !Array.isArray(
-            datos.numeros
-        )
-    )
-        return;
-
-    //////////////////////////////////////////////////////////
-    // SOLAMENTE P1 A P5
-    //////////////////////////////////////////////////////////
-
-    if (
-        !window.CORR_APRENDIZAJE
-    ) {
-
-        window.CORR_APRENDIZAJE = {
-
-            posiciones: {
-
-                1: {},
-                2: {},
-                3: {},
-                4: {},
-                5: {}
-            },
-
-            turnos: {
-
-                PREVIA: 0,
-                PRIMERA: 0,
-                MATUTINA: 0,
-                VESPERTINA: 0,
-                NOCTURNA: 0
-            }
-        };
-    }
-
-    let A =
-        window.CORR_APRENDIZAJE;
-
-    //////////////////////////////////////////////////////////
-    // TURNO
-    //////////////////////////////////////////////////////////
-
-    if (
-        A.turnos[
-            datos.turno
-        ] !== undefined
-    ) {
-
-        A.turnos[
-            datos.turno
-        ]++;
-    }
-
-    //////////////////////////////////////////////////////////
-    // POSICIONES 1 A 5
-    //////////////////////////////////////////////////////////
-
-    for (
-        let i = 0;
-        i < 5;
-        i++
-    ) {
-
-        let numero =
-            datos.numeros[i];
-
-        if (!numero)
-            continue;
-
-        A.posiciones[
-            i + 1
-        ][numero] =
-
-            (
-                A.posiciones[
-                    i + 1
-                ][numero] || 0
-            ) + 1;
-    }
-
-    //////////////////////////////////////////////////////////
-    // GUARDAR APRENDIZAJE
-    //////////////////////////////////////////////////////////
-
-    try {
-
-        localStorage.setItem(
-
-            "CORR_APRENDIZAJE_P1_P5",
-
-            JSON.stringify(A)
-        );
-
-    } catch(e) {}
-}
-
-//////////////////////////////////////////////////////////////
-// RESUMEN APRENDIZAJE
-//////////////////////////////////////////////////////////////
-
-function CORR_resumenAprendizaje() {
-
-    let A =
-        window.CORR_APRENDIZAJE;
-
-    if (!A) {
-
-        return (
-            "Todavía no hay aprendizaje."
-        );
-    }
-
-    let texto = "";
-
-    for (
-        let posicion = 1;
-        posicion <= 5;
-        posicion++
-    ) {
-
-        let mapa =
-            A.posiciones[
-                posicion
-            ] || {};
-
-        let mejores =
-            Object.keys(mapa)
-                .sort(
-                    function(a,b) {
-
-                        return (
-                            mapa[b] -
-                            mapa[a]
-                        );
-                    }
-                )
-                .slice(0,3);
-
-        texto +=
-            "P" +
-            posicion +
-            ": ";
-
-        if (
-            mejores.length === 0
-        ) {
-
-            texto +=
-                "sin datos\n";
-
-            continue;
-        }
-
-        texto +=
-            mejores
-                .map(
-                    function(n) {
-
-                        return (
-                            n +
-                            "(" +
-                            mapa[n] +
-                            ")"
-                        );
-                    }
-                )
-                .join(" | ") +
-            "\n";
-    }
-
-    return texto;
 }
 
 //////////////////////////////////////////////////////////////
@@ -14466,7 +14804,7 @@ function CORR_NUEVO_detenerOCR() {
 }
 
 //////////////////////////////////////////////////////////////
-// CONEXIONES PÚBLICAS
+// EXPORTAR
 //////////////////////////////////////////////////////////////
 
 window.EMI_CORR =
@@ -14484,24 +14822,132 @@ window.EMI_CORR.abrirOCR =
 window.EMI_CORR.detenerOCR =
     CORR_NUEVO_detenerOCR;
 
-//////////////////////////////////////////////////////////////
-// IMPORTANTE
-//
-// NO CREAR:
-// EMI_CORR.extraer20Corrientes
-//
-// La función correcta es:
-// CORR_extraer20()
-//
-//////////////////////////////////////////////////////////////
+window.EMI_CORR.aprenderEnVivo =
+    CORR_aprenderEnVivo;
 
 //////////////////////////////////////////////////////////////
 // FIN BLOQUE 2
 //////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////
-// 🎯 CORRENTINA INDEPENDIENTE
-// BLOQUE 3/5 — CARGA MANUAL + GENERADOR
+
 //////////////////////////////////////////////////////////////
+// 🎯 CORRENTINA INDEPENDIENTE
+// BLOQUE 3/5 — CARGA + GENERADOR
+//
+// SIN TESLA
+//
+// FLUJO DE APRENDIZAJE:
+//
+// PREVIA     → PRIMERA
+// PRIMERA    → MATUTINA
+// MATUTINA   → VESPERTINA
+// VESPERTINA → NOCTURNA
+// NOCTURNA   → PREVIA
+//
+// OBJETIVO:
+// P1 → P5
+//////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////////////
+// TURNOS CORRENTINA
+//////////////////////////////////////////////////////////////
+
+const CORR_TURNOS = [
+    "PREVIA",
+    "PRIMERA",
+    "MATUTINA",
+    "VESPERTINA",
+    "NOCTURNA"
+];
+
+//////////////////////////////////////////////////////////////
+// OBTENER TURNO SIGUIENTE
+//////////////////////////////////////////////////////////////
+
+function CORR_siguienteTurno(turno) {
+
+    turno =
+        String(turno || "")
+            .toUpperCase()
+            .trim();
+
+    let indice =
+        CORR_TURNOS.indexOf(turno);
+
+    if (indice < 0)
+        return "";
+
+    return CORR_TURNOS[
+        (indice + 1) %
+        CORR_TURNOS.length
+    ];
+}
+
+//////////////////////////////////////////////////////////////
+// NORMALIZAR TURNO
+//////////////////////////////////////////////////////////////
+
+function CORR_normalizarTurno(turno) {
+
+    turno =
+        String(turno || "")
+            .toUpperCase()
+            .trim();
+
+    if (
+        turno.includes("PREVIA")
+    )
+        return "PREVIA";
+
+    if (
+        turno.includes("PRIMERA")
+    )
+        return "PRIMERA";
+
+    if (
+        turno.includes("MATUTINA")
+    )
+        return "MATUTINA";
+
+    if (
+        turno.includes("VESPERTINA")
+    )
+        return "VESPERTINA";
+
+    if (
+        turno.includes("NOCTURNA") ||
+        turno.includes("NOTURNA") ||
+        turno.includes("NOCT")
+    )
+        return "NOCTURNA";
+
+    return "";
+}
+
+//////////////////////////////////////////////////////////////
+// NORMALIZAR CUATERNO
+//////////////////////////////////////////////////////////////
+
+function CORR_normalizarCuaterno(
+    numero
+) {
+
+    if (
+        numero === undefined ||
+        numero === null
+    )
+        return null;
+
+    numero =
+        String(numero)
+            .replace(/\D/g, "");
+
+    if (!numero)
+        return null;
+
+    return numero
+        .padStart(4, "0")
+        .slice(-4);
+}
 
 //////////////////////////////////////////////////////////////
 // CARGA MANUAL
@@ -14511,34 +14957,24 @@ function CORR_NUEVO_cargaManual() {
 
     let turno =
         prompt(
-            "Turno:\n\n" +
-            "PREVIA\n" +
-            "PRIMERA\n" +
-            "MATUTINA\n" +
-            "VESPERTINA\n" +
-            "NOCTURNA"
+            "CORRENTINA\n\n" +
+            "Indique el turno de estos 20 cuaternos:\n\n" +
+            "1 - PREVIA\n" +
+            "2 - PRIMERA\n" +
+            "3 - MATUTINA\n" +
+            "4 - VESPERTINA\n" +
+            "5 - NOCTURNA"
         );
 
     if (!turno)
         return;
 
     turno =
-        turno
-            .toUpperCase()
-            .trim();
+        CORR_normalizarTurno(
+            turno
+        );
 
-    let validos = [
-
-        "PREVIA",
-        "PRIMERA",
-        "MATUTINA",
-        "VESPERTINA",
-        "NOCTURNA"
-    ];
-
-    if (
-        !validos.includes(turno)
-    ) {
+    if (!turno) {
 
         alert(
             "Turno no válido."
@@ -14549,29 +14985,36 @@ function CORR_NUEVO_cargaManual() {
 
     let entrada =
         prompt(
-            "Ingrese las 20 posiciones\n" +
-            "separadas por espacio o coma.\n\n" +
+            "Ingrese los 20 cuaternos.\n\n" +
             "Ejemplo:\n" +
-            "1234 5678 9012 ..."
+            "1234 5678 9012 3456 ..."
         );
 
     if (!entrada)
         return;
 
     let numeros =
-        entrada.match(
-            /\b\d{4}\b/g
-        ) || [];
+        String(entrada)
+            .match(
+                /\b\d{4}\b/g
+            ) || [];
 
     numeros =
-        numeros.slice(0,20);
+        numeros
+            .slice(0,20)
+            .map(
+                CORR_normalizarCuaterno
+            )
+            .filter(Boolean);
 
     if (
-        numeros.length === 0
+        numeros.length < 20
     ) {
 
         alert(
-            "No se encontraron cuaternos."
+            "Se necesitan 20 cuaternos.\n\n" +
+            "Encontrados: " +
+            numeros.length
         );
 
         return;
@@ -14580,8 +15023,12 @@ function CORR_NUEVO_cargaManual() {
     let registro = {
 
         id:
-            "MANUAL_" +
-            Date.now(),
+            "MANUAL_CORR_" +
+            Date.now() +
+            "_" +
+            Math.random()
+                .toString(36)
+                .slice(2),
 
         fecha:
             new Date()
@@ -14601,8 +15048,12 @@ function CORR_NUEVO_cargaManual() {
             "MANUAL",
 
         posiciones:
-            numeros
+            numeros.slice(0,20)
     };
+
+    //////////////////////////////////////////////////////////
+    // GUARDAR
+    //////////////////////////////////////////////////////////
 
     CORR_MEMORIA.push(
         registro
@@ -14610,60 +15061,90 @@ function CORR_NUEVO_cargaManual() {
 
     CORR_ESTADO.registros++;
 
-    CORR_ESTADO.cuaternos +=
-        numeros.length;
+    CORR_ESTADO.cuaternos += 20;
 
     if (
-        CORR_ESTADO[turno] !==
-        undefined
+        CORR_ESTADO[turno] !== undefined
     ) {
 
-        CORR_ESTADO[turno] +=
-            numeros.length;
+        CORR_ESTADO[turno] += 20;
     }
 
     CORR_guardarMemoria();
 
+    //////////////////////////////////////////////////////////
+    // ENTRENAR TRANSICIÓN
+    //////////////////////////////////////////////////////////
+
+    if (
+        typeof CORR_TR_entrenar ===
+        "function"
+    ) {
+
+        CORR_TR_entrenar();
+    }
+
+    let siguiente =
+        CORR_siguienteTurno(
+            turno
+        );
+
     CORR_panel(
 
-        "✅ CARGA MANUAL\n\n" +
+        "✅ CARGA CORRENTINA\n\n" +
 
-        "Turno: " +
+        "Turno cargado: " +
         turno +
         "\n\n" +
 
-        "Posiciones guardadas: " +
-        numeros.length
+        "20 cuaternos guardados.\n\n" +
+
+        "🧠 Este bloque aprende " +
+        "P1 → P5.\n\n" +
+
+        "🎯 Próximo turno a predecir:\n" +
+        turno +
+        " → " +
+        siguiente +
+        "\n\n" +
+
+        "⚡ TESLA: NO INTERVIENE."
     );
 }
 
 //////////////////////////////////////////////////////////////
-// TRANSFORMAR CUATERNO A TERNO
+// TERNO
 //////////////////////////////////////////////////////////////
 
 function CORR_terno(
     numero
 ) {
 
-    if (
-        !/^\d{4}$/.test(numero)
-    )
+    numero =
+        CORR_normalizarCuaterno(
+            numero
+        );
+
+    if (!numero)
         return null;
 
-    return numero.slice(1);
+    return numero.slice(-3);
 }
 
 //////////////////////////////////////////////////////////////
-// TRANSFORMAR CUATERNO A AMBOS
+// AMBOS
 //////////////////////////////////////////////////////////////
 
 function CORR_ambos(
     numero
 ) {
 
-    if (
-        !/^\d{4}$/.test(numero)
-    )
+    numero =
+        CORR_normalizarCuaterno(
+            numero
+        );
+
+    if (!numero)
         return null;
 
     return numero.slice(-2);
@@ -14673,132 +15154,153 @@ function CORR_ambos(
 // FRECUENCIA
 //////////////////////////////////////////////////////////////
 
-function CORR_frecuencia() {
+function CORR_frecuenciaTurno(
+    turno
+) {
 
-    let mapa = {};
+    let resultado = {
+
+        1: {},
+        2: {},
+        3: {},
+        4: {},
+        5: {}
+    };
+
+    turno =
+        CORR_normalizarTurno(
+            turno
+        );
+
+    if (!turno)
+        return resultado;
 
     for (
         let registro of CORR_MEMORIA
     ) {
 
+        if (
+            CORR_normalizarTurno(
+                registro.turno
+            ) !== turno
+        )
+            continue;
+
+        let posiciones =
+            registro.posiciones ||
+            [];
+
         for (
-            let numero of
-            registro.posiciones || []
+            let i = 0;
+            i < 5;
+            i++
         ) {
 
-            mapa[numero] =
-                (mapa[numero] || 0) +
-                1;
+            let numero =
+                CORR_normalizarCuaterno(
+                    posiciones[i]
+                );
+
+            if (!numero)
+                continue;
+
+            resultado[i + 1][numero] =
+                (
+                    resultado[i + 1][numero] ||
+                    0
+                ) + 1;
         }
     }
 
-    return mapa;
+    return resultado;
 }
 
 //////////////////////////////////////////////////////////////
-// GENERAR 2 CUATERNOS
+// OBTENER REGISTROS DE UN TURNO
 //////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////////////
-// 🎯 CORRENTINA — GENERADOR POR TURNO
-// BLOQUE 5
-//
-// SIN TESLA
-// SIN HISTÓRICO GENERAL MEZCLADO
-//
-// Cada turno aprende de su propio turno:
-// PREVIA     → PREVIA
-// PRIMERA    → PRIMERA
-// MATUTINA   → MATUTINA
-// VESPERTINA → VESPERTINA
-// NOCTURNA   → NOCTURNA
-//////////////////////////////////////////////////////////////
-
-function CORR_generarPorTurno(turno) {
+function CORR_registrosTurno(
+    turno
+) {
 
     turno =
-        String(turno || "")
-            .toUpperCase()
-            .trim();
+        CORR_normalizarTurno(
+            turno
+        );
 
-    const TURNOS = [
-        "PREVIA",
-        "PRIMERA",
-        "MATUTINA",
-        "VESPERTINA",
-        "NOCTURNA"
-    ];
+    if (!turno)
+        return [];
 
-    if (!TURNOS.includes(turno)) {
+    return CORR_MEMORIA.filter(
+        function(registro) {
+
+            return (
+                CORR_normalizarTurno(
+                    registro.turno
+                ) === turno
+            );
+        }
+    );
+}
+
+//////////////////////////////////////////////////////////////
+// GENERADOR PRINCIPAL
+//
+// RECIBE EL TURNO QUE YA TENEMOS
+// Y PREDICE EL SIGUIENTE.
+//
+//////////////////////////////////////////////////////////////
+
+function CORR_generarPorTurno(
+    turnoOrigen
+) {
+
+    turnoOrigen =
+        CORR_normalizarTurno(
+            turnoOrigen
+        );
+
+    if (!turnoOrigen) {
 
         CORR_panel(
-            "❌ Seleccioná un turno válido."
+            "❌ No se recibió un turno válido."
         );
 
         return [];
     }
 
-    //////////////////////////////////////////////////////////
-    // MEMORIA CORRENTINA
-    //////////////////////////////////////////////////////////
-
-    let memoria = [];
-
-    if (
-        Array.isArray(
-            window.CORR_MEMORIA
-        )
-    ) {
-
-        memoria =
-            window.CORR_MEMORIA;
-
-    } else {
-
-        try {
-
-            memoria =
-                JSON.parse(
-                    localStorage.getItem(
-                        "MEMORIA_CORRENTINA_APRENDIZAJE"
-                    )
-                ) || [];
-
-        } catch(e) {
-
-            memoria = [];
-        }
-    }
-
-    //////////////////////////////////////////////////////////
-    // 🔥 SOLO EL TURNO SOLICITADO
-    //////////////////////////////////////////////////////////
-
-    let datosTurno =
-        memoria.filter(
-            function(registro) {
-
-                return (
-                    String(
-                        registro.turno || ""
-                    ).toUpperCase() === turno
-                );
-            }
+    let turnoObjetivo =
+        CORR_siguienteTurno(
+            turnoOrigen
         );
 
     //////////////////////////////////////////////////////////
-    // NO USAR HISTÓRICO GENERAL
+    // MEMORIA DEL TURNO OBJETIVO
     //////////////////////////////////////////////////////////
 
+    let datosObjetivo =
+        CORR_registrosTurno(
+            turnoObjetivo
+        );
+
+    //////////////////////////////////////////////////////////
+    // MEMORIA DEL TURNO ORIGEN
+    //////////////////////////////////////////////////////////
+
+    let datosOrigen =
+        CORR_registrosTurno(
+            turnoOrigen
+        );
+
     if (
-        datosTurno.length === 0
+        datosOrigen.length === 0
     ) {
 
         CORR_panel(
 
-            "⚠️ NO HAY DATOS PARA " +
-            turno +
-            "\n\n" +
+            "⚠️ NO HAY MEMORIA PARA " +
+            turnoOrigen +
+            ".\n\n" +
 
             "Primero cargá resultados " +
             "de ese turno."
@@ -14808,61 +15310,74 @@ function CORR_generarPorTurno(turno) {
     }
 
     //////////////////////////////////////////////////////////
-    // FRECUENCIA POR POSICIÓN
-    //
-    // SOLO P1–P5
-    //////////////////////////////////////////////////////////
-
-    let frecuencia = {
-
-        1: {},
-        2: {},
-        3: {},
-        4: {},
-        5: {}
-    };
-
-    for (
-        let registro of datosTurno
-    ) {
-
-        let posiciones =
-            registro.posiciones ||
-            registro.numeros ||
-            [];
-
-        for (
-            let i = 0;
-            i < 5;
-            i++
-        ) {
-
-            if (
-                !posiciones[i]
-            )
-                continue;
-
-            let numero =
-                String(
-                    posiciones[i]
-                )
-                .replace(/\D/g, "")
-                .padStart(4, "0")
-                .slice(-4);
-
-            frecuencia[i + 1][numero] =
-                (
-                    frecuencia[i + 1][numero] ||
-                    0
-                ) + 1;
-        }
-    }
-
-    //////////////////////////////////////////////////////////
     // CANDIDATOS
     //////////////////////////////////////////////////////////
 
     let candidatos = {};
+
+    function agregarCandidato(
+        numero,
+        posicion,
+        puntos,
+        frecuencia
+    ) {
+
+        numero =
+            CORR_normalizarCuaterno(
+                numero
+            );
+
+        if (!numero)
+            return;
+
+        if (!candidatos[numero]) {
+
+            candidatos[numero] = {
+
+                numero:
+                    numero,
+
+                puntaje:
+                    0,
+
+                frecuencia:
+                    0,
+
+                posiciones:
+                    []
+            };
+        }
+
+        candidatos[numero]
+            .puntaje +=
+            Number(puntos || 0);
+
+        candidatos[numero]
+            .frecuencia +=
+            Number(frecuencia || 0);
+
+        if (
+            !candidatos[numero]
+                .posiciones
+                .includes(posicion)
+        ) {
+
+            candidatos[numero]
+                .posiciones
+                .push(posicion);
+        }
+    }
+
+    //////////////////////////////////////////////////////////
+    // FRECUENCIA DEL TURNO OBJETIVO
+    //
+    // No mezcla turnos.
+    //////////////////////////////////////////////////////////
+
+    let frecuencia =
+        CORR_frecuenciaTurno(
+            turnoObjetivo
+        );
 
     for (
         let posicion = 1;
@@ -14883,52 +15398,39 @@ function CORR_generarPorTurno(turno) {
                             mapa[a]
                         );
                     }
-                );
-
-        //////////////////////////////////////////////////////
-        // NO QUEDARSE SOLO CON EL PRIMERO
-        //////////////////////////////////////////////////////
+                )
+                .slice(0,20);
 
         for (
             let i = 0;
-            i < Math.min(
-                ordenados.length,
-                15
-            );
+            i < ordenados.length;
             i++
         ) {
 
             let numero =
                 ordenados[i];
 
-            if (!candidatos[numero]) {
-
-                candidatos[numero] = {
-
-                    numero:
-                        numero,
-
-                    frecuencia:
-                        0,
-
-                    posiciones: [],
-
-                    puntaje: 0
-                };
-            }
-
-            candidatos[numero]
-                .frecuencia +=
+            let f =
                 mapa[numero];
 
-            candidatos[numero]
-                .posiciones
-                .push(posicion);
+            agregarCandidato(
+
+                numero,
+
+                posicion,
+
+                f * 1,
+
+                f
+            );
         }
     }
 
     //////////////////////////////////////////////////////////
-    // 🔄 TRANSICIÓN DEL MISMO TURNO
+    // TRANSICIÓN
+    //
+    // EL TURNO ORIGEN PRODUCE
+    // EL TURNO OBJETIVO.
     //////////////////////////////////////////////////////////
 
     if (
@@ -14936,103 +15438,116 @@ function CORR_generarPorTurno(turno) {
         "function"
     ) {
 
-        //////////////////////////////////////////////////////
-        // TOMAR EL ÚLTIMO REGISTRO DEL MISMO TURNO
-        //////////////////////////////////////////////////////
-
-        let ultimo =
-            datosTurno[
-                datosTurno.length - 1
-            ];
-
-        let posiciones =
-            ultimo.posiciones ||
-            ultimo.numeros ||
-            [];
-
-        //////////////////////////////////////////////////////
-        // P1–P5
-        //////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////
+        // TOMAR TODOS LOS REGISTROS DEL ORIGEN
+        // PARA QUE APRENDA DE TODO EL HISTÓRICO.
+        ////////////////////////////////////////////////////////
 
         for (
-            let posicion = 1;
-            posicion <= 5;
-            posicion++
+            let registro of datosOrigen
         ) {
 
-            let anterior =
-                posiciones[
-                    posicion - 1
-                ];
-
-            if (!anterior)
-                continue;
-
-            let transiciones =
-                CORR_TR_obtener(
-                    posicion,
-                    anterior,
-                    turno
-                );
+            let posiciones =
+                registro.posiciones ||
+                [];
 
             for (
-                let t of transiciones
+                let posicion = 1;
+                posicion <= 5;
+                posicion++
             ) {
 
-                if (!t || !t.numero)
+                let anterior =
+                    posiciones[
+                        posicion - 1
+                    ];
+
+                if (!anterior)
                     continue;
 
-                let numero =
-                    t.numero;
+                let transiciones =
+                    CORR_TR_obtener(
+                        posicion,
+                        anterior,
+                        turnoObjetivo
+                    );
 
-                if (!candidatos[numero]) {
+                for (
+                    let t of transiciones
+                ) {
 
-                    candidatos[numero] = {
+                    if (
+                        !t ||
+                        !t.numero
+                    )
+                        continue;
 
-                        numero:
-                            numero,
+                    //////////////////////////////////////////////////
+                    // TRANSICIÓN TIENE MÁS PESO
+                    //////////////////////////////////////////////////
 
-                        frecuencia:
-                            0,
+                    agregarCandidato(
 
-                        posiciones:
-                            [],
+                        t.numero,
 
-                        puntaje:
-                            0
-                    };
+                        posicion,
+
+                        Number(t.veces || 0) * 5,
+
+                        Number(t.veces || 0)
+                    );
                 }
-
-                //////////////////////////////////////////////////
-                // LA TRANSICIÓN TIENE MÁS PESO
-                //////////////////////////////////////////////////
-
-                candidatos[numero]
-                    .puntaje +=
-                    t.veces * 3;
-
-                candidatos[numero]
-                    .posiciones
-                    .push(posicion);
             }
         }
     }
 
     //////////////////////////////////////////////////////////
-    // PUNTAJE DE FRECUENCIA
+    // SI NO HAY TRANSICIÓN ESPECÍFICA
+    //
+    // USAR TRANSICIÓN GENERAL DEL MISMO TURNO
     //////////////////////////////////////////////////////////
 
-    Object.keys(
-        candidatos
-    ).forEach(
-        function(numero) {
+    if (
+        Object.keys(candidatos)
+            .length === 0
+    ) {
 
-            candidatos[numero]
-                .puntaje +=
-                candidatos[numero]
-                    .frecuencia;
+        for (
+            let registro of datosObjetivo
+        ) {
+
+            let posiciones =
+                registro.posiciones ||
+                [];
+
+            for (
+                let posicion = 1;
+                posicion <= 5;
+                posicion++
+            ) {
+
+                let numero =
+                    posiciones[
+                        posicion - 1
+                    ];
+
+                numero =
+                    CORR_normalizarCuaterno(
+                        numero
+                    );
+
+                if (!numero)
+                    continue;
+
+                agregarCandidato(
+                    numero,
+                    posicion,
+                    1,
+                    1
+                );
+            }
         }
-    );
+    }
 
     //////////////////////////////////////////////////////////
     // ORDENAR
@@ -15053,9 +15568,9 @@ function CORR_generarPorTurno(turno) {
         );
 
     //////////////////////////////////////////////////////////
-    // 🔥 DIVERSIFICAR
+    // DIVERSIFICAR
     //
-    // No devolver siempre el mismo número.
+    // No repetir siempre el mismo cuaterno.
     //////////////////////////////////////////////////////////
 
     let seleccionados = [];
@@ -15082,41 +15597,90 @@ function CORR_generarPorTurno(turno) {
     }
 
     //////////////////////////////////////////////////////////
-    // MOSTRAR
+    // RESULTADO
     //////////////////////////////////////////////////////////
+
+    if (
+        seleccionados.length === 0
+    ) {
+
+        CORR_panel(
+
+            "⚠️ Todavía no hay suficientes " +
+            "datos para generar " +
+            turnoObjetivo +
+            ".\n\n" +
+
+            "Origen: " +
+            turnoOrigen +
+            "\n" +
+
+            "Objetivo: " +
+            turnoObjetivo
+        );
+
+        return [];
+    }
+
+    let principal =
+        seleccionados[0];
+
+    let respaldo =
+        seleccionados[1] ||
+        seleccionados[0];
 
     let salida =
 
-        "🎯 CORRENTINA — " +
-        turno +
-        "\n" +
-
+        "🎯 CORRENTINA\n" +
         "================================\n\n" +
 
-        "🧠 Datos del turno: " +
-        datosTurno.length +
+        "🧠 APRENDIZAJE\n" +
+
+        "Origen: " +
+        turnoOrigen +
+        "\n" +
+
+        "Predicción: " +
+        turnoObjetivo +
         "\n\n" +
 
-        "🏆 CANDIDATOS APRENDIDOS\n\n";
+        "📚 Registros origen: " +
+        datosOrigen.length +
+        "\n" +
 
-    seleccionados.forEach(
-        function(numero, indice) {
+        "📚 Registros objetivo: " +
+        datosObjetivo.length +
+        "\n\n" +
 
-            salida +=
-                (indice + 1) +
-                ". " +
-                numero +
-                "\n";
-        }
-    );
+        "🏆 PRINCIPAL\n" +
+        principal +
+        "\n" +
 
-    salida +=
+        "TERNO: " +
+        CORR_terno(principal) +
+        "\n" +
 
-        "\n🔄 TRANSICIÓN: ACTIVA\n" +
+        "AMBOS: " +
+        CORR_ambos(principal) +
+        "\n\n" +
 
-        "📊 FRECUENCIA: ACTIVA\n" +
+        "🥈 RESPALDO\n" +
+        respaldo +
+        "\n" +
 
-        "🎯 OBJETIVO: P1–P5\n\n" +
+        "TERNO: " +
+        CORR_terno(respaldo) +
+        "\n" +
+
+        "AMBOS: " +
+        CORR_ambos(respaldo) +
+        "\n\n" +
+
+        "🎯 PREDICCIÓN: P1 → P5\n" +
+
+        "🔄 TRANSICIÓN: ACTIVA\n" +
+
+        "📊 FRECUENCIA: ACTIVA\n\n" +
 
         "⚡ TESLA: NO INTERVIENE";
 
@@ -15124,88 +15688,130 @@ function CORR_generarPorTurno(turno) {
         salida
     );
 
-    return seleccionados;
+    //////////////////////////////////////////////////////////
+    // DEVOLVER OBJETO COMPLETO
+    //////////////////////////////////////////////////////////
+
+    return {
+
+        origen:
+            turnoOrigen,
+
+        objetivo:
+            turnoObjetivo,
+
+        candidatos:
+            seleccionados,
+
+        principal:
+            principal,
+
+        respaldo:
+            respaldo,
+
+        principalTerno:
+            CORR_terno(principal),
+
+        respaldoTerno:
+            CORR_terno(respaldo),
+
+        principalAmbos:
+            CORR_ambos(principal),
+
+        respaldoAmbos:
+            CORR_ambos(respaldo)
+    };
 }
 
 //////////////////////////////////////////////////////////////
-// 🎯 GENERADOR CORRENTINA
-// USA EL ÚLTIMO TURNO REALMENTE CARGADO
+// GENERADOR DEL BOTÓN
+//
+// IMPORTANTE:
+// NO DEPENDE DE #CORR_TURNO.
+//
+// Primero intenta usar el último turno cargado.
+// Si no existe, pide el turno.
+//
 //////////////////////////////////////////////////////////////
 
 function CORR_NUEVO_generar() {
 
-    let turno = "";
+    let turnoOrigen = "";
 
     //////////////////////////////////////////////////////////
-    // BUSCAR EL ÚLTIMO REGISTRO CARGADO
+    // 1. ÚLTIMO REGISTRO VÁLIDO
     //////////////////////////////////////////////////////////
 
     if (
-        Array.isArray(window.CORR_MEMORIA) &&
-        window.CORR_MEMORIA.length > 0
-    ) {
-
-        let ultimo =
-            window.CORR_MEMORIA[
-                window.CORR_MEMORIA.length - 1
-            ];
-
-        turno = String(
-            ultimo.turno ||
-            ultimo.turnoNombre ||
-            ultimo.nombreTurno ||
-            ""
+        Array.isArray(
+            CORR_MEMORIA
         )
-        .toUpperCase()
-        .trim();
-    }
-
-    //////////////////////////////////////////////////////////
-    // NORMALIZAR EL NOMBRE DEL TURNO
-    //////////////////////////////////////////////////////////
-
-    if (turno.includes("PREVIA")) {
-
-        turno = "PREVIA";
-
-    } else if (turno.includes("PRIMERA")) {
-
-        turno = "PRIMERA";
-
-    } else if (turno.includes("MATUTINA")) {
-
-        turno = "MATUTINA";
-
-    } else if (turno.includes("VESPERTINA")) {
-
-        turno = "VESPERTINA";
-
-    } else if (
-        turno.includes("NOCTURNA") ||
-        turno.includes("NOTURNA")
     ) {
 
-        turno = "NOCTURNA";
+        for (
+            let i =
+                CORR_MEMORIA.length - 1;
+            i >= 0;
+            i--
+        ) {
+
+            let t =
+                CORR_normalizarTurno(
+                    CORR_MEMORIA[i].turno
+                );
+
+            if (t) {
+
+                turnoOrigen = t;
+
+                break;
+            }
+        }
     }
 
     //////////////////////////////////////////////////////////
-    // VERIFICAR
+    // 2. SI NO EXISTE, PEDIR TURNO
     //////////////////////////////////////////////////////////
 
-    const TURNOS_VALIDOS = [
-        "PREVIA",
-        "PRIMERA",
-        "MATUTINA",
-        "VESPERTINA",
-        "NOCTURNA"
-    ];
+    if (!turnoOrigen) {
 
-    if (!TURNOS_VALIDOS.includes(turno)) {
+        let respuesta =
+            prompt(
+
+                "¿Qué turno acabás de cargar?\n\n" +
+
+                "PREVIA\n" +
+                "PRIMERA\n" +
+                "MATUTINA\n" +
+                "VESPERTINA\n" +
+                "NOCTURNA"
+            );
+
+        if (!respuesta)
+            return [];
+
+        turnoOrigen =
+            CORR_normalizarTurno(
+                respuesta
+            );
+    }
+
+    //////////////////////////////////////////////////////////
+    // VALIDAR
+    //////////////////////////////////////////////////////////
+
+    if (
+        !CORR_TURNOS.includes(
+            turnoOrigen
+        )
+    ) {
 
         CORR_panel(
-            "⚠️ NO PUDE IDENTIFICAR EL TURNO.\n\n" +
-            "La memoria no tiene registrado " +
-            "el turno de los 20 cuaternos."
+
+            "❌ No pude identificar el turno.\n\n" +
+
+            "Elegí: PREVIA, PRIMERA, MATUTINA, " +
+            "VESPERTINA o NOCTURNA."
         );
 
         return [];
@@ -15218,15 +15824,20 @@ function CORR_NUEVO_generar() {
     window.EMI_CORR =
         window.EMI_CORR || {};
 
-    window.EMI_CORR.ultimoTurno =
-        turno;
+    window.EMI_CORR.turnoOrigen =
+        turnoOrigen;
+
+    window.EMI_CORR.turnoObjetivo =
+        CORR_siguienteTurno(
+            turnoOrigen
+        );
 
     //////////////////////////////////////////////////////////
-    // GENERAR EXCLUSIVAMENTE PARA ESE TURNO
+    // GENERAR
     //////////////////////////////////////////////////////////
 
     return CORR_generarPorTurno(
-        turno
+        turnoOrigen
     );
 }
 
@@ -15240,15 +15851,32 @@ window.EMI_CORR =
 window.EMI_CORR.generarPorTurno =
     CORR_generarPorTurno;
 
+window.EMI_CORR.generar =
+    CORR_NUEVO_generar;
+
+window.EMI_CORR.siguienteTurno =
+    CORR_siguienteTurno;
+
 //////////////////////////////////////////////////////////////
-// FIN
+// FIN BLOQUE 3
 //////////////////////////////////////////////////////////////
 
-    
-    
-//////////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////////
 // 🎯 CORRENTINA INDEPENDIENTE
-// BLOQUE 4/5 — ANÁLISIS Y APRENDIZAJE
+// BLOQUE 4/5 — ANÁLISIS + APRENDIZAJE + SIMULACIÓN
+//
+// SIN TESLA
+//
+// OBJETIVO:
+// APRENDER P1 → P5
+//
+// Y COMPARAR:
+//
+// PREVIA → PRIMERA
+// PRIMERA → MATUTINA
+// MATUTINA → VESPERTINA
+// VESPERTINA → NOCTURNA
+// NOCTURNA → PREVIA
 //////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////
@@ -15277,9 +15905,19 @@ function CORR_analizarPosiciones() {
     ) {
 
         let posiciones =
-            registro.posiciones || [];
+            registro.posiciones ||
+            [];
+
+        if (
+            posiciones.length === 0
+        )
+            continue;
 
         resultado.total++;
+
+        //////////////////////////////////////////////////////
+        // SOLO P1 A P5
+        //////////////////////////////////////////////////////
 
         for (
             let i = 0;
@@ -15288,7 +15926,9 @@ function CORR_analizarPosiciones() {
         ) {
 
             let numero =
-                posiciones[i];
+                CORR_normalizarCuaterno(
+                    posiciones[i]
+                );
 
             if (!numero)
                 continue;
@@ -15296,10 +15936,12 @@ function CORR_analizarPosiciones() {
             resultado.posiciones[
                 i + 1
             ][numero] =
+
                 (
                     resultado.posiciones[
                         i + 1
-                    ][numero] || 0
+                    ][numero] ||
+                    0
                 ) + 1;
         }
     }
@@ -15315,23 +15957,20 @@ function CORR_analizarTurnos() {
 
     let salida = {};
 
-    let turnos = [
-
-        "PREVIA",
-        "PRIMERA",
-        "MATUTINA",
-        "VESPERTINA",
-        "NOCTURNA"
-    ];
-
     for (
-        let turno of turnos
+        let turno of CORR_TURNOS
     ) {
 
         salida[turno] = {
 
             registros: 0,
-            cuaternos: 0
+
+            cuaternos: 0,
+
+            siguiente:
+                CORR_siguienteTurno(
+                    turno
+                )
         };
     }
 
@@ -15341,33 +15980,69 @@ function CORR_analizarTurnos() {
     ) {
 
         let turno =
-            registro.turno;
+            CORR_normalizarTurno(
+                registro.turno
+            );
 
         if (
             !salida[turno]
         )
             continue;
 
-        salida[turno].registros++;
+        let cantidad =
+            Array.isArray(
+                registro.posiciones
+            )
+            ?
+            registro.posiciones.length
+            :
+            0;
 
-        salida[turno].cuaternos +=
-            (
-                registro.posiciones ||
-                []
-            ).length;
+        salida[turno]
+            .registros++;
+
+        salida[turno]
+            .cuaternos +=
+            cantidad;
     }
 
     return salida;
 }
 
 //////////////////////////////////////////////////////////////
-// MEJORES DE POSICIONES 1 A 5
+// MEJORES POSICIONES
 //////////////////////////////////////////////////////////////
 
-function CORR_mejoresPosiciones() {
+function CORR_mejoresPosiciones(
+    turno
+) {
 
-    let analisis =
-        CORR_analizarPosiciones();
+    let analisis;
+
+    //////////////////////////////////////////////////////////
+    // SI SE INDICA TURNO, ANALIZAR SOLO ESE TURNO
+    //////////////////////////////////////////////////////////
+
+    if (turno) {
+
+        turno =
+            CORR_normalizarTurno(
+                turno
+            );
+
+        analisis = {
+
+            posiciones:
+                CORR_frecuenciaTurno(
+                    turno
+                )
+        };
+
+    } else {
+
+        analisis =
+            CORR_analizarPosiciones();
+    }
 
     let salida = {};
 
@@ -15380,7 +16055,7 @@ function CORR_mejoresPosiciones() {
         let mapa =
             analisis.posiciones[
                 posicion
-            ];
+            ] || {};
 
         let lista =
             Object.keys(mapa)
@@ -15415,12 +16090,15 @@ function CORR_mejoresPosiciones() {
 }
 
 //////////////////////////////////////////////////////////////
-// ANÁLISIS
+// VER ANÁLISIS
 //////////////////////////////////////////////////////////////
 
 function CORR_NUEVO_verAnalisis() {
 
     if (
+        !Array.isArray(
+            CORR_MEMORIA
+        ) ||
         CORR_MEMORIA.length === 0
     ) {
 
@@ -15431,11 +16109,48 @@ function CORR_NUEVO_verAnalisis() {
         return;
     }
 
-    let mejores =
-        CORR_mejoresPosiciones();
+    let turnos =
+        CORR_analizarTurnos();
 
     let texto =
-        "📊 ANÁLISIS CORRENTINA\n\n";
+        "📊 ANÁLISIS CORRENTINA\n" +
+        "================================\n\n";
+
+    //////////////////////////////////////////////////////////
+    // TURNOS
+    //////////////////////////////////////////////////////////
+
+    texto +=
+        "📚 MEMORIA POR TURNO\n\n";
+
+    for (
+        let turno of CORR_TURNOS
+    ) {
+
+        let dato =
+            turnos[turno];
+
+        texto +=
+
+            turno +
+            ": " +
+            dato.cuaternos +
+            " cuaternos\n" +
+
+            "→ predice " +
+            dato.siguiente +
+            "\n\n";
+    }
+
+    //////////////////////////////////////////////////////////
+    // POSICIONES
+    //////////////////////////////////////////////////////////
+
+    texto +=
+        "🎯 MEJORES POSICIONES P1–P5\n\n";
+
+    let mejores =
+        CORR_mejoresPosiciones();
 
     for (
         let posicion = 1;
@@ -15444,39 +16159,55 @@ function CORR_NUEVO_verAnalisis() {
     ) {
 
         texto +=
-            "🥇 POSICIÓN " +
+            "P" +
             posicion +
-            "\n";
+            ": ";
 
         let lista =
             mejores[posicion];
 
         if (
+            !lista ||
             lista.length === 0
         ) {
 
             texto +=
-                "Sin datos\n\n";
+                "sin datos\n";
 
             continue;
         }
 
-        for (
-            let dato of lista.slice(0,5)
-        ) {
+        texto +=
+            lista
+                .slice(0,5)
+                .map(
+                    function(d) {
 
-            texto +=
-                dato.numero +
-                " → " +
-                dato.frecuencia +
-                "\n";
-        }
+                        return (
+                            d.numero +
+                            "(" +
+                            d.frecuencia +
+                            ")"
+                        );
+                    }
+                )
+                .join(" | ");
 
-        texto += "\n";
+        texto +=
+            "\n";
     }
 
     texto +=
-        "🎯 El aprendizaje prioriza las posiciones 1 a 5.";
+
+        "\n🧠 APRENDIZAJE ACTIVO\n" +
+
+        "• P1 a P5\n" +
+
+        "• Frecuencia por turno\n" +
+
+        "• Transición entre turnos\n\n" +
+
+        "⚡ TESLA: NO INTERVIENE.";
 
     CORR_panel(
         texto
@@ -15484,31 +16215,63 @@ function CORR_NUEVO_verAnalisis() {
 }
 
 //////////////////////////////////////////////////////////////
-// SIMULAR ACIERTO EN POSICIONES 1 A 5
+// SIMULAR UN CUATERNO
+//
+// SOLO P1–P5
 //////////////////////////////////////////////////////////////
 
 function CORR_simularNumero(
-    prediccion
+    prediccion,
+    turno
 ) {
+
+    prediccion =
+        CORR_normalizarCuaterno(
+            prediccion
+        );
 
     let resultado = {
 
         cuaterno: 0,
+
         terno: 0,
+
         ambos: 0,
 
         posicionCuaterno: 0,
+
         posicionTerno: 0,
-        posicionAmbos: 0
+
+        posicionAmbos: 0,
+
+        totalPruebas: 0
     };
 
+    if (!prediccion)
+        return resultado;
+
+    //////////////////////////////////////////////////////////
+    // SI SE INDICA TURNO, SIMULAR SOLO ESE TURNO
+    //////////////////////////////////////////////////////////
+
+    let memoria =
+        turno
+        ?
+        CORR_registrosTurno(
+            turno
+        )
+        :
+        CORR_MEMORIA;
+
     for (
-        let registro of
-        CORR_MEMORIA
+        let registro of memoria
     ) {
 
         let posiciones =
-            registro.posiciones || [];
+            registro.posiciones ||
+            [];
+
+        resultado.totalPruebas++;
 
         for (
             let i = 0;
@@ -15520,7 +16283,12 @@ function CORR_simularNumero(
         ) {
 
             let real =
-                posiciones[i];
+                CORR_normalizarCuaterno(
+                    posiciones[i]
+                );
+
+            if (!real)
+                continue;
 
             //////////////////////////////////////////////////
             // CUATERNO
@@ -15587,7 +16355,7 @@ function CORR_simularNumero(
 }
 
 //////////////////////////////////////////////////////////////
-// SIMULAR
+// SIMULACIÓN
 //////////////////////////////////////////////////////////////
 
 function CORR_NUEVO_simular() {
@@ -15597,33 +16365,64 @@ function CORR_NUEVO_simular() {
     ) {
 
         CORR_panel(
-            "⚠️ Necesitamos más memoria para simular."
+            "⚠️ Necesitamos más memoria " +
+            "para simular."
         );
 
         return;
     }
 
+    //////////////////////////////////////////////////////////
+    // GENERAR
+    //////////////////////////////////////////////////////////
+
     let generado =
         CORR_NUEVO_generar();
 
-    if (!generado)
+    if (
+        !generado ||
+        !generado.principal
+    )
         return;
+
+    let turnoObjetivo =
+        generado.objetivo;
+
+    //////////////////////////////////////////////////////////
+    // SIMULAR PRINCIPAL
+    //////////////////////////////////////////////////////////
 
     let a =
         CORR_simularNumero(
-            generado.principal
+            generado.principal,
+            turnoObjetivo
         );
+
+    //////////////////////////////////////////////////////////
+    // SIMULAR RESPALDO
+    //////////////////////////////////////////////////////////
 
     let b =
         CORR_simularNumero(
-            generado.respaldo
+            generado.respaldo,
+            turnoObjetivo
         );
 
     CORR_panel(
 
-        "🧪 SIMULACIÓN CORRENTINA\n\n" +
+        "🧪 SIMULACIÓN CORRENTINA\n" +
+        "================================\n\n" +
+
+        "ORIGEN: " +
+        generado.origen +
+        "\n" +
+
+        "OBJETIVO: " +
+        generado.objetivo +
+        "\n\n" +
 
         "🎯 PRINCIPAL\n" +
+
         generado.principal +
         "\n\n" +
 
@@ -15640,6 +16439,7 @@ function CORR_NUEVO_simular() {
         "\n\n" +
 
         "🥈 RESPALDO\n" +
+
         generado.respaldo +
         "\n\n" +
 
@@ -15655,7 +16455,9 @@ function CORR_NUEVO_simular() {
         b.ambos +
         "\n\n" +
 
-        "🎯 SOLO POSICIONES 1 A 5"
+        "🎯 SOLO POSICIONES 1 A 5\n\n" +
+
+        "⚡ TESLA: NO INTERVIENE."
     );
 }
 
@@ -15682,45 +16484,63 @@ function CORR_NUEVO_verHistorial() {
             .reverse();
 
     let texto =
-        "📋 HISTORIAL CORRENTINA\n\n";
+        "📋 HISTORIAL CORRENTINA\n" +
+        "================================\n\n";
 
     for (
         let registro of ultimos
     ) {
 
+        let posiciones =
+            registro.posiciones ||
+            [];
+
         texto +=
 
             "📅 " +
-            registro.fecha +
+            (
+                registro.fecha ||
+                "-"
+            ) +
             "\n" +
 
             "🕐 " +
-            registro.turno +
+            (
+                registro.turno ||
+                "SIN TURNO"
+            ) +
             "\n" +
 
             "📄 Página " +
-            registro.pagina +
-            "\n" +
-
-            "1: " +
-            (registro.posiciones[0] || "-") +
-            " | " +
-
-            "2: " +
-            (registro.posiciones[1] || "-") +
-            " | " +
-
-            "3: " +
-            (registro.posiciones[2] || "-") +
-            " | " +
-
-            "4: " +
-            (registro.posiciones[3] || "-") +
-            " | " +
-
-            "5: " +
-            (registro.posiciones[4] || "-") +
+            (
+                registro.pagina ||
+                "-"
+            ) +
             "\n\n";
+
+        //////////////////////////////////////////////////////
+        // MOSTRAR SOLO P1–P5
+        //////////////////////////////////////////////////////
+
+        for (
+            let i = 0;
+            i < 5;
+            i++
+        ) {
+
+            texto +=
+                "P" +
+                (i + 1) +
+                ": " +
+                (
+                    posiciones[i] ||
+                    "-"
+                ) +
+                "\n";
+        }
+
+        texto +=
+            "-------------------------\n";
     }
 
     CORR_panel(
@@ -15729,545 +16549,73 @@ function CORR_NUEVO_verHistorial() {
 }
 
 //////////////////////////////////////////////////////////////
-// FIN BLOQUE 4
+// RESUMEN COMPLETO DEL APRENDIZAJE
 //////////////////////////////////////////////////////////////
 
-  //////////////////////////////////////////////////////////////
-// 🎯 CORRENTINA — MOTOR DE TRANSICIÓN
-// INDEPENDIENTE DE TESLA
-//
-// Estudia:
-// anterior → siguiente
-// turno → siguiente
-// posición → siguiente
-//
-// OBJETIVO PRINCIPAL: P1 a P5
-//////////////////////////////////////////////////////////////
-
-window.CORR_TRANSICION =
-    window.CORR_TRANSICION || {
-
-        registros: [],
-        pares: {},
-        porTurno: {},
-
-        totalAnalizados: 0,
-
-        aciertosP1: 0,
-        aciertosP2: 0,
-        aciertosP3: 0,
-        aciertosP4: 0,
-        aciertosP5: 0
-    };
-
-
-//////////////////////////////////////////////////////////////
-// NORMALIZAR NÚMERO
-//////////////////////////////////////////////////////////////
-
-function CORR_TR_normalizar(numero) {
-
-    if (numero === undefined ||
-        numero === null) {
-
-        return null;
-    }
-
-    numero =
-        String(numero)
-            .replace(/\D/g, "");
-
-    if (!numero)
-        return null;
-
-    return numero
-        .padStart(4, "0")
-        .slice(-4);
-}
-
-
-//////////////////////////////////////////////////////////////
-// REGISTRAR TRANSICIÓN
-//
-// Compara un registro anterior con el siguiente.
-// SOLO P1–P5 son objetivo de predicción.
-//
-//////////////////////////////////////////////////////////////
-
-function CORR_TR_registrar(
-    anterior,
-    siguiente
-) {
-
-    if (!anterior ||
-        !siguiente) {
-
-        return;
-    }
-
-    if (!Array.isArray(anterior.posiciones) ||
-        !Array.isArray(siguiente.posiciones)) {
-
-        return;
-    }
-
-    if (anterior.posiciones.length < 5 ||
-        siguiente.posiciones.length < 5) {
-
-        return;
-    }
-
-    CORR_TRANSICION
-        .totalAnalizados++;
-
-    //////////////////////////////////////////////////////////
-    // REGISTRO GENERAL
-    //////////////////////////////////////////////////////////
-
-    let registro = {
-
-        fechaAnterior:
-            anterior.fecha || "",
-
-        fechaSiguiente:
-            siguiente.fecha || "",
-
-        turnoAnterior:
-            anterior.turno || "",
-
-        turnoSiguiente:
-            siguiente.turno || "",
-
-        anterior:
-            anterior.posiciones
-                .slice(0, 5),
-
-        siguiente:
-            siguiente.posiciones
-                .slice(0, 5)
-    };
-
-    CORR_TRANSICION
-        .registros
-        .push(registro);
-
-
-    //////////////////////////////////////////////////////////
-    // ANALIZAR P1 → P1
-    // P2 → P2
-    // ...
-    // P5 → P5
-    //////////////////////////////////////////////////////////
-
-    for (
-        let i = 0;
-        i < 5;
-        i++
-    ) {
-
-        let numeroAnterior =
-            CORR_TR_normalizar(
-                anterior.posiciones[i]
-            );
-
-        let numeroSiguiente =
-            CORR_TR_normalizar(
-                siguiente.posiciones[i]
-            );
-
-        if (!numeroAnterior ||
-            !numeroSiguiente) {
-
-            continue;
-        }
-
-        //////////////////////////////////////////////////////
-        // CREAR ESTRUCTURA
-        //////////////////////////////////////////////////////
-
-        if (!CORR_TRANSICION.pares[i + 1]) {
-
-            CORR_TRANSICION.pares[i + 1] = {};
-        }
-
-        if (
-            !CORR_TRANSICION
-                .pares[i + 1][numeroAnterior]
-        ) {
-
-            CORR_TRANSICION
-                .pares[i + 1][numeroAnterior] = {};
-        }
-
-        let mapa =
-            CORR_TRANSICION
-                .pares[i + 1][numeroAnterior];
-
-        mapa[numeroSiguiente] =
-            (mapa[numeroSiguiente] || 0) + 1;
-
-
-        //////////////////////////////////////////////////////
-        // APRENDIZAJE POR TURNO
-        //////////////////////////////////////////////////////
-
-        let turno =
-            siguiente.turno ||
-            "SIN_TURNO";
-
-        if (!CORR_TRANSICION.porTurno[turno]) {
-
-            CORR_TRANSICION
-                .porTurno[turno] = {};
-        }
-
-        if (
-            !CORR_TRANSICION
-                .porTurno[turno][i + 1]
-        ) {
-
-            CORR_TRANSICION
-                .porTurno[turno][i + 1] = {};
-        }
-
-        if (
-            !CORR_TRANSICION
-                .porTurno[turno][i + 1]
-                [numeroAnterior]
-        ) {
-
-            CORR_TRANSICION
-                .porTurno[turno][i + 1]
-                [numeroAnterior] = {};
-        }
-
-        let mapaTurno =
-            CORR_TRANSICION
-                .porTurno[turno]
-                [i + 1]
-                [numeroAnterior];
-
-        mapaTurno[numeroSiguiente] =
-            (mapaTurno[numeroSiguiente] || 0) + 1;
-    }
-
-    //////////////////////////////////////////////////////////
-    // GUARDAR
-    //////////////////////////////////////////////////////////
-
-    CORR_TR_guardar();
-}
-
-
-//////////////////////////////////////////////////////////////
-// CONSTRUIR TRANSICIONES DE TODO EL HISTÓRICO
-//////////////////////////////////////////////////////////////
-
-function CORR_TR_entrenar() {
-
-    if (
-        typeof CORR_MEMORIA ===
-        "undefined"
-    ) {
-
-        return;
-    }
-
-    if (
-        !Array.isArray(
-            CORR_MEMORIA
-        )
-    ) {
-
-        return;
-    }
-
-    //////////////////////////////////////////////////////////
-    // ORDENAR POR FECHA / PÁGINA
-    //////////////////////////////////////////////////////////
-
-    let datos =
-        CORR_MEMORIA
-            .slice()
-            .sort(
-                function(a, b) {
-
-                    let fa =
-                        String(
-                            a.fecha || ""
-                        );
-
-                    let fb =
-                        String(
-                            b.fecha || ""
-                        );
-
-                    if (fa < fb)
-                        return -1;
-
-                    if (fa > fb)
-                        return 1;
-
-                    return (
-                        Number(
-                            a.pagina || 0
-                        ) -
-                        Number(
-                            b.pagina || 0
-                        )
-                    );
-                }
-            );
-
-    //////////////////////////////////////////////////////////
-    // LIMPIAR TRANSICIONES
-    //////////////////////////////////////////////////////////
-
-    CORR_TRANSICION.pares = {};
-    CORR_TRANSICION.porTurno = {};
-    CORR_TRANSICION.registros = [];
-
-    CORR_TRANSICION.totalAnalizados = 0;
-
-    //////////////////////////////////////////////////////////
-    // COMPARAR REGISTROS CONSECUTIVOS
-    //////////////////////////////////////////////////////////
-
-    for (
-        let i = 0;
-        i < datos.length - 1;
-        i++
-    ) {
-
-        let actual =
-            datos[i];
-
-        let siguiente =
-            datos[i + 1];
-
-        CORR_TR_registrar(
-            actual,
-            siguiente
-        );
-    }
-
-    CORR_TR_guardar();
-
-    return CORR_TRANSICION;
-}
-
-
-//////////////////////////////////////////////////////////////
-// OBTENER LAS TRANSICIONES MÁS FUERTES
-//////////////////////////////////////////////////////////////
-
-function CORR_TR_obtener(
-    posicion,
-    numero,
-    turno
-) {
-
-    numero =
-        CORR_TR_normalizar(
-            numero
-        );
-
-    if (!numero)
-        return [];
-
-    //////////////////////////////////////////////////////////
-    // SI HAY TURNO, PRIORIZAR TURNO
-    //////////////////////////////////////////////////////////
-
-    if (
-        turno &&
-        CORR_TRANSICION
-            .porTurno[turno] &&
-        CORR_TRANSICION
-            .porTurno[turno][posicion] &&
-        CORR_TRANSICION
-            .porTurno[turno][posicion]
-            [numero]
-    ) {
-
-        return CORR_TR_top(
-
-            CORR_TRANSICION
-                .porTurno[turno]
-                [posicion]
-                [numero],
-
-            10
-        );
-    }
-
-    //////////////////////////////////////////////////////////
-    // TRANSICIÓN GENERAL
-    //////////////////////////////////////////////////////////
-
-    if (
-        CORR_TRANSICION
-            .pares[posicion] &&
-        CORR_TRANSICION
-            .pares[posicion][numero]
-    ) {
-
-        return CORR_TR_top(
-
-            CORR_TRANSICION
-                .pares[posicion]
-                [numero],
-
-            10
-        );
-    }
-
-    return [];
-}
-
-
-//////////////////////////////////////////////////////////////
-// TOP TRANSICIONES
-//////////////////////////////////////////////////////////////
-
-function CORR_TR_top(
-    mapa,
-    limite
-) {
-
-    return Object.keys(mapa)
-        .sort(
-            function(a, b) {
-
-                return (
-                    mapa[b] -
-                    mapa[a]
-                );
-            }
-        )
-        .slice(0, limite)
-        .map(
-            function(numero) {
-
-                return {
-
-                    numero:
-                        numero,
-
-                    veces:
-                        mapa[numero]
-                };
-            }
-        );
-}
-
-
-//////////////////////////////////////////////////////////////
-// GUARDAR MEMORIA DE TRANSICIÓN
-//////////////////////////////////////////////////////////////
-
-function CORR_TR_guardar() {
-
-    try {
-
-        localStorage.setItem(
-
-            "CORR_TRANSICION_MEMORIA",
-
-            JSON.stringify(
-                CORR_TRANSICION
-            )
-        );
-
-    }
-    catch(error) {
-
-        console.error(
-            "Error guardando transición Correntina:",
-            error
-        );
-    }
-}
-
-
-//////////////////////////////////////////////////////////////
-// CARGAR MEMORIA DE TRANSICIÓN
-//////////////////////////////////////////////////////////////
-
-function CORR_TR_cargar() {
-
-    try {
-
-        let memoria =
-            localStorage.getItem(
-                "CORR_TRANSICION_MEMORIA"
-            );
-
-        if (!memoria)
-            return;
-
-        let datos =
-            JSON.parse(
-                memoria
-            );
-
-        if (datos) {
-
-            CORR_TRANSICION =
-                Object.assign(
-
-                    CORR_TRANSICION,
-
-                    datos
-                );
-        }
-
-    }
-    catch(error) {
-
-        console.error(
-            "Error cargando transición Correntina:",
-            error
-        );
-    }
-}
-
-
-//////////////////////////////////////////////////////////////
-// RESUMEN
-//////////////////////////////////////////////////////////////
-
-function CORR_TR_resumen() {
+function CORR_resumenAprendizaje() {
 
     let total =
-        CORR_TRANSICION
-            .totalAnalizados || 0;
+        CORR_MEMORIA.length;
 
-    return (
+    let turnos =
+        CORR_analizarTurnos();
 
-        "🔄 MOTOR TRANSICIÓN CORRENTINA\n" +
+    let texto =
+
+        "🧠 CEREBRO CORRENTINA\n" +
         "================================\n\n" +
 
-        "Registros comparados: " +
+        "Registros: " +
         total +
-        "\n\n" +
+        "\n\n";
 
-        "El motor estudia cómo cambia " +
-        "cada posición P1–P5 entre " +
-        "un sorteo y el siguiente.\n\n" +
+    for (
+        let turno of CORR_TURNOS
+    ) {
 
-        "⚡ Tesla: NO INTERVIENE.\n" +
-        "Este motor es independiente."
-    );
+        texto +=
+
+            turno +
+            " → " +
+            turnos[turno].siguiente +
+            "\n" +
+
+            "Cuaternos: " +
+            turnos[turno].cuaternos +
+            "\n\n";
+    }
+
+    texto +=
+
+        "🎯 APRENDE SOLO P1–P5\n" +
+
+        "🔄 TRANSICIÓN ACTIVA\n" +
+
+        "📊 FRECUENCIA ACTIVA\n\n" +
+
+        "⚡ TESLA: INDEPENDIENTE.";
+
+    return texto;
 }
 
-
 //////////////////////////////////////////////////////////////
-// INICIALIZAR
+// ENTRENAR TRANSICIÓN DESPUÉS DE CARGAR
 //////////////////////////////////////////////////////////////
 
-CORR_TR_cargar();
+function CORR_reentrenarTodo() {
 
+    if (
+        typeof CORR_TR_entrenar ===
+        "function"
+    ) {
+
+        CORR_TR_entrenar();
+
+        return true;
+    }
+
+    return false;
+}
 
 //////////////////////////////////////////////////////////////
 // EXPORTAR
@@ -16276,21 +16624,28 @@ CORR_TR_cargar();
 window.EMI_CORR =
     window.EMI_CORR || {};
 
-window.EMI_CORR.transicion =
-    CORR_TR_registrar;
+window.EMI_CORR.analizar =
+    CORR_analizarPosiciones;
 
-window.EMI_CORR.entrenarTransicion =
-    CORR_TR_entrenar;
+window.EMI_CORR.analizarTurnos =
+    CORR_analizarTurnos;
 
-window.EMI_CORR.obtenerTransicion =
-    CORR_TR_obtener;
+window.EMI_CORR.simular =
+    CORR_NUEVO_simular;
 
-window.EMI_CORR.resumenTransicion =
-    CORR_TR_resumen;
+window.EMI_CORR.historial =
+    CORR_NUEVO_verHistorial;
+
+window.EMI_CORR.resumen =
+    CORR_resumenAprendizaje;
+
+window.EMI_CORR.reentrenar =
+    CORR_reentrenarTodo;
 
 //////////////////////////////////////////////////////////////
-// FIN MOTOR TRANSICIÓN
-//////////////////////////////////////////////////////////////  
+// FIN BLOQUE 4
+//////////////////////////////////////////////////////////////   
+    
  //////////////////////////////////////////////////////////////
 // 🎯 CORRENTINA INDEPENDIENTE
 // BLOQUE 5/5 — TESLA + SISTEMA FINAL

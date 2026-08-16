@@ -13782,14 +13782,86 @@ function CORR_mostrarProgreso(
 
 //////////////////////////////////////////////////////////////
 // ABRIR PDF
+// CORRENTINA — TURNO SELECCIONADO POR EL USUARIO
 //////////////////////////////////////////////////////////////
 
 async function CORR_NUEVO_abrirOCR() {
 
-    CORR_DETENER_OCR =
-        false;
+    CORR_DETENER_OCR = false;
 
     CORR_resetEstado();
+
+    //////////////////////////////////////////////////////////
+    // SELECCIONAR TURNO ANTES DEL PDF
+    //////////////////////////////////////////////////////////
+
+    let turno =
+        prompt(
+            "¿QUÉ TURNO ESTÁS CARGANDO?\n\n" +
+            "PREVIA\n" +
+            "PRIMERA\n" +
+            "MATUTINA\n" +
+            "VESPERTINA\n" +
+            "NOCTURNA"
+        );
+
+    if (!turno)
+        return;
+
+    turno =
+        String(turno)
+            .toUpperCase()
+            .trim();
+
+    //////////////////////////////////////////////////////////
+    // NORMALIZAR
+    //////////////////////////////////////////////////////////
+
+    if (turno.includes("PREVIA")) {
+
+        turno = "PREVIA";
+
+    } else if (turno.includes("PRIMERA")) {
+
+        turno = "PRIMERA";
+
+    } else if (turno.includes("MATUTINA")) {
+
+        turno = "MATUTINA";
+
+    } else if (turno.includes("VESPERTINA")) {
+
+        turno = "VESPERTINA";
+
+    } else if (
+        turno.includes("NOCTURNA") ||
+        turno.includes("NOTURNA")
+    ) {
+
+        turno = "NOCTURNA";
+
+    } else {
+
+        alert(
+            "Turno no válido."
+        );
+
+        return;
+    }
+
+    //////////////////////////////////////////////////////////
+    // GUARDAR TURNO ACTIVO
+    //////////////////////////////////////////////////////////
+
+    window.EMI_CORR =
+        window.EMI_CORR || {};
+
+    window.EMI_CORR.ultimoTurno =
+        turno;
+
+    //////////////////////////////////////////////////////////
+    // ARCHIVO PDF
+    //////////////////////////////////////////////////////////
 
     let input =
         document.createElement(
@@ -13812,7 +13884,8 @@ async function CORR_NUEVO_abrirOCR() {
                 return;
 
             await CORR_procesarPDF(
-                archivo
+                archivo,
+                turno
             );
         };
 
@@ -13828,10 +13901,12 @@ async function CORR_NUEVO_abrirOCR() {
 // BLOQUE 2/5 — PARTE 2/2
 // PROCESAMIENTO PDF + APRENDIZAJE EN VIVO
 //////////////////////////////////////////////////////////////
-
 async function CORR_procesarPDF(
-    archivo
+    archivo,
+    turnoSeleccionado
 ) {
+
+
 
     let worker = null;
 
@@ -13994,6 +14069,13 @@ async function CORR_procesarPDF(
                     texto,
                     pagina
                 );
+            //////////////////////////////////////////////////////////////
+// EL TURNO SELECCIONADO MANDA
+// NO DEPENDE DEL OCR
+//////////////////////////////////////////////////////////////
+
+datos.turno =
+    turnoSeleccionado;
 
             CORR_ESTADO
                 .paginasProcesadas =

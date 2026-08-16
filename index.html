@@ -13072,205 +13072,63 @@ async function finalizarCargaManual_V61(){
 
     }
 
-  //////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
 // 🎯 CORRENTINA INDEPENDIENTE
-// MÓDULO NUEVO — BLOQUE 1/4
+// BLOQUE 1/4 — MEMORIA Y ESTADO
 //
-// MEMORIA + ESTADO + TURNOS
-//
-// ⚠️ TESLA NO INTERVIENE
+// TESLA NO INTERVIENE
 //////////////////////////////////////////////////////////////
 
-window.EMI_CORR =
-    window.EMI_CORR || {};
+window.EMI_CORR = window.EMI_CORR || {};
 
-//////////////////////////////////////////////////////////////
-// CLAVE DE MEMORIA
-//////////////////////////////////////////////////////////////
-
-const CORR_DB_KEY =
-    "EMI_CORR_MEMORIA_V3";
-
-//////////////////////////////////////////////////////////////
-// MEMORIA PRINCIPAL
-//////////////////////////////////////////////////////////////
+const CORR_DB_KEY = "EMI_CORR_MEMORIA_V3";
 
 let CORR_MEMORIA = [];
 
-window.CORR_MEMORIA =
-    CORR_MEMORIA;
-
-//////////////////////////////////////////////////////////////
-// TURNO ACTIVO
-//////////////////////////////////////////////////////////////
-
-let CORR_TURNO_ACTIVO = "";
-
-window.CORR_TURNO_ACTIVO = "";
-
-//////////////////////////////////////////////////////////////
-// ESTADO DEL LECTOR
-//////////////////////////////////////////////////////////////
-
 let CORR_ESTADO = {
-
     pdfPaginas: 0,
-
     paginasProcesadas: 0,
-
     paginasCorrientes: 0,
-
     registros: 0,
-
     cuaternos: 0,
 
-    erroresOCR: 0,
-
-    sinTurno: 0,
-
     PREVIA: 0,
-
     PRIMERA: 0,
-
     MATUTINA: 0,
-
     VESPERTINA: 0,
-
     NOCTURNA: 0
 };
-
-window.CORR_ESTADO =
-    CORR_ESTADO;
-
-//////////////////////////////////////////////////////////////
-// TURNOS VÁLIDOS
-//////////////////////////////////////////////////////////////
-
-const CORR_TURNOS = [
-
-    "PREVIA",
-    "PRIMERA",
-    "MATUTINA",
-    "VESPERTINA",
-    "NOCTURNA"
-];
 
 //////////////////////////////////////////////////////////////
 // NORMALIZAR TURNO
 //////////////////////////////////////////////////////////////
 
-function CORR_normalizarTurno(
-    turno
-) {
+function CORR_normalizarTurno(turno) {
 
-    turno =
-        String(turno || "")
-            .toUpperCase()
-            .trim();
+    let t = String(turno || "")
+        .toUpperCase()
+        .trim();
 
-    if (
-        turno.includes("PREVIA")
-    )
+    if (t.includes("PREVIA"))
         return "PREVIA";
 
-    if (
-        turno.includes("PRIMERA")
-    )
+    if (t.includes("PRIMERA"))
         return "PRIMERA";
 
-    if (
-        turno.includes("MATUTINA")
-    )
+    if (t.includes("MATUTINA"))
         return "MATUTINA";
 
-    if (
-        turno.includes("VESPERTINA")
-    )
+    if (t.includes("VESPERTINA"))
         return "VESPERTINA";
 
     if (
-        turno.includes("NOCTURNA") ||
-        turno.includes("NOTURNA") ||
-        turno.includes("NOCT") ||
-        turno.includes("N0CT")
+        t.includes("NOCTURNA") ||
+        t.includes("NOTURNA") ||
+        t.includes("NOCT")
     )
         return "NOCTURNA";
 
     return "";
-}
-
-//////////////////////////////////////////////////////////////
-// DEFINIR TURNO ACTIVO
-//////////////////////////////////////////////////////////////
-
-function CORR_definirTurno(
-    turno
-) {
-
-    let normalizado =
-        CORR_normalizarTurno(
-            turno
-        );
-
-    if (!normalizado)
-        return false;
-
-    CORR_TURNO_ACTIVO =
-        normalizado;
-
-    window.CORR_TURNO_ACTIVO =
-        normalizado;
-
-    window.EMI_CORR.turnoActivo =
-        normalizado;
-
-    try {
-
-        localStorage.setItem(
-            "CORR_TURNO_ACTIVO",
-            normalizado
-        );
-
-    } catch(e) {}
-
-    return true;
-}
-
-//////////////////////////////////////////////////////////////
-// CARGAR TURNO ACTIVO
-//////////////////////////////////////////////////////////////
-
-function CORR_cargarTurnoActivo() {
-
-    let turno = "";
-
-    try {
-
-        turno =
-            localStorage.getItem(
-                "CORR_TURNO_ACTIVO"
-            ) || "";
-
-    } catch(e) {}
-
-    turno =
-        CORR_normalizarTurno(
-            turno
-        );
-
-    if (turno) {
-
-        CORR_TURNO_ACTIVO =
-            turno;
-
-        window.CORR_TURNO_ACTIVO =
-            turno;
-
-        window.EMI_CORR.turnoActivo =
-            turno;
-    }
-
-    return turno;
 }
 
 //////////////////////////////////////////////////////////////
@@ -13279,32 +13137,29 @@ function CORR_cargarTurnoActivo() {
 
 function CORR_cargarMemoria() {
 
-    CORR_MEMORIA = [];
-
     try {
 
-        let guardado =
+        let datos =
             localStorage.getItem(
                 CORR_DB_KEY
             );
 
-        if (guardado) {
+        if (!datos) {
 
-            let datos =
-                JSON.parse(
-                    guardado
-                );
+            CORR_MEMORIA = [];
 
-            if (
-                Array.isArray(datos)
-            ) {
+        } else {
 
-                CORR_MEMORIA =
-                    datos;
-            }
+            let memoria =
+                JSON.parse(datos);
+
+            CORR_MEMORIA =
+                Array.isArray(memoria)
+                    ? memoria
+                    : [];
         }
 
-    } catch(error) {
+    } catch (error) {
 
         console.error(
             "Error cargando memoria Correntina:",
@@ -13319,12 +13174,6 @@ function CORR_cargarMemoria() {
 
     window.EMI_CORR.memoria =
         CORR_MEMORIA;
-
-    //////////////////////////////////////////////////////////
-    // RECONSTRUIR ESTADO
-    //////////////////////////////////////////////////////////
-
-    CORR_reconstruirEstado();
 
     return CORR_MEMORIA;
 }
@@ -13354,7 +13203,7 @@ function CORR_guardarMemoria() {
 
         return true;
 
-    } catch(error) {
+    } catch (error) {
 
         console.error(
             "Error guardando memoria Correntina:",
@@ -13366,76 +13215,6 @@ function CORR_guardarMemoria() {
 }
 
 //////////////////////////////////////////////////////////////
-// RECONSTRUIR CONTADORES
-//////////////////////////////////////////////////////////////
-
-function CORR_reconstruirEstado() {
-
-    CORR_ESTADO = {
-
-        pdfPaginas: 0,
-
-        paginasProcesadas: 0,
-
-        paginasCorrientes:
-            CORR_MEMORIA.length,
-
-        registros:
-            CORR_MEMORIA.length,
-
-        cuaternos: 0,
-
-        erroresOCR: 0,
-
-        sinTurno: 0,
-
-        PREVIA: 0,
-
-        PRIMERA: 0,
-
-        MATUTINA: 0,
-
-        VESPERTINA: 0,
-
-        NOCTURNA: 0
-    };
-
-    for (
-        let registro of CORR_MEMORIA
-    ) {
-
-        let posiciones =
-            Array.isArray(
-                registro.posiciones
-            )
-            ?
-            registro.posiciones
-            :
-            [];
-
-        CORR_ESTADO.cuaternos +=
-            posiciones.length;
-
-        let turno =
-            CORR_normalizarTurno(
-                registro.turno
-            );
-
-        if (
-            CORR_ESTADO[turno] !==
-            undefined
-        ) {
-
-            CORR_ESTADO[turno] +=
-                posiciones.length;
-        }
-    }
-
-    window.CORR_ESTADO =
-        CORR_ESTADO;
-}
-
-//////////////////////////////////////////////////////////////
 // LIMPIAR MEMORIA
 //////////////////////////////////////////////////////////////
 
@@ -13443,92 +13222,51 @@ function CORR_limpiarMemoria() {
 
     CORR_MEMORIA = [];
 
-    window.CORR_MEMORIA =
-        CORR_MEMORIA;
+    localStorage.removeItem(
+        CORR_DB_KEY
+    );
 
-    try {
+    window.CORR_MEMORIA = [];
 
-        localStorage.removeItem(
-            CORR_DB_KEY
-        );
+    window.EMI_CORR.memoria = [];
 
-        localStorage.removeItem(
-            "CORR_APRENDIZAJE_P1_P5"
-        );
-
-        localStorage.removeItem(
-            "CORR_TRANSICION_MEMORIA_V3"
-        );
-
-    } catch(e) {}
-
-    CORR_reconstruirEstado();
+    CORR_resetEstado();
 
     CORR_panel(
-        "🗑 MEMORIA CORRENTINA LIMPIADA\n\n" +
-        "La memoria anterior fue eliminada."
+        "🗑 MEMORIA CORRENTINA LIMPIADA"
     );
 }
 
 //////////////////////////////////////////////////////////////
-// FECHA
+// RESET ESTADO
 //////////////////////////////////////////////////////////////
 
-function CORR_extraerFecha(
-    texto
-) {
+function CORR_resetEstado() {
 
-    texto =
-        String(texto || "");
+    CORR_ESTADO = {
 
-    let m =
-        texto.match(
-            /\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/
-        );
+        pdfPaginas: 0,
+        paginasProcesadas: 0,
+        paginasCorrientes: 0,
+        registros: 0,
+        cuaternos: 0,
 
-    if (!m) {
+        PREVIA: 0,
+        PRIMERA: 0,
+        MATUTINA: 0,
+        VESPERTINA: 0,
+        NOCTURNA: 0
+    };
 
-        return new Date()
-            .toISOString()
-            .slice(0,10);
-    }
-
-    return (
-        m[3] +
-        "-" +
-        m[2] +
-        "-" +
-        m[1]
-    );
+    window.EMI_CORR.estado =
+        CORR_ESTADO;
 }
 
 //////////////////////////////////////////////////////////////
-// PANEL
+// ESTADO VISUAL
 //////////////////////////////////////////////////////////////
 
-function CORR_panel(
-    texto
-) {
-
-    let elemento =
-        document.getElementById(
-            "CORR_NUEVO_panel"
-        );
-
-    if (elemento) {
-
-        elemento.innerText =
-            String(texto || "");
-    }
-}
-
-//////////////////////////////////////////////////////////////
-// ESTADO
-//////////////////////////////////////////////////////////////
-
-function CORR_estado(
-    texto
-) {
+function CORR_estado(texto) {
 
     let elemento =
         document.getElementById(
@@ -13538,47 +13276,26 @@ function CORR_estado(
     if (elemento) {
 
         elemento.innerText =
-            String(texto || "");
+            texto;
     }
 }
 
 //////////////////////////////////////////////////////////////
-// RESUMEN RÁPIDO
+// PANEL VISUAL
 //////////////////////////////////////////////////////////////
 
-function CORR_resumenMemoria() {
+function CORR_panel(texto) {
 
-    return (
+    let elemento =
+        document.getElementById(
+            "CORR_NUEVO_panel"
+        );
 
-        "🧠 MEMORIA CORRENTINA\n\n" +
+    if (elemento) {
 
-        "Registros: " +
-        CORR_MEMORIA.length +
-        "\n" +
-
-        "Cuaternos: " +
-        CORR_ESTADO.cuaternos +
-        "\n\n" +
-
-        "PREVIA: " +
-        CORR_ESTADO.PREVIA +
-        "\n" +
-
-        "PRIMERA: " +
-        CORR_ESTADO.PRIMERA +
-        "\n" +
-
-        "MATUTINA: " +
-        CORR_ESTADO.MATUTINA +
-        "\n" +
-
-        "VESPERTINA: " +
-        CORR_ESTADO.VESPERTINA +
-        "\n" +
-
-        "NOCTURNA: " +
-        CORR_ESTADO.NOCTURNA
-    );
+        elemento.innerText =
+            texto;
+    }
 }
 
 //////////////////////////////////////////////////////////////
@@ -13587,42 +13304,19 @@ function CORR_resumenMemoria() {
 
 CORR_cargarMemoria();
 
-CORR_cargarTurnoActivo();
-
-//////////////////////////////////////////////////////////////
-// EXPORTAR
-//////////////////////////////////////////////////////////////
+window.CORR_MEMORIA =
+    CORR_MEMORIA;
 
 window.EMI_CORR.memoria =
     CORR_MEMORIA;
 
 window.EMI_CORR.estado =
     CORR_ESTADO;
-
-window.EMI_CORR.definirTurno =
-    CORR_definirTurno;
-
-window.EMI_CORR.cargarMemoria =
-    CORR_cargarMemoria;
-
-window.EMI_CORR.guardarMemoria =
-    CORR_guardarMemoria;
-
-window.EMI_CORR.limpiarMemoria =
-    CORR_limpiarMemoria;
-
 //////////////////////////////////////////////////////////////
-// FIN BLOQUE 1
-//////////////////////////////////////////////////////////////  
-
-  //////////////////////////////////////////////////////////////
 // 🎯 CORRENTINA INDEPENDIENTE
-// MÓDULO NUEVO — BLOQUE 2/4
+// BLOQUE 2/4 — PDF + OCR + GUARDADO
 //
-// PDF + OCR + 20 POSICIONES
-// APRENDIZAJE EN VIVO
-//
-// ⚠️ TESLA NO INTERVIENE
+// TESLA NO INTERVIENE
 //////////////////////////////////////////////////////////////
 
 let CORR_DETENER_OCR = false;
@@ -13631,14 +13325,11 @@ let CORR_DETENER_OCR = false;
 // NORMALIZAR OCR
 //////////////////////////////////////////////////////////////
 
-function CORR_normalizarOCR(
-    texto
-) {
+function CORR_normalizarOCR(texto) {
 
     return String(texto || "")
         .toUpperCase()
         .replace(/[|]/g, " ")
-        .replace(/[“”"']/g, " ")
         .replace(/\s+/g, " ")
         .trim();
 }
@@ -13647,33 +13338,21 @@ function CORR_normalizarOCR(
 // BUSCAR TURNO
 //////////////////////////////////////////////////////////////
 
-function CORR_buscarTurno(
-    texto
-) {
+function CORR_buscarTurno(texto) {
 
     let t =
-        CORR_normalizarOCR(
-            texto
-        );
+        CORR_normalizarOCR(texto);
 
-    if (
-        t.includes("PREVIA")
-    )
+    if (t.includes("PREVIA"))
         return "PREVIA";
 
-    if (
-        t.includes("PRIMERA")
-    )
+    if (t.includes("PRIMERA"))
         return "PRIMERA";
 
-    if (
-        t.includes("MATUTINA")
-    )
+    if (t.includes("MATUTINA"))
         return "MATUTINA";
 
-    if (
-        t.includes("VESPERTINA")
-    )
+    if (t.includes("VESPERTINA"))
         return "VESPERTINA";
 
     if (
@@ -13688,12 +13367,37 @@ function CORR_buscarTurno(
 }
 
 //////////////////////////////////////////////////////////////
-// BUSCAR NÚMEROS DE 4 DÍGITOS
+// BUSCAR FECHA
 //////////////////////////////////////////////////////////////
 
-function CORR_buscarCuaternos(
-    texto
-) {
+function CORR_buscarFecha(texto) {
+
+    let m =
+        String(texto || "").match(
+            /\b(\d{2})[\/\-](\d{2})[\/\-](\d{4})\b/
+        );
+
+    if (!m) {
+
+        return new Date()
+            .toISOString()
+            .slice(0, 10);
+    }
+
+    return (
+        m[3] +
+        "-" +
+        m[2] +
+        "-" +
+        m[1]
+    );
+}
+
+//////////////////////////////////////////////////////////////
+// EXTRAER CUATERNOS
+//////////////////////////////////////////////////////////////
+
+function CORR_buscarCuaternos(texto) {
 
     let limpio =
         String(texto || "")
@@ -13707,47 +13411,7 @@ function CORR_buscarCuaternos(
 }
 
 //////////////////////////////////////////////////////////////
-// NORMALIZAR CUATERNO
-//////////////////////////////////////////////////////////////
-
-function CORR_normalizarCuaterno(
-    numero
-) {
-
-    let n =
-        String(numero || "")
-            .replace(/\D/g, "");
-
-    if (!n)
-        return "";
-
-    return n
-        .padStart(4, "0")
-        .slice(-4);
-}
-
-//////////////////////////////////////////////////////////////
-// DETECTAR CORRIENTES
-//////////////////////////////////////////////////////////////
-
-function CORR_esCorrientes(
-    texto
-) {
-
-    let t =
-        CORR_normalizarOCR(
-            texto
-        );
-
-    return (
-        t.includes("CORRIENTES") ||
-        t.includes("CORRIENTE") ||
-        t.includes("CORRIENT")
-    );
-}
-
-//////////////////////////////////////////////////////////////
-// EXTRAER LAS 20 POSICIONES
+// EXTRAER 20
 //////////////////////////////////////////////////////////////
 
 function CORR_extraer20(
@@ -13756,44 +13420,27 @@ function CORR_extraer20(
 ) {
 
     let original =
-        String(texto || "");
+        CORR_normalizarOCR(texto);
 
-    let normalizado =
-        CORR_normalizarOCR(
-            original
-        );
+    let resultado = {
 
-    //////////////////////////////////////////////////////////
-    // TURNO DETECTADO POR OCR
-    //////////////////////////////////////////////////////////
+        encontrado: false,
 
-    let turnoOCR =
-        CORR_buscarTurno(
-            normalizado
-        );
+        pagina:
+            pagina,
 
-    //////////////////////////////////////////////////////////
-    // SI NO LO LEYÓ OCR, BUSCAR TURNO ACTIVO
-    //////////////////////////////////////////////////////////
+        fecha:
+            CORR_buscarFecha(
+                original
+            ),
 
-    let turno =
-        turnoOCR ||
-        CORR_TURNO_ACTIVO ||
-        "";
+        turno:
+            CORR_buscarTurno(
+                original
+            ),
 
-    turno =
-        CORR_normalizarTurno(
-            turno
-        );
-
-    //////////////////////////////////////////////////////////
-    // FECHA
-    //////////////////////////////////////////////////////////
-
-    let fecha =
-        CORR_extraerFecha(
-            normalizado
-        );
+        numeros: []
+    };
 
     //////////////////////////////////////////////////////////
     // TODOS LOS CUATERNOS
@@ -13801,169 +13448,110 @@ function CORR_extraer20(
 
     let todos =
         CORR_buscarCuaternos(
-            normalizado
-        )
-        .map(
-            CORR_normalizarCuaterno
-        )
-        .filter(Boolean);
-
-    let numeros = [];
+            original
+        );
 
     //////////////////////////////////////////////////////////
     // BUSCAR ZONA CORRIENTES
     //////////////////////////////////////////////////////////
 
-    let indiceCorrientes =
-        normalizado.indexOf(
+    let indice =
+        original.indexOf(
             "CORRIENTES"
         );
 
-    if (
-        indiceCorrientes < 0
-    ) {
+    if (indice < 0) {
 
-        indiceCorrientes =
-            normalizado.indexOf(
+        indice =
+            original.indexOf(
                 "CORRIENTE"
             );
     }
 
-    if (
-        indiceCorrientes < 0
-    ) {
-
-        indiceCorrientes =
-            normalizado.indexOf(
-                "CORRIENT"
-            );
-    }
-
     //////////////////////////////////////////////////////////
-    // PRIMER INTENTO:
-    // NÚMEROS DESPUÉS DE CORRIENTES
+    // PRIMER INTENTO
     //////////////////////////////////////////////////////////
 
-    if (
-        indiceCorrientes >= 0
-    ) {
+    if (indice >= 0) {
 
         let zona =
-            normalizado.substring(
-                indiceCorrientes,
-                indiceCorrientes + 12000
+            original.substring(
+                indice,
+                indice + 15000
             );
 
-        let zonaNumeros =
+        let numerosZona =
             CORR_buscarCuaternos(
                 zona
-            )
-            .map(
-                CORR_normalizarCuaterno
-            )
-            .filter(Boolean);
+            );
 
         if (
-            zonaNumeros.length >= 20
+            numerosZona.length >= 20
         ) {
 
-            numeros =
-                zonaNumeros.slice(0,20);
+            resultado.numeros =
+                numerosZona.slice(
+                    0,
+                    20
+                );
+
+            resultado.encontrado =
+                true;
         }
     }
 
     //////////////////////////////////////////////////////////
-    // SEGUNDO INTENTO:
-    // CUALQUIER GRUPO DE 20
+    // SEGUNDO INTENTO
     //////////////////////////////////////////////////////////
 
     if (
-        numeros.length !== 20 &&
+        !resultado.encontrado &&
         todos.length >= 20
     ) {
 
-        let mejorGrupo =
-            null;
+        resultado.numeros =
+            todos.slice(
+                0,
+                20
+            );
 
-        //////////////////////////////////////////////////////
-        // PROBAR GRUPOS DE 20
-        //////////////////////////////////////////////////////
-
-        for (
-            let i = 0;
-            i <= todos.length - 20;
-            i++
-        ) {
-
-            let grupo =
-                todos.slice(
-                    i,
-                    i + 20
-                );
-
-            if (
-                grupo.length === 20
-            ) {
-
-                mejorGrupo =
-                    grupo;
-
-                //////////////////////////////////////////////////
-                // Si hay Corrientes, preferir el primer grupo
-                // después de su encabezado.
-                //////////////////////////////////////////////////
-
-                break;
-            }
-        }
-
-        if (mejorGrupo) {
-
-            numeros =
-                mejorGrupo;
-        }
+        resultado.encontrado =
+            true;
     }
 
     //////////////////////////////////////////////////////////
-    // VALIDACIÓN
+    // NORMALIZAR
     //////////////////////////////////////////////////////////
 
-    numeros =
-        numeros
-            .map(
-                CORR_normalizarCuaterno
-            )
-            .filter(Boolean)
-            .slice(0,20);
+    if (
+        resultado.encontrado
+    ) {
 
-    return {
+        resultado.numeros =
+            resultado.numeros
+                .map(
+                    function(n) {
 
-        encontrado:
-            numeros.length === 20,
+                        return String(n)
+                            .replace(/\D/g, "")
+                            .padStart(4, "0")
+                            .slice(-4);
+                    }
+                )
+                .slice(0, 20);
 
-        pagina:
-            pagina,
+        if (
+            resultado.numeros.length !== 20
+        ) {
 
-        fecha:
-            fecha,
+            resultado.encontrado =
+                false;
 
-        turno:
-            turno,
+            resultado.numeros = [];
+        }
+    }
 
-        turnoOCR:
-            turnoOCR,
-
-        turnoActivo:
-            CORR_TURNO_ACTIVO,
-
-        numeros:
-            numeros,
-
-        corrientes:
-            CORR_esCorrientes(
-                normalizado
-            )
-    };
+    return resultado;
 }
 
 //////////////////////////////////////////////////////////////
@@ -13978,6 +13566,9 @@ function CORR_guardarRegistro(
     if (!datos)
         return false;
 
+    if (!datos.encontrado)
+        return false;
+
     if (
         !Array.isArray(
             datos.numeros
@@ -13990,71 +13581,25 @@ function CORR_guardarRegistro(
     )
         return false;
 
-    //////////////////////////////////////////////////////////
-    // EL TURNO DE OCR TIENE PRIORIDAD.
-    // SI OCR FALLA, USA TURNO ACTIVO.
-    //////////////////////////////////////////////////////////
-
     let turno =
         CORR_normalizarTurno(
-            datos.turnoOCR ||
-            datos.turno ||
-            CORR_TURNO_ACTIVO
+            datos.turno
         );
 
     //////////////////////////////////////////////////////////
-    // SIN TURNO = NO INVENTAR
+    // SI OCR NO DETECTÓ TURNO
+    // NO INVENTARLO
     //////////////////////////////////////////////////////////
 
     if (!turno) {
 
-        CORR_ESTADO.sinTurno++;
-
-        return false;
-    }
-
-    //////////////////////////////////////////////////////////
-    // EVITAR DUPLICAR MISMA PÁGINA
-    //////////////////////////////////////////////////////////
-
-    let yaExiste =
-        CORR_MEMORIA.some(
-            function(registro) {
-
-                return (
-
-                    Number(
-                        registro.pagina
-                    ) ===
-                    Number(
-                        datos.pagina
-                    )
-
-                    &&
-
-                    String(
-                        registro.archivo ||
-                        ""
-                    ) ===
-                    String(
-                        archivo
-                        ?
-                        archivo.name
-                        :
-                        ""
-                    )
-                );
-            }
+        console.warn(
+            "Correntina: página sin turno",
+            datos.pagina
         );
 
-    if (yaExiste) {
-
         return false;
     }
-
-    //////////////////////////////////////////////////////////
-    // CREAR REGISTRO
-    //////////////////////////////////////////////////////////
 
     let registro = {
 
@@ -14080,14 +13625,14 @@ function CORR_guardarRegistro(
 
         archivo:
             archivo
-            ?
-            archivo.name
-            :
-            "",
+                ? archivo.name
+                : "",
 
         posiciones:
-            datos.numeros
-                .slice(0,20)
+            datos.numeros.slice(
+                0,
+                20
+            )
     };
 
     //////////////////////////////////////////////////////////
@@ -14101,15 +13646,9 @@ function CORR_guardarRegistro(
     window.CORR_MEMORIA =
         CORR_MEMORIA;
 
-    //////////////////////////////////////////////////////////
-    // CONTADORES
-    //////////////////////////////////////////////////////////
-
     CORR_ESTADO.registros++;
 
     CORR_ESTADO.cuaternos += 20;
-
-    CORR_ESTADO.paginasCorrientes++;
 
     if (
         CORR_ESTADO[turno] !==
@@ -14119,178 +13658,9 @@ function CORR_guardarRegistro(
         CORR_ESTADO[turno] += 20;
     }
 
-    //////////////////////////////////////////////////////////
-    // GUARDAR INMEDIATAMENTE
-    //////////////////////////////////////////////////////////
-
     CORR_guardarMemoria();
 
-    //////////////////////////////////////////////////////////
-    // APRENDER INMEDIATAMENTE
-    //////////////////////////////////////////////////////////
-
-    CORR_aprenderEnVivo(
-        registro
-    );
-
     return true;
-}
-
-//////////////////////////////////////////////////////////////
-// APRENDIZAJE EN VIVO
-//
-// SOLO P1–P5
-//////////////////////////////////////////////////////////////
-
-function CORR_aprenderEnVivo(
-    registro
-) {
-
-    if (!registro)
-        return;
-
-    let posiciones =
-        Array.isArray(
-            registro.posiciones
-        )
-        ?
-        registro.posiciones
-        :
-        [];
-
-    if (
-        posiciones.length < 5
-    )
-        return;
-
-    //////////////////////////////////////////////////////////
-    // MEMORIA DE APRENDIZAJE
-    //////////////////////////////////////////////////////////
-
-    let aprendizaje = null;
-
-    try {
-
-        aprendizaje =
-            JSON.parse(
-                localStorage.getItem(
-                    "CORR_APRENDIZAJE_P1_P5"
-                )
-            );
-
-    } catch(e) {
-
-        aprendizaje = null;
-    }
-
-    if (
-        !aprendizaje ||
-        typeof aprendizaje !== "object"
-    ) {
-
-        aprendizaje = {
-
-            total: 0,
-
-            turnos: {
-
-                PREVIA: 0,
-                PRIMERA: 0,
-                MATUTINA: 0,
-                VESPERTINA: 0,
-                NOCTURNA: 0
-            },
-
-            posiciones: {
-
-                1: {},
-                2: {},
-                3: {},
-                4: {},
-                5: {}
-            }
-        };
-    }
-
-    //////////////////////////////////////////////////////////
-    // TOTAL
-    //////////////////////////////////////////////////////////
-
-    aprendizaje.total++;
-
-    //////////////////////////////////////////////////////////
-    // TURNO
-    //////////////////////////////////////////////////////////
-
-    let turno =
-        CORR_normalizarTurno(
-            registro.turno
-        );
-
-    if (
-        aprendizaje.turnos[turno]
-        !== undefined
-    ) {
-
-        aprendizaje.turnos[turno]++;
-    }
-
-    //////////////////////////////////////////////////////////
-    // P1 A P5
-    //////////////////////////////////////////////////////////
-
-    for (
-        let i = 0;
-        i < 5;
-        i++
-    ) {
-
-        let numero =
-            CORR_normalizarCuaterno(
-                posiciones[i]
-            );
-
-        if (!numero)
-            continue;
-
-        if (
-            !aprendizaje.posiciones[
-                i + 1
-            ]
-        ) {
-
-            aprendizaje.posiciones[
-                i + 1
-            ] = {};
-        }
-
-        aprendizaje.posiciones[
-            i + 1
-        ][numero] =
-
-            (
-                aprendizaje.posiciones[
-                    i + 1
-                ][numero] || 0
-            ) + 1;
-    }
-
-    //////////////////////////////////////////////////////////
-    // GUARDAR APRENDIZAJE
-    //////////////////////////////////////////////////////////
-
-    try {
-
-        localStorage.setItem(
-
-            "CORR_APRENDIZAJE_P1_P5",
-
-            JSON.stringify(
-                aprendizaje
-            )
-        );
-
-    } catch(e) {}
 }
 
 //////////////////////////////////////////////////////////////
@@ -14300,63 +13670,36 @@ function CORR_aprenderEnVivo(
 function CORR_mostrarProgreso(
     pagina,
     total,
-    datos
+    encontrado
 ) {
 
     let porcentaje =
-        total > 0
-        ?
-        Math.round(
-            pagina /
-            total *
-            100
-        )
-        :
-        0;
+        total
+            ? Math.round(
+                pagina / total * 100
+            )
+            : 0;
 
-    let turno =
-        datos &&
-        datos.turno
-        ?
-        datos.turno
-        :
-        "—";
+    let texto =
 
-    CORR_estado(
-
-        "📄 CORRENTINA " +
-        pagina +
-        "/" +
-        total +
-        " — " +
-        porcentaje +
-        "%"
-    );
-
-    CORR_panel(
-
-        "🧠 LECTOR CORRENTINA\n" +
+        "🧠 CORRENTINA — APRENDIZAJE EN VIVO\n" +
         "================================\n\n" +
 
         "📄 Página: " +
         pagina +
         "/" +
         total +
-        "\n" +
-
-        "📊 Progreso: " +
+        " (" +
         porcentaje +
-        "%\n\n" +
+        "%)\n\n" +
 
-        "🎯 Correntina encontradas: " +
-        CORR_ESTADO.paginasCorrientes +
+        "🎯 Registros: " +
+        CORR_ESTADO.registros +
         "\n" +
 
-        "🔢 Cuaternos aprendidos: " +
+        "🔢 Cuaternos: " +
         CORR_ESTADO.cuaternos +
         "\n\n" +
-
-        "📚 TURNOS\n" +
 
         "PREVIA: " +
         CORR_ESTADO.PREVIA +
@@ -14378,23 +13721,34 @@ function CORR_mostrarProgreso(
         CORR_ESTADO.NOCTURNA +
         "\n\n" +
 
-        "🕐 Turno página: " +
-        turno +
-        "\n\n" +
+        (
+            encontrado
+                ? "✅ Correntina encontrada"
+                : "⏳ Buscando Correntina..."
+        );
 
-        "🎯 APRENDIENDO EN VIVO\n" +
-        "Posiciones P1 → P5"
+    CORR_estado(
+        "📄 Procesando " +
+        pagina +
+        "/" +
+        total
+    );
+
+    CORR_panel(
+        texto
     );
 }
 
 //////////////////////////////////////////////////////////////
-// ABRIR PDF
+// ABRIR OCR
 //////////////////////////////////////////////////////////////
 
 async function CORR_NUEVO_abrirOCR() {
 
     CORR_DETENER_OCR =
         false;
+
+    CORR_resetEstado();
 
     let input =
         document.createElement(
@@ -14408,10 +13762,10 @@ async function CORR_NUEVO_abrirOCR() {
         ".pdf,application/pdf";
 
     input.onchange =
-        async function(event) {
+        async function(e) {
 
             let archivo =
-                event.target.files[0];
+                e.target.files[0];
 
             if (!archivo)
                 return;
@@ -14436,10 +13790,6 @@ async function CORR_procesarPDF(
 
     try {
 
-        //////////////////////////////////////////////////////
-        // PDF.JS
-        //////////////////////////////////////////////////////
-
         if (
             typeof pdfjsLib ===
             "undefined"
@@ -14449,10 +13799,6 @@ async function CORR_procesarPDF(
                 "PDF.js no está cargado."
             );
         }
-
-        //////////////////////////////////////////////////////
-        // TESSERACT
-        //////////////////////////////////////////////////////
 
         if (
             typeof Tesseract ===
@@ -14464,11 +13810,8 @@ async function CORR_procesarPDF(
             );
         }
 
-        CORR_DETENER_OCR =
-            false;
-
         CORR_estado(
-            "⏳ ABRIENDO PDF..."
+            "⏳ Abriendo PDF..."
         );
 
         let buffer =
@@ -14484,32 +13827,14 @@ async function CORR_procesarPDF(
         CORR_ESTADO.pdfPaginas =
             pdf.numPages;
 
-        CORR_ESTADO.paginasProcesadas =
-            0;
-
-        //////////////////////////////////////////////////////
-        // MOSTRAR PDF
-        //////////////////////////////////////////////////////
-
         CORR_panel(
 
-            "📄 PDF DETECTADO\n" +
-            "================================\n\n" +
-
-            "Archivo:\n" +
-            archivo.name +
-            "\n\n" +
-
-            "📖 Páginas: " +
+            "📄 PDF DETECTADO\n\n" +
+            "Páginas: " +
             pdf.numPages +
             "\n\n" +
-
-            "🧠 Comenzando aprendizaje..."
+            "🧠 Iniciando aprendizaje..."
         );
-
-        //////////////////////////////////////////////////////
-        // CREAR WORKER OCR
-        //////////////////////////////////////////////////////
 
         worker =
             await Tesseract.createWorker(
@@ -14517,7 +13842,7 @@ async function CORR_procesarPDF(
             );
 
         //////////////////////////////////////////////////////
-        // PÁGINA POR PÁGINA
+        // PROCESAR TODAS LAS PÁGINAS
         //////////////////////////////////////////////////////
 
         for (
@@ -14528,27 +13853,13 @@ async function CORR_procesarPDF(
 
             if (
                 CORR_DETENER_OCR
-            ) {
-
-                CORR_estado(
-                    "⛔ LECTOR DETENIDO"
-                );
-
+            )
                 break;
-            }
-
-            //////////////////////////////////////////////////
-            // PÁGINA
-            //////////////////////////////////////////////////
 
             let page =
                 await pdf.getPage(
                     pagina
                 );
-
-            //////////////////////////////////////////////////
-            // RENDER
-            //////////////////////////////////////////////////
 
             let viewport =
                 page.getViewport({
@@ -14585,27 +13896,14 @@ async function CORR_procesarPDF(
 
             }).promise;
 
-            //////////////////////////////////////////////////
-            //////////////////////////////////////////////////
-            // OCR
-            //////////////////////////////////////////////////
-
             let lectura =
                 await worker.recognize(
                     canvas
                 );
 
             let texto =
-                lectura &&
-                lectura.data
-                ?
-                lectura.data.text || ""
-                :
+                lectura.data.text ||
                 "";
-
-            //////////////////////////////////////////////////
-            // EXTRAER
-            //////////////////////////////////////////////////
 
             let datos =
                 CORR_extraer20(
@@ -14613,13 +13911,8 @@ async function CORR_procesarPDF(
                     pagina
                 );
 
-            CORR_ESTADO
-                .paginasProcesadas =
+            CORR_ESTADO.paginasProcesadas =
                 pagina;
-
-            //////////////////////////////////////////////////
-            // GUARDAR
-            //////////////////////////////////////////////////
 
             let guardado =
                 false;
@@ -14634,32 +13927,33 @@ async function CORR_procesarPDF(
                         archivo
                     );
 
-            } else {
+                if (guardado) {
 
-                CORR_ESTADO
-                    .erroresOCR++;
+                    CORR_ESTADO
+                        .paginasCorrientes++;
+
+                    // APRENDIZAJE EN VIVO
+                    if (
+                        typeof CORR_aprenderEnVivo ===
+                        "function"
+                    ) {
+
+                        CORR_aprenderEnVivo(
+                            datos
+                        );
+                    }
+                }
             }
 
-            //////////////////////////////////////////////////
-            // PROGRESO
-            //////////////////////////////////////////////////
-
             CORR_mostrarProgreso(
-
                 pagina,
-
                 pdf.numPages,
-
-                datos
+                guardado
             );
 
             //////////////////////////////////////////////////
-            // LIBERAR CANVAS
+            // DAR TIEMPO A LA INTERFAZ
             //////////////////////////////////////////////////
-
-            canvas.width = 1;
-
-            canvas.height = 1;
 
             await new Promise(
                 function(resolve) {
@@ -14672,10 +13966,6 @@ async function CORR_procesarPDF(
             );
         }
 
-        //////////////////////////////////////////////////////
-        // TERMINAR OCR
-        //////////////////////////////////////////////////////
-
         if (worker) {
 
             await worker.terminate();
@@ -14683,81 +13973,30 @@ async function CORR_procesarPDF(
             worker = null;
         }
 
-        //////////////////////////////////////////////////////
-        // ENTRENAMIENTO GLOBAL
-        //
-        // El Bloque 3 tendrá el motor de transición.
-        // Lo llamamos si ya existe.
-        //////////////////////////////////////////////////////
-
-        if (
-            typeof CORR_TR_entrenar ===
-            "function"
-        ) {
-
-            try {
-
-                CORR_TR_entrenar();
-
-            } catch(error) {
-
-                console.error(
-                    "Error entrenando transición:",
-                    error
-                );
-            }
-        }
-
-        //////////////////////////////////////////////////////
-        // FINAL
-        //////////////////////////////////////////////////////
-
-        CORR_guardarMemoria();
+        CORR_estado(
+            "✅ PDF terminado"
+        );
 
         CORR_panel(
 
-            "✅ CARGA CORRENTINA TERMINADA\n" +
-            "================================\n\n" +
+            "✅ CORRENTINA TERMINADA\n\n" +
 
-            "📄 Páginas procesadas: " +
+            "Páginas procesadas: " +
             CORR_ESTADO.paginasProcesadas +
-            "/" +
-            CORR_ESTADO.pdfPaginas +
             "\n\n" +
 
-            "🎯 Correntina encontradas: " +
+            "Páginas Correntina: " +
             CORR_ESTADO.paginasCorrientes +
             "\n\n" +
 
-            "🔢 Cuaternos: " +
+            "Cuaternos guardados: " +
             CORR_ESTADO.cuaternos +
             "\n\n" +
 
-            "📚 PREVIA: " +
-            CORR_ESTADO.PREVIA +
-            "\n" +
-
-            "📚 PRIMERA: " +
-            CORR_ESTADO.PRIMERA +
-            "\n" +
-
-            "📚 MATUTINA: " +
-            CORR_ESTADO.MATUTINA +
-            "\n" +
-
-            "📚 VESPERTINA: " +
-            CORR_ESTADO.VESPERTINA +
-            "\n" +
-
-            "📚 NOCTURNA: " +
-            CORR_ESTADO.NOCTURNA +
-            "\n\n" +
-
-            "🧠 La memoria quedó guardada."
+            "🧠 Memoria guardada."
         );
 
-    }
-    catch(error) {
+    } catch(error) {
 
         console.error(
             "Error lector Correntina:",
@@ -14773,20 +14012,15 @@ async function CORR_procesarPDF(
             } catch(e) {}
         }
 
+        CORR_estado(
+            "❌ Error lector Correntina"
+        );
+
         CORR_panel(
 
             "❌ ERROR LECTOR CORRENTINA\n\n" +
 
-            String(
-                error.message ||
-                error
-            ) +
-            "\n\n" +
-
-            "Páginas procesadas: " +
-            CORR_ESTADO.paginasProcesadas +
-            "/" +
-            CORR_ESTADO.pdfPaginas
+            error.message
         );
     }
 }
@@ -14809,9 +14043,6 @@ function CORR_NUEVO_detenerOCR() {
 // EXPORTAR
 //////////////////////////////////////////////////////////////
 
-window.EMI_CORR =
-    window.EMI_CORR || {};
-
 window.EMI_CORR.extraer20 =
     CORR_extraer20;
 
@@ -14824,12 +14055,10 @@ window.EMI_CORR.abrirOCR =
 window.EMI_CORR.detenerOCR =
     CORR_NUEVO_detenerOCR;
 
-window.EMI_CORR.aprenderEnVivo =
-    CORR_aprenderEnVivo;
-
 //////////////////////////////////////////////////////////////
 // FIN BLOQUE 2
 //////////////////////////////////////////////////////////////
+
 
 //////////////////////////////////////////////////////////////
 // 🎯 CORRENTINA INDEPENDIENTE
